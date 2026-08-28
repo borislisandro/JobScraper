@@ -246,7 +246,14 @@ impl Database {
     .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(if kind=="reference" {Some("Reference-only source: it is never scraped.")} else if adapter=="custom-api" {Some("Custom source disabled: a verified source-specific adapter is required.")} else {Some("Starter source is disabled until you review and enable it.")}).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
             sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
                 .bind(id()).bind(source_id).bind(serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":host,"adapterVersion":"1.1.0","mode":"direct"}).to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            // Legacy packs used generated source IDs. Retire only an untouched,
+            // disabled old starter with no dependent history; user-created sources
+            // and every historical reference remain intact.
+            sqlx::query("UPDATE sources SET enabled=0,deleted_at=?,disabled_reason='Replaced by versioned starter-pack source' WHERE id<>? AND name=? AND base_url=? AND adapter_id=? AND enabled=0 AND deleted_at IS NULL AND created_at=updated_at AND disabled_reason='Starter source is disabled until you review and enable it.' AND NOT EXISTS (SELECT 1 FROM scrape_runs WHERE scrape_runs.source_id=sources.id) AND NOT EXISTS (SELECT 1 FROM jobs WHERE jobs.source_id=sources.id) AND EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=sources.id AND c.created_at=c.updated_at AND c.config_json LIKE '%starterPackVersion%')")
+                .bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).execute(&self.pool).await.map_err(|e| e.to_string())?;
         }
+        sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version','2026-08-28') ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+            .execute(&self.pool).await.map_err(|e| e.to_string())?;
         Ok(())
     }
     pub async fn persist_worker_job(
@@ -1408,5 +1415,33 @@ mod matching_persistence_tests {
         assert!(mark_focus_prompt(&mut shown, "first"));
         assert!(!mark_focus_prompt(&mut shown, "first"));
         assert!(mark_focus_prompt(&mut shown, "second"));
+    }
+
+    #[tokio::test]
+    async fn starter_reconciliation_retires_only_exact_untouched_legacy_rows() {
+        let root = std::env::temp_dir().join(format!("jobscraper-starter-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let stamp = "2026-01-01T00:00:00Z";
+        for (source, changed) in [("legacy", false), ("user-owned", true)] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?, 'https://careers.microchip.com/','workday','1.0.0',0,'active','Starter source is disabled until you review and enable it.',0,0,?,?)")
+                .bind(source).bind("Microchip").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+                .bind(format!("config-{source}")).bind(source).bind("{\"starterPackVersion\":\"1.0.0\"}").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
+        }
+        db.install_starter_pack().await.unwrap();
+        let retired: Option<String> =
+            sqlx::query_scalar("SELECT deleted_at FROM sources WHERE id='legacy'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        let preserved: Option<String> =
+            sqlx::query_scalar("SELECT deleted_at FROM sources WHERE id='user-owned'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert!(retired.is_some());
+        assert!(preserved.is_none());
+        db.pool.close().await;
     }
 }

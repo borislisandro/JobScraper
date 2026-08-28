@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "check": "tsc -b --pretty false",
     "tauri": "tauri",
-    "test": "vitest run --passWithNoTests --exclude sidecar/** && node --test sidecar/worker.protocol.test.mjs sidecar/adapters.test.mjs"
+    "test": "vitest run --passWithNoTests --exclude sidecar/** && node --test sidecar/worker.protocol.test.mjs sidecar/adapters.test.mjs sidecar/security.test.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",

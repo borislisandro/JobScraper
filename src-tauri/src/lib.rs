@@ -144,6 +144,7 @@ pub fn run() {
             sidecar::probe_source,
             sidecar::scrape_source,
             sidecar::scrape_all,
+            sidecar::cancel_scrape_all,
             sidecar::cancel_scrape,
             sidecar::resume_scrape,
             sidecar::capture_session

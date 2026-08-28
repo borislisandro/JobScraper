@@ -2,9 +2,10 @@ use crate::{db::ApiResult, AppState};
 use base64::Engine;
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     path::PathBuf,
     sync::{Arc, Mutex},
+    time::Duration,
 };
 use tauri::{Emitter, State};
 use tokio::{
@@ -17,32 +18,126 @@ use uuid::Uuid;
 /// JSONL worker process registry. It exists only while a user-initiated action runs.
 #[derive(Default)]
 pub struct SidecarManager {
-    pids: Mutex<HashMap<String, u32>>,
-    controls: Mutex<HashMap<String, mpsc::UnboundedSender<String>>>,
+    workers: Mutex<HashMap<String, RunningWorker>>,
+    batches: Mutex<HashMap<String, ScrapeBatch>>,
+}
+struct RunningWorker {
+    pid: u32,
+    control: mpsc::UnboundedSender<String>,
+    batch_id: Option<String>,
+}
+#[derive(Default)]
+struct ScrapeBatch {
+    cancelled: bool,
+    workers: HashSet<String>,
 }
 impl SidecarManager {
     pub fn active(&self) -> bool {
-        !self.pids.lock().unwrap().is_empty()
+        !self.workers.lock().unwrap().is_empty()
     }
-    fn add(&self, id: String, pid: u32, control: mpsc::UnboundedSender<String>) {
-        self.pids.lock().unwrap().insert(id, pid);
-        self.controls.lock().unwrap().insert(id, control);
+    fn add(
+        &self,
+        id: String,
+        pid: u32,
+        control: mpsc::UnboundedSender<String>,
+        batch_id: Option<String>,
+    ) {
+        if let Some(batch) = &batch_id {
+            self.batches
+                .lock()
+                .unwrap()
+                .entry(batch.clone())
+                .or_default()
+                .workers
+                .insert(id.clone());
+        }
+        self.workers.lock().unwrap().insert(
+            id,
+            RunningWorker {
+                pid,
+                control,
+                batch_id,
+            },
+        );
     }
     fn remove(&self, id: &str) {
-        self.pids.lock().unwrap().remove(id);
-        self.controls.lock().unwrap().remove(id);
+        if let Some(worker) = self.workers.lock().unwrap().remove(id) {
+            if let Some(batch) = worker.batch_id {
+                if let Some(entry) = self.batches.lock().unwrap().get_mut(&batch) {
+                    entry.workers.remove(id);
+                }
+            }
+        }
+    }
+    fn start_batch(&self, id: &str) -> bool {
+        let mut batches = self.batches.lock().unwrap();
+        if batches.contains_key(id) {
+            return false;
+        }
+        batches.insert(id.to_owned(), ScrapeBatch::default());
+        true
+    }
+    fn finish_batch(&self, id: &str) {
+        self.batches.lock().unwrap().remove(id);
+    }
+    fn batch_cancelled(&self, id: &str) -> bool {
+        self.batches
+            .lock()
+            .unwrap()
+            .get(id)
+            .map(|batch| batch.cancelled)
+            .unwrap_or(true)
+    }
+    fn request_batch_cancel(&self, id: &str) -> Option<Vec<u32>> {
+        let worker_ids = {
+            let mut batches = self.batches.lock().unwrap();
+            let batch = batches.get_mut(id)?;
+            batch.cancelled = true;
+            batch.workers.iter().cloned().collect::<Vec<_>>()
+        };
+        let workers = self.workers.lock().unwrap();
+        Some(
+            worker_ids
+                .into_iter()
+                .filter_map(|worker_id| workers.get(&worker_id))
+                .map(|worker| {
+                    let _ = worker.control.send("cancel".into());
+                    worker.pid
+                })
+                .collect(),
+        )
+    }
+    fn kill_if_still_active(&self, pids: &[u32]) {
+        let active: HashSet<u32> = self
+            .workers
+            .lock()
+            .unwrap()
+            .values()
+            .map(|worker| worker.pid)
+            .collect();
+        for pid in pids.iter().copied().filter(|pid| active.contains(pid)) {
+            let _ = std::process::Command::new("taskkill")
+                .args(["/PID", &pid.to_string(), "/T", "/F"])
+                .status();
+        }
     }
     pub fn cancel_all(&self) {
-        let ids: Vec<String> = self.pids.lock().unwrap().keys().cloned().collect();
+        let ids: Vec<String> = self.workers.lock().unwrap().keys().cloned().collect();
         for id in ids {
             self.cancel(&id);
         }
     }
     fn cancel(&self, id: &str) -> bool {
-        if let Some(control) = self.controls.lock().unwrap().get(id) {
-            let _ = control.send("cancel".into());
+        if let Some(worker) = self.workers.lock().unwrap().get(id) {
+            let _ = worker.control.send("cancel".into());
         }
-        if let Some(pid) = self.pids.lock().unwrap().remove(id) {
+        if let Some(pid) = self
+            .workers
+            .lock()
+            .unwrap()
+            .get(id)
+            .map(|worker| worker.pid)
+        {
             let _ = std::process::Command::new("taskkill")
                 .args(["/PID", &pid.to_string(), "/T", "/F"])
                 .status();
@@ -52,11 +147,11 @@ impl SidecarManager {
         }
     }
     fn resume(&self, id: &str) -> bool {
-        self.controls
+        self.workers
             .lock()
             .unwrap()
             .get(id)
-            .map(|control| control.send("resume".into()).is_ok())
+            .map(|worker| worker.control.send("resume".into()).is_ok())
             .unwrap_or(false)
     }
 }
@@ -125,6 +220,7 @@ async fn run(
     state: Arc<AppState>,
     command: &str,
     mut source: serde_json::Value,
+    batch_id: Option<&str>,
 ) -> ApiResult<Vec<WorkerEvent>> {
     let run_id = Uuid::new_v4().to_string();
     let source_id = source
@@ -183,7 +279,9 @@ async fn run(
     };
     let mut stdin = child.stdin.take().ok_or("Worker stdin unavailable")?;
     let (control, mut control_rx) = mpsc::unbounded_channel::<String>();
-    state.sidecars.add(run_id.clone(), pid, control);
+    state
+        .sidecars
+        .add(run_id.clone(), pid, control, batch_id.map(str::to_owned));
     let writer_run_id = run_id.clone();
     tokio::spawn(async move {
         let _ = stdin
@@ -279,7 +377,7 @@ pub async fn test_source(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Vec<WorkerEvent>> {
-    run(app, state.inner().clone(), "test_source", source).await
+    run(app, state.inner().clone(), "test_source", source, None).await
 }
 #[tauri::command]
 pub async fn probe_source(
@@ -287,7 +385,7 @@ pub async fn probe_source(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Vec<WorkerEvent>> {
-    run(app, state.inner().clone(), "probe_source", source).await
+    run(app, state.inner().clone(), "probe_source", source, None).await
 }
 #[tauri::command]
 pub async fn scrape_source(
@@ -295,7 +393,7 @@ pub async fn scrape_source(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Vec<WorkerEvent>> {
-    run(app, state.inner().clone(), "scrape_source", source).await
+    run(app, state.inner().clone(), "scrape_source", source, None).await
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -303,6 +401,7 @@ pub struct ScrapeAllResult {
     pub run_id: String,
     pub completed_sources: usize,
     pub failed_sources: usize,
+    pub cancelled_sources: usize,
 }
 /// Manual batch only: groups are run at most two domains at a time; each group
 /// is sequential, enforcing one worker stream per domain.
@@ -310,8 +409,12 @@ pub struct ScrapeAllResult {
 pub async fn scrape_all(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
+    run_id: Option<String>,
 ) -> ApiResult<ScrapeAllResult> {
-    let batch_id = Uuid::new_v4().to_string();
+    let batch_id = run_id.unwrap_or_else(|| Uuid::new_v4().to_string());
+    if !state.sidecars.start_batch(&batch_id) {
+        return Err("A Scrape All run with this ID is already active".into());
+    }
     let rows=sqlx::query("SELECT id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,last_success_at,created_at,updated_at FROM sources WHERE enabled=1 AND kind='active' AND deleted_at IS NULL ORDER BY id").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
     let mut groups: HashMap<String, Vec<serde_json::Value>> = HashMap::new();
     for row in rows {
@@ -325,6 +428,7 @@ pub async fn scrape_all(
     }
     let mut done = 0;
     let mut failed = 0;
+    let mut cancelled = 0;
     let total = groups.values().map(Vec::len).sum::<usize>();
     let group_values: Vec<_> = groups.into_values().collect();
     for pair in group_values.chunks(2) {
@@ -333,33 +437,46 @@ pub async fn scrape_all(
             let app = app.clone();
             let state = state.inner().clone();
             let sources = group.clone();
+            let batch_id = batch_id.clone();
             tasks.push(tokio::spawn(async move {
                 let mut outcomes = Vec::new();
                 for source in sources {
-                    outcomes.push(
-                        run(app.clone(), state.clone(), "scrape_source", source)
-                            .await
-                            .is_ok(),
-                    );
+                    if state.sidecars.batch_cancelled(&batch_id) {
+                        outcomes.push(None);
+                        continue;
+                    }
+                    outcomes.push(Some(
+                        run(
+                            app.clone(),
+                            state.clone(),
+                            "scrape_source",
+                            source,
+                            Some(&batch_id),
+                        )
+                        .await
+                        .is_ok(),
+                    ));
                 }
                 outcomes
             }));
         }
         for task in futures::future::join_all(tasks).await {
             for outcome in task.map_err(|e| e.to_string())? {
-                if outcome {
-                    done += 1
-                } else {
-                    failed += 1
-                };
-                let _=app.emit("scrape-all-progress",serde_json::json!({"runId":batch_id,"completed":done+failed,"total":total,"failed":failed}));
+                match outcome {
+                    Some(true) => done += 1,
+                    Some(false) => failed += 1,
+                    None => cancelled += 1,
+                }
+                let _=app.emit("scrape-all-progress",serde_json::json!({"runId":batch_id,"completed":done+failed+cancelled,"total":total,"failed":failed,"cancelled":cancelled}));
             }
         }
     }
+    state.sidecars.finish_batch(&batch_id);
     Ok(ScrapeAllResult {
         run_id: batch_id,
         completed_sources: done,
         failed_sources: failed,
+        cancelled_sources: cancelled,
     })
 }
 #[tauri::command]
@@ -368,7 +485,7 @@ pub async fn capture_session(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Vec<WorkerEvent>> {
-    run(app, state.inner().clone(), "capture_session", source).await
+    run(app, state.inner().clone(), "capture_session", source, None).await
 }
 #[tauri::command]
 pub fn cancel_scrape(run_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<bool> {
@@ -377,4 +494,52 @@ pub fn cancel_scrape(run_id: String, state: State<'_, Arc<AppState>>) -> ApiResu
 #[tauri::command]
 pub fn resume_scrape(run_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<bool> {
     Ok(state.sidecars.resume(&run_id))
+}
+#[tauri::command]
+pub async fn cancel_scrape_all(run_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<bool> {
+    let Some(pids) = state.sidecars.request_batch_cancel(&run_id) else {
+        return Ok(false);
+    };
+    // Cooperative JSONL cancellation gets a short grace period before forced tree cleanup.
+    tokio::time::sleep(Duration::from_secs(2)).await;
+    state.sidecars.kill_if_still_active(&pids);
+    Ok(true)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn batch_cancellation_prevents_future_dequeue_and_signals_active_worker() {
+        let manager = SidecarManager::default();
+        assert!(manager.start_batch("batch"));
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        manager.add("worker".into(), 4242, tx, Some("batch".into()));
+        let pids = manager.request_batch_cancel("batch").unwrap();
+        assert_eq!(pids, vec![4242]);
+        assert!(manager.batch_cancelled("batch"));
+        assert_eq!(rx.try_recv().as_deref(), Ok("cancel"));
+        manager.remove("worker");
+        manager.finish_batch("batch");
+    }
+
+    #[test]
+    fn only_two_domains_are_scheduled_at_once_and_each_domain_is_serial() {
+        let domains = vec![vec!["a1", "a2"], vec!["b1"], vec!["c1", "c2"]];
+        let waves: Vec<_> = domains.chunks(2).collect();
+        assert_eq!(waves.len(), 2);
+        assert!(waves.iter().all(|wave| wave.len() <= 2));
+        assert_eq!(waves[0][0], vec!["a1", "a2"]);
+    }
+
+    #[test]
+    fn resume_only_targets_registered_worker() {
+        let manager = SidecarManager::default();
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        manager.add("worker".into(), 42, tx, None);
+        assert!(manager.resume("worker"));
+        assert_eq!(rx.try_recv().as_deref(), Ok("resume"));
+        assert!(!manager.resume("missing"));
+    }
 }
