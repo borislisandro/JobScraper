@@ -6,6 +6,7 @@ use crate::{
     domain::{Application, Persona, PersonaInput, Source, SourceInput, StageInput},
     AppState,
 };
+use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -15,7 +16,7 @@ use sqlx::{
 };
 use std::{
     collections::HashSet,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{Arc, Mutex, OnceLock},
 };
 use tauri::{Emitter, State};
@@ -48,6 +49,7 @@ fn ghost_due_from(occurred_at: &str, days: i64) -> ApiResult<String> {
 fn id() -> String {
     Uuid::new_v4().to_string()
 }
+const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
     let url = Url::parse(value).map_err(|_| "A valid HTTP(S) URL is required".to_string())?;
     if !matches!(url.scheme(), "http" | "https") {
@@ -725,7 +727,281 @@ pub async fn set_review_decision(
 }
 #[tauri::command]
 pub async fn list_applications(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Application>> {
-    sqlx::query_as("SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.rejection_reason,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id ORDER BY a.updated_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as(&format!("{APPLICATION_SELECT} ORDER BY a.updated_at DESC"))
+        .fetch_all(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())
+}
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplicationEvent {
+    pub id: String,
+    pub application_id: String,
+    pub event_type: String,
+    pub from_stage: Option<String>,
+    pub to_stage: Option<String>,
+    pub reason: Option<String>,
+    pub occurred_at: String,
+    pub payload_json: String,
+}
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplicationNote {
+    pub id: String,
+    pub application_id: String,
+    pub body: String,
+    pub created_at: String,
+    pub updated_at: Option<String>,
+    pub deleted_at: Option<String>,
+}
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplicationDocument {
+    pub id: String,
+    pub application_id: String,
+    pub kind: String,
+    pub document_type: String,
+    pub filename: String,
+    pub mime_type: String,
+    pub sha256: String,
+    pub size: i64,
+    pub event_id: Option<String>,
+    pub created_at: String,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplicationDetails {
+    pub application: Application,
+    pub source_name: Option<String>,
+    pub source_url: Option<String>,
+    pub first_response_at: Option<String>,
+    pub events: Vec<ApplicationEvent>,
+    pub notes: Vec<ApplicationNote>,
+    pub documents: Vec<ApplicationDocument>,
+}
+#[tauri::command]
+pub async fn application_details(
+    application_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<ApplicationDetails> {
+    let application: Application = sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
+        .bind(&application_id)
+        .fetch_one(&state.db.pool)
+        .await
+        .map_err(|_| "Application was not found".to_string())?;
+    let source = sqlx::query(
+        "SELECT s.name,s.base_url FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.id=?",
+    )
+    .bind(&application.job_id)
+    .fetch_optional(&state.db.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    let events = sqlx::query_as("SELECT id,application_id,event_type,from_stage,to_stage,reason,occurred_at,payload_json FROM application_events WHERE application_id=? ORDER BY occurred_at,id").bind(&application_id).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let notes = sqlx::query_as("SELECT id,application_id,body,created_at,updated_at,deleted_at FROM notes WHERE application_id=? AND deleted_at IS NULL ORDER BY created_at DESC").bind(&application_id).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let documents = sqlx::query_as("SELECT id,application_id,kind,document_type,filename,mime_type,sha256,size,event_id,created_at FROM application_documents WHERE application_id=? ORDER BY created_at DESC").bind(&application_id).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let first_response_at = sqlx::query_scalar("SELECT min(occurred_at) FROM application_events WHERE application_id=? AND to_stage IN ('screening','interviewing','offer','rejected') AND occurred_at>(SELECT applied_at FROM applications WHERE id=?)").bind(&application_id).bind(&application_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
+    Ok(ApplicationDetails {
+        application,
+        source_name: source.as_ref().map(|row| row.get(0)),
+        source_url: source.as_ref().map(|row| row.get(1)),
+        first_response_at,
+        events,
+        notes,
+        documents,
+    })
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplicationDetailsInput {
+    pub application_id: String,
+    pub recruiter_name: Option<String>,
+    pub recruiter_email: Option<String>,
+    pub recruiter_phone: Option<String>,
+    pub source_attribution: Option<String>,
+    pub rejection_reason: Option<String>,
+    pub rejection_category: Option<String>,
+    pub withdrawn_reason: Option<String>,
+}
+#[tauri::command]
+pub async fn save_application_details(
+    input: ApplicationDetailsInput,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let t = now();
+    let changed=sqlx::query("UPDATE applications SET recruiter_name=?,recruiter_email=?,recruiter_phone=?,source_attribution=?,rejection_reason=?,rejection_category=?,withdrawn_reason=?,updated_at=? WHERE id=?").bind(&input.recruiter_name).bind(&input.recruiter_email).bind(&input.recruiter_phone).bind(&input.source_attribution).bind(&input.rejection_reason).bind(&input.rejection_category).bind(&input.withdrawn_reason).bind(&t).bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    if changed.rows_affected() == 0 {
+        return Err("Application was not found".into());
+    }
+    sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'details_updated',?,?)").bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"recruiterName":input.recruiter_name,"sourceAttribution":input.source_attribution}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NoteInput {
+    pub id: Option<String>,
+    pub application_id: String,
+    pub body: String,
+}
+#[tauri::command]
+pub async fn save_application_note(
+    input: NoteInput,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<ApplicationNote> {
+    if input.body.trim().is_empty() {
+        return Err("Note cannot be empty".into());
+    };
+    let t = now();
+    let note_id = input.id.unwrap_or_else(id);
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    sqlx::query("INSERT INTO notes(id,application_id,body,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET body=excluded.body,updated_at=excluded.updated_at WHERE notes.application_id=excluded.application_id AND notes.deleted_at IS NULL").bind(&note_id).bind(&input.application_id).bind(&input.body).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'note_saved',?,?)").bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"noteId":note_id}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())?;
+    sqlx::query_as(
+        "SELECT id,application_id,body,created_at,updated_at,deleted_at FROM notes WHERE id=?",
+    )
+    .bind(note_id)
+    .fetch_one(&state.db.pool)
+    .await
+    .map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn delete_application_note(
+    note_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let app: Option<String> =
+        sqlx::query_scalar("SELECT application_id FROM notes WHERE id=? AND deleted_at IS NULL")
+            .bind(&note_id)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    let Some(app) = app else {
+        return Err("Note was not found".into());
+    };
+    let t = now();
+    sqlx::query("UPDATE notes SET deleted_at=?,updated_at=? WHERE id=?")
+        .bind(&t)
+        .bind(&t)
+        .bind(&note_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'note_deleted',?,?)").bind(id()).bind(app).bind(&t).bind(serde_json::json!({"noteId":note_id}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AttachApplicationDocument {
+    pub application_id: String,
+    pub document_type: String,
+    pub filename: Option<String>,
+    pub mime_type: Option<String>,
+    pub base64: Option<String>,
+    pub resume_document_id: Option<String>,
+    pub event_id: Option<String>,
+}
+fn controlled_resume_bytes(root: &Path, stored: &str) -> ApiResult<Vec<u8>> {
+    let documents = root
+        .join("documents")
+        .canonicalize()
+        .map_err(|e| e.to_string())?;
+    let file = Path::new(stored)
+        .canonicalize()
+        .map_err(|_| "Resume source is missing".to_string())?;
+    if !file.starts_with(&documents) {
+        return Err("Resume source is outside controlled documents".into());
+    };
+    std::fs::read(file).map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn attach_application_document(
+    input: AttachApplicationDocument,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<ApplicationDocument> {
+    if !["resume", "cover_letter", "other"].contains(&input.document_type.as_str()) {
+        return Err("Document type must be resume, cover_letter, or other".into());
+    }
+    let (filename, mime, content) = match (input.base64, input.resume_document_id) {
+        (Some(encoded), None) => {
+            let bytes = STANDARD
+                .decode(encoded)
+                .map_err(|_| "Invalid attachment bytes")?;
+            let filename = input
+                .filename
+                .filter(|v| !v.trim().is_empty())
+                .ok_or("Attachment filename is required")?;
+            (
+                filename,
+                input
+                    .mime_type
+                    .unwrap_or_else(|| "application/octet-stream".into()),
+                bytes,
+            )
+        }
+        (None, Some(resume_id)) => {
+            let row =
+                sqlx::query("SELECT filename,mime_type,path FROM resume_documents WHERE id=?")
+                    .bind(resume_id)
+                    .fetch_one(&state.db.pool)
+                    .await
+                    .map_err(|_| "Resume version was not found".to_string())?;
+            let filename: String = row.get(0);
+            let mime: String = row.get(1);
+            let path: String = row.get(2);
+            (
+                filename,
+                mime,
+                controlled_resume_bytes(&state.db.root, &path)?,
+            )
+        }
+        _ => return Err("Attach either controlled resume version or local file bytes".into()),
+    };
+    if content.len() > 20 * 1024 * 1024 {
+        return Err("Attachment exceeds 20 MB".into());
+    };
+    let document_id = id();
+    let sha256 = format!("{:x}", Sha256::digest(&content));
+    let size = content.len() as i64;
+    let t = now();
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    sqlx::query("INSERT INTO application_documents(id,application_id,kind,document_type,filename,content,mime_type,sha256,size,event_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(&document_id).bind(&input.application_id).bind(&input.document_type).bind(&input.document_type).bind(&filename).bind(content).bind(&mime).bind(&sha256).bind(size).bind(&input.event_id).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'document_attached',?,?)").bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"documentId":document_id,"sha256":sha256,"filename":filename}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())?;
+    sqlx::query_as("SELECT id,application_id,kind,document_type,filename,mime_type,sha256,size,event_id,created_at FROM application_documents WHERE id=?").bind(document_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ApplicationDocumentExport {
+    pub filename: String,
+    pub mime_type: String,
+    pub base64: String,
+    pub sha256: String,
+}
+#[tauri::command]
+pub async fn export_application_document(
+    document_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<ApplicationDocumentExport> {
+    let row = sqlx::query(
+        "SELECT filename,mime_type,content,sha256 FROM application_documents WHERE id=?",
+    )
+    .bind(document_id)
+    .fetch_one(&state.db.pool)
+    .await
+    .map_err(|_| "Application document was not found".to_string())?;
+    let bytes: Vec<u8> = row.get(2);
+    let sha256: String = row.get(3);
+    if format!("{:x}", Sha256::digest(&bytes)) != sha256 {
+        return Err("Application document checksum failed".into());
+    };
+    Ok(ApplicationDocumentExport {
+        filename: row.get(0),
+        mime_type: row.get(1),
+        base64: STANDARD.encode(bytes),
+        sha256,
+    })
 }
 #[tauri::command]
 pub async fn create_application(
@@ -739,7 +1015,11 @@ pub async fn create_application(
     sqlx::query("INSERT INTO applications(id,job_id,persona_id,current_stage,created_at,updated_at) VALUES(?,?,?,'planned',?,?)").bind(&application_id).bind(&job_id).bind(persona_id).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,to_stage,occurred_at) VALUES(?,?, 'created','planned',?)").bind(id()).bind(&application_id).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
-    sqlx::query_as("SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.rejection_reason,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id WHERE a.id=?").bind(application_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
+        .bind(application_id)
+        .fetch_one(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())
 }
 #[tauri::command]
 pub async fn transition_application(
@@ -759,23 +1039,26 @@ pub async fn transition_application(
     if !valid.contains(&input.stage.as_str()) {
         return Err("Invalid application stage".into());
     };
-    if input.stage == "applied" {
-        return Err("Use Open application and explicit Yes confirmation to record applied".into());
-    }
     let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
     let current: String = sqlx::query_scalar("SELECT current_stage FROM applications WHERE id=?")
         .bind(&input.application_id)
         .fetch_one(&mut *tx)
         .await
         .map_err(|_| "Application was not found".to_string())?;
+    validate_stage_transition(
+        &current,
+        &input.stage,
+        input.manual_override,
+        input.reason.as_deref(),
+    )?;
     let occurred = input.occurred_at.unwrap_or_else(now);
     let applied = if input.stage == "applied" {
         Some(occurred.clone())
     } else {
         None
     };
-    sqlx::query("UPDATE applications SET current_stage=?, applied_at=COALESCE(applied_at,?),updated_at=? WHERE id=?").bind(&input.stage).bind(applied).bind(&occurred).bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-    sqlx::query("INSERT INTO application_events(id,application_id,event_type,from_stage,to_stage,occurred_at,payload_json) VALUES(?,?, 'stage_changed',?,?,?,?,?)").bind(id()).bind(&input.application_id).bind(&current).bind(&input.stage).bind(&occurred).bind(input.payload.unwrap_or_else(||serde_json::json!({})).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("UPDATE applications SET current_stage=?, applied_at=COALESCE(applied_at,?),accepted_at=CASE WHEN ?='accepted' THEN COALESCE(accepted_at,?) ELSE accepted_at END,rejection_reason=CASE WHEN ?='rejected' THEN ? ELSE rejection_reason END,withdrawn_reason=CASE WHEN ?='withdrawn' THEN ? ELSE withdrawn_reason END,updated_at=? WHERE id=?").bind(&input.stage).bind(applied).bind(&input.stage).bind(&occurred).bind(&input.stage).bind(&input.reason).bind(&input.stage).bind(&input.reason).bind(&occurred).bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT INTO application_events(id,application_id,event_type,from_stage,to_stage,reason,occurred_at,payload_json) VALUES(?,?, 'stage_changed',?,?,?,?,?)").bind(id()).bind(&input.application_id).bind(&current).bind(&input.stage).bind(&input.reason).bind(&occurred).bind(serde_json::json!({"manualOverride":input.manual_override,"metadata":input.payload.unwrap_or_else(||serde_json::json!({}))}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     if input.stage == "applied" {
         let due = ghost_due_from(&occurred, 14)?;
         sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)").bind(id()).bind(&input.application_id).bind(due).bind(&occurred).execute(&mut *tx).await.map_err(|e|e.to_string())?;
@@ -793,7 +1076,49 @@ pub async fn transition_application(
         sqlx::query("UPDATE reminders SET status='cancelled' WHERE application_id=? AND status='pending' AND reminder_type='ghosted'").bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
-    sqlx::query_as("SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.rejection_reason,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id WHERE a.id=?").bind(input.application_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
+        .bind(input.application_id)
+        .fetch_one(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())
+}
+fn legal_stage_transition(from: &str, to: &str) -> bool {
+    matches!(
+        (from, to),
+        ("planned", "applied")
+            | (
+                "applied",
+                "screening" | "interviewing" | "offer" | "rejected" | "withdrawn"
+            )
+            | (
+                "screening",
+                "interviewing" | "offer" | "rejected" | "withdrawn"
+            )
+            | ("interviewing", "offer" | "rejected" | "withdrawn")
+            | ("offer", "accepted" | "rejected" | "withdrawn")
+    )
+}
+fn validate_stage_transition(
+    from: &str,
+    to: &str,
+    manual_override: bool,
+    reason: Option<&str>,
+) -> ApiResult<()> {
+    if to == "applied" && !manual_override {
+        return Err("Use Open application and explicit Yes confirmation to record applied".into());
+    }
+    if manual_override
+        && reason
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .is_none()
+    {
+        return Err("Manual stage override requires a reason".into());
+    }
+    if !manual_override && !legal_stage_transition(from, to) {
+        return Err(format!("Cannot move application from {from} to {to} without an explicit manual override reason"));
+    }
+    Ok(())
 }
 #[tauri::command]
 pub async fn record_apply_decision(
@@ -850,6 +1175,7 @@ pub struct InterviewInput {
     pub stage: String,
     pub scheduled_at: String,
     pub notes: Option<String>,
+    pub outcome: Option<String>,
 }
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -860,6 +1186,7 @@ pub struct Interview {
     pub scheduled_at: String,
     pub completed_at: Option<String>,
     pub notes: Option<String>,
+    pub outcome: Option<String>,
     pub created_at: String,
     pub updated_at: Option<String>,
 }
@@ -890,7 +1217,7 @@ pub async fn list_interviews(
     application_id: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Vec<Interview>> {
-    sqlx::query_as("SELECT id,application_id,stage,scheduled_at,completed_at,notes,created_at,updated_at FROM interviews WHERE application_id=? ORDER BY scheduled_at")
+    sqlx::query_as("SELECT id,application_id,stage,scheduled_at,completed_at,notes,outcome,created_at,updated_at FROM interviews WHERE application_id=? ORDER BY scheduled_at")
         .bind(application_id).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
@@ -915,10 +1242,11 @@ pub async fn save_interview(
         if owner != input.application_id {
             return Err("Interview application cannot change".into());
         }
-        sqlx::query("UPDATE interviews SET stage=?,scheduled_at=?,notes=?,updated_at=? WHERE id=?")
+        sqlx::query("UPDATE interviews SET stage=?,scheduled_at=?,notes=?,outcome=?,updated_at=? WHERE id=?")
             .bind(&input.stage)
             .bind(&input.scheduled_at)
             .bind(&input.notes)
+            .bind(&input.outcome)
             .bind(&t)
             .bind(&interview_id)
             .execute(&mut *tx)
@@ -927,8 +1255,8 @@ pub async fn save_interview(
         sqlx::query("UPDATE reminders SET status='cancelled' WHERE entity_id=? AND reminder_type='interview' AND status='pending'")
             .bind(&interview_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     } else {
-        sqlx::query("INSERT INTO interviews(id,application_id,stage,scheduled_at,notes,created_at,updated_at) VALUES(?,?,?,?,?,?,?)")
-            .bind(&interview_id).bind(&input.application_id).bind(&input.stage).bind(&input.scheduled_at).bind(&input.notes).bind(&t).bind(&t)
+        sqlx::query("INSERT INTO interviews(id,application_id,stage,scheduled_at,notes,outcome,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)")
+            .bind(&interview_id).bind(&input.application_id).bind(&input.stage).bind(&input.scheduled_at).bind(&input.notes).bind(&input.outcome).bind(&t).bind(&t)
             .execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
     insert_interview_reminders(
@@ -943,7 +1271,7 @@ pub async fn save_interview(
         .bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"interviewId":interview_id,"stage":input.stage,"scheduledAt":input.scheduled_at}).to_string())
         .execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
-    sqlx::query_as("SELECT id,application_id,stage,scheduled_at,completed_at,notes,created_at,updated_at FROM interviews WHERE id=?")
+    sqlx::query_as("SELECT id,application_id,stage,scheduled_at,completed_at,notes,outcome,created_at,updated_at FROM interviews WHERE id=?")
         .bind(interview_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
@@ -1516,5 +1844,40 @@ mod matching_persistence_tests {
         assert!(retired.is_some());
         assert!(preserved.is_none());
         db.pool.close().await;
+    }
+
+    #[test]
+    fn application_transition_rules_require_explicit_override() {
+        assert!(legal_stage_transition("applied", "screening"));
+        assert!(legal_stage_transition("offer", "accepted"));
+        assert!(!legal_stage_transition("planned", "offer"));
+        assert!(!legal_stage_transition("rejected", "screening"));
+        assert!(validate_stage_transition("planned", "applied", false, None).is_err());
+        assert!(validate_stage_transition("planned", "offer", true, None).is_err());
+        assert!(
+            validate_stage_transition("planned", "offer", true, Some("historical import")).is_ok()
+        );
+    }
+
+    #[tokio::test]
+    async fn application_tracking_migration_persists_notes_documents_and_event_reason() {
+        let pool = migrated_pool().await;
+        sqlx::query("CREATE TABLE IF NOT EXISTS application_test (id TEXT)")
+            .execute(&pool)
+            .await
+            .unwrap();
+        // Migration creates the immutable document metadata and note audit columns.
+        let note_columns: i64 = sqlx::query_scalar("SELECT count(*) FROM pragma_table_info('notes') WHERE name IN ('updated_at','deleted_at')").fetch_one(&pool).await.unwrap();
+        let doc_columns: i64 = sqlx::query_scalar("SELECT count(*) FROM pragma_table_info('application_documents') WHERE name IN ('document_type','mime_type','size','event_id')").fetch_one(&pool).await.unwrap();
+        let reason_columns: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM pragma_table_info('application_events') WHERE name='reason'",
+        )
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert_eq!(note_columns, 2);
+        assert_eq!(doc_columns, 4);
+        assert_eq!(reason_columns, 1);
+        pool.close().await;
     }
 }

@@ -104,7 +104,14 @@ pub struct Application {
     pub persona_id: Option<String>,
     pub current_stage: String,
     pub recruiter: Option<String>,
+    pub recruiter_name: Option<String>,
+    pub recruiter_email: Option<String>,
+    pub recruiter_phone: Option<String>,
+    pub source_attribution: Option<String>,
     pub rejection_reason: Option<String>,
+    pub rejection_category: Option<String>,
+    pub withdrawn_reason: Option<String>,
+    pub accepted_at: Option<String>,
     pub applied_at: Option<String>,
     pub created_at: String,
     pub updated_at: String,
@@ -118,4 +125,7 @@ pub struct StageInput {
     pub stage: String,
     pub occurred_at: Option<String>,
     pub payload: Option<serde_json::Value>,
+    pub reason: Option<String>,
+    #[serde(default)]
+    pub manual_override: bool,
 }
