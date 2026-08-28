@@ -49,6 +49,67 @@ fn ghost_due_from(occurred_at: &str, days: i64) -> ApiResult<String> {
 fn id() -> String {
     Uuid::new_v4().to_string()
 }
+pub fn normalize_canonical_url(value: &str) -> Option<String> {
+    let mut url = Url::parse(value).ok()?;
+    if !matches!(url.scheme(), "http" | "https") {
+        return None;
+    };
+    url.set_fragment(None);
+    let host = url.host_str()?.to_ascii_lowercase();
+    url.set_host(Some(&host)).ok()?;
+    if (url.scheme() == "https" && url.port() == Some(443))
+        || (url.scheme() == "http" && url.port() == Some(80))
+    {
+        url.set_port(None).ok()?
+    };
+    let mut pairs: url::form_urlencoded::Serializer<'_, String> =
+        url::form_urlencoded::Serializer::new(String::new());
+    let mut query = url::form_urlencoded::parse(url.query().unwrap_or_default().as_bytes())
+        .filter(|(k, _)| !k.starts_with("utm_") && k != "fbclid")
+        .collect::<Vec<_>>();
+    query.sort();
+    for (key, value) in query {
+        pairs.append_pair(&key, &value)
+    }
+    let encoded = pairs.finish();
+    url.set_query((!encoded.is_empty()).then_some(&encoded));
+    Some(url.to_string().trim_end_matches('/').to_owned())
+}
+fn normalized_text(value: &str) -> String {
+    value
+        .to_ascii_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { ' ' })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+fn job_fingerprint(title: &str, company: &str, location: Option<&str>) -> String {
+    format!(
+        "{:x}",
+        Sha256::digest(format!(
+            "{}|{}|{}",
+            normalized_text(title),
+            normalized_text(company),
+            normalized_text(location.unwrap_or(""))
+        ))
+    )
+}
+fn fuzzy_similarity(left: &str, right: &str) -> f64 {
+    let left: HashSet<_> = normalized_text(left)
+        .split_whitespace()
+        .map(str::to_owned)
+        .collect();
+    let right: HashSet<_> = normalized_text(right)
+        .split_whitespace()
+        .map(str::to_owned)
+        .collect();
+    if left.is_empty() || right.is_empty() {
+        return 0.0;
+    };
+    left.intersection(&right).count() as f64 / left.union(&right).count() as f64
+}
 const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
     let url = Url::parse(value).map_err(|_| "A valid HTTP(S) URL is required".to_string())?;
@@ -278,7 +339,19 @@ impl Database {
             return Err("Worker result is missing required title or company".into());
         }
         let external = payload.get("externalId").and_then(|v| v.as_str());
-        let canonical = payload.get("canonicalUrl").and_then(|v| v.as_str());
+        let canonical = payload
+            .get("canonicalUrl")
+            .and_then(|v| v.as_str())
+            .and_then(normalize_canonical_url);
+        let requisition = payload
+            .get("requisitionId")
+            .and_then(|v| v.as_str())
+            .filter(|value| !value.trim().is_empty());
+        let fingerprint = job_fingerprint(
+            title,
+            company,
+            payload.get("location").and_then(|v| v.as_str()),
+        );
         let t = now();
         let job_id = id();
         let description = payload
@@ -290,10 +363,11 @@ impl Database {
             .and_then(|v| v.as_str())
             .unwrap_or("");
         let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
-        let existing:Option<String>=sqlx::query_scalar("SELECT id FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) LIMIT 1").bind(source_id).bind(external).bind(canonical).bind(canonical).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?;
+        let existing:Option<String>=sqlx::query_scalar("SELECT id FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=?) OR dedupe_fingerprint=? ORDER BY created_at LIMIT 1").bind(source_id).bind(external).bind(canonical.as_deref()).bind(canonical.as_deref()).bind(requisition).bind(requisition).bind(&fingerprint).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?;
         let actual = existing.unwrap_or(job_id);
         sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,title,company,location,work_mode,description_text,description_html,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,title=excluded.title,company=excluded.company,location=excluded.location,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,skills_json=excluded.skills_json,content_hash=excluded.content_hash,provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,updated_at=excluded.updated_at")
-  .bind(&actual).bind(source_id).bind(external).bind(canonical).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(payload.get("descriptionHtml").and_then(|v|v.as_str()).map(|s|s.chars().take(250_000).collect::<String>())).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+  .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(payload.get("descriptionHtml").and_then(|v|v.as_str()).map(|s|s.chars().take(250_000).collect::<String>())).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        sqlx::query("UPDATE jobs SET requisition_id=COALESCE(?,requisition_id),dedupe_fingerprint=? WHERE id=?").bind(requisition).bind(&fingerprint).bind(&actual).execute(&mut *tx).await.map_err(|e|e.to_string())?;
         sqlx::query("INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,?,?)")
             .bind(id())
             .bind(&actual)
@@ -302,6 +376,11 @@ impl Database {
             .execute(&mut *tx)
             .await
             .map_err(|e| e.to_string())?;
+        let location = payload
+            .get("location")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+        for row in sqlx::query("SELECT id,title,company,coalesce(location,'') FROM jobs WHERE id<>? AND lower(company)=lower(?) AND dedupe_fingerprint<>? ORDER BY updated_at DESC LIMIT 100").bind(&actual).bind(company).bind(&fingerprint).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? { let other:String=row.get(0);let title_score=fuzzy_similarity(title,&row.get::<String,_>(1));let location_score=if location.is_empty(){1.0}else{fuzzy_similarity(location,&row.get::<String,_>(3))};if title_score>=0.84&&location_score>=0.70 {let (left,right)=if actual<other{(&actual,&other)}else{(&other,&actual)};sqlx::query("INSERT OR IGNORE INTO duplicate_candidates(id,left_job_id,right_job_id,method,score,status,evidence_json,created_at) VALUES(?,?,?,?,?,'suggested',?,?)").bind(id()).bind(left).bind(right).bind("fuzzy").bind((title_score+location_score)/2.0).bind(serde_json::json!({"title":title_score,"location":location_score,"company":"exact normalized"}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}}
         tx.commit().await.map_err(|e| e.to_string())?;
         Ok(())
     }
@@ -343,6 +422,150 @@ pub async fn get_source_config(
         object.remove("requestHeaders")
     }
     Ok(config)
+}
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct DuplicateCandidate {
+    pub id: String,
+    pub left_job_id: String,
+    pub right_job_id: String,
+    pub method: String,
+    pub score: Option<f64>,
+    pub status: String,
+    pub evidence_json: String,
+    pub created_at: String,
+    pub left_title: String,
+    pub left_company: String,
+    pub right_title: String,
+    pub right_company: String,
+}
+#[tauri::command]
+pub async fn list_duplicate_candidates(
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Vec<DuplicateCandidate>> {
+    sqlx::query_as("SELECT c.id,c.left_job_id,c.right_job_id,c.method,c.score,c.status,c.evidence_json,c.created_at,l.title AS left_title,l.company AS left_company,r.title AS right_title,r.company AS right_company FROM duplicate_candidates c JOIN jobs l ON l.id=c.left_job_id JOIN jobs r ON r.id=c.right_job_id WHERE c.status='suggested' ORDER BY c.score DESC,c.created_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+}
+#[tauri::command]
+pub async fn dismiss_duplicate_candidate(
+    candidate_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    let changed=sqlx::query("UPDATE duplicate_candidates SET status='dismissed',decided_at=? WHERE id=? AND status='suggested'").bind(now()).bind(candidate_id).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
+    if changed.rows_affected() == 0 {
+        return Err("Duplicate candidate is not pending".into());
+    };
+    Ok(())
+}
+#[tauri::command]
+pub async fn merge_duplicate_jobs(
+    candidate_id: String,
+    canonical_job_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let pair=sqlx::query("SELECT left_job_id,right_job_id FROM duplicate_candidates WHERE id=? AND status='suggested'").bind(&candidate_id).fetch_one(&mut *tx).await.map_err(|_|"Duplicate candidate is not pending".to_string())?;
+    let left: String = pair.get(0);
+    let right: String = pair.get(1);
+    if canonical_job_id != left && canonical_job_id != right {
+        return Err("Canonical winner must be one candidate job".into());
+    };
+    let merged = if canonical_job_id == left {
+        right
+    } else {
+        left
+    };
+    let conflicts:i64=sqlx::query_scalar("SELECT (SELECT count(*) FROM match_results a JOIN match_results b ON a.persona_id=b.persona_id AND a.algorithm_version=b.algorithm_version WHERE a.job_id=? AND b.job_id=?)+(SELECT count(*) FROM review_decisions a JOIN review_decisions b ON a.persona_id=b.persona_id WHERE a.job_id=? AND b.job_id=?)").bind(&canonical_job_id).bind(&merged).bind(&canonical_job_id).bind(&merged).fetch_one(&mut *tx).await.map_err(|e|e.to_string())?;
+    if conflicts > 0 {
+        return Err(
+            "Merge has conflicting persona match or review state; resolve manually first".into(),
+        );
+    };
+    let app_ids: Vec<String> = sqlx::query_scalar("SELECT id FROM applications WHERE job_id=?")
+        .bind(&merged)
+        .fetch_all(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    let occurrence_ids: Vec<String> =
+        sqlx::query_scalar("SELECT id FROM job_occurrences WHERE job_id=?")
+            .bind(&merged)
+            .fetch_all(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    let revision_ids: Vec<String> =
+        sqlx::query_scalar("SELECT id FROM job_revisions WHERE job_id=?")
+            .bind(&merged)
+            .fetch_all(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    let snapshot = serde_json::json!({"applications":app_ids,"occurrences":occurrence_ids,"revisions":revision_ids});
+    let audit = id();
+    let t = now();
+    sqlx::query("INSERT INTO duplicate_merge_audits(id,canonical_job_id,merged_job_id,snapshot_json,created_at) VALUES(?,?,?,?,?)").bind(&audit).bind(&canonical_job_id).bind(&merged).bind(snapshot.to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    for table in ["applications", "job_occurrences", "job_revisions"] {
+        sqlx::query(&format!("UPDATE {table} SET job_id=? WHERE job_id=?"))
+            .bind(&canonical_job_id)
+            .bind(&merged)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+    sqlx::query("INSERT INTO job_aliases(id,canonical_job_id,alias_job_id,reason,created_at) VALUES(?,?,?,?,?)").bind(id()).bind(&canonical_job_id).bind(&merged).bind("reviewed duplicate merge").bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT OR IGNORE INTO duplicate_groups(id,primary_job_id,member_job_id,reason,created_at) VALUES(?,?,?,?,?)").bind(id()).bind(&canonical_job_id).bind(&merged).bind("reviewed duplicate merge").bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("UPDATE duplicate_candidates SET status='merged',decided_at=? WHERE id=?")
+        .bind(&t)
+        .bind(candidate_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn unmerge_duplicate_jobs(
+    canonical_job_id: String,
+    merged_job_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let row=sqlx::query("SELECT id,snapshot_json FROM duplicate_merge_audits WHERE canonical_job_id=? AND merged_job_id=? AND undone_at IS NULL ORDER BY created_at DESC LIMIT 1").bind(&canonical_job_id).bind(&merged_job_id).fetch_one(&mut *tx).await.map_err(|_|"No active merge audit was found".to_string())?;
+    let audit: String = row.get(0);
+    let snapshot: serde_json::Value = serde_json::from_str(&row.get::<String, _>(1))
+        .map_err(|_| "Merge audit is corrupt".to_string())?;
+    for (table, key) in [
+        ("applications", "applications"),
+        ("job_occurrences", "occurrences"),
+        ("job_revisions", "revisions"),
+    ] {
+        for row_id in snapshot
+            .get(key)
+            .and_then(|v| v.as_array())
+            .into_iter()
+            .flatten()
+            .filter_map(|v| v.as_str())
+        {
+            let changed = sqlx::query(&format!(
+                "UPDATE {table} SET job_id=? WHERE id=? AND job_id=?"
+            ))
+            .bind(&merged_job_id)
+            .bind(row_id)
+            .bind(&canonical_job_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+            if changed.rows_affected() != 1 {
+                return Err("Unmerge cannot safely restore changed relationship ownership".into());
+            }
+        }
+    }
+    let t = now();
+    sqlx::query("UPDATE job_aliases SET removed_at=? WHERE canonical_job_id=? AND alias_job_id=? AND removed_at IS NULL").bind(&t).bind(&canonical_job_id).bind(&merged_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("UPDATE duplicate_merge_audits SET undone_at=? WHERE id=?")
+        .bind(&t)
+        .bind(&audit)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query("UPDATE duplicate_candidates SET status='unmerged',decided_at=? WHERE (left_job_id=? AND right_job_id=?) OR (left_job_id=? AND right_job_id=?)").bind(&t).bind(&canonical_job_id).bind(&merged_job_id).bind(&merged_job_id).bind(&canonical_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())
 }
 #[tauri::command]
 pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) -> ApiResult<Source> {
@@ -2070,5 +2293,21 @@ mod matching_persistence_tests {
         })
         .is_err());
         pool.close().await;
+    }
+
+    #[test]
+    fn dedupe_normalization_and_conservative_fuzzy_thresholds() {
+        assert_eq!(
+            normalize_canonical_url("HTTPS://EXAMPLE.test:443/jobs/?utm_source=x&id=2#top")
+                .unwrap(),
+            "https://example.test/jobs?id=2"
+        );
+        assert!(normalize_canonical_url("file:///private").is_none());
+        assert_eq!(
+            job_fingerprint("Firmware Engineer", "Chip Co", Some("Lisbon")),
+            job_fingerprint(" firmware engineer ", "CHIP co", Some("lisbon"))
+        );
+        assert!(fuzzy_similarity("Firmware Engineer", "Firmware Engineer II") >= 0.84);
+        assert!(fuzzy_similarity("Firmware Engineer", "Marketing Manager") < 0.70);
     }
 }
