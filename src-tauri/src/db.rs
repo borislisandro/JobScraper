@@ -41,6 +41,67 @@ pub struct Database {
 fn now() -> String {
     Utc::now().to_rfc3339()
 }
+/// Conflict snapshots are immutable audit evidence. Old, pre-operational snapshots
+/// deliberately fail closed: they cannot be used to delete or re-key a live row.
+fn dedupe_snapshot_id(snapshot: &str) -> ApiResult<String> {
+    serde_json::from_str::<serde_json::Value>(snapshot)
+        .ok()
+        .and_then(|value| {
+            value
+                .get("id")
+                .and_then(|id| id.as_str())
+                .map(str::to_owned)
+        })
+        .filter(|id| !id.is_empty())
+        .ok_or_else(|| {
+            "Conflict uses a legacy incomplete snapshot; unmerge before resolving it".into()
+        })
+}
+fn dedupe_snapshot_text(value: &serde_json::Value, field: &str) -> ApiResult<String> {
+    value
+        .get(field)
+        .and_then(|item| item.as_str())
+        .map(str::to_owned)
+        .ok_or_else(|| format!("Conflict snapshot missing {field}"))
+}
+async fn restore_match_snapshot(
+    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+    job_id: &str,
+    persona_id: &str,
+    snapshot: &str,
+) -> ApiResult<()> {
+    let value: serde_json::Value =
+        serde_json::from_str(snapshot).map_err(|_| "Conflict snapshot is corrupt".to_string())?;
+    let eligible = value
+        .get("eligible")
+        .and_then(|item| item.as_i64())
+        .ok_or("Conflict snapshot missing eligible")?;
+    let score = value
+        .get("score")
+        .and_then(|item| item.as_f64())
+        .ok_or("Conflict snapshot missing score")?;
+    sqlx::query("INSERT INTO match_results(id,job_id,persona_id,score,eligible,algorithm_version,model_version,filter_decision_json,components_json,explanation_json,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
+        .bind(dedupe_snapshot_id(snapshot)?).bind(job_id).bind(persona_id).bind(score).bind(eligible)
+        .bind(dedupe_snapshot_text(&value,"algorithmVersion")?).bind(dedupe_snapshot_text(&value,"modelVersion")?)
+        .bind(dedupe_snapshot_text(&value,"filterDecisionJson")?).bind(dedupe_snapshot_text(&value,"componentsJson")?)
+        .bind(dedupe_snapshot_text(&value,"explanationJson")?).bind(dedupe_snapshot_text(&value,"createdAt")?).bind(dedupe_snapshot_text(&value,"updatedAt")?)
+        .execute(&mut **tx).await.map_err(|e|e.to_string())?;
+    Ok(())
+}
+async fn restore_review_snapshot(
+    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+    job_id: &str,
+    persona_id: &str,
+    snapshot: &str,
+) -> ApiResult<()> {
+    let value: serde_json::Value =
+        serde_json::from_str(snapshot).map_err(|_| "Conflict snapshot is corrupt".to_string())?;
+    sqlx::query("INSERT INTO review_decisions(id,job_id,persona_id,status,reason,decided_at) VALUES(?,?,?,?,?,?)")
+        .bind(dedupe_snapshot_id(snapshot)?).bind(job_id).bind(persona_id)
+        .bind(dedupe_snapshot_text(&value,"status")?).bind(value.get("reason").and_then(|item|item.as_str()))
+        .bind(dedupe_snapshot_text(&value,"decidedAt")?).execute(&mut **tx).await.map_err(|e|e.to_string())?;
+    Ok(())
+}
 fn ghost_due_from(occurred_at: &str, days: i64) -> ApiResult<String> {
     chrono::DateTime::parse_from_rfc3339(occurred_at)
         .map_err(|_| "Application timestamp must be UTC RFC3339".to_string())
@@ -487,21 +548,94 @@ pub async fn resolve_duplicate_conflict(
     resolution: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    if !["keep_canonical", "keep_alias", "retain_historical"].contains(&resolution.as_str()) {
-        return Err("Resolution must keep_canonical, keep_alias, or retain_historical".into());
+    let resolution = if resolution == "retain_historical" {
+        "retain_both_history"
+    } else {
+        resolution.as_str()
     };
+    if !["keep_canonical", "keep_alias", "retain_both_history"].contains(&resolution) {
+        return Err("Resolution must keep_canonical, keep_alias, or retain_both_history".into());
+    }
     let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
-    let row=sqlx::query("SELECT a.canonical_job_id,c.conflict_type,c.persona_id FROM duplicate_merge_conflicts c JOIN duplicate_merge_audits a ON a.id=c.audit_id WHERE c.id=? AND c.resolved_at IS NULL").bind(&conflict_id).fetch_one(&mut *tx).await.map_err(|_|"Duplicate conflict is not pending".to_string())?;
+    let row=sqlx::query("SELECT a.canonical_job_id,a.merged_job_id,c.conflict_type,c.persona_id,c.canonical_snapshot_json,c.merged_snapshot_json,c.resolution,c.resolved_at FROM duplicate_merge_conflicts c JOIN duplicate_merge_audits a ON a.id=c.audit_id WHERE c.id=?").bind(&conflict_id).fetch_one(&mut *tx).await.map_err(|_|"Duplicate conflict was not found".to_string())?;
+    if row.get::<Option<String>, _>(7).is_some() {
+        if row.get::<String, _>(6) == resolution {
+            return Ok(());
+        }
+        return Err("Conflict already resolved with a different decision".into());
+    }
     let job: String = row.get(0);
+    let merged: String = row.get(1);
+    let conflict_type: String = row.get(2);
+    let canonical = row.get::<String, _>(4);
+    let alias = row.get::<String, _>(5);
+    let canonical_id = dedupe_snapshot_id(&canonical)?;
+    let alias_id = dedupe_snapshot_id(&alias)?;
+    match (conflict_type.as_str(), resolution) {
+        ("match_result", "keep_canonical") | ("match_result", "retain_both_history") => {
+            sqlx::query("DELETE FROM match_results WHERE id=? AND job_id=?")
+                .bind(alias_id)
+                .bind(&merged)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+        }
+        ("review_decision", "keep_canonical") | ("review_decision", "retain_both_history") => {
+            sqlx::query("DELETE FROM review_decisions WHERE id=? AND job_id=?")
+                .bind(alias_id)
+                .bind(&merged)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+        }
+        ("match_result", "keep_alias") => {
+            sqlx::query("DELETE FROM match_results WHERE id=? AND job_id=?")
+                .bind(canonical_id)
+                .bind(&job)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+            let changed = sqlx::query("UPDATE match_results SET job_id=? WHERE id=? AND job_id=?")
+                .bind(&job)
+                .bind(alias_id)
+                .bind(&merged)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+            if changed.rows_affected() != 1 {
+                return Err("Conflict current row changed; cannot safely keep alias".into());
+            }
+        }
+        ("review_decision", "keep_alias") => {
+            sqlx::query("DELETE FROM review_decisions WHERE id=? AND job_id=?")
+                .bind(canonical_id)
+                .bind(&job)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+            let changed =
+                sqlx::query("UPDATE review_decisions SET job_id=? WHERE id=? AND job_id=?")
+                    .bind(&job)
+                    .bind(alias_id)
+                    .bind(&merged)
+                    .execute(&mut *tx)
+                    .await
+                    .map_err(|e| e.to_string())?;
+            if changed.rows_affected() != 1 {
+                return Err("Conflict current row changed; cannot safely keep alias".into());
+            }
+        }
+        _ => return Err("Unsupported duplicate conflict type".into()),
+    }
     let t = now();
     sqlx::query("UPDATE duplicate_merge_conflicts SET resolution=?,resolved_at=? WHERE id=?")
-        .bind(&resolution)
+        .bind(resolution)
         .bind(&t)
         .bind(&conflict_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
-    sqlx::query("INSERT INTO job_dedupe_events(id,canonical_job_id,method,evidence_json,created_at) VALUES(?,?, 'conflict_resolution',?,?)").bind(id()).bind(job).bind(serde_json::json!({"conflictId":conflict_id,"resolution":resolution,"type":row.get::<String,_>(1),"personaId":row.get::<String,_>(2)}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT INTO job_dedupe_events(id,canonical_job_id,method,evidence_json,created_at) VALUES(?,?, 'conflict_resolution',?,?)").bind(id()).bind(job).bind(serde_json::json!({"conflictId":conflict_id,"resolution":resolution,"type":conflict_type,"personaId":row.get::<String,_>(3),"canonicalSnapshot":canonical,"aliasSnapshot":alias}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())
 }
 #[tauri::command]
@@ -550,12 +684,18 @@ pub async fn merge_duplicate_jobs(
             .fetch_all(&mut *tx)
             .await
             .map_err(|e| e.to_string())?;
-    let snapshot = serde_json::json!({"applications":app_ids,"occurrences":occurrence_ids,"revisions":revision_ids});
+    // Capture every ownership move before making it. Conflict rows stay separate
+    // until an explicit resolution, while non-conflicting rows are re-keyed.
+    let match_ids: Vec<String> = sqlx::query_scalar("SELECT m.id FROM match_results m WHERE m.job_id=? AND NOT EXISTS(SELECT 1 FROM match_results c WHERE c.job_id=? AND c.persona_id=m.persona_id AND c.algorithm_version=m.algorithm_version)")
+        .bind(&merged).bind(&canonical_job_id).fetch_all(&mut *tx).await.map_err(|e|e.to_string())?;
+    let review_ids: Vec<String> = sqlx::query_scalar("SELECT r.id FROM review_decisions r WHERE r.job_id=? AND NOT EXISTS(SELECT 1 FROM review_decisions c WHERE c.job_id=? AND c.persona_id=r.persona_id)")
+        .bind(&merged).bind(&canonical_job_id).fetch_all(&mut *tx).await.map_err(|e|e.to_string())?;
+    let snapshot = serde_json::json!({"applications":app_ids,"occurrences":occurrence_ids,"revisions":revision_ids,"matches":match_ids,"reviews":review_ids,"snapshotVersion":2});
     let audit = id();
     let t = now();
     sqlx::query("INSERT INTO duplicate_merge_audits(id,canonical_job_id,merged_job_id,snapshot_json,created_at) VALUES(?,?,?,?,?)").bind(&audit).bind(&canonical_job_id).bind(&merged).bind(snapshot.to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-    for row in sqlx::query("SELECT a.persona_id,a.filter_decision_json,b.filter_decision_json FROM match_results a JOIN match_results b ON a.persona_id=b.persona_id AND a.algorithm_version=b.algorithm_version WHERE a.job_id=? AND b.job_id=?").bind(&canonical_job_id).bind(&merged).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? {sqlx::query("INSERT INTO duplicate_merge_conflicts(id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,created_at) VALUES(?,?, 'match_result',?,?,?,?)").bind(id()).bind(&audit).bind(row.get::<String,_>(0)).bind(row.get::<String,_>(1)).bind(row.get::<String,_>(2)).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}
-    for row in sqlx::query("SELECT a.persona_id,json_object('status',a.status,'reason',a.reason),json_object('status',b.status,'reason',b.reason) FROM review_decisions a JOIN review_decisions b ON a.persona_id=b.persona_id WHERE a.job_id=? AND b.job_id=?").bind(&canonical_job_id).bind(&merged).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? {sqlx::query("INSERT INTO duplicate_merge_conflicts(id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,created_at) VALUES(?,?, 'review_decision',?,?,?,?)").bind(id()).bind(&audit).bind(row.get::<String,_>(0)).bind(row.get::<String,_>(1)).bind(row.get::<String,_>(2)).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}
+    for row in sqlx::query("SELECT a.persona_id,json_object('id',a.id,'score',a.score,'eligible',a.eligible,'algorithmVersion',a.algorithm_version,'modelVersion',a.model_version,'filterDecisionJson',a.filter_decision_json,'componentsJson',a.components_json,'explanationJson',a.explanation_json,'createdAt',a.created_at,'updatedAt',a.updated_at),json_object('id',b.id,'score',b.score,'eligible',b.eligible,'algorithmVersion',b.algorithm_version,'modelVersion',b.model_version,'filterDecisionJson',b.filter_decision_json,'componentsJson',b.components_json,'explanationJson',b.explanation_json,'createdAt',b.created_at,'updatedAt',b.updated_at) FROM match_results a JOIN match_results b ON a.persona_id=b.persona_id AND a.algorithm_version=b.algorithm_version WHERE a.job_id=? AND b.job_id=?").bind(&canonical_job_id).bind(&merged).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? {sqlx::query("INSERT INTO duplicate_merge_conflicts(id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,created_at) VALUES(?,?, 'match_result',?,?,?,?)").bind(id()).bind(&audit).bind(row.get::<String,_>(0)).bind(row.get::<String,_>(1)).bind(row.get::<String,_>(2)).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}
+    for row in sqlx::query("SELECT a.persona_id,json_object('id',a.id,'status',a.status,'reason',a.reason,'decidedAt',a.decided_at),json_object('id',b.id,'status',b.status,'reason',b.reason,'decidedAt',b.decided_at) FROM review_decisions a JOIN review_decisions b ON a.persona_id=b.persona_id WHERE a.job_id=? AND b.job_id=?").bind(&canonical_job_id).bind(&merged).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? {sqlx::query("INSERT INTO duplicate_merge_conflicts(id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,created_at) VALUES(?,?, 'review_decision',?,?,?,?)").bind(id()).bind(&audit).bind(row.get::<String,_>(0)).bind(row.get::<String,_>(1)).bind(row.get::<String,_>(2)).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}
     sqlx::query("UPDATE match_results SET job_id=? WHERE job_id=? AND NOT EXISTS(SELECT 1 FROM match_results c WHERE c.job_id=? AND c.persona_id=match_results.persona_id AND c.algorithm_version=match_results.algorithm_version)").bind(&canonical_job_id).bind(&merged).bind(&canonical_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("UPDATE review_decisions SET job_id=? WHERE job_id=? AND NOT EXISTS(SELECT 1 FROM review_decisions c WHERE c.job_id=? AND c.persona_id=review_decisions.persona_id)").bind(&canonical_job_id).bind(&merged).bind(&canonical_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     for table in ["applications", "job_occurrences", "job_revisions"] {
@@ -587,10 +727,82 @@ pub async fn unmerge_duplicate_jobs(
     let audit: String = row.get(0);
     let snapshot: serde_json::Value = serde_json::from_str(&row.get::<String, _>(1))
         .map_err(|_| "Merge audit is corrupt".to_string())?;
+    // Resolve paths are reversible. A post-merge owner change fails the whole
+    // transaction instead of reconstructing a mixed canonical/alias pair.
+    let conflicts = sqlx::query("SELECT conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,resolution,resolved_at FROM duplicate_merge_conflicts WHERE audit_id=?")
+        .bind(&audit).fetch_all(&mut *tx).await.map_err(|e|e.to_string())?;
+    for conflict in conflicts {
+        let resolved: Option<String> = conflict.get(5);
+        if resolved.is_none() {
+            continue;
+        }
+        let kind: String = conflict.get(0);
+        let persona: String = conflict.get(1);
+        let canonical_snapshot: String = conflict.get(2);
+        let alias_snapshot: String = conflict.get(3);
+        let resolution: String = conflict.get(4);
+        let canonical_id = dedupe_snapshot_id(&canonical_snapshot)?;
+        let alias_id = dedupe_snapshot_id(&alias_snapshot)?;
+        match (kind.as_str(), resolution.as_str()) {
+            ("match_result", "keep_alias") => {
+                let moved =
+                    sqlx::query("UPDATE match_results SET job_id=? WHERE id=? AND job_id=?")
+                        .bind(&merged_job_id)
+                        .bind(&alias_id)
+                        .bind(&canonical_job_id)
+                        .execute(&mut *tx)
+                        .await
+                        .map_err(|e| e.to_string())?;
+                if moved.rows_affected() != 1 {
+                    return Err(
+                        "Unmerge cannot safely restore resolved alias match ownership".into(),
+                    );
+                }
+                restore_match_snapshot(&mut tx, &canonical_job_id, &persona, &canonical_snapshot)
+                    .await?;
+            }
+            ("review_decision", "keep_alias") => {
+                let moved =
+                    sqlx::query("UPDATE review_decisions SET job_id=? WHERE id=? AND job_id=?")
+                        .bind(&merged_job_id)
+                        .bind(&alias_id)
+                        .bind(&canonical_job_id)
+                        .execute(&mut *tx)
+                        .await
+                        .map_err(|e| e.to_string())?;
+                if moved.rows_affected() != 1 {
+                    return Err(
+                        "Unmerge cannot safely restore resolved alias review ownership".into(),
+                    );
+                }
+                restore_review_snapshot(&mut tx, &canonical_job_id, &persona, &canonical_snapshot)
+                    .await?;
+            }
+            ("match_result", "keep_canonical") | ("match_result", "retain_both_history") => {
+                if canonical_id.is_empty() {
+                    return Err("Conflict snapshot is incomplete".into());
+                }
+                restore_match_snapshot(&mut tx, &merged_job_id, &persona, &alias_snapshot).await?;
+            }
+            ("review_decision", "keep_canonical") | ("review_decision", "retain_both_history") => {
+                if canonical_id.is_empty() {
+                    return Err("Conflict snapshot is incomplete".into());
+                }
+                restore_review_snapshot(&mut tx, &merged_job_id, &persona, &alias_snapshot).await?;
+            }
+            _ => {
+                return Err(
+                    "Unmerge cannot safely restore legacy or unknown conflict resolution".into(),
+                )
+            }
+        }
+    }
     for (table, key) in [
         ("applications", "applications"),
         ("job_occurrences", "occurrences"),
         ("job_revisions", "revisions"),
+        ("match_results", "matches"),
+        ("review_decisions", "reviews"),
     ] {
         for row_id in snapshot
             .get(key)
@@ -2366,5 +2578,52 @@ mod matching_persistence_tests {
         );
         assert!(fuzzy_similarity("Firmware Engineer", "Firmware Engineer II") >= 0.84);
         assert!(fuzzy_similarity("Firmware Engineer", "Marketing Manager") < 0.70);
+    }
+
+    #[test]
+    fn dedupe_conflict_snapshots_fail_closed_and_keep_row_identity() {
+        assert!(dedupe_snapshot_id("{\"id\":\"match-a\"}").is_ok());
+        assert!(dedupe_snapshot_id("{\"filterDecision\":{}}")
+            .unwrap_err()
+            .contains("legacy incomplete"));
+        assert!(dedupe_snapshot_id("not json").is_err());
+    }
+
+    #[tokio::test]
+    async fn dedupe_snapshot_restore_is_transactional_and_preserves_one_current_row() {
+        let pool = migrated_pool().await;
+        seed_match(&pool).await;
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('alias','s','Engineer','Company','description','[]','alias-v1','t','1','t','t')").execute(&pool).await.unwrap();
+        let current = r#"{"id":"current","score":60.0,"eligible":1,"algorithmVersion":"dedupe-v1","modelVersion":"model","filterDecisionJson":"{}","componentsJson":"{}","explanationJson":"{}","createdAt":"t","updatedAt":"t"}"#;
+        let alias = r#"{"id":"alias-match","score":70.0,"eligible":1,"algorithmVersion":"dedupe-v1","modelVersion":"model","filterDecisionJson":"{}","componentsJson":"{}","explanationJson":"{}","createdAt":"t","updatedAt":"t"}"#;
+        let mut tx = pool.begin().await.unwrap();
+        restore_match_snapshot(&mut tx, "j", "p", current)
+            .await
+            .unwrap();
+        restore_match_snapshot(&mut tx, "alias", "p", alias)
+            .await
+            .unwrap();
+        tx.commit().await.unwrap();
+        assert_eq!(sqlx::query_scalar::<_,i64>("SELECT count(*) FROM match_results WHERE persona_id='p' AND algorithm_version='dedupe-v1'").fetch_one(&pool).await.unwrap(),2);
+        let mut tx = pool.begin().await.unwrap();
+        sqlx::query("DELETE FROM match_results WHERE id='current'")
+            .execute(&mut *tx)
+            .await
+            .unwrap();
+        sqlx::query(
+            "UPDATE match_results SET job_id='j' WHERE id='alias-match' AND job_id='alias'",
+        )
+        .execute(&mut *tx)
+        .await
+        .unwrap();
+        tx.rollback().await.unwrap();
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM match_results WHERE id='current'")
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+            1
+        );
+        pool.close().await;
     }
 }
