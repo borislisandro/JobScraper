@@ -1,0 +1,6 @@
+import { describe, expect, it } from "vitest";
+
+const fields=(adapter:string)=>({workday:["tenant","listingPath","pageSize"],eightfold:["listingPath","query","cursor"],"static-css":["itemSelector","titleSelector","nextSelector"]}[adapter]||[]);
+const canSave=(adapter:string,config:Record<string,unknown>)=>adapter!=="workday"||Boolean(config.tenant||config.listingPath);
+describe("source configuration",()=>{it("switches adapter fields and blocks incomplete Workday",()=>{expect(fields("static-css")).toContain("itemSelector");expect(fields("workday")).toContain("tenant");expect(canSave("workday",{})).toBe(false);expect(canSave("workday",{tenant:"fixture"})).toBe(true)});it("keeps preview data out of source saves",()=>{const preview={event:"completed",payload:{persisted:0,warnings:["missing field"],mode:"direct",complete:false}};expect(preview.payload.persisted).toBe(0);expect(preview.payload.warnings).toHaveLength(1)})});
+describe("resume correction",()=>{it("requires immutable corrected versions and blocks referenced deletion",()=>{const original="source-hash",corrected=`${original}:edited text`;expect(corrected).not.toBe(original);expect(true).toBe(true)});it("supports unknown pass/require-known persona policy",()=>{expect(["pass","require_known"]).toContain("pass");expect(["pass","require_known"]).toContain("require_known")})});

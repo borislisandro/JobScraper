@@ -101,6 +101,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             db::list_sources,
+            db::get_source_config,
             db::save_source,
             db::delete_source,
             db::list_jobs,
@@ -135,6 +136,8 @@ pub fn run() {
             db::get_match_explanation,
             documents::import_resume,
             documents::update_resume_text,
+            documents::list_resume_documents,
+            documents::delete_resume_document,
             embedding::embedding_status,
             sessions::save_browser_session,
             sessions::has_browser_session,

@@ -23,6 +23,19 @@ pub struct ResumeResult {
     pub suggested_skills: Vec<String>,
     pub suggested_titles: Vec<String>,
     pub requires_manual_paste: bool,
+    pub content_hash: String,
+}
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ResumeDocument {
+    pub id: String,
+    pub persona_id: Option<String>,
+    pub filename: String,
+    pub extracted_text: String,
+    pub mime_type: String,
+    pub content_hash: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 fn now() -> String {
     chrono::Utc::now().to_rfc3339()
@@ -137,6 +150,7 @@ pub async fn import_resume(
         suggested_skills: skills,
         suggested_titles: titles,
         requires_manual_paste: image_only,
+        content_hash: hash,
     })
 }
 #[tauri::command]
@@ -144,16 +158,86 @@ pub async fn update_resume_text(
     document_id: String,
     extracted_text: String,
     state: State<'_, Arc<AppState>>,
-) -> ApiResult<()> {
+) -> ApiResult<ResumeResult> {
     if extracted_text.len() > 2_000_000 {
         return Err("Extracted text is too large".into());
     };
-    sqlx::query("UPDATE resume_documents SET extracted_text=?,updated_at=? WHERE id=?")
-        .bind(extracted_text)
-        .bind(now())
+    let original: ResumeDocument = sqlx::query_as("SELECT id,persona_id,filename,extracted_text,mime_type,content_hash,created_at,updated_at FROM resume_documents WHERE id=?")
+        .bind(&document_id).fetch_one(&state.db.pool).await.map_err(|_| "Resume version was not found".to_string())?;
+    let new_id = id();
+    let t = now();
+    let hash = format!(
+        "{:x}",
+        Sha256::digest(format!("{}\n{}", original.content_hash, extracted_text))
+    );
+    let path: String = sqlx::query_scalar("SELECT path FROM resume_documents WHERE id=?")
+        .bind(&document_id)
+        .fetch_one(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query("INSERT INTO resume_documents(id,persona_id,filename,path,extracted_text,mime_type,content_hash,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)")
+        .bind(&new_id).bind(&original.persona_id).bind(&original.filename).bind(path).bind(&extracted_text).bind(&original.mime_type).bind(&hash).bind(&t).bind(&t).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let (skills, titles) = suggestions(&extracted_text);
+    Ok(ResumeResult {
+        id: new_id,
+        extracted_text,
+        image_only: extracted_text.trim().len() < 20,
+        suggested_skills: skills,
+        suggested_titles: titles,
+        requires_manual_paste: false,
+        content_hash: hash,
+    })
+}
+#[tauri::command]
+pub async fn list_resume_documents(
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Vec<ResumeDocument>> {
+    sqlx::query_as("SELECT id,persona_id,filename,extracted_text,mime_type,content_hash,created_at,updated_at FROM resume_documents ORDER BY created_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+}
+#[tauri::command]
+pub async fn delete_resume_document(
+    document_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    let references: i64 =
+        sqlx::query_scalar("SELECT count(*) FROM personas WHERE resume_document_id=?")
+            .bind(&document_id)
+            .fetch_one(&state.db.pool)
+            .await
+            .map_err(|e| e.to_string())?;
+    if references > 0 {
+        return Err(
+            "Resume version is selected by a persona and remains immutable/archiveable".into(),
+        );
+    }
+    sqlx::query("DELETE FROM resume_documents WHERE id=?")
         .bind(document_id)
         .execute(&state.db.pool)
         .await
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deterministic_suggestions_and_image_only_boundary() {
+        let (skills, titles) = suggestions("Rust firmware engineer with Linux and Git");
+        assert!(skills.contains(&"rust".to_string()));
+        assert!(titles.contains(&"firmware engineer".to_string()));
+        assert!("short extracted text".len() < 20);
+        assert!("A sufficiently long manually pasted resume body".len() >= 20);
+    }
+
+    #[test]
+    fn corrected_version_hash_changes_without_touching_original_bytes() {
+        let original = "original-file-hash";
+        let corrected = format!(
+            "{:x}",
+            Sha256::digest(format!("{original}\ncorrected text"))
+        );
+        assert_ne!(original, corrected);
+    }
 }

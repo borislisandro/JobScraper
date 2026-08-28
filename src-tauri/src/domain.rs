@@ -71,6 +71,7 @@ pub struct PersonaInput {
     pub threshold: f64,
     pub unknown_policy: String,
     pub confirmed_skills: Vec<String>,
+    pub resume_document_id: Option<String>,
 }
 fn default_include_keyword_mode() -> String {
     "any".into()
@@ -90,6 +91,7 @@ pub struct Persona {
     pub salary_min: Option<f64>,
     pub threshold: f64,
     pub unknown_policy: String,
+    pub resume_document_id: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

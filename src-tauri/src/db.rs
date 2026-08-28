@@ -324,6 +324,25 @@ pub async fn list_sources(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Sour
     sqlx::query_as::<_,Source>("SELECT id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,last_success_at,created_at,updated_at FROM sources WHERE deleted_at IS NULL ORDER BY name") .fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
+pub async fn get_source_config(
+    source_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<serde_json::Value> {
+    let text: String =
+        sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=?")
+            .bind(source_id)
+            .fetch_one(&state.db.pool)
+            .await
+            .map_err(|_| "Source configuration was not found".to_string())?;
+    let mut config: serde_json::Value =
+        serde_json::from_str(&text).map_err(|_| "Source configuration is invalid".to_string())?;
+    if let Some(object) = config.as_object_mut() {
+        object.remove("sessionCookies");
+        object.remove("requestHeaders")
+    }
+    Ok(config)
+}
+#[tauri::command]
 pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) -> ApiResult<Source> {
     valid_url(&input.base_url, input.allow_private_network)?;
     if input.kind == "reference" && input.enabled {
@@ -382,7 +401,7 @@ async fn jobs_query(
 }
 #[tauri::command]
 pub async fn list_personas(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Persona>> {
-    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,created_at,updated_at FROM personas ORDER BY name").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at FROM personas ORDER BY name").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn save_persona(
@@ -395,8 +414,8 @@ pub async fn save_persona(
     if !["any", "all"].contains(&input.include_keyword_mode.as_str()) {
         return Err("Include keyword mode must be any or all".into());
     }
-    sqlx::query("INSERT INTO personas(id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,target_titles_json=excluded.target_titles_json,include_keywords_json=excluded.include_keywords_json,include_keyword_mode=excluded.include_keyword_mode,exclude_keywords_json=excluded.exclude_keywords_json,location=excluded.location,work_mode=excluded.work_mode,seniority=excluded.seniority,salary_min=excluded.salary_min,threshold=excluded.threshold,unknown_policy=excluded.unknown_policy,updated_at=excluded.updated_at")
- .bind(&persona_id).bind(&input.name).bind(serde_json::to_string(&input.target_titles).unwrap()).bind(serde_json::to_string(&input.include_keywords).unwrap()).bind(&input.include_keyword_mode).bind(serde_json::to_string(&input.exclude_keywords).unwrap()).bind(&input.location).bind(&input.work_mode).bind(&input.seniority).bind(input.salary_min).bind(input.threshold.clamp(0.0,100.0)).bind(&input.unknown_policy).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT INTO personas(id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,target_titles_json=excluded.target_titles_json,include_keywords_json=excluded.include_keywords_json,include_keyword_mode=excluded.include_keyword_mode,exclude_keywords_json=excluded.exclude_keywords_json,location=excluded.location,work_mode=excluded.work_mode,seniority=excluded.seniority,salary_min=excluded.salary_min,threshold=excluded.threshold,unknown_policy=excluded.unknown_policy,resume_document_id=excluded.resume_document_id,updated_at=excluded.updated_at")
+ .bind(&persona_id).bind(&input.name).bind(serde_json::to_string(&input.target_titles).unwrap()).bind(serde_json::to_string(&input.include_keywords).unwrap()).bind(&input.include_keyword_mode).bind(serde_json::to_string(&input.exclude_keywords).unwrap()).bind(&input.location).bind(&input.work_mode).bind(&input.seniority).bind(input.salary_min).bind(input.threshold.clamp(0.0,100.0)).bind(&input.unknown_policy).bind(&input.resume_document_id).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("DELETE FROM persona_skills WHERE persona_id=?")
         .bind(&persona_id)
         .execute(&mut *tx)
@@ -415,7 +434,7 @@ pub async fn save_persona(
     }
     tx.commit().await.map_err(|e| e.to_string())?;
     rescore(&state.db.pool, &state.db.root, &persona_id, None).await?;
-    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,created_at,updated_at FROM personas WHERE id=?").bind(persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at FROM personas WHERE id=?").bind(persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn rescore_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {

@@ -1,8 +1,16 @@
 import { invoke } from "@tauri-apps/api/core";
 export type Source={id:string;name:string;baseUrl:string;adapterId:string;adapterVersion:string;enabled:boolean;kind:string;disabledReason?:string;robotsOverride:boolean;lastSuccessAt?:string};
 export type Job={id:string;sourceId:string;title:string;company:string;location?:string;workMode?:string;canonicalUrl?:string;applyUrl?:string;descriptionText:string;postedAt?:string;seniority?:string;availability:string;score?:number;eligible?:boolean;reasons?:string};
-export type Persona={id:string;name:string;targetTitlesJson:string;includeKeywordsJson:string;includeKeywordMode:"any"|"all";excludeKeywordsJson:string;threshold:number;unknownPolicy:string}; export type Application={id:string;jobId:string;personaId?:string;currentStage:string;appliedAt?:string;title?:string;company?:string}; export type RestoreStatus={applied:boolean;restart_required:boolean;message:string};export type RestoreStage={restart_required:boolean;staging_path:string;message:string};export type WorkerEvent={event:string;runId:string;payload:Record<string,unknown>};
+export type Persona={id:string;name:string;targetTitlesJson:string;includeKeywordsJson:string;includeKeywordMode:"any"|"all";excludeKeywordsJson:string;location?:string;workMode?:string;seniority?:string;salaryMin?:number;threshold:number;unknownPolicy:string;resumeDocumentId?:string}; export type Application={id:string;jobId:string;personaId?:string;currentStage:string;appliedAt?:string;title?:string;company?:string}; export type RestoreStatus={applied:boolean;restart_required:boolean;message:string};export type RestoreStage={restart_required:boolean;staging_path:string;message:string};export type WorkerEvent={event:string;runId:string;payload:Record<string,unknown>};
 export type Interview={id:string;applicationId:string;stage:string;scheduledAt:string;notes?:string};
+export type ResumeDocument={id:string;personaId?:string;filename:string;extractedText:string;mimeType:string;contentHash:string;createdAt:string;updatedAt:string};
+export type ResumeImportResult={id:string;extractedText:string;imageOnly:boolean;suggestedSkills:string[];suggestedTitles:string[];requiresManualPaste:boolean;contentHash?:string};
+export const importResume=(input:{personaId?:string;filename:string;base64:string})=>invoke<ResumeImportResult>("import_resume",{input});
+export const correctResumeText=(documentId:string,extractedText:string)=>invoke<ResumeImportResult>("update_resume_text",{documentId,extractedText});
+export const resumeDocuments=()=>invoke<ResumeDocument[]>("list_resume_documents");
+export const deleteResumeDocument=(documentId:string)=>invoke("delete_resume_document",{documentId});
+export const sourceConfig=(sourceId:string)=>invoke<Record<string,unknown>>("get_source_config",{sourceId});
+export const captureSession=(source:Source)=>invoke<WorkerEvent[]>("capture_session",{source});
 export const scrapeAll=(runId:string)=>invoke<{runId:string;completedSources:number;failedSources:number;cancelledSources:number}>("scrape_all",{runId});
 export const cancelScrapeAll=(runId:string)=>invoke<boolean>("cancel_scrape_all",{runId});
 export const cancelScrape=(runId:string)=>invoke<boolean>("cancel_scrape",{runId});
