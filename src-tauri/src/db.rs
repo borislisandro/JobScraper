@@ -463,6 +463,47 @@ pub struct MergedJob {
 pub async fn list_merged_jobs(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<MergedJob>> {
     sqlx::query_as("SELECT a.canonical_job_id,a.merged_job_id,c.title AS canonical_title,m.title AS merged_title,a.created_at,(SELECT count(*) FROM duplicate_merge_conflicts x WHERE x.audit_id=a.id AND x.resolved_at IS NULL) AS conflict_count FROM duplicate_merge_audits a JOIN jobs c ON c.id=a.canonical_job_id JOIN jobs m ON m.id=a.merged_job_id WHERE a.undone_at IS NULL ORDER BY a.created_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct DuplicateConflict {
+    pub id: String,
+    pub audit_id: String,
+    pub conflict_type: String,
+    pub persona_id: String,
+    pub canonical_snapshot_json: String,
+    pub merged_snapshot_json: String,
+    pub resolution: String,
+    pub created_at: String,
+}
+#[tauri::command]
+pub async fn list_duplicate_conflicts(
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Vec<DuplicateConflict>> {
+    sqlx::query_as("SELECT id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,resolution,created_at FROM duplicate_merge_conflicts WHERE resolved_at IS NULL ORDER BY created_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+}
+#[tauri::command]
+pub async fn resolve_duplicate_conflict(
+    conflict_id: String,
+    resolution: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    if !["keep_canonical", "keep_alias", "retain_historical"].contains(&resolution.as_str()) {
+        return Err("Resolution must keep_canonical, keep_alias, or retain_historical".into());
+    };
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let row=sqlx::query("SELECT a.canonical_job_id,c.conflict_type,c.persona_id FROM duplicate_merge_conflicts c JOIN duplicate_merge_audits a ON a.id=c.audit_id WHERE c.id=? AND c.resolved_at IS NULL").bind(&conflict_id).fetch_one(&mut *tx).await.map_err(|_|"Duplicate conflict is not pending".to_string())?;
+    let job: String = row.get(0);
+    let t = now();
+    sqlx::query("UPDATE duplicate_merge_conflicts SET resolution=?,resolved_at=? WHERE id=?")
+        .bind(&resolution)
+        .bind(&t)
+        .bind(&conflict_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query("INSERT INTO job_dedupe_events(id,canonical_job_id,method,evidence_json,created_at) VALUES(?,?, 'conflict_resolution',?,?)").bind(id()).bind(job).bind(serde_json::json!({"conflictId":conflict_id,"resolution":resolution,"type":row.get::<String,_>(1),"personaId":row.get::<String,_>(2)}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())
+}
 #[tauri::command]
 pub async fn dismiss_duplicate_candidate(
     candidate_id: String,

@@ -106,6 +106,8 @@ pub fn run() {
             db::delete_source,
             db::list_duplicate_candidates,
             db::list_merged_jobs,
+            db::list_duplicate_conflicts,
+            db::resolve_duplicate_conflict,
             db::dismiss_duplicate_candidate,
             db::merge_duplicate_jobs,
             db::unmerge_duplicate_jobs,
