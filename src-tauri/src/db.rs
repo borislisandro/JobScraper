@@ -1576,43 +1576,205 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
     }
     Ok(serde_json::json!({"scheduled":scheduled,"missed":missed,"errors":errors}))
 }
+#[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AnalyticsFilter {
+    pub start_at: Option<String>,
+    pub end_at: Option<String>,
+    pub persona_id: Option<String>,
+    pub source_id: Option<String>,
+    pub company: Option<String>,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Count {
+    name: String,
+    count: i64,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Trend {
+    date: String,
+    count: i64,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Conversion {
+    name: String,
+    numerator: i64,
+    denominator: i64,
+    rate: Option<f64>,
+    small_sample: bool,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResponseMetric {
+    name: String,
+    hours: Option<f64>,
+    samples: i64,
+    small_sample: bool,
+}
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Analytics {
     total: u64,
+    date_window: String,
     by_stage: Vec<Count>,
+    applications_over_time: Vec<Trend>,
+    source_counts: Vec<Count>,
+    company_counts: Vec<Count>,
+    conversions: Vec<Conversion>,
+    response_by_company: Vec<ResponseMetric>,
+    response_by_source: Vec<ResponseMetric>,
+    outcomes: Vec<Count>,
+    match_score_buckets: Vec<Count>,
+    review_decisions: Vec<Count>,
+    job_freshness: Vec<Count>,
     applied_to_response_hours: Option<f64>,
     response_samples: u64,
+    response_small_sample: bool,
 }
-#[derive(Serialize)]
-struct Count {
-    name: String,
-    count: i64,
+fn validate_analytics_filter(input: &AnalyticsFilter) -> ApiResult<()> {
+    for value in [&input.start_at, &input.end_at] {
+        if let Some(value) = value {
+            chrono::DateTime::parse_from_rfc3339(value)
+                .map_err(|_| "Analytics dates must be UTC RFC3339".to_string())?;
+        }
+    }
+    if input.start_at > input.end_at {
+        return Err("Analytics start date must not be after end date".into());
+    };
+    Ok(())
+}
+fn analytics_where() -> &'static str {
+    " WHERE s.deleted_at IS NULL AND (? IS NULL OR a.created_at>=?) AND (? IS NULL OR a.created_at<?) AND (? IS NULL OR a.persona_id=?) AND (? IS NULL OR j.source_id=?) AND (? IS NULL OR lower(j.company)=lower(?))"
+}
+fn bind_analytics<'q>(
+    query: sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>>,
+    input: &'q AnalyticsFilter,
+) -> sqlx::query::Query<'q, sqlx::Sqlite, sqlx::sqlite::SqliteArguments<'q>> {
+    query
+        .bind(&input.start_at)
+        .bind(&input.start_at)
+        .bind(&input.end_at)
+        .bind(&input.end_at)
+        .bind(&input.persona_id)
+        .bind(&input.persona_id)
+        .bind(&input.source_id)
+        .bind(&input.source_id)
+        .bind(&input.company)
+        .bind(&input.company)
+}
+async fn counts(pool: &SqlitePool, input: &AnalyticsFilter, select: &str) -> ApiResult<Vec<Count>> {
+    let sql=format!("SELECT {select},count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id {} GROUP BY 1 ORDER BY 2 DESC,1",analytics_where());
+    Ok(bind_analytics(sqlx::query(&sql), input)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .into_iter()
+        .map(|r| Count {
+            name: r.get(0),
+            count: r.get(1),
+        })
+        .collect())
+}
+async fn response_metrics(
+    pool: &SqlitePool,
+    input: &AnalyticsFilter,
+    group: &str,
+) -> ApiResult<Vec<ResponseMetric>> {
+    let sql=format!("SELECT {group},avg((julianday(e.occurred_at)-julianday(a.applied_at))*24),count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id JOIN application_events e ON e.application_id=a.id WHERE a.applied_at IS NOT NULL AND e.occurred_at=(SELECT min(e2.occurred_at) FROM application_events e2 WHERE e2.application_id=a.id AND e2.occurred_at>a.applied_at AND e2.to_stage IN ('screening','interviewing','offer','rejected')) AND (? IS NULL OR a.created_at>=?) AND (? IS NULL OR a.created_at<?) AND (? IS NULL OR a.persona_id=?) AND (? IS NULL OR j.source_id=?) AND (? IS NULL OR lower(j.company)=lower(?)) GROUP BY 1 ORDER BY 3 DESC,1");
+    let rows = bind_analytics(sqlx::query(&sql), input)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(rows
+        .into_iter()
+        .map(|r| {
+            let samples: i64 = r.get(2);
+            ResponseMetric {
+                name: r.get(0),
+                hours: r.get(1),
+                samples,
+                small_sample: samples < 3,
+            }
+        })
+        .collect())
 }
 #[tauri::command]
-pub async fn analytics(state: State<'_, Arc<AppState>>) -> ApiResult<Analytics> {
-    let total: i64 = sqlx::query_scalar("SELECT count(*) FROM applications")
+pub async fn analytics(
+    filter: Option<AnalyticsFilter>,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Analytics> {
+    let input = filter.unwrap_or_default();
+    validate_analytics_filter(&input)?;
+    let where_sql = analytics_where();
+    let total:i64=bind_analytics(sqlx::query_scalar(&format!("SELECT count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id {where_sql}")),&input).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let by_stage = counts(&state.db.pool, &input, "a.current_stage").await?;
+    let source_counts = counts(&state.db.pool, &input, "s.name").await?;
+    let company_counts = counts(&state.db.pool, &input, "j.company").await?;
+    let applications_over_time=bind_analytics(sqlx::query(&format!("SELECT substr(a.created_at,1,10),count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id {where_sql} GROUP BY 1 ORDER BY 1")),&input).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?.into_iter().map(|r|Trend{date:r.get(0),count:r.get(1)}).collect();
+    let facts_sql=format!("SELECT count(*) AS cohort, sum(a.applied_at IS NOT NULL), sum(EXISTS(SELECT 1 FROM application_events e WHERE e.application_id=a.id AND a.applied_at IS NOT NULL AND e.occurred_at>a.applied_at AND e.to_stage IN ('screening','interviewing','offer','rejected'))), sum(EXISTS(SELECT 1 FROM application_events e WHERE e.application_id=a.id AND e.to_stage='interviewing')), sum(EXISTS(SELECT 1 FROM application_events e WHERE e.application_id=a.id AND e.to_stage='offer')), sum(EXISTS(SELECT 1 FROM application_events e WHERE e.application_id=a.id AND e.to_stage='accepted')) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id {where_sql}");
+    let facts = bind_analytics(sqlx::query(&facts_sql), &input)
         .fetch_one(&state.db.pool)
         .await
         .map_err(|e| e.to_string())?;
-    let by_stage = sqlx::query(
-        "SELECT current_stage,count(*) AS count FROM applications GROUP BY current_stage",
-    )
-    .fetch_all(&state.db.pool)
-    .await
-    .map_err(|e| e.to_string())?
-    .into_iter()
-    .map(|r| Count {
-        name: r.get(0),
-        count: r.get(1),
-    })
-    .collect();
-    let row=sqlx::query("SELECT avg((julianday(e.occurred_at)-julianday(a.applied_at))*24),count(*) FROM applications a JOIN application_events e ON e.application_id=a.id WHERE a.applied_at IS NOT NULL AND e.occurred_at>a.applied_at AND e.to_stage IN ('screening','interviewing','offer','rejected')").fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let cohort: i64 = facts.get(0);
+    let applied: i64 = facts.get::<Option<i64>, _>(1).unwrap_or(0);
+    let responded: i64 = facts.get::<Option<i64>, _>(2).unwrap_or(0);
+    let interviewed: i64 = facts.get::<Option<i64>, _>(3).unwrap_or(0);
+    let offered: i64 = facts.get::<Option<i64>, _>(4).unwrap_or(0);
+    let accepted: i64 = facts.get::<Option<i64>, _>(5).unwrap_or(0);
+    let conversion = |name: &str, numerator: i64, denominator: i64| Conversion {
+        name: name.into(),
+        numerator,
+        denominator,
+        rate: (denominator > 0).then_some(numerator as f64 * 100.0 / denominator as f64),
+        small_sample: denominator < 3,
+    };
+    let conversions = vec![
+        conversion("applied", applied, cohort),
+        conversion("first response", responded, applied),
+        conversion("interview", interviewed, applied),
+        conversion("offer", offered, applied),
+        conversion("accepted", accepted, applied),
+    ];
+    let response_by_company = response_metrics(&state.db.pool, &input, "j.company").await?;
+    let response_by_source = response_metrics(&state.db.pool, &input, "s.name").await?;
+    let all_response = response_by_company
+        .iter()
+        .fold((0.0, 0_i64), |(total, n), item| match item.hours {
+            Some(hours) => (total + hours * item.samples as f64, n + item.samples),
+            None => (total, n),
+        });
+    let applied_to_response_hours =
+        (all_response.1 > 0).then_some(all_response.0 / all_response.1 as f64);
+    let outcomes=counts(&state.db.pool,&input,"CASE WHEN a.current_stage IN ('accepted','rejected','withdrawn') THEN a.current_stage ELSE 'open' END").await?;
+    let match_score_buckets=bind_analytics(sqlx::query(&format!("SELECT CASE WHEN m.score IS NULL THEN 'unscored' WHEN m.score<40 THEN '0-39' WHEN m.score<60 THEN '40-59' WHEN m.score<80 THEN '60-79' ELSE '80-100' END,count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id LEFT JOIN match_results m ON m.job_id=a.job_id AND m.persona_id=a.persona_id {where_sql} GROUP BY 1 ORDER BY 1")),&input).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?.into_iter().map(|r|Count{name:r.get(0),count:r.get(1)}).collect();
+    let review_decisions=sqlx::query("SELECT status,count(*) FROM review_decisions WHERE (? IS NULL OR persona_id=?) GROUP BY status ORDER BY status").bind(&input.persona_id).bind(&input.persona_id).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?.into_iter().map(|r|Count{name:r.get(0),count:r.get(1)}).collect();
+    let job_freshness=sqlx::query("SELECT CASE WHEN availability!='active' THEN availability WHEN posted_at IS NULL THEN 'unknown date' WHEN julianday('now')-julianday(posted_at)<=7 THEN '0-7 days' WHEN julianday('now')-julianday(posted_at)<=30 THEN '8-30 days' ELSE '31+ days' END,count(*) FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.deleted_at IS NULL AND (? IS NULL OR j.source_id=?) AND (? IS NULL OR lower(j.company)=lower(?)) GROUP BY 1 ORDER BY 1").bind(&input.source_id).bind(&input.source_id).bind(&input.company).bind(&input.company).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?.into_iter().map(|r|Count{name:r.get(0),count:r.get(1)}).collect();
+    let date_window = format!(
+        "applications created {} to {}",
+        input.start_at.as_deref().unwrap_or("all time"),
+        input.end_at.as_deref().unwrap_or("now")
+    );
     Ok(Analytics {
         total: total as u64,
+        date_window,
         by_stage,
-        applied_to_response_hours: row.get(0),
-        response_samples: row.get::<i64, _>(1) as u64,
+        applications_over_time,
+        source_counts,
+        company_counts,
+        conversions,
+        response_by_company,
+        response_by_source,
+        outcomes,
+        match_score_buckets,
+        review_decisions,
+        job_freshness,
+        applied_to_response_hours,
+        response_samples: all_response.1 as u64,
+        response_small_sample: all_response.1 < 3,
     })
 }
 #[derive(Serialize)]
@@ -1878,6 +2040,35 @@ mod matching_persistence_tests {
         assert_eq!(note_columns, 2);
         assert_eq!(doc_columns, 4);
         assert_eq!(reason_columns, 1);
+        pool.close().await;
+    }
+
+    #[tokio::test]
+    async fn analytics_fixture_uses_event_response_and_date_boundaries() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('as','Analytics source','https://example.test','json','1',0,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,availability,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('aj','as','Role','Company','text','[]','active','hash','2026-01-01T00:00:00Z','1','2026-01-01T00:00:00Z','2026-01-01T00:00:00Z')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO applications(id,job_id,current_stage,applied_at,created_at,updated_at) VALUES('aa','aj','screening','2026-01-02T00:00:00Z','2026-01-02T00:00:00Z','2026-01-03T00:00:00Z')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO application_events(id,application_id,event_type,to_stage,occurred_at,payload_json) VALUES('before','aa','stage_changed','screening','2026-01-01T00:00:00Z','{}'),('after','aa','stage_changed','screening','2026-01-03T12:00:00Z','{}')").execute(&pool).await.unwrap();
+        let response: Option<f64> = sqlx::query_scalar("SELECT avg((julianday(e.occurred_at)-julianday(a.applied_at))*24) FROM applications a JOIN application_events e ON e.application_id=a.id WHERE e.occurred_at=(SELECT min(e2.occurred_at) FROM application_events e2 WHERE e2.application_id=a.id AND e2.occurred_at>a.applied_at AND e2.to_stage IN ('screening','interviewing','offer','rejected'))").fetch_one(&pool).await.unwrap();
+        assert_eq!(response, Some(36.0));
+        let start = "2026-01-02T00:00:00Z";
+        let end = "2026-01-03T00:00:00Z";
+        let count: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM applications WHERE created_at>=? AND created_at<?",
+        )
+        .bind(start)
+        .bind(end)
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert_eq!(count, 1);
+        assert!(validate_analytics_filter(&AnalyticsFilter {
+            start_at: Some(end.into()),
+            end_at: Some(start.into()),
+            ..Default::default()
+        })
+        .is_err());
         pool.close().await;
     }
 }
