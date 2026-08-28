@@ -108,6 +108,8 @@ pub fn run() {
             db::search_jobs,
             db::list_personas,
             db::save_persona,
+            db::archive_persona,
+            db::delete_persona,
             db::list_review_queue,
             db::set_review_decision,
             db::list_applications,

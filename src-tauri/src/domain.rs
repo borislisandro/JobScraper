@@ -94,6 +94,7 @@ pub struct Persona {
     pub resume_document_id: Option<String>,
     pub created_at: String,
     pub updated_at: String,
+    pub archived_at: Option<String>,
 }
 #[derive(Debug, Clone, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]

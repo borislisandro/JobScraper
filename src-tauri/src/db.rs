@@ -401,7 +401,31 @@ async fn jobs_query(
 }
 #[tauri::command]
 pub async fn list_personas(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Persona>> {
-    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at FROM personas ORDER BY name").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at,archived_at FROM personas WHERE archived_at IS NULL ORDER BY name").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+}
+#[tauri::command]
+pub async fn archive_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
+    sqlx::query("UPDATE personas SET archived_at=?,updated_at=? WHERE id=?")
+        .bind(now())
+        .bind(now())
+        .bind(persona_id)
+        .execute(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+#[tauri::command]
+pub async fn delete_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
+    let deps:i64=sqlx::query_scalar("SELECT (SELECT count(*) FROM applications WHERE persona_id=?)+(SELECT count(*) FROM review_decisions WHERE persona_id=?)+(SELECT count(*) FROM match_results WHERE persona_id=?)").bind(&persona_id).bind(&persona_id).bind(&persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
+    if deps > 0 {
+        return Err("Persona has review, match, or application history; archive it instead".into());
+    }
+    sqlx::query("DELETE FROM personas WHERE id=?")
+        .bind(persona_id)
+        .execute(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
 }
 #[tauri::command]
 pub async fn save_persona(
@@ -434,7 +458,7 @@ pub async fn save_persona(
     }
     tx.commit().await.map_err(|e| e.to_string())?;
     rescore(&state.db.pool, &state.db.root, &persona_id, None).await?;
-    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at FROM personas WHERE id=?").bind(persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at,archived_at FROM personas WHERE id=?").bind(persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn rescore_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
