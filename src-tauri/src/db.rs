@@ -84,60 +84,168 @@ impl Database {
         })
     }
     pub async fn install_starter_pack(&self) -> ApiResult<()> {
+        // Stable IDs make this dated pack idempotent even when a user renames a
+        // source. All active starters are disabled until explicitly enabled.
         let starters = [
-            ("Microchip", "https://careers.microchip.com/", "workday"),
             (
+                "00000000-0000-4000-8000-000000000001",
+                "Microchip",
+                "https://careers.microchip.com/",
+                "workday",
+                "careers.microchip.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000002",
                 "Analog Devices",
                 "https://analogdevices.wd1.myworkdayjobs.com/",
                 "workday",
+                "analogdevices.wd1.myworkdayjobs.com",
+                "active",
             ),
             (
+                "00000000-0000-4000-8000-000000000003",
                 "Broadcom",
                 "https://broadcom.wd1.myworkdayjobs.com/",
                 "workday",
+                "broadcom.wd1.myworkdayjobs.com",
+                "active",
             ),
-            ("Intel", "https://jobs.intel.com/", "workday"),
-            ("STMicroelectronics", "https://careers.st.com/", "eightfold"),
             (
+                "00000000-0000-4000-8000-000000000004",
+                "Intel",
+                "https://jobs.intel.com/",
+                "workday",
+                "jobs.intel.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000005",
+                "Marvell careers (Workday)",
+                "https://marvell.wd1.myworkdayjobs.com/",
+                "workday",
+                "marvell.wd1.myworkdayjobs.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000006",
+                "STMicroelectronics",
+                "https://careers.st.com/",
+                "eightfold",
+                "careers.st.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000007",
                 "NVIDIA",
                 "https://nvidia.wd5.myworkdayjobs.com/",
                 "eightfold",
+                "nvidia.wd5.myworkdayjobs.com",
+                "active",
             ),
-            ("GlobalFoundries", "https://gf.com/careers", "eightfold"),
-            ("Micron", "https://careers.micron.com/", "eightfold"),
-            ("Qualcomm", "https://careers.qualcomm.com/", "eightfold"),
-            ("Arm", "https://careers.arm.com/", "icims"),
-            ("AMD", "https://careers.amd.com/", "icims"),
-            ("Cisco", "https://jobs.cisco.com/", "phenom"),
-            ("Apple", "https://jobs.apple.com/", "custom-api"),
-            ("MediaTek", "https://www.mediatek.com/careers", "custom-api"),
-            ("u-blox", "https://www.u-blox.com/en/careers", "custom-api"),
             (
+                "00000000-0000-4000-8000-000000000008",
+                "GlobalFoundries",
+                "https://gf.com/careers",
+                "eightfold",
+                "gf.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000009",
+                "Micron",
+                "https://careers.micron.com/",
+                "eightfold",
+                "careers.micron.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000010",
+                "Qualcomm",
+                "https://careers.qualcomm.com/",
+                "eightfold",
+                "careers.qualcomm.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000011",
+                "Arm",
+                "https://careers.arm.com/",
+                "icims",
+                "careers.arm.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000012",
+                "AMD",
+                "https://careers.amd.com/",
+                "icims",
+                "careers.amd.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000013",
+                "Cisco",
+                "https://jobs.cisco.com/",
+                "phenom",
+                "jobs.cisco.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000014",
+                "Apple",
+                "https://jobs.apple.com/",
+                "custom-api",
+                "jobs.apple.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000015",
+                "MediaTek",
+                "https://www.mediatek.com/careers",
+                "custom-api",
+                "www.mediatek.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000016",
+                "u-blox",
+                "https://www.u-blox.com/en/careers",
+                "custom-api",
+                "www.u-blox.com",
+                "active",
+            ),
+            (
+                "00000000-0000-4000-8000-000000000017",
                 "Google",
                 "https://www.google.com/about/careers/applications/jobs/results",
                 "custom-api",
+                "www.google.com",
+                "active",
             ),
             (
+                "00000000-0000-4000-8000-000000000018",
                 "SK hynix",
                 "https://www.skhynix.com/eng/careers/",
                 "custom-api",
+                "www.skhynix.com",
+                "active",
             ),
             (
+                "00000000-0000-4000-8000-000000000019",
                 "Marvell careers (reference)",
                 "https://www.marvell.com/company/careers.html",
                 "reference",
+                "www.marvell.com",
+                "reference",
             ),
         ];
-        for (name, url, adapter) in starters {
-            let source_id = id();
+        for (source_id, name, url, adapter, host, kind) in starters {
             let t = now();
-            let kind = if adapter == "reference" {
-                "reference"
-            } else {
-                "active"
-            };
             sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,0,0,?,?)")
-    .bind(&source_id).bind(name).bind(url).bind(adapter).bind("1.0.0").bind(kind).bind(if kind=="reference" {Some("Reference-only source: it is never scraped.")} else {Some("Starter source is disabled until you review and enable it.")}).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+    .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(if kind=="reference" {Some("Reference-only source: it is never scraped.")} else if adapter=="custom-api" {Some("Custom source disabled: a verified source-specific adapter is required.")} else {Some("Starter source is disabled until you review and enable it.")}).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+                .bind(id()).bind(source_id).bind(serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":host,"adapterVersion":"1.1.0","mode":"direct"}).to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
         }
         Ok(())
     }

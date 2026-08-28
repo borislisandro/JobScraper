@@ -140,8 +140,12 @@ pub fn run() {
             sessions::has_browser_session,
             sessions::delete_browser_session,
             sidecar::test_source,
+            sidecar::adapter_manifests,
+            sidecar::probe_source,
             sidecar::scrape_source,
+            sidecar::scrape_all,
             sidecar::cancel_scrape,
+            sidecar::resume_scrape,
             sidecar::capture_session
         ])
         .build(tauri::generate_context!())

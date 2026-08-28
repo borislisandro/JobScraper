@@ -10,6 +10,7 @@ use tauri::{Emitter, State};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
     process::Command,
+    sync::mpsc,
 };
 use uuid::Uuid;
 
@@ -17,16 +18,19 @@ use uuid::Uuid;
 #[derive(Default)]
 pub struct SidecarManager {
     pids: Mutex<HashMap<String, u32>>,
+    controls: Mutex<HashMap<String, mpsc::UnboundedSender<String>>>,
 }
 impl SidecarManager {
     pub fn active(&self) -> bool {
         !self.pids.lock().unwrap().is_empty()
     }
-    fn add(&self, id: String, pid: u32) {
+    fn add(&self, id: String, pid: u32, control: mpsc::UnboundedSender<String>) {
         self.pids.lock().unwrap().insert(id, pid);
+        self.controls.lock().unwrap().insert(id, control);
     }
     fn remove(&self, id: &str) {
         self.pids.lock().unwrap().remove(id);
+        self.controls.lock().unwrap().remove(id);
     }
     pub fn cancel_all(&self) {
         let ids: Vec<String> = self.pids.lock().unwrap().keys().cloned().collect();
@@ -35,6 +39,9 @@ impl SidecarManager {
         }
     }
     fn cancel(&self, id: &str) -> bool {
+        if let Some(control) = self.controls.lock().unwrap().get(id) {
+            let _ = control.send("cancel".into());
+        }
         if let Some(pid) = self.pids.lock().unwrap().remove(id) {
             let _ = std::process::Command::new("taskkill")
                 .args(["/PID", &pid.to_string(), "/T", "/F"])
@@ -43,6 +50,14 @@ impl SidecarManager {
         } else {
             false
         }
+    }
+    fn resume(&self, id: &str) -> bool {
+        self.controls
+            .lock()
+            .unwrap()
+            .get(id)
+            .map(|control| control.send("resume".into()).is_ok())
+            .unwrap_or(false)
     }
 }
 #[derive(Serialize, Deserialize, Clone)]
@@ -60,6 +75,30 @@ pub struct WorkerEvent {
     pub event: String,
     pub run_id: String,
     pub payload: serde_json::Value,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdapterManifest {
+    pub id: &'static str,
+    pub version: &'static str,
+    pub modes: &'static [&'static str],
+    pub required_fields: &'static [&'static str],
+    pub config_schema: serde_json::Value,
+}
+#[tauri::command]
+pub fn adapter_manifests() -> Vec<AdapterManifest> {
+    [
+        ("static-css", &["direct","css","pagination"][..], &["itemSelector","titleSelector"][..]),
+        ("static-xpath", &["direct","xpath","pagination"][..], &["itemXPath","titleXPath"][..]),
+        ("json", &["direct","json","pagination"][..], &["itemsPath"][..]),
+        ("rss", &["direct","rss"][..], &[][..]),
+        ("playwright", &["headed","headless","session"][..], &[][..]),
+        ("workday", &["direct-json","pagination"][..], &[][..]),
+        ("eightfold", &["direct-json","pagination"][..], &[][..]),
+        ("icims", &["direct-json","pagination"][..], &[][..]),
+        ("talentbrew-jibe", &["direct-json","pagination"][..], &[][..]),
+        ("phenom", &["direct-json","pagination"][..], &[][..]),
+    ].into_iter().map(|(id,modes,required_fields)| AdapterManifest { id,version:"1.1.0",modes,required_fields,config_schema:serde_json::json!({"type":"object","properties":{"urlTemplate":{"type":"string"},"query":{"type":"string"},"maxPages":{"type":"integer","minimum":1,"maximum":50}},"required":required_fields}) }).collect()
 }
 fn worker_paths(app: &tauri::AppHandle) -> ApiResult<(PathBuf, PathBuf)> {
     let root = app
@@ -136,7 +175,6 @@ async fn run(
         .spawn()
         .map_err(|e| format!("Could not start isolated scraper: {e}"))?;
     let pid = child.id().ok_or("Worker did not return a PID")?;
-    state.sidecars.add(run_id.clone(), pid);
     let request = WorkerRequest {
         protocol_version: 1,
         command: command.into(),
@@ -144,11 +182,26 @@ async fn run(
         source,
     };
     let mut stdin = child.stdin.take().ok_or("Worker stdin unavailable")?;
-    stdin
-        .write_all(format!("{}\n", serde_json::to_string(&request).unwrap()).as_bytes())
-        .await
-        .map_err(|e| e.to_string())?;
-    stdin.shutdown().await.map_err(|e| e.to_string())?;
+    let (control, mut control_rx) = mpsc::unbounded_channel::<String>();
+    state.sidecars.add(run_id.clone(), pid, control);
+    let writer_run_id = run_id.clone();
+    tokio::spawn(async move {
+        let _ = stdin
+            .write_all(format!("{}\n", serde_json::to_string(&request).unwrap()).as_bytes())
+            .await;
+        while let Some(command) = control_rx.recv().await {
+            let line =
+                serde_json::json!({"protocolVersion":1,"command":command,"runId":writer_run_id})
+                    .to_string();
+            if stdin
+                .write_all(format!("{line}\n").as_bytes())
+                .await
+                .is_err()
+            {
+                break;
+            }
+        }
+    });
     let output = child.stdout.take().ok_or("Worker stdout unavailable")?;
     let mut lines = BufReader::new(output).lines();
     let mut events = Vec::new();
@@ -229,12 +282,85 @@ pub async fn test_source(
     run(app, state.inner().clone(), "test_source", source).await
 }
 #[tauri::command]
+pub async fn probe_source(
+    source: serde_json::Value,
+    app: tauri::AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Vec<WorkerEvent>> {
+    run(app, state.inner().clone(), "probe_source", source).await
+}
+#[tauri::command]
 pub async fn scrape_source(
     source: serde_json::Value,
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Vec<WorkerEvent>> {
     run(app, state.inner().clone(), "scrape_source", source).await
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ScrapeAllResult {
+    pub run_id: String,
+    pub completed_sources: usize,
+    pub failed_sources: usize,
+}
+/// Manual batch only: groups are run at most two domains at a time; each group
+/// is sequential, enforcing one worker stream per domain.
+#[tauri::command]
+pub async fn scrape_all(
+    app: tauri::AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<ScrapeAllResult> {
+    let batch_id = Uuid::new_v4().to_string();
+    let rows=sqlx::query("SELECT id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,last_success_at,created_at,updated_at FROM sources WHERE enabled=1 AND kind='active' AND deleted_at IS NULL ORDER BY id").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let mut groups: HashMap<String, Vec<serde_json::Value>> = HashMap::new();
+    for row in rows {
+        let base: String = row.get("base_url");
+        let domain = url::Url::parse(&base)
+            .ok()
+            .and_then(|u| u.host_str().map(str::to_owned))
+            .ok_or("Saved source has invalid URL")?;
+        let source = serde_json::json!({"id":row.get::<String,_>("id"),"name":row.get::<String,_>("name"),"baseUrl":base,"adapterId":row.get::<String,_>("adapter_id"),"adapterVersion":row.get::<String,_>("adapter_version"),"enabled":true,"kind":"active","robotsOverride":row.get::<bool,_>("robots_override")});
+        groups.entry(domain).or_default().push(source);
+    }
+    let mut done = 0;
+    let mut failed = 0;
+    let total = groups.values().map(Vec::len).sum::<usize>();
+    let group_values: Vec<_> = groups.into_values().collect();
+    for pair in group_values.chunks(2) {
+        let mut tasks = Vec::new();
+        for group in pair {
+            let app = app.clone();
+            let state = state.inner().clone();
+            let sources = group.clone();
+            tasks.push(tokio::spawn(async move {
+                let mut outcomes = Vec::new();
+                for source in sources {
+                    outcomes.push(
+                        run(app.clone(), state.clone(), "scrape_source", source)
+                            .await
+                            .is_ok(),
+                    );
+                }
+                outcomes
+            }));
+        }
+        for task in futures::future::join_all(tasks).await {
+            for outcome in task.map_err(|e| e.to_string())? {
+                if outcome {
+                    done += 1
+                } else {
+                    failed += 1
+                };
+                let _=app.emit("scrape-all-progress",serde_json::json!({"runId":batch_id,"completed":done+failed,"total":total,"failed":failed}));
+            }
+        }
+    }
+    Ok(ScrapeAllResult {
+        run_id: batch_id,
+        completed_sources: done,
+        failed_sources: failed,
+    })
 }
 #[tauri::command]
 pub async fn capture_session(
@@ -247,4 +373,8 @@ pub async fn capture_session(
 #[tauri::command]
 pub fn cancel_scrape(run_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<bool> {
     Ok(state.sidecars.cancel(&run_id))
+}
+#[tauri::command]
+pub fn resume_scrape(run_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<bool> {
+    Ok(state.sidecars.resume(&run_id))
 }

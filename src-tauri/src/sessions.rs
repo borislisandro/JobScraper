@@ -1,7 +1,7 @@
 //! Per-source Playwright storage state encryption. Credentials are never collected or stored.
 use crate::{db::ApiResult, AppState};
 use aes_gcm::{
-    aead::{Aead, KeyInit},
+    aead::{generic_array::GenericArray, rand_core::RngCore, Aead, KeyInit, OsRng, Payload},
     Aes256Gcm, Nonce,
 };
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -22,11 +22,9 @@ fn key() -> ApiResult<[u8; 32]> {
     let digest = Sha256::digest(encoded.as_bytes());
     Ok(digest.into())
 }
-fn nonce(source: &str) -> [u8; 12] {
-    let h = Sha256::digest(format!("JobScraper/session/{source}").as_bytes());
-    let mut n = [0; 12];
-    n.copy_from_slice(&h[..12]);
-    n
+const FORMAT: &[u8; 4] = b"JS2\0";
+fn context(source: &str) -> Vec<u8> {
+    format!("JobScraper/session/v2/{source}").into_bytes()
 }
 fn file(root: &std::path::Path, source: &str) -> ApiResult<std::path::PathBuf> {
     if !uuid::Uuid::parse_str(source).is_ok() {
@@ -50,10 +48,21 @@ pub fn save_bytes(root: &std::path::Path, source_id: &str, plain: Vec<u8>) -> Ap
         return Err("Browser storage state exceeds 10 MB".into());
     };
     let cipher = Aes256Gcm::new_from_slice(&key()?).map_err(|e| e.to_string())?;
+    let mut nonce = [0_u8; 12];
+    OsRng.fill_bytes(&mut nonce);
     let encrypted = cipher
-        .encrypt(Nonce::from_slice(&nonce(source_id)), plain.as_ref())
+        .encrypt(
+            GenericArray::from_slice(&nonce),
+            Payload {
+                msg: plain.as_ref(),
+                aad: &context(source_id),
+            },
+        )
         .map_err(|_| "Could not encrypt browser storage state")?;
-    std::fs::write(file(root, source_id)?, encrypted).map_err(|e| e.to_string())?;
+    let mut stored = FORMAT.to_vec();
+    stored.extend_from_slice(&nonce);
+    stored.extend_from_slice(&encrypted);
+    std::fs::write(file(root, source_id)?, stored).map_err(|e| e.to_string())?;
     Ok(())
 }
 pub fn load_browser_session(root: &std::path::Path, source: &str) -> ApiResult<Option<Vec<u8>>> {
@@ -63,10 +72,49 @@ pub fn load_browser_session(root: &std::path::Path, source: &str) -> ApiResult<O
     };
     let cipher = Aes256Gcm::new_from_slice(&key()?).map_err(|e| e.to_string())?;
     let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    if !bytes.starts_with(FORMAT) {
+        return Err("Legacy browser session format rejected; capture a new session".into());
+    }
+    if bytes.len() <= FORMAT.len() + 12 {
+        return Err("Browser session blob is truncated".into());
+    }
+    let nonce = &bytes[FORMAT.len()..FORMAT.len() + 12];
+    let ciphertext = &bytes[FORMAT.len() + 12..];
     cipher
-        .decrypt(Nonce::from_slice(&nonce(source)), bytes.as_ref())
+        .decrypt(
+            GenericArray::from_slice(nonce),
+            Payload {
+                msg: ciphertext,
+                aad: &context(source),
+            },
+        )
         .map(Some)
-        .map_err(|_| "Saved browser session cannot be decrypted")
+        .map_err(|_| "Saved browser session cannot be decrypted or belongs to another source")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn v2_format_uses_random_nonce_and_authenticates_source() {
+        let root =
+            std::env::temp_dir().join(format!("jobscraper-session-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(root.join("sessions")).unwrap();
+        let one = "00000000-0000-4000-8000-000000000001";
+        let two = "00000000-0000-4000-8000-000000000002";
+        save_bytes(&root, one, b"first".to_vec()).unwrap();
+        let first = std::fs::read(file(&root, one).unwrap()).unwrap();
+        save_bytes(&root, one, b"second".to_vec()).unwrap();
+        let second = std::fs::read(file(&root, one).unwrap()).unwrap();
+        assert_ne!(&first[4..16], &second[4..16]);
+        assert_eq!(
+            load_browser_session(&root, one).unwrap(),
+            Some(b"second".to_vec())
+        );
+        std::fs::write(file(&root, two).unwrap(), second).unwrap();
+        assert!(load_browser_session(&root, two).is_err());
+        let _ = std::fs::remove_dir_all(root);
+    }
 }
 #[tauri::command]
 pub fn has_browser_session(source_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<bool> {
