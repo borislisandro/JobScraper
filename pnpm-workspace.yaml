@@ -1,0 +1,4 @@
+packages:
+  - sidecar
+allowBuilds:
+  esbuild: true
