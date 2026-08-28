@@ -364,6 +364,7 @@ impl Database {
             .unwrap_or("");
         let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
         let existing:Option<String>=sqlx::query_scalar("SELECT id FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=?) OR dedupe_fingerprint=? ORDER BY created_at LIMIT 1").bind(source_id).bind(external).bind(canonical.as_deref()).bind(canonical.as_deref()).bind(requisition).bind(requisition).bind(&fingerprint).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?;
+        let coalesced = existing.is_some();
         let actual = existing.unwrap_or(job_id);
         sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,title,company,location,work_mode,description_text,description_html,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,title=excluded.title,company=excluded.company,location=excluded.location,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,skills_json=excluded.skills_json,content_hash=excluded.content_hash,provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,updated_at=excluded.updated_at")
   .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(payload.get("descriptionHtml").and_then(|v|v.as_str()).map(|s|s.chars().take(250_000).collect::<String>())).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
@@ -376,6 +377,9 @@ impl Database {
             .execute(&mut *tx)
             .await
             .map_err(|e| e.to_string())?;
+        if coalesced {
+            sqlx::query("INSERT INTO job_dedupe_events(id,canonical_job_id,method,evidence_json,created_at) VALUES(?,?, 'exact',?,?)").bind(id()).bind(&actual).bind(serde_json::json!({"externalId":external,"canonicalUrl":canonical,"requisitionId":requisition,"fingerprint":fingerprint}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        }
         let location = payload
             .get("location")
             .and_then(|v| v.as_str())
@@ -445,6 +449,20 @@ pub async fn list_duplicate_candidates(
 ) -> ApiResult<Vec<DuplicateCandidate>> {
     sqlx::query_as("SELECT c.id,c.left_job_id,c.right_job_id,c.method,c.score,c.status,c.evidence_json,c.created_at,l.title AS left_title,l.company AS left_company,r.title AS right_title,r.company AS right_company FROM duplicate_candidates c JOIN jobs l ON l.id=c.left_job_id JOIN jobs r ON r.id=c.right_job_id WHERE c.status='suggested' ORDER BY c.score DESC,c.created_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
+#[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct MergedJob {
+    pub canonical_job_id: String,
+    pub merged_job_id: String,
+    pub canonical_title: String,
+    pub merged_title: String,
+    pub created_at: String,
+    pub conflict_count: i64,
+}
+#[tauri::command]
+pub async fn list_merged_jobs(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<MergedJob>> {
+    sqlx::query_as("SELECT a.canonical_job_id,a.merged_job_id,c.title AS canonical_title,m.title AS merged_title,a.created_at,(SELECT count(*) FROM duplicate_merge_conflicts x WHERE x.audit_id=a.id AND x.resolved_at IS NULL) AS conflict_count FROM duplicate_merge_audits a JOIN jobs c ON c.id=a.canonical_job_id JOIN jobs m ON m.id=a.merged_job_id WHERE a.undone_at IS NULL ORDER BY a.created_at DESC").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+}
 #[tauri::command]
 pub async fn dismiss_duplicate_candidate(
     candidate_id: String,
@@ -474,12 +492,6 @@ pub async fn merge_duplicate_jobs(
     } else {
         left
     };
-    let conflicts:i64=sqlx::query_scalar("SELECT (SELECT count(*) FROM match_results a JOIN match_results b ON a.persona_id=b.persona_id AND a.algorithm_version=b.algorithm_version WHERE a.job_id=? AND b.job_id=?)+(SELECT count(*) FROM review_decisions a JOIN review_decisions b ON a.persona_id=b.persona_id WHERE a.job_id=? AND b.job_id=?)").bind(&canonical_job_id).bind(&merged).bind(&canonical_job_id).bind(&merged).fetch_one(&mut *tx).await.map_err(|e|e.to_string())?;
-    if conflicts > 0 {
-        return Err(
-            "Merge has conflicting persona match or review state; resolve manually first".into(),
-        );
-    };
     let app_ids: Vec<String> = sqlx::query_scalar("SELECT id FROM applications WHERE job_id=?")
         .bind(&merged)
         .fetch_all(&mut *tx)
@@ -501,6 +513,10 @@ pub async fn merge_duplicate_jobs(
     let audit = id();
     let t = now();
     sqlx::query("INSERT INTO duplicate_merge_audits(id,canonical_job_id,merged_job_id,snapshot_json,created_at) VALUES(?,?,?,?,?)").bind(&audit).bind(&canonical_job_id).bind(&merged).bind(snapshot.to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    for row in sqlx::query("SELECT a.persona_id,a.filter_decision_json,b.filter_decision_json FROM match_results a JOIN match_results b ON a.persona_id=b.persona_id AND a.algorithm_version=b.algorithm_version WHERE a.job_id=? AND b.job_id=?").bind(&canonical_job_id).bind(&merged).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? {sqlx::query("INSERT INTO duplicate_merge_conflicts(id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,created_at) VALUES(?,?, 'match_result',?,?,?,?)").bind(id()).bind(&audit).bind(row.get::<String,_>(0)).bind(row.get::<String,_>(1)).bind(row.get::<String,_>(2)).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}
+    for row in sqlx::query("SELECT a.persona_id,json_object('status',a.status,'reason',a.reason),json_object('status',b.status,'reason',b.reason) FROM review_decisions a JOIN review_decisions b ON a.persona_id=b.persona_id WHERE a.job_id=? AND b.job_id=?").bind(&canonical_job_id).bind(&merged).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? {sqlx::query("INSERT INTO duplicate_merge_conflicts(id,audit_id,conflict_type,persona_id,canonical_snapshot_json,merged_snapshot_json,created_at) VALUES(?,?, 'review_decision',?,?,?,?)").bind(id()).bind(&audit).bind(row.get::<String,_>(0)).bind(row.get::<String,_>(1)).bind(row.get::<String,_>(2)).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}
+    sqlx::query("UPDATE match_results SET job_id=? WHERE job_id=? AND NOT EXISTS(SELECT 1 FROM match_results c WHERE c.job_id=? AND c.persona_id=match_results.persona_id AND c.algorithm_version=match_results.algorithm_version)").bind(&canonical_job_id).bind(&merged).bind(&canonical_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("UPDATE review_decisions SET job_id=? WHERE job_id=? AND NOT EXISTS(SELECT 1 FROM review_decisions c WHERE c.job_id=? AND c.persona_id=review_decisions.persona_id)").bind(&canonical_job_id).bind(&merged).bind(&canonical_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     for table in ["applications", "job_occurrences", "job_revisions"] {
         sqlx::query(&format!("UPDATE {table} SET job_id=? WHERE job_id=?"))
             .bind(&canonical_job_id)
