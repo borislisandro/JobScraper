@@ -3390,4 +3390,26 @@ mod matching_persistence_tests {
             .strip_prefix(&root)
             .is_err());
     }
+
+    #[test]
+    fn outcome_csv_aggregates_source_company_rates_and_small_samples() {
+        let mut selected = HashMap::new();
+        selected.insert(
+            "sources".into(),
+            vec![serde_json::json!({"id":"s","name":"Source, One"})],
+        );
+        selected.insert(
+            "jobs".into(),
+            vec![serde_json::json!({"id":"j","source_id":"s","company":"Chip \"Co\""})],
+        );
+        selected.insert("applications".into(),vec![serde_json::json!({"id":"a","job_id":"j","current_stage":"accepted","applied_at":"2026-01-01T00:00:00Z"})]);
+        selected.insert("application_events".into(),vec![serde_json::json!({"application_id":"a","to_stage":"screening","occurred_at":"2026-01-01T12:00:00Z"})]);
+        let source = String::from_utf8(outcomes_csv(&selected, false)).unwrap();
+        let company = String::from_utf8(outcomes_csv(&selected, true)).unwrap();
+        assert!(source.contains("\"Source, One\""));
+        assert!(source.contains("100.00%"));
+        assert!(source.contains("12.00"));
+        assert!(source.contains("small_sample"));
+        assert!(company.contains("\"Chip \"\"Co\"\"\""));
+    }
 }
