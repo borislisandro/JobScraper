@@ -203,6 +203,6 @@ mod tests {
     }
     #[test]
     fn top_three() {
-        assert_eq!(mean_top_three(vec![.1,.9,.7,.8]),.8);
+        assert!((mean_top_three(vec![0.1, 0.9, 0.7, 0.8]) - 0.8).abs() < 1e-9);
     }
 }

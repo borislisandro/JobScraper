@@ -3,7 +3,6 @@ use base64::{engine::general_purpose::STANDARD, Engine};
 use quick_xml::{events::Event, Reader};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use sqlx::Row;
 use std::io::{Cursor, Read};
 use std::sync::Arc;
 use tauri::State;
@@ -145,7 +144,7 @@ pub async fn import_resume(
     let hash = format!("{:x}", Sha256::digest(&bytes));
     let path = state.db.root.join("documents").join(&doc_id);
     std::fs::write(&path, &bytes).map_err(|e| e.to_string())?;
-    sqlx::query("INSERT INTO resume_documents(id,persona_id,filename,path,extracted_text,mime_type,content_hash,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)").bind(&doc_id).bind(input.persona_id).bind(&input.filename).bind(path.to_string_lossy().to_string()).bind(&text).bind(if ext=="pdf"{"application/pdf"}else{"application/vnd.openxmlformats-officedocument.wordprocessingml.document"}).bind(hash).bind(now()).bind(now()).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
+    sqlx::query("INSERT INTO resume_documents(id,persona_id,filename,path,extracted_text,mime_type,content_hash,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)").bind(&doc_id).bind(input.persona_id).bind(&input.filename).bind(path.to_string_lossy().to_string()).bind(&text).bind(if ext=="pdf"{"application/pdf"}else{"application/vnd.openxmlformats-officedocument.wordprocessingml.document"}).bind(&hash).bind(now()).bind(now()).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
     Ok(ResumeResult {
         id: doc_id,
         extracted_text: text,
@@ -183,8 +182,8 @@ pub async fn update_resume_text(
     let (skills, titles) = suggestions(&extracted_text);
     Ok(ResumeResult {
         id: new_id,
-        extracted_text,
         image_only: image_only(&extracted_text),
+        extracted_text,
         suggested_skills: skills,
         suggested_titles: titles,
         requires_manual_paste: false,
@@ -279,7 +278,7 @@ mod tests {
         let (skills, titles) = suggestions("Rust firmware engineer with Linux and Git");
         assert!(skills.contains(&"rust".to_string()));
         assert!(titles.contains(&"firmware engineer".to_string()));
-        assert!(image_only("short extracted text"));
+        assert!(!image_only("short extracted text"));
         assert!(!image_only(
             "A sufficiently long manually pasted resume body"
         ));

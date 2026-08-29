@@ -75,7 +75,7 @@ pub fn run() {
                     );
                     let _ = scheduler.cancel(&task);
                 }
-                app.exit(0);
+                app.handle().exit(0);
                 return Ok(());
             }
             std::fs::create_dir_all(local.join("documents"))?;

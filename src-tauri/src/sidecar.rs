@@ -1,13 +1,14 @@
 use crate::{db::ApiResult, AppState};
 use base64::Engine;
 use serde::{Deserialize, Serialize};
+use sqlx::Row;
 use std::{
     collections::{HashMap, HashSet},
     path::PathBuf,
     sync::{Arc, Mutex},
     time::Duration,
 };
-use tauri::{Emitter, State};
+use tauri::{Emitter, Manager, State};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
     process::Command,

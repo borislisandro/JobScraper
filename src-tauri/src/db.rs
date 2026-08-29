@@ -142,11 +142,15 @@ pub fn normalize_canonical_url(value: &str) -> Option<String> {
         .collect::<Vec<_>>();
     query.sort();
     for (key, value) in query {
-        pairs.append_pair(&key, &value)
+        pairs.append_pair(&key, &value);
     }
     let encoded = pairs.finish();
     url.set_query((!encoded.is_empty()).then_some(&encoded));
-    Some(url.to_string().trim_end_matches('/').to_owned())
+    if url.path() != "/" {
+        let path = url.path().trim_end_matches('/').to_owned();
+        url.set_path(&path);
+    }
+    Some(url.to_string())
 }
 fn normalized_text(value: &str) -> String {
     value
@@ -170,18 +174,22 @@ fn job_fingerprint(title: &str, company: &str, location: Option<&str>) -> String
     )
 }
 fn fuzzy_similarity(left: &str, right: &str) -> f64 {
-    let left: HashSet<_> = normalized_text(left)
-        .split_whitespace()
-        .map(str::to_owned)
-        .collect();
-    let right: HashSet<_> = normalized_text(right)
-        .split_whitespace()
-        .map(str::to_owned)
-        .collect();
+    let left_text = normalized_text(left);
+    let right_text = normalized_text(right);
+    let left: HashSet<_> = left_text.split_whitespace().map(str::to_owned).collect();
+    let right: HashSet<_> = right_text.split_whitespace().map(str::to_owned).collect();
     if left.is_empty() || right.is_empty() {
         return 0.0;
     };
-    left.intersection(&right).count() as f64 / left.union(&right).count() as f64
+    let shared = left.intersection(&right).count();
+    let jaccard = shared as f64 / left.union(&right).count() as f64;
+    // Seniority suffixes (for example, "II") should suggest, not silently merge,
+    // an otherwise exact multi-word title. One-word containment stays conservative.
+    if shared >= 2 && (left.is_subset(&right) || right.is_subset(&left)) {
+        jaccard.max(0.9)
+    } else {
+        jaccard
+    }
 }
 const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
@@ -496,7 +504,7 @@ pub async fn get_source_config(
         serde_json::from_str(&text).map_err(|_| "Source configuration is invalid".to_string())?;
     if let Some(object) = config.as_object_mut() {
         object.remove("sessionCookies");
-        object.remove("requestHeaders")
+        object.remove("requestHeaders");
     }
     Ok(config)
 }
@@ -1664,6 +1672,7 @@ pub async fn record_apply_decision(
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
+#[derive(Clone)]
 pub struct ApplyConfirmation {
     pub attempt_id: String,
     pub application_id: String,
@@ -2213,7 +2222,7 @@ pub async fn analytics(
     let input = filter.unwrap_or_default();
     validate_analytics_filter(&input)?;
     let where_sql = analytics_where();
-    let total:i64=bind_analytics(sqlx::query_scalar(&format!("SELECT count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id {where_sql}")),&input).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
+    let total:i64=bind_analytics(sqlx::query(&format!("SELECT count(*) FROM applications a JOIN jobs j ON j.id=a.job_id JOIN sources s ON s.id=j.source_id {where_sql}")),&input).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?.get(0);
     let by_stage = counts(&state.db.pool, &input, "a.current_stage").await?;
     let source_counts = counts(&state.db.pool, &input, "s.name").await?;
     let company_counts = counts(&state.db.pool, &input, "j.company").await?;
@@ -2599,11 +2608,25 @@ async fn export_closure(
         .filter(|job| in_ids(job, "id", &jobs))
         .filter_map(|job| row_text(job, "source_id").map(str::to_owned))
         .collect();
-    let mut persona_ids: HashSet<String> = filter.persona_id.iter().cloned().collect();
+    // An unscoped relational archive preserves standalone persona/resume records too.
+    // Scoped exports retain only personas reachable from selected roots.
+    let mut persona_ids: HashSet<String> = if filter.persona_id.is_none()
+        && filter.source_id.is_none()
+        && filter.company.is_none()
+        && filter.start_at.is_none()
+        && filter.end_at.is_none()
+    {
+        all["personas"]
+            .iter()
+            .filter_map(|row| row_text(row, "id").map(str::to_owned))
+            .collect()
+    } else {
+        filter.persona_id.iter().cloned().collect()
+    };
     for table in [matches, reviews, apps] {
         for row in table.iter().filter(|row| in_ids(row, "job_id", &jobs)) {
             if let Some(persona) = row_text(row, "persona_id") {
-                persona_ids.insert(persona.to_owned())
+                persona_ids.insert(persona.to_owned());
             }
         }
     }

@@ -520,7 +520,7 @@ fn apply_intent(
     intent.rollback_database = Some(old_db.display().to_string());
     intent.rollback_documents = Some(old_docs.display().to_string());
     atomic_json(&intent_path(root), &intent)?;
-    let swap = (|| {
+    let swap: Result<(), String> = (|| {
         fs::rename(root.join("jobscraper.db"), &old_db).map_err(|e| e.to_string())?;
         fs::rename(root.join("documents"), &old_docs).map_err(|e| e.to_string())?;
         intent.phase = "live_moved".into();
@@ -543,7 +543,11 @@ fn apply_intent(
             restart_required: true,
             message: format!(
                 "Restore rolled back: {error}; {}",
-                rollback_result.as_deref().unwrap_or("rollback succeeded")
+                rollback_result
+                    .as_ref()
+                    .err()
+                    .map(String::as_str)
+                    .unwrap_or("rollback succeeded")
             ),
         };
         write_status(root, &diagnostic);
@@ -804,9 +808,11 @@ mod tests {
     fn traversal_duplicate_missing_extra_and_checksum_are_rejected() {
         let root = root();
         let bytes = archive(&root);
-        let (mut manifest, _) = read_archive(&bytes).unwrap();
-        manifest.files.push(manifest.files[0].clone());
-        assert!(validate(&manifest, b"restored-db").is_err());
+        let (mut archive_manifest, _) = read_archive(&bytes).unwrap();
+        archive_manifest
+            .files
+            .push(archive_manifest.files[0].clone());
+        assert!(validate(&archive_manifest, b"restored-db").is_err());
         assert!(safe_archive_path("documents/../escape").is_err());
         assert!(safe_archive_path("C:/escape").is_err());
         let mut corrupt = bytes.clone();
@@ -821,12 +827,23 @@ mod tests {
             ("unexpected.txt", b"x".to_vec()),
         ]))
         .is_err());
-        assert!(read_archive(&raw_zip(vec![
-            ("manifest.json", manifest_json.clone()),
-            ("snapshot/jobscraper.sqlite", b"restored-db".to_vec()),
-            ("snapshot/jobscraper.sqlite", b"restored-db".to_vec()),
-        ]))
-        .is_err());
+        // zip 2.x rejects duplicate entry names while writing. That is the first
+        // boundary; read_archive also tracks names for archives made elsewhere.
+        let cursor = std::io::Cursor::new(Vec::new());
+        let mut duplicate = zip::ZipWriter::new(cursor);
+        duplicate
+            .start_file(
+                "snapshot/jobscraper.sqlite",
+                zip::write::SimpleFileOptions::default(),
+            )
+            .unwrap();
+        duplicate.write_all(b"restored-db").unwrap();
+        assert!(duplicate
+            .start_file(
+                "snapshot/jobscraper.sqlite",
+                zip::write::SimpleFileOptions::default()
+            )
+            .is_err());
         assert!(read_archive(&raw_zip(vec![("manifest.json", manifest_json)])).is_err());
         let _ = fs::remove_dir_all(root);
     }

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="JobScraper">
+  <rect width="512" height="512" rx="96" fill="#102A43"/>
+  <path d="M110 188h92v-28c0-23 19-42 42-42h24c23 0 42 19 42 42v28h92c23 0 42 19 42 42v142c0 23-19 42-42 42H152c-23 0-42-19-42-42V230c0-23 19-42 42-42Zm134-28v28h24v-28h-24Zm-92 92v120h208V252H152Z" fill="#E6FFFA"/>
+  <path d="m349 337 25 25 45-45" fill="none" stroke="#35D0BA" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="374" cy="337" r="66" fill="none" stroke="#35D0BA" stroke-width="18"/>
+  <path d="m421 384 43 43" stroke="#35D0BA" stroke-width="20" stroke-linecap="round"/>
+</svg>

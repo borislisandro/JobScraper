@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { EXPORT_KINDS } from "./api";
 
 describe("data-management workflow",()=>{
  it("requires a selected path and explicit overwrite",()=>{
@@ -19,9 +20,9 @@ describe("data-management workflow",()=>{
   expect(preview.files).toHaveLength(0);
  });
  it("exposes source and company outcome export payloads",()=>{
-  const kinds=["source_outcomes","company_outcomes"];
-  const payload={kind:kinds[1],filter:{sourceId:"source",company:"Chip Co"}};
-  expect(kinds).toContain("source_outcomes");
+  const payload={kind:EXPORT_KINDS[6],filter:{sourceId:"source",company:"Chip Co"}};
+  expect(EXPORT_KINDS).toContain("source_outcomes");
+  expect(EXPORT_KINDS).toContain("company_outcomes");
   expect(payload.kind).toBe("company_outcomes");
   expect(payload.filter.company).toBe("Chip Co");
  });
