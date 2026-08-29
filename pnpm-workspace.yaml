@@ -1,4 +1,5 @@
 packages:
   - sidecar
+injectWorkspacePackages: true
 allowBuilds:
   esbuild: true

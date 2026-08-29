@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 importers:
 
@@ -76,19 +77,19 @@ importers:
   sidecar:
     dependencies:
       '@xmldom/xmldom':
-        specifier: ^0.8.10
+        specifier: 0.8.15
         version: 0.8.15
       cheerio:
-        specifier: ^1.0.0
+        specifier: 1.2.0
         version: 1.2.0
       fast-xml-parser:
-        specifier: ^4.5.1
+        specifier: 4.5.7
         version: 4.5.7
       playwright-core:
-        specifier: ^1.50.0
+        specifier: 1.62.1
         version: 1.62.1
       xpath:
-        specifier: ^0.0.34
+        specifier: 0.0.34
         version: 0.0.34
 
 packages:

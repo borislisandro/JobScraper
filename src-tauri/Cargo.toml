@@ -33,5 +33,7 @@ futures = "0.3"
 base64 = "0.22"
 aes-gcm = "0.10"
 keyring = "3"
-fastembed = "6"
+# UserDefinedEmbeddingModel reads only our bundled files. Keep only ORT's build
+# runtime provisioner; omit FastEmbed's hf-hub/model download features.
+fastembed = { version = "6", default-features = false, features = ["ort-download-binaries-native-tls"] }
 windows-sys = { version = "0.61", features = ["Win32_Storage_FileSystem"] }

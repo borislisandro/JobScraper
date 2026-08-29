@@ -11,13 +11,18 @@ mod sidecar;
 
 use db::Database;
 use notifications::{Scheduler, WindowsTaskScheduler};
-use std::sync::{Arc, Mutex};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 use tauri::Manager;
 use tauri_plugin_notification::NotificationExt;
 use uuid::Uuid;
 
 pub struct AppState {
     pub db: Database,
+    /// Immutable Tauri resource root; model inference never reads app data/cache.
+    pub model_root: PathBuf,
     pub sidecars: sidecar::SidecarManager,
     pub shown_apply_attempt: Mutex<Option<String>>,
 }
@@ -45,6 +50,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let local = app.path().local_data_dir()?.join("JobScraper");
+            let model_root = app.path().resource_dir()?;
             if let Some(reminder_id) = deliver_reminder_argument().map_err(std::io::Error::other)? {
                 std::fs::create_dir_all(&local)?;
                 let db =
@@ -93,6 +99,7 @@ pub fn run() {
             let _ = tauri::async_runtime::block_on(db::reconcile_reminders_pool(&db.pool));
             app.manage(Arc::new(AppState {
                 db,
+                model_root,
                 sidecars: sidecar::SidecarManager::default(),
                 shown_apply_attempt: Mutex::new(None),
             }));
@@ -158,6 +165,7 @@ pub fn run() {
             documents::list_resume_documents,
             documents::delete_resume_document,
             embedding::embedding_status,
+            embedding::embedding_smoke,
             sessions::save_browser_session,
             sessions::has_browser_session,
             sessions::delete_browser_session,

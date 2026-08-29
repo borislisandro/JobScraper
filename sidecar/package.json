@@ -1,4 +1,4 @@
 {
   "name": "jobscraper-sidecar", "private": true, "type": "module",
-  "dependencies": { "cheerio": "^1.0.0", "playwright-core": "^1.50.0", "fast-xml-parser": "^4.5.1", "xpath": "^0.0.34", "@xmldom/xmldom": "^0.8.10" }
+  "dependencies": { "cheerio": "1.2.0", "playwright-core": "1.62.1", "fast-xml-parser": "4.5.7", "xpath": "0.0.34", "@xmldom/xmldom": "0.8.15" }
 }

@@ -1001,12 +1001,12 @@ pub async fn save_persona(
         .map_err(|e| e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
-    rescore(&state.db.pool, &state.db.root, &persona_id, None).await?;
+    rescore(&state.db.pool, &state.model_root, &persona_id, None).await?;
     sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at,archived_at FROM personas WHERE id=?").bind(persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn rescore_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
-    rescore(&state.db.pool, &state.db.root, &persona_id, None).await
+    rescore(&state.db.pool, &state.model_root, &persona_id, None).await
 }
 #[tauri::command]
 pub async fn rescore_match(
@@ -1014,7 +1014,13 @@ pub async fn rescore_match(
     persona_id: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    rescore(&state.db.pool, &state.db.root, &persona_id, Some(&job_id)).await
+    rescore(
+        &state.db.pool,
+        &state.model_root,
+        &persona_id,
+        Some(&job_id),
+    )
+    .await
 }
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -1065,7 +1071,7 @@ pub async fn rescore_stale_matches(
             });
         }
         let job_id: String = row.get(0);
-        rescore(&state.db.pool, &state.db.root, &persona_id, Some(&job_id)).await?;
+        rescore(&state.db.pool, &state.model_root, &persona_id, Some(&job_id)).await?;
         completed += 1;
         let _ = app.emit(
             "rescore-progress",
@@ -2291,12 +2297,14 @@ pub async fn analytics(
     })
 }
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Diagnostics {
     db_path: String,
     schema_version: i64,
     source_count: i64,
     job_count: i64,
-    startup_network: bool,
+    application_startup_network_enabled: bool,
+    webview_runtime_network_controlled: bool,
     sidecar_active: bool,
 }
 #[tauri::command]
@@ -2318,7 +2326,8 @@ pub async fn diagnostics(state: State<'_, Arc<AppState>>) -> ApiResult<Diagnosti
         schema_version: version,
         source_count,
         job_count,
-        startup_network: false,
+        application_startup_network_enabled: false,
+        webview_runtime_network_controlled: false,
         sidecar_active: state.sidecars.active(),
     })
 }

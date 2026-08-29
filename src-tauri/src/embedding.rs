@@ -55,11 +55,11 @@ fn resource_files(root: &Path) -> Result<(PathBuf, PathBuf, PathBuf, PathBuf, Pa
 pub fn embedding_status(
     state: tauri::State<'_, std::sync::Arc<crate::AppState>>,
 ) -> EmbeddingStatus {
-    let expected = model_dir(&state.db.root);
+    let expected = model_dir(&state.model_root);
     EmbeddingStatus {
         model: MODEL_ID.into(),
         dimensions: DIMENSIONS,
-        ready: resource_files(&state.db.root).is_ok(),
+        ready: resource_files(&state.model_root).is_ok(),
         expected_path: expected.display().to_string(),
         downloads_disabled: true,
     }
@@ -174,6 +174,22 @@ pub fn embed_packaged(root: &Path, texts: Vec<String>) -> Result<Vec<Vec<f32>>, 
     }
     all.into_iter().map(l2_normalize).collect()
 }
+#[tauri::command]
+pub fn embedding_smoke(
+    state: tauri::State<'_, std::sync::Arc<crate::AppState>>,
+) -> Result<EmbeddingStatus, String> {
+    let output = embed_packaged(&state.model_root, vec!["offline package smoke".into()])?;
+    if output.len() != 1 || output[0].len() != DIMENSIONS {
+        return Err("Bundled BGE smoke returned an invalid vector count or dimension".into());
+    }
+    Ok(EmbeddingStatus {
+        model: MODEL_ID.into(),
+        dimensions: DIMENSIONS,
+        ready: true,
+        expected_path: model_dir(&state.model_root).display().to_string(),
+        downloads_disabled: true,
+    })
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -204,5 +220,15 @@ mod tests {
     #[test]
     fn top_three() {
         assert!((mean_top_three(vec![0.1, 0.9, 0.7, 0.8]) - 0.8).abs() < 1e-9);
+    }
+    #[test]
+    #[ignore = "requires prepared offline release model"]
+    fn packaged_bge_smoke_is_384_dimensions() {
+        let root = std::env::var("JOBSCRAPER_MODEL_RESOURCE_ROOT")
+            .expect("set JOBSCRAPER_MODEL_RESOURCE_ROOT to packaged resource root");
+        let vectors = embed_packaged(Path::new(&root), vec!["offline package smoke".into()])
+            .expect("prepared model must load without a network request");
+        assert_eq!(vectors.len(), 1);
+        assert_eq!(vectors[0].len(), DIMENSIONS);
     }
 }
