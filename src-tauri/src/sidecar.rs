@@ -260,8 +260,19 @@ async fn run(
     } else {
         None
     };
-    if command == "scrape_source" {
-        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES(?,?, 'scrape','running',?)").bind(&run_id).bind(&source_id).bind(chrono::Utc::now().to_rfc3339()).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
+    // ponytail: run history (scrape_run_events) is only persisted for saved sources running
+    // test/scrape, matching the scrape_runs.mode CHECK constraint ('test','scrape'). Widening
+    // it to also cover probe/capture would need a table-rebuild migration (scrape_run_events and
+    // job_occurrences hold FKs into scrape_runs) for two commands that produce no jobs and little
+    // diagnostic value; skipped here, revisit if probe/capture history is actually requested.
+    let track_run = matches!(command, "scrape_source" | "test_source") && !source_id.is_empty();
+    if track_run {
+        let mode = if command == "scrape_source" {
+            "scrape"
+        } else {
+            "test"
+        };
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES(?,?,?, 'running',?)").bind(&run_id).bind(&source_id).bind(mode).bind(chrono::Utc::now().to_rfc3339()).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
     }
     let (node, script) = worker_paths(&app)?;
     let mut child = Command::new(node)
@@ -313,6 +324,25 @@ async fn run(
                 .persist_worker_job(&run_id, &source_id, &event.payload)
                 .await?;
         }
+        // "job" and "progress" fire once per discovered job and would dominate the event log
+        // without adding diagnostic value beyond what jobs/job_occurrences already record.
+        if track_run && !matches!(event.event.as_str(), "job" | "progress") {
+            let level = match event.event.as_str() {
+                "warning" => "warning",
+                "failed" => "error",
+                _ => "info",
+            };
+            sqlx::query("INSERT INTO scrape_run_events(id,run_id,level,event_type,payload_json,created_at) VALUES(?,?,?,?,?,?)")
+                .bind(Uuid::new_v4().to_string())
+                .bind(&run_id)
+                .bind(level)
+                .bind(&event.event)
+                .bind(event.payload.to_string())
+                .bind(chrono::Utc::now().to_rfc3339())
+                .execute(&state.db.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+        }
         if command == "capture_session" && event.event == "completed" {
             if let Some(encoded) = event
                 .payload
@@ -334,7 +364,7 @@ async fn run(
     if let Some(path) = temp_session {
         let _ = std::fs::remove_file(path);
     }
-    if command == "scrape_source" {
+    if track_run {
         let final_event = events.last().map(|e| e.event.as_str()).unwrap_or("failed");
         let complete = events
             .last()
@@ -356,7 +386,7 @@ async fn run(
             .execute(&state.db.pool)
             .await
             .map_err(|e| e.to_string())?;
-        if state_name == "completed" && complete {
+        if command == "scrape_source" && state_name == "completed" && complete {
             state
                 .db
                 .reconcile_availability(&run_id, &source_id, true)

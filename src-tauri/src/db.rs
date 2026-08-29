@@ -2980,7 +2980,7 @@ pub async fn preview_purge(
         }
         "scrape_logs" => {
             let events: Vec<String> =
-                sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE occurred_at<?")
+                sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE created_at<?")
                     .bind(&before)
                     .fetch_all(&state.db.pool)
                     .await
@@ -3423,6 +3423,24 @@ mod matching_persistence_tests {
         pool.close().await;
     }
 
+    #[tokio::test]
+    async fn scrape_log_purge_query_matches_the_events_table_schema() {
+        // Regression: preview_purge's "scrape_logs" branch used to filter on a column
+        // ("occurred_at") that scrape_run_events never had (it has "created_at"), so the
+        // query would fail at runtime the first time the table held any rows.
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','s','https://example.test','json','1',0,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','test','completed','2026-01-01T00:00:00Z')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_run_events(id,run_id,level,event_type,payload_json,created_at) VALUES('e1','r','info','started','{}','2026-01-01T00:00:00Z'),('e2','r','info','started','{}','2026-03-01T00:00:00Z')").execute(&pool).await.unwrap();
+        let old: Vec<String> =
+            sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE created_at<?")
+                .bind("2026-02-01T00:00:00Z")
+                .fetch_all(&pool)
+                .await
+                .unwrap();
+        assert_eq!(old, vec!["e1".to_string()]);
+        pool.close().await;
+    }
     #[test]
     fn purge_preview_hash_detects_tampering_and_file_boundary_is_relative() {
         let original = purge_hash("sessions", &[], &[], &["source/session.json".into()]);
