@@ -420,8 +420,51 @@ fn collect_documents(root: &Path) -> Result<Vec<(PathBuf, Vec<u8>)>, String> {
 fn safety_snapshot(root: &Path, schema: i64) -> Result<PathBuf, String> {
     let backups = root.join("backups");
     fs::create_dir_all(&backups).map_err(|e| e.to_string())?;
-    let db = fs::read(root.join("jobscraper.db"))
-        .map_err(|_| "Live database missing for safety snapshot")?;
+    let live_db = root.join("jobscraper.db");
+    if !live_db.is_file() {
+        return Err("Live database missing for safety snapshot".into());
+    }
+    // This runs from apply_pending_restore during startup, before any sqlx pool is
+    // opened (see lib.rs setup), so there is no app pool to reuse here. The database
+    // is WAL-mode (db.rs sets journal_mode=WAL), so a raw fs::read of the .db file
+    // alone could miss committed transactions still sitting in a stale -wal file
+    // after an unclean shutdown. Open a short-lived connection just for
+    // `VACUUM INTO`, which always produces one consistent snapshot regardless of
+    // WAL state, matching what create_backup_archive already does with the pool.
+    //
+    // The connection is deliberately NOT read-only: recovering a stale -wal is the
+    // whole point here, and a read-only open can fail outright on the unclean
+    // shutdown this is meant to survive.
+    //
+    // If the live file cannot be opened as a database at all (corrupt, truncated,
+    // or not SQLite), fall back to copying its raw bytes. A restore is about to
+    // overwrite that file, so preserving whatever is there matters more than
+    // preserving it in a queryable form.
+    let vacuum_target = backups.join(format!("safety-vacuum-{}.sqlite", uuid::Uuid::new_v4()));
+    let vacuumed = tauri::async_runtime::block_on(async {
+        use sqlx::Connection;
+        let opts = sqlx::sqlite::SqliteConnectOptions::new()
+            .filename(&live_db)
+            .create_if_missing(false);
+        let mut conn = sqlx::SqliteConnection::connect_with(&opts)
+            .await
+            .map_err(|e| e.to_string())?;
+        sqlx::query("VACUUM INTO ?")
+            .bind(vacuum_target.to_string_lossy().to_string())
+            .execute(&mut conn)
+            .await
+            .map_err(|e| e.to_string())?;
+        Ok::<(), String>(())
+    })
+    .is_ok();
+    let db = if vacuumed {
+        let bytes = fs::read(&vacuum_target).map_err(|e| e.to_string())?;
+        let _ = fs::remove_file(&vacuum_target);
+        bytes
+    } else {
+        let _ = fs::remove_file(&vacuum_target);
+        fs::read(&live_db).map_err(|_| "Live database missing for safety snapshot")?
+    };
     let docs_root = root.join("documents");
     fs::create_dir_all(&docs_root).map_err(|e| e.to_string())?;
     let destination = backups.join(format!(

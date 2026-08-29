@@ -283,7 +283,7 @@ impl Database {
                 "00000000-0000-4000-8000-000000000007",
                 "NVIDIA",
                 "https://nvidia.wd5.myworkdayjobs.com/",
-                "eightfold",
+                "workday",
                 "nvidia.wd5.myworkdayjobs.com",
                 "active",
             ),
@@ -395,6 +395,15 @@ impl Database {
             // and every historical reference remain intact.
             sqlx::query("UPDATE sources SET enabled=0,deleted_at=?,disabled_reason='Replaced by versioned starter-pack source' WHERE id<>? AND name=? AND base_url=? AND adapter_id=? AND enabled=0 AND deleted_at IS NULL AND created_at=updated_at AND disabled_reason='Starter source is disabled until you review and enable it.' AND NOT EXISTS (SELECT 1 FROM scrape_runs WHERE scrape_runs.source_id=sources.id) AND NOT EXISTS (SELECT 1 FROM jobs WHERE jobs.source_id=sources.id) AND EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=sources.id AND c.created_at=c.updated_at AND c.config_json LIKE '%starterPackVersion%')")
                 .bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).execute(&self.pool).await.map_err(|e| e.to_string())?;
+        }
+        // NVIDIA (000007) was seeded with adapter "eightfold" against a Workday host;
+        // INSERT OR IGNORE above cannot fix an already-installed row, so reconcile it
+        // here the same way migration 0006 reconciles legacy starter rows: only touch
+        // it if it is still exactly as installed (never edited by the user).
+        {
+            let t = now();
+            sqlx::query("UPDATE sources SET adapter_id='workday',updated_at=? WHERE id='00000000-0000-4000-8000-000000000007' AND adapter_id='eightfold' AND created_at=updated_at")
+                .bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
         }
         sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version','2026-08-28') ON CONFLICT(key) DO UPDATE SET value=excluded.value")
             .execute(&self.pool).await.map_err(|e| e.to_string())?;
@@ -2303,8 +2312,14 @@ pub struct Diagnostics {
     schema_version: i64,
     source_count: i64,
     job_count: i64,
-    application_startup_network_enabled: bool,
-    webview_runtime_network_controlled: bool,
+    /// Design assertion, not a live measurement: JobScraper's own code makes no
+    /// network request during startup (see README, manual-scrape-only design).
+    app_code_network_free_at_startup: bool,
+    /// Design assertion, not a live measurement: JobScraper does not attempt to
+    /// control network activity the WebView2 runtime itself initiates, which the
+    /// README documents as making its own outbound connections independent of
+    /// this app's code.
+    webview_runtime_network_not_controlled_by_app: bool,
     sidecar_active: bool,
 }
 #[tauri::command]
@@ -2326,8 +2341,8 @@ pub async fn diagnostics(state: State<'_, Arc<AppState>>) -> ApiResult<Diagnosti
         schema_version: version,
         source_count,
         job_count,
-        application_startup_network_enabled: false,
-        webview_runtime_network_controlled: false,
+        app_code_network_free_at_startup: true,
+        webview_runtime_network_not_controlled_by_app: true,
         sidecar_active: state.sidecars.active(),
     })
 }
