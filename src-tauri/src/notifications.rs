@@ -165,13 +165,6 @@ pub fn scoped_orphans(managed: &[String], expected: &HashSet<String>) -> Vec<Str
         .cloned()
         .collect()
 }
-pub fn utc_to_local_once(due: DateTime<Utc>) -> (String, String) {
-    let local = due.with_timezone(&Local);
-    (
-        local.format("%Y-%m-%d").to_string(),
-        local.format("%H:%M").to_string(),
-    )
-}
 pub fn reconcile(now: DateTime<Utc>, reminders: &[Reminder]) -> (Vec<String>, Vec<String>) {
     let mut schedule = vec![];
     let mut missed = vec![];
@@ -184,50 +177,10 @@ pub fn reconcile(now: DateTime<Utc>, reminders: &[Reminder]) -> (Vec<String>, Ve
     }
     (schedule, missed)
 }
-pub fn fixed_task_args(
-    executable: &str,
-    id: &str,
-    due: DateTime<Utc>,
-) -> Result<Vec<String>, String> {
-    if executable.is_empty() || executable.contains('"') || executable.contains('\n') {
-        return Err("Invalid packaged executable".into());
-    };
-    let name = task_name(id)?;
-    let (date, time) = utc_to_local_once(due);
-    Ok(vec![
-        "/Create".into(),
-        "/F".into(),
-        "/TN".into(),
-        name,
-        "/SC".into(),
-        "ONCE".into(),
-        "/SD".into(),
-        date,
-        "/ST".into(),
-        time,
-        "/TR".into(),
-        format!("\"{executable}\" --reminder {id}"),
-    ])
-}
 #[cfg(test)]
 mod tests {
     use super::*;
     use chrono::Duration;
-    #[test]
-    fn math_dst_and_safe_args() {
-        let due = DateTime::parse_from_rfc3339("2026-03-29T01:30:00Z")
-            .unwrap()
-            .with_timezone(&Utc);
-        let args = fixed_task_args(
-            "C:\\Program Files\\JobScraper\\JobScraper.exe",
-            &Uuid::new_v4().to_string(),
-            due,
-        )
-        .unwrap();
-        assert!(args.iter().any(|v| v == "ONCE"));
-        assert!(fixed_task_args("bad\"exe", &Uuid::new_v4().to_string(), due).is_err());
-        assert!(task_name("nope").is_err())
-    }
     #[test]
     fn xml_scopes_and_escapes_values() {
         let id = Uuid::new_v4().to_string();
@@ -236,6 +189,7 @@ mod tests {
         assert!(xml.contains("InteractiveToken"));
         assert!(xml.contains("A &amp; B"));
         assert!(xml.contains("--deliver-reminder"));
+        assert!(task_name("nope").is_err());
         assert!(is_managed_task_path(&format!(
             "\\JobScraper\\JobScraper-Reminder-{id}"
         )));

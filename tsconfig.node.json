@@ -1,1 +1,1 @@
-{ "compilerOptions": { "composite": true, "module": "ESNext", "moduleResolution": "Bundler", "allowSyntheticDefaultImports": true, "lib": ["ES2022", "DOM"], "types": ["node"] }, "include": ["vite.config.ts"] }
+{ "compilerOptions": { "composite": true, "module": "ESNext", "moduleResolution": "Bundler", "allowSyntheticDefaultImports": true, "skipLibCheck": true, "lib": ["ES2022", "DOM"], "types": ["node"] }, "include": ["vite.config.ts"] }
