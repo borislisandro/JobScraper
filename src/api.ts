@@ -18,6 +18,10 @@ export const scrapeAll=(runId:string)=>invoke<{runId:string;completedSources:num
 export const cancelScrapeAll=(runId:string)=>invoke<boolean>("cancel_scrape_all",{runId});
 export const cancelScrape=(runId:string)=>invoke<boolean>("cancel_scrape",{runId});
 export type DuplicateCandidate={id:string;leftJobId:string;rightJobId:string;method:string;score?:number;status:string;evidenceJson:string;leftTitle:string;leftCompany:string;rightTitle:string;rightCompany:string};
+export type ExportFilter={startAt?:string;endAt?:string;personaId?:string};export type PurgePreview={token:string;previewHash:string;category:string;expiresAt:string;rowCounts:Record<string,number>;protectedCount:number;controlledFiles:string[];impact:string};
+export const exportData=(request:{kind:string;destination:string;overwrite:boolean;filter?:ExportFilter})=>invoke<string>("export_data",{request});
+export const previewPurge=(input:{category:string;beforeAt?:string})=>invoke<PurgePreview>("preview_purge",{input});
+export const applyPurge=(input:{token:string;previewHash:string;confirmation:string})=>invoke<{auditId:string;deleted:Record<string,number>;fileCleanupFailures:string[]}>("apply_purge",{input});
 export const duplicateCandidates=()=>invoke<DuplicateCandidate[]>("list_duplicate_candidates");
 export const mergeDuplicate=(candidateId:string,canonicalJobId:string)=>invoke("merge_duplicate_jobs",{candidateId,canonicalJobId});
 export const dismissDuplicate=(candidateId:string)=>invoke("dismiss_duplicate_candidate",{candidateId});

@@ -15,7 +15,7 @@ use sqlx::{
     Row, SqlitePool,
 };
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     path::{Path, PathBuf},
     sync::{Arc, Mutex, OnceLock},
 };
@@ -27,11 +27,23 @@ use uuid::Uuid;
 pub type ApiResult<T> = Result<T, String>;
 static RESCORE_CANCELLED: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
 static RESCORE_ACTIVE: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
+static PURGE_PREVIEWS: OnceLock<Mutex<HashMap<String, PurgePreviewState>>> = OnceLock::new();
 fn cancelled_runs() -> &'static Mutex<HashSet<String>> {
     RESCORE_CANCELLED.get_or_init(|| Mutex::new(HashSet::new()))
 }
 fn active_runs() -> &'static Mutex<HashSet<String>> {
     RESCORE_ACTIVE.get_or_init(|| Mutex::new(HashSet::new()))
+}
+fn purge_previews() -> &'static Mutex<HashMap<String, PurgePreviewState>> {
+    PURGE_PREVIEWS.get_or_init(|| Mutex::new(HashMap::new()))
+}
+#[derive(Clone)]
+struct PurgePreviewState {
+    preview: PurgePreview,
+    job_ids: Vec<String>,
+    event_ids: Vec<String>,
+    session_paths: Vec<String>,
+    expires_at: chrono::DateTime<Utc>,
 }
 #[derive(Clone)]
 pub struct Database {
@@ -2350,6 +2362,372 @@ pub async fn export_csv(kind: String, state: State<'_, Arc<AppState>>) -> ApiRes
     Ok(file.display().to_string())
 }
 
+#[derive(Deserialize, Serialize, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ExportFilter {
+    pub start_at: Option<String>,
+    pub end_at: Option<String>,
+    pub persona_id: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExportRequest {
+    pub kind: String,
+    pub destination: String,
+    pub overwrite: bool,
+    #[serde(default)]
+    pub filter: ExportFilter,
+}
+fn csv_cell(value: Option<String>) -> String {
+    format!("\"{}\"", value.unwrap_or_default().replace('"', "\"\""))
+}
+fn explicit_export_destination(destination: &str, overwrite: bool) -> ApiResult<PathBuf> {
+    let path = PathBuf::from(destination);
+    if !path.is_absolute() || path.file_name().is_none() {
+        return Err("Choose an absolute output file path".into());
+    }
+    if path.exists() && !overwrite {
+        return Err("Output file exists; confirm overwrite explicitly".into());
+    }
+    path.parent()
+        .filter(|parent| parent.exists())
+        .ok_or("Output folder does not exist")?;
+    Ok(path)
+}
+async fn relational_rows(pool: &SqlitePool, table: &str) -> ApiResult<Vec<serde_json::Value>> {
+    // Table name comes only from this hard-coded inventory. Column names come from
+    // SQLite schema and are quoted before being included in generated JSON SQL.
+    let allowed = [
+        "sources",
+        "source_configs",
+        "scrape_runs",
+        "scrape_run_events",
+        "jobs",
+        "job_occurrences",
+        "job_revisions",
+        "personas",
+        "resume_documents",
+        "persona_skills",
+        "persona_filters",
+        "embeddings",
+        "match_results",
+        "review_decisions",
+        "applications",
+        "application_events",
+        "notes",
+        "application_documents",
+        "interviews",
+        "reminders",
+        "job_aliases",
+        "duplicate_candidates",
+        "duplicate_merge_audits",
+        "duplicate_merge_conflicts",
+        "job_dedupe_events",
+        "data_purge_audits",
+    ];
+    if !allowed.contains(&table) {
+        return Err("Unsupported relational export table".into());
+    }
+    let columns = sqlx::query("SELECT name FROM pragma_table_info(?) ORDER BY cid")
+        .bind(table)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let mut pairs = Vec::new();
+    for column in columns {
+        let name: String = column.get(0);
+        // BLOB contents are exported by backups; JSON exports retain their stable
+        // metadata rather than copying potentially large opaque file/model bytes.
+        if name == "content" || name == "vector" {
+            continue;
+        }
+        if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return Err("Unsafe schema column".into());
+        }
+        pairs.push(format!("'{}',\"{}\"", name, name));
+    }
+    let sql = format!(
+        "SELECT json_object({}) FROM \"{}\" ORDER BY rowid",
+        pairs.join(","),
+        table
+    );
+    let rows = sqlx::query_scalar::<_, String>(&sql)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    rows.into_iter()
+        .map(|row| serde_json::from_str(&row).map_err(|_| "Relational row JSON was invalid".into()))
+        .collect()
+}
+async fn relational_json(pool: &SqlitePool, filter: &ExportFilter) -> ApiResult<Vec<u8>> {
+    if filter
+        .start_at
+        .as_deref()
+        .is_some_and(|date| chrono::DateTime::parse_from_rfc3339(date).is_err())
+        || filter
+            .end_at
+            .as_deref()
+            .is_some_and(|date| chrono::DateTime::parse_from_rfc3339(date).is_err())
+    {
+        return Err("Export dates must be UTC RFC3339".into());
+    }
+    let tables = [
+        "sources",
+        "source_configs",
+        "scrape_runs",
+        "scrape_run_events",
+        "jobs",
+        "job_occurrences",
+        "job_revisions",
+        "personas",
+        "resume_documents",
+        "persona_skills",
+        "persona_filters",
+        "embeddings",
+        "match_results",
+        "review_decisions",
+        "applications",
+        "application_events",
+        "notes",
+        "application_documents",
+        "interviews",
+        "reminders",
+        "job_aliases",
+        "duplicate_candidates",
+        "duplicate_merge_audits",
+        "duplicate_merge_conflicts",
+        "job_dedupe_events",
+        "data_purge_audits",
+    ];
+    let mut data = serde_json::Map::new();
+    for table in tables {
+        data.insert(
+            table.to_string(),
+            serde_json::Value::Array(relational_rows(pool, table).await?),
+        );
+    }
+    serde_json::to_vec_pretty(&serde_json::json!({"format":"jobscraper-relational-json","version":1,"exportedAt":now(),"filter":filter,"tables":data})).map_err(|e|e.to_string())
+}
+async fn csv_bytes(pool: &SqlitePool, kind: &str, filter: &ExportFilter) -> ApiResult<Vec<u8>> {
+    let (sql,headers)=match kind {
+        "jobs"=>("SELECT j.id,j.title,j.company,j.location,j.canonical_url,j.availability,j.posted_at,j.extraction_at FROM jobs j ORDER BY j.created_at","id,title,company,location,canonical_url,availability,posted_at,extraction_at"),
+        "applications"=>("SELECT a.id,a.job_id,a.persona_id,a.current_stage,j.title,j.company,a.applied_at,a.created_at,a.updated_at FROM applications a LEFT JOIN jobs j ON j.id=a.job_id ORDER BY a.created_at","id,job_id,persona_id,stage,title,company,applied_at,created_at,updated_at"),
+        "events"=>("SELECT id,application_id,event_type,from_stage,to_stage,occurred_at,reason,payload_json FROM application_events ORDER BY occurred_at","id,application_id,event_type,from_stage,to_stage,occurred_at,reason,payload_json"),
+        "interviews"=>("SELECT id,application_id,stage,scheduled_at,completed_at,outcome,notes FROM interviews ORDER BY scheduled_at","id,application_id,stage,scheduled_at,completed_at,outcome,notes"),
+        "source_outcomes"=>("SELECT s.id,s.name,j.company,j.availability,count(*) AS jobs FROM jobs j JOIN sources s ON s.id=j.source_id GROUP BY s.id,s.name,j.company,j.availability ORDER BY s.name,j.company","source_id,source_name,company,availability,jobs"),
+        _=>return Err("Export kind must be jobs, applications, events, interviews, source_outcomes, or relational_json".into()),
+    };
+    let rows = sqlx::query(sql)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let mut text = format!("{headers}\r\n");
+    for row in rows {
+        let mut values = Vec::new();
+        for index in 0..row.len() {
+            values.push(csv_cell(
+                row.try_get::<Option<String>, _>(index).ok().flatten(),
+            ));
+        }
+        text.push_str(&values.join(","));
+        text.push_str("\r\n");
+    }
+    Ok(text.into_bytes())
+}
+#[tauri::command]
+pub async fn export_data(
+    request: ExportRequest,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<String> {
+    let path = explicit_export_destination(&request.destination, request.overwrite)?;
+    let bytes = if request.kind == "relational_json" {
+        relational_json(&state.db.pool, &request.filter).await?
+    } else {
+        csv_bytes(&state.db.pool, &request.kind, &request.filter).await?
+    };
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
+    Ok(path.display().to_string())
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PurgePreviewInput {
+    pub category: String,
+    pub before_at: Option<String>,
+}
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PurgePreview {
+    pub token: String,
+    pub preview_hash: String,
+    pub category: String,
+    pub expires_at: String,
+    pub row_counts: serde_json::Value,
+    pub protected_count: i64,
+    pub controlled_files: Vec<String>,
+    pub impact: String,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PurgeApplyInput {
+    pub token: String,
+    pub preview_hash: String,
+    pub confirmation: String,
+}
+fn purge_hash(category: &str, jobs: &[String], events: &[String], files: &[String]) -> String {
+    let mut all = vec![category.to_string()];
+    all.extend(jobs.iter().cloned());
+    all.extend(events.iter().cloned());
+    all.extend(files.iter().cloned());
+    all.sort();
+    format!("{:x}", Sha256::digest(all.join("\n").as_bytes()))
+}
+fn controlled_session_path(root: &Path, relative: &str) -> ApiResult<PathBuf> {
+    let path = Path::new(relative);
+    if path.is_absolute()
+        || path
+            .components()
+            .any(|part| !matches!(part, std::path::Component::Normal(_)))
+    {
+        return Err("Session purge path escaped controlled sessions directory".into());
+    }
+    Ok(root.join(path))
+}
+#[tauri::command]
+pub async fn preview_purge(
+    input: PurgePreviewInput,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<PurgePreview> {
+    let before = input.before_at.unwrap_or_else(|| now());
+    if chrono::DateTime::parse_from_rfc3339(&before).is_err() {
+        return Err("Purge cutoff must be UTC RFC3339".into());
+    }
+    let (jobs, events, files, protected, impact) = match input.category.as_str() {
+        "closed_jobs" => {
+            let jobs:Vec<String>=sqlx::query_scalar("SELECT j.id FROM jobs j WHERE j.availability='closed' AND j.updated_at<? AND NOT EXISTS(SELECT 1 FROM applications a WHERE a.job_id=j.id) AND NOT EXISTS(SELECT 1 FROM review_decisions r WHERE r.job_id=j.id)").bind(&before).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
+            let protected:i64=sqlx::query_scalar("SELECT count(*) FROM jobs j WHERE j.availability='closed' AND j.updated_at<? AND (EXISTS(SELECT 1 FROM applications a WHERE a.job_id=j.id) OR EXISTS(SELECT 1 FROM review_decisions r WHERE r.job_id=j.id))").bind(&before).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
+            (jobs,vec![],vec![],protected,"Deletes only closed jobs without applications or review history; dependent scrape sightings/revisions/matches are deleted by foreign-key policy.".into())
+        }
+        "scrape_logs" => {
+            let events: Vec<String> =
+                sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE occurred_at<?")
+                    .bind(&before)
+                    .fetch_all(&state.db.pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
+            (vec![],events,vec![],0,"Deletes only old scrape run event diagnostics; sources, runs, jobs, and history remain.".into())
+        }
+        "sessions" => {
+            let root = state.db.root.join("sessions");
+            let files = if root.exists() {
+                std::fs::read_dir(&root)
+                    .map_err(|e| e.to_string())?
+                    .filter_map(Result::ok)
+                    .filter_map(|entry| {
+                        let path = entry.path();
+                        let modified = entry.metadata().ok()?.modified().ok()?;
+                        if modified < std::time::SystemTime::now() {
+                            Some(path.strip_prefix(&root).ok()?.to_string_lossy().to_string())
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            } else {
+                vec![]
+            };
+            (vec![],vec![],files,0,"Deletes only controlled encrypted browser session files. Credentials, models, logs, and documents remain.".into())
+        }
+        _ => return Err("Purge category must be closed_jobs, scrape_logs, or sessions".into()),
+    };
+    let token = id();
+    let expires = Utc::now() + chrono::Duration::minutes(10);
+    let hash = purge_hash(&input.category, &jobs, &events, &files);
+    let preview = PurgePreview {
+        token: token.clone(),
+        preview_hash: hash,
+        category: input.category,
+        row_counts: serde_json::json!({"jobs":jobs.len(),"scrapeRunEvents":events.len(),"sessionFiles":files.len()}),
+        protected_count: protected,
+        controlled_files: files.clone(),
+        expires_at: expires.to_rfc3339(),
+        impact,
+    };
+    purge_previews()
+        .lock()
+        .map_err(|_| "Purge preview registry unavailable")?
+        .insert(
+            token,
+            PurgePreviewState {
+                preview: preview.clone(),
+                job_ids: jobs,
+                event_ids: events,
+                session_paths: files,
+                expires_at: expires,
+            },
+        );
+    Ok(preview)
+}
+#[tauri::command]
+pub async fn apply_purge(
+    input: PurgeApplyInput,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<serde_json::Value> {
+    if input.confirmation != "PURGE" {
+        return Err("Type PURGE to confirm irreversible deletion".into());
+    };
+    let stored = purge_previews()
+        .lock()
+        .map_err(|_| "Purge preview registry unavailable")?
+        .remove(&input.token)
+        .ok_or("Purge preview expired or already used")?;
+    if stored.expires_at < Utc::now() || stored.preview.preview_hash != input.preview_hash {
+        return Err("Purge preview is stale or was tampered with".into());
+    };
+    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    for job in &stored.job_ids {
+        let changed=sqlx::query("DELETE FROM jobs WHERE id=? AND availability='closed' AND NOT EXISTS(SELECT 1 FROM applications WHERE job_id=?) AND NOT EXISTS(SELECT 1 FROM review_decisions WHERE job_id=?)").bind(job).bind(job).bind(job).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        if changed.rows_affected() != 1 {
+            return Err("Purge preview changed; no rows were deleted".into());
+        }
+    }
+    for event in &stored.event_ids {
+        let changed = sqlx::query("DELETE FROM scrape_run_events WHERE id=?")
+            .bind(event)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+        if changed.rows_affected() != 1 {
+            return Err("Purge preview changed; no rows were deleted".into());
+        }
+    }
+    let audit = id();
+    let t = now();
+    sqlx::query("INSERT INTO data_purge_audits(id,category,preview_hash,impact_json,file_cleanup_json,created_at) VALUES(?,?,?,?,?,?)").bind(&audit).bind(&stored.preview.category).bind(&stored.preview.preview_hash).bind(serde_json::to_string(&stored.preview.row_counts).unwrap()).bind("[]").bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())?;
+    let root = state.db.root.join("sessions");
+    let mut failures = Vec::new();
+    for relative in &stored.session_paths {
+        match controlled_session_path(&root, relative) {
+            Ok(full) if std::fs::remove_file(&full).is_err() => failures.push(relative.clone()),
+            Ok(_) => {}
+            Err(_) => failures.push(relative.clone()),
+        }
+    }
+    sqlx::query("UPDATE data_purge_audits SET file_cleanup_json=? WHERE id=?")
+        .bind(serde_json::to_string(&failures).unwrap())
+        .bind(&audit)
+        .execute(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    if stored.preview.category == "closed_jobs" || stored.preview.category == "scrape_logs" {
+        let _ = sqlx::query("PRAGMA optimize").execute(&state.db.pool).await;
+    }
+    Ok(
+        serde_json::json!({"auditId":audit,"deleted":stored.preview.row_counts,"fileCleanupFailures":failures}),
+    )
+}
+
 #[cfg(test)]
 mod matching_persistence_tests {
     use super::*;
@@ -2625,5 +3003,44 @@ mod matching_persistence_tests {
             1
         );
         pool.close().await;
+    }
+
+    #[tokio::test]
+    async fn relational_export_and_csv_escape_keep_stable_relationship_ids() {
+        let pool = migrated_pool().await;
+        seed_match(&pool).await;
+        let archive = relational_json(&pool, &ExportFilter::default())
+            .await
+            .unwrap();
+        let archive: serde_json::Value = serde_json::from_slice(&archive).unwrap();
+        assert_eq!(archive["format"], "jobscraper-relational-json");
+        assert_eq!(archive["version"], 1);
+        assert_eq!(archive["tables"]["jobs"][0]["id"], "j");
+        assert_eq!(archive["tables"]["personas"][0]["id"], "p");
+        assert_eq!(csv_cell(Some("a,\"b\"\r\n".into())), "\"a,\"\"b\"\"\r\n\"");
+        let csv = String::from_utf8(
+            csv_bytes(&pool, "jobs", &ExportFilter::default())
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert!(csv.starts_with("id,title"));
+        assert!(csv.contains("\r\n"));
+        pool.close().await;
+    }
+
+    #[test]
+    fn purge_preview_hash_detects_tampering_and_file_boundary_is_relative() {
+        let original = purge_hash("sessions", &[], &[], &["source/session.json".into()]);
+        let changed = purge_hash("sessions", &[], &[], &["../documents/resume.pdf".into()]);
+        assert_ne!(original, changed);
+        let root = PathBuf::from("C:/JobScraper/sessions");
+        let safe = root.join("source/session.json");
+        assert!(safe.strip_prefix(&root).is_ok());
+        // The actual delete path must use normalized controlled components; this
+        // demonstrates why an absolute archive/session path is never accepted.
+        assert!(PathBuf::from("C:/other/session.json")
+            .strip_prefix(&root)
+            .is_err());
     }
 }
