@@ -230,180 +230,73 @@ impl Database {
     pub async fn install_starter_pack(&self) -> ApiResult<()> {
         // Stable IDs make this dated pack idempotent even when a user renames a
         // source. All active starters are disabled until explicitly enabled.
+        //
+        // Live-fire verified 2026-08-29 (see the "Round 2" plan doc): only the five
+        // Workday tenants below actually return jobs anonymously. Every Eightfold,
+        // iCIMS, Phenom and custom-api source was confirmed dead end-to-end (auth
+        // gate, robots denial, bot-management redirect loop, or a 404'd/replatformed
+        // URL) and is seeded disabled with the specific reason found, per source,
+        // rather than a generic placeholder.
         let starters = [
-            (
-                "00000000-0000-4000-8000-000000000001",
-                "Microchip",
-                "https://careers.microchip.com/",
-                "workday",
-                "careers.microchip.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000002",
-                "Analog Devices",
-                "https://analogdevices.wd1.myworkdayjobs.com/",
-                "workday",
-                "analogdevices.wd1.myworkdayjobs.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000003",
-                "Broadcom",
-                "https://broadcom.wd1.myworkdayjobs.com/",
-                "workday",
-                "broadcom.wd1.myworkdayjobs.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000004",
-                "Intel",
-                "https://jobs.intel.com/",
-                "workday",
-                "jobs.intel.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000005",
-                "Marvell careers (Workday)",
-                "https://marvell.wd1.myworkdayjobs.com/",
-                "workday",
-                "marvell.wd1.myworkdayjobs.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000006",
-                "STMicroelectronics",
-                "https://careers.st.com/",
-                "eightfold",
-                "careers.st.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000007",
-                "NVIDIA",
-                "https://nvidia.wd5.myworkdayjobs.com/",
-                "workday",
-                "nvidia.wd5.myworkdayjobs.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000008",
-                "GlobalFoundries",
-                "https://gf.com/careers",
-                "eightfold",
-                "gf.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000009",
-                "Micron",
-                "https://careers.micron.com/",
-                "eightfold",
-                "careers.micron.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000010",
-                "Qualcomm",
-                "https://careers.qualcomm.com/",
-                "eightfold",
-                "careers.qualcomm.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000011",
-                "Arm",
-                "https://careers.arm.com/",
-                "icims",
-                "careers.arm.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000012",
-                "AMD",
-                "https://careers.amd.com/",
-                "icims",
-                "careers.amd.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000013",
-                "Cisco",
-                "https://jobs.cisco.com/",
-                "phenom",
-                "jobs.cisco.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000014",
-                "Apple",
-                "https://jobs.apple.com/",
-                "custom-api",
-                "jobs.apple.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000015",
-                "MediaTek",
-                "https://www.mediatek.com/careers",
-                "custom-api",
-                "www.mediatek.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000016",
-                "u-blox",
-                "https://www.u-blox.com/en/careers",
-                "custom-api",
-                "www.u-blox.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000017",
-                "Google",
-                "https://www.google.com/about/careers/applications/jobs/results",
-                "custom-api",
-                "www.google.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000018",
-                "SK hynix",
-                "https://www.skhynix.com/eng/careers/",
-                "custom-api",
-                "www.skhynix.com",
-                "active",
-            ),
-            (
-                "00000000-0000-4000-8000-000000000019",
-                "Marvell careers (reference)",
-                "https://www.marvell.com/company/careers.html",
-                "reference",
-                "www.marvell.com",
-                "reference",
-            ),
+            ("00000000-0000-4000-8000-000000000001","Microchip","https://careers.microchip.com/","custom-api","www.microchip.com","active","{}","careers.microchip.com redirects (302) to a www.microchip.com marketing page, not a Workday tenant; no ATS endpoint was identified for Microchip."),
+            ("00000000-0000-4000-8000-000000000002","Analog Devices","https://analogdevices.wd1.myworkdayjobs.com/","workday","analogdevices.wd1.myworkdayjobs.com","active","{\"tenant\":\"analogdevices\",\"site\":\"External\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000003","Broadcom","https://broadcom.wd1.myworkdayjobs.com/","workday","broadcom.wd1.myworkdayjobs.com","active","{\"tenant\":\"broadcom\",\"site\":\"External_Career\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000004","Intel","https://intel.wd1.myworkdayjobs.com/","workday","intel.wd1.myworkdayjobs.com","active","{\"tenant\":\"intel\",\"site\":\"External\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000005","Marvell","https://marvell.wd1.myworkdayjobs.com/","workday","marvell.wd1.myworkdayjobs.com","active","{\"tenant\":\"marvell\",\"site\":\"MarvellCareers\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000006","STMicroelectronics","https://careers.st.com/","eightfold","careers.st.com","active","{}","careers.st.com does not resolve (DNS NXDOMAIN); no working STMicroelectronics careers host was identified."),
+            ("00000000-0000-4000-8000-000000000007","NVIDIA","https://nvidia.wd5.myworkdayjobs.com/","workday","nvidia.wd5.myworkdayjobs.com","active","{\"tenant\":\"nvidia\",\"site\":\"NVIDIAExternalCareerSite\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000008","GlobalFoundries","https://gf.com/careers","eightfold","gf.com","active","{}","gf.com/careers is a WordPress-hosted marketing page (robots.txt references wp-admin/wp-json, not Eightfold) and returns 403 to non-browser requests; no Eightfold or other ATS endpoint was identified."),
+            ("00000000-0000-4000-8000-000000000009","Micron","https://careers.micron.com/","eightfold","careers.micron.com","active","{}","Eightfold's allow-listed search paths (/api/career_hub, /api/apply/v2/jobs) require an authenticated PCSX session; anonymous requests are redirected to /login or rejected (\"Not authorized for PCSX\"). No public JSON endpoint is exposed."),
+            ("00000000-0000-4000-8000-000000000010","Qualcomm","https://careers.qualcomm.com/","eightfold","careers.qualcomm.com","active","{}","Eightfold's allow-listed search paths (/api/career_hub, /api/apply/v2/jobs) require an authenticated PCSX session; anonymous requests are redirected to /login. No public JSON endpoint is exposed."),
+            ("00000000-0000-4000-8000-000000000011","Arm","https://careers.arm.com/","talentbrew-jibe","careers.arm.com","active","{}","careers.arm.com's own job search path (/search-jobs/) is robots-disallowed, and its actual application backends (earlycareers-arm.icims.com, experienced-arm.icims.com) publish a blanket \"Disallow: /\". No path can be scraped without violating robots."),
+            ("00000000-0000-4000-8000-000000000012","AMD","https://careers.amd.com/","icims","careers.amd.com","active","{}","careers.amd.com returns a same-URL redirect loop to non-browser requests, consistent with bot-management middleware; the real ATS platform could not be confirmed without a JavaScript-executing client, which is out of scope."),
+            ("00000000-0000-4000-8000-000000000013","Cisco","https://careers.cisco.com/","phenom","careers.cisco.com","active","{}","jobs.cisco.com redirects to careers.cisco.com (confirmed Phenom-branded via its CareerConnectResources assets), but this tenant's custom build exposes no working /search-jobs/results endpoint (404) and its sitemaps list no job URLs (client-rendered). No public JSON endpoint was found."),
+            ("00000000-0000-4000-8000-000000000014","Apple","https://jobs.apple.com/","custom-api","jobs.apple.com","active","{}","jobs.apple.com runs a proprietary internal careers API; it is not one of the five supported ATS platforms."),
+            ("00000000-0000-4000-8000-000000000015","MediaTek","https://www.mediatek.com/careers","custom-api","www.mediatek.com","active","{}","www.mediatek.com/careers returns 404; MediaTek's current careers URL and ATS platform were not identified."),
+            ("00000000-0000-4000-8000-000000000016","u-blox","https://www.u-blox.com/en/careers","custom-api","www.u-blox.com","active","{}","www.u-blox.com/en/careers does not expose a recognizable ATS platform; it is not one of the five supported adapters."),
+            ("00000000-0000-4000-8000-000000000017","Google","https://www.google.com/about/careers/applications/jobs/results","custom-api","www.google.com","active","{}","Google's careers site runs a proprietary internal API; it is not one of the five supported ATS platforms."),
+            ("00000000-0000-4000-8000-000000000018","SK hynix","https://www.skhynix.com/eng/careers/","custom-api","www.skhynix.com","active","{}","www.skhynix.com/eng/careers/ returns 404; SK hynix's current careers URL and ATS platform were not identified."),
+            ("00000000-0000-4000-8000-000000000019","Marvell (reference)","https://www.marvell.com/company/careers.html","reference","www.marvell.com","reference","{}","Reference-only source: it is never scraped."),
         ];
-        for (source_id, name, url, adapter, host, kind) in starters {
+        for (source_id, name, url, adapter, host, kind, extra_config, reason) in starters {
             let t = now();
             sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,0,0,?,?)")
-    .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(if kind=="reference" {Some("Reference-only source: it is never scraped.")} else if adapter=="custom-api" {Some("Custom source disabled: a verified source-specific adapter is required.")} else {Some("Starter source is disabled until you review and enable it.")}).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+    .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(reason).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":host,"adapterVersion":"1.1.0","mode":"direct"});
+            if let (Some(base), Some(extra)) = (
+                config.as_object_mut(),
+                serde_json::from_str::<serde_json::Value>(extra_config)
+                    .ok()
+                    .and_then(|v| v.as_object().cloned()),
+            ) {
+                base.extend(extra);
+            }
             sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
-                .bind(id()).bind(source_id).bind(serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":host,"adapterVersion":"1.1.0","mode":"direct"}).to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+                .bind(id()).bind(source_id).bind(config.to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
             // Legacy packs used generated source IDs. Retire only an untouched,
             // disabled old starter with no dependent history; user-created sources
             // and every historical reference remain intact.
             sqlx::query("UPDATE sources SET enabled=0,deleted_at=?,disabled_reason='Replaced by versioned starter-pack source' WHERE id<>? AND name=? AND base_url=? AND adapter_id=? AND enabled=0 AND deleted_at IS NULL AND created_at=updated_at AND disabled_reason='Starter source is disabled until you review and enable it.' AND NOT EXISTS (SELECT 1 FROM scrape_runs WHERE scrape_runs.source_id=sources.id) AND NOT EXISTS (SELECT 1 FROM jobs WHERE jobs.source_id=sources.id) AND EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=sources.id AND c.created_at=c.updated_at AND c.config_json LIKE '%starterPackVersion%')")
                 .bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).execute(&self.pool).await.map_err(|e| e.to_string())?;
-        }
-        // NVIDIA (000007) was seeded with adapter "eightfold" against a Workday host;
-        // INSERT OR IGNORE above cannot fix an already-installed row, so reconcile it
-        // here the same way migration 0006 reconciles legacy starter rows: only touch
-        // it if it is still exactly as installed (never edited by the user).
-        {
-            let t = now();
-            sqlx::query("UPDATE sources SET adapter_id='workday',updated_at=? WHERE id='00000000-0000-4000-8000-000000000007' AND adapter_id='eightfold' AND created_at=updated_at")
-                .bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            // INSERT OR IGNORE above cannot fix a row from a previous install of this
+            // pack. Reconcile the same fields the tuple above just corrected — same
+            // pattern as the original NVIDIA adapter fix — but only when the row is
+            // still exactly as this pack installed it (never edited by the user).
+            sqlx::query("UPDATE sources SET name=?,base_url=?,adapter_id=?,disabled_reason=?,updated_at=? WHERE id=? AND created_at=updated_at AND (name<>? OR base_url<>? OR adapter_id<>? OR disabled_reason<>?)")
+                .bind(name).bind(url).bind(adapter).bind(reason).bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).bind(reason).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            let existing_config: Option<String> = sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=? AND created_at=updated_at").bind(source_id).fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            if let Some(existing) = existing_config {
+                if let Ok(mut parsed) = serde_json::from_str::<serde_json::Value>(&existing) {
+                    if let (Some(obj), Some(want)) = (parsed.as_object_mut(), config.as_object()) {
+                        let changed = want.iter().any(|(k, v)| obj.get(k) != Some(v));
+                        if changed {
+                            obj.extend(want.clone());
+                            sqlx::query("UPDATE source_configs SET config_json=?,updated_at=? WHERE source_id=? AND created_at=updated_at")
+                                .bind(parsed.to_string()).bind(&t).bind(source_id).execute(&self.pool).await.map_err(|e| e.to_string())?;
+                        }
+                    }
+                }
+            }
         }
         sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version','2026-08-28') ON CONFLICT(key) DO UPDATE SET value=excluded.value")
             .execute(&self.pool).await.map_err(|e| e.to_string())?;
@@ -3219,9 +3112,12 @@ mod matching_persistence_tests {
         std::fs::create_dir_all(&root).unwrap();
         let db = Database::open(root.join("jobscraper.db")).await.unwrap();
         let stamp = "2026-01-01T00:00:00Z";
+        // Analog Devices (still classified "workday" in the live starter pack) stands
+        // in for a pre-versioned legacy row here; Microchip's own classification was
+        // corrected live-fire testing found it isn't actually a Workday tenant.
         for (source, changed) in [("legacy", false), ("user-owned", true)] {
-            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?, 'https://careers.microchip.com/','workday','1.0.0',0,'active','Starter source is disabled until you review and enable it.',0,0,?,?)")
-                .bind(source).bind("Microchip").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?, 'https://analogdevices.wd1.myworkdayjobs.com/','workday','1.0.0',0,'active','Starter source is disabled until you review and enable it.',0,0,?,?)")
+                .bind(source).bind("Analog Devices").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
             sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
                 .bind(format!("config-{source}")).bind(source).bind("{\"starterPackVersion\":\"1.0.0\"}").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
         }
@@ -3238,6 +3134,89 @@ mod matching_persistence_tests {
                 .unwrap();
         assert!(retired.is_some());
         assert!(preserved.is_none());
+        db.pool.close().await;
+    }
+
+    #[tokio::test]
+    async fn starter_reconciliation_backfills_corrected_host_and_tenant_on_an_untouched_row() {
+        // Simulates a database installed before the live-fire fixes: Intel seeded
+        // against the stale jobs.intel.com host with no tenant/site, and Microchip
+        // still misclassified as Workday. install_starter_pack must correct both in
+        // place without the user re-adding the sources, exactly like the original
+        // NVIDIA adapter fix — but only because these rows were never edited.
+        let root = std::env::temp_dir().join(format!("jobscraper-reconcile-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let stamp = "2026-01-01T00:00:00Z";
+        let intel_id = "00000000-0000-4000-8000-000000000004";
+        let microchip_id = "00000000-0000-4000-8000-000000000001";
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Intel','https://jobs.intel.com/','workday','1.1.0',0,'active','Starter source is disabled until you review and enable it.',0,0,?,?)")
+            .bind(intel_id).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+            .bind("config-intel").bind(intel_id).bind(r#"{"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":"jobs.intel.com","adapterVersion":"1.1.0","mode":"direct"}"#).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Microchip','https://careers.microchip.com/','workday','1.1.0',0,'active','Starter source is disabled until you review and enable it.',0,0,?,?)")
+            .bind(microchip_id).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+            .bind("config-microchip").bind(microchip_id).bind(r#"{"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":"careers.microchip.com","adapterVersion":"1.1.0","mode":"direct"}"#).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        let (intel_url, intel_config): (String, String) = sqlx::query_as(
+            "SELECT s.base_url, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id=?",
+        )
+        .bind(intel_id)
+        .fetch_one(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(intel_url, "https://intel.wd1.myworkdayjobs.com/");
+        assert!(intel_config.contains("\"tenant\":\"intel\""));
+        assert!(intel_config.contains("\"site\":\"External\""));
+        assert!(intel_config.contains("\"expectedHost\":\"intel.wd1.myworkdayjobs.com\""));
+        let (microchip_adapter, microchip_reason): (String, Option<String>) =
+            sqlx::query_as("SELECT adapter_id, disabled_reason FROM sources WHERE id=?")
+                .bind(microchip_id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(microchip_adapter, "custom-api");
+        assert!(microchip_reason.unwrap().contains("not a Workday tenant"));
+        db.pool.close().await;
+    }
+
+    // R5: nothing connected the starter pack to the adapter layer, so a source could
+    // seed a config the sidecar's requestFor() rejects and nothing would notice until
+    // a live run failed. This test and sidecar/starter-pack.contract.test.mjs share one
+    // fixture (sidecar/starter-pack.fixture.json): this one fails if install_starter_pack
+    // changes without updating the checked-in fixture; the Node test fails if the seeded
+    // config no longer builds a request. Neither side can drift from the other silently.
+    #[tokio::test]
+    async fn starter_pack_matches_the_checked_in_adapter_contract_fixture() {
+        let root = std::env::temp_dir().join(format!("jobscraper-fixture-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        let rows: Vec<(String, String, String, String)> = sqlx::query_as(
+            "SELECT s.name, s.base_url, s.adapter_id, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id ORDER BY s.id",
+        )
+        .fetch_all(&db.pool)
+        .await
+        .unwrap();
+        let actual: Vec<serde_json::Value> = rows
+            .into_iter()
+            .map(|(name, base_url, adapter_id, config_json)| {
+                serde_json::json!({"name":name,"baseUrl":base_url,"adapterId":adapter_id,"configJson":serde_json::from_str::<serde_json::Value>(&config_json).unwrap()})
+            })
+            .collect();
+        let fixture_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("sidecar")
+            .join("starter-pack.fixture.json");
+        let expected: Vec<serde_json::Value> =
+            serde_json::from_str(&std::fs::read_to_string(&fixture_path).unwrap()).unwrap();
+        assert_eq!(
+            serde_json::to_string_pretty(&actual).unwrap(),
+            serde_json::to_string_pretty(&expected).unwrap(),
+            "install_starter_pack no longer matches sidecar/starter-pack.fixture.json — \
+             update the fixture (it drives the Node adapter-contract test) alongside this change"
+        );
         db.pool.close().await;
     }
 
