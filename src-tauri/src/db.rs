@@ -2368,6 +2368,8 @@ pub struct ExportFilter {
     pub start_at: Option<String>,
     pub end_at: Option<String>,
     pub persona_id: Option<String>,
+    pub source_id: Option<String>,
+    pub company: Option<String>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -2459,7 +2461,27 @@ async fn relational_rows(pool: &SqlitePool, table: &str) -> ApiResult<Vec<serde_
         .map(|row| serde_json::from_str(&row).map_err(|_| "Relational row JSON was invalid".into()))
         .collect()
 }
-async fn relational_json(pool: &SqlitePool, filter: &ExportFilter) -> ApiResult<Vec<u8>> {
+fn row_text<'a>(row: &'a serde_json::Value, field: &str) -> Option<&'a str> {
+    row.get(field).and_then(|value| value.as_str())
+}
+fn has_id(rows: &[serde_json::Value], id: &str) -> bool {
+    rows.iter().any(|row| row_text(row, "id") == Some(id))
+}
+fn in_ids(row: &serde_json::Value, field: &str, ids: &HashSet<String>) -> bool {
+    row_text(row, field).is_some_and(|value| ids.contains(value))
+}
+fn export_date_matches(row: &serde_json::Value, field: &str, filter: &ExportFilter) -> bool {
+    let value = row_text(row, field).unwrap_or("");
+    filter
+        .start_at
+        .as_deref()
+        .is_none_or(|start| value >= start)
+        && filter.end_at.as_deref().is_none_or(|end| value < end)
+}
+async fn export_closure(
+    pool: &SqlitePool,
+    filter: &ExportFilter,
+) -> ApiResult<HashMap<String, Vec<serde_json::Value>>> {
     if filter
         .start_at
         .as_deref()
@@ -2470,6 +2492,11 @@ async fn relational_json(pool: &SqlitePool, filter: &ExportFilter) -> ApiResult<
             .is_some_and(|date| chrono::DateTime::parse_from_rfc3339(date).is_err())
     {
         return Err("Export dates must be UTC RFC3339".into());
+    }
+    if let (Some(start), Some(end)) = (filter.start_at.as_deref(), filter.end_at.as_deref()) {
+        if start >= end {
+            return Err("Export start must be before end".into());
+        }
     }
     let tables = [
         "sources",
@@ -2499,35 +2526,213 @@ async fn relational_json(pool: &SqlitePool, filter: &ExportFilter) -> ApiResult<
         "job_dedupe_events",
         "data_purge_audits",
     ];
-    let mut data = serde_json::Map::new();
+    let mut all = HashMap::new();
     for table in tables {
-        data.insert(
-            table.to_string(),
-            serde_json::Value::Array(relational_rows(pool, table).await?),
-        );
+        all.insert(table.to_string(), relational_rows(pool, table).await?);
+    }
+    let sources = &all["sources"];
+    let personas = &all["personas"];
+    if filter
+        .source_id
+        .as_deref()
+        .is_some_and(|id| !has_id(sources, id))
+    {
+        return Err("Export source ID was not found".into());
+    }
+    if filter
+        .persona_id
+        .as_deref()
+        .is_some_and(|id| !has_id(personas, id))
+    {
+        return Err("Export persona ID was not found".into());
+    }
+    let apps = &all["applications"];
+    let matches = &all["match_results"];
+    let reviews = &all["review_decisions"];
+    let mut jobs: HashSet<String> = all["jobs"]
+        .iter()
+        .filter(|job| {
+            let source = filter
+                .source_id
+                .as_deref()
+                .is_none_or(|id| row_text(job, "source_id") == Some(id));
+            let company = filter.company.as_deref().is_none_or(|name| {
+                row_text(job, "company").is_some_and(|value| value.eq_ignore_ascii_case(name))
+            });
+            let date = export_date_matches(job, "created_at", filter);
+            let persona = filter.persona_id.as_deref().is_none_or(|id| {
+                apps.iter().any(|app| {
+                    row_text(app, "job_id") == row_text(job, "id")
+                        && row_text(app, "persona_id") == Some(id)
+                }) || matches.iter().any(|item| {
+                    row_text(item, "job_id") == row_text(job, "id")
+                        && row_text(item, "persona_id") == Some(id)
+                }) || reviews.iter().any(|item| {
+                    row_text(item, "job_id") == row_text(job, "id")
+                        && row_text(item, "persona_id") == Some(id)
+                })
+            });
+            source && company && date && persona
+        })
+        .filter_map(|job| row_text(job, "id").map(str::to_owned))
+        .collect();
+    let app_ids: HashSet<String> = apps
+        .iter()
+        .filter(|app| {
+            let persona = filter
+                .persona_id
+                .as_deref()
+                .is_none_or(|id| row_text(app, "persona_id") == Some(id));
+            let date = export_date_matches(app, "created_at", filter);
+            let job_ok = row_text(app, "job_id").is_some_and(|id| jobs.contains(id));
+            persona && date && job_ok
+        })
+        .filter_map(|app| row_text(app, "id").map(str::to_owned))
+        .collect();
+    for app in apps.iter().filter(|app| in_ids(app, "id", &app_ids)) {
+        if let Some(job) = row_text(app, "job_id") {
+            jobs.insert(job.to_owned());
+        }
+    }
+    let source_ids: HashSet<String> = all["jobs"]
+        .iter()
+        .filter(|job| in_ids(job, "id", &jobs))
+        .filter_map(|job| row_text(job, "source_id").map(str::to_owned))
+        .collect();
+    let mut persona_ids: HashSet<String> = filter.persona_id.iter().cloned().collect();
+    for table in [matches, reviews, apps] {
+        for row in table.iter().filter(|row| in_ids(row, "job_id", &jobs)) {
+            if let Some(persona) = row_text(row, "persona_id") {
+                persona_ids.insert(persona.to_owned())
+            }
+        }
+    }
+    let run_ids: HashSet<String> = all["job_occurrences"]
+        .iter()
+        .filter(|row| in_ids(row, "job_id", &jobs))
+        .filter_map(|row| row_text(row, "run_id").map(str::to_owned))
+        .collect();
+    let audit_ids: HashSet<String> = all["duplicate_merge_audits"]
+        .iter()
+        .filter(|row| in_ids(row, "canonical_job_id", &jobs) && in_ids(row, "merged_job_id", &jobs))
+        .filter_map(|row| row_text(row, "id").map(str::to_owned))
+        .collect();
+    let mut out = HashMap::new();
+    for table in tables {
+        let rows = &all[table];
+        let selected: Vec<_> = match table {
+            "jobs" => rows
+                .iter()
+                .filter(|r| in_ids(r, "id", &jobs))
+                .cloned()
+                .collect(),
+            "sources" => rows
+                .iter()
+                .filter(|r| in_ids(r, "id", &source_ids))
+                .cloned()
+                .collect(),
+            "source_configs" | "scrape_runs" => rows
+                .iter()
+                .filter(|r| in_ids(r, "source_id", &source_ids))
+                .cloned()
+                .collect(),
+            "scrape_run_events" => rows
+                .iter()
+                .filter(|r| in_ids(r, "run_id", &run_ids))
+                .cloned()
+                .collect(),
+            "job_occurrences" | "job_revisions" | "match_results" | "review_decisions" => rows
+                .iter()
+                .filter(|r| in_ids(r, "job_id", &jobs))
+                .cloned()
+                .collect(),
+            "applications" => rows
+                .iter()
+                .filter(|r| in_ids(r, "id", &app_ids))
+                .cloned()
+                .collect(),
+            "application_events"
+            | "notes"
+            | "application_documents"
+            | "interviews"
+            | "reminders" => rows
+                .iter()
+                .filter(|r| in_ids(r, "application_id", &app_ids))
+                .cloned()
+                .collect(),
+            "personas" => rows
+                .iter()
+                .filter(|r| in_ids(r, "id", &persona_ids))
+                .cloned()
+                .collect(),
+            "resume_documents" => rows
+                .iter()
+                .filter(|r| {
+                    in_ids(r, "persona_id", &persona_ids)
+                        || row_text(r, "id").is_some_and(|id| {
+                            all["personas"]
+                                .iter()
+                                .filter(|p| in_ids(p, "id", &persona_ids))
+                                .any(|p| row_text(p, "resume_document_id") == Some(id))
+                        })
+                })
+                .cloned()
+                .collect(),
+            "persona_skills" | "persona_filters" => rows
+                .iter()
+                .filter(|r| in_ids(r, "persona_id", &persona_ids))
+                .cloned()
+                .collect(),
+            "embeddings" => rows
+                .iter()
+                .filter(|r| in_ids(r, "owner_id", &jobs) || in_ids(r, "owner_id", &persona_ids))
+                .cloned()
+                .collect(),
+            "duplicate_merge_audits" => rows
+                .iter()
+                .filter(|r| in_ids(r, "id", &audit_ids))
+                .cloned()
+                .collect(),
+            "duplicate_merge_conflicts" => rows
+                .iter()
+                .filter(|r| in_ids(r, "audit_id", &audit_ids))
+                .cloned()
+                .collect(),
+            "job_aliases" | "duplicate_candidates" => rows
+                .iter()
+                .filter(|r| {
+                    in_ids(r, "canonical_job_id", &jobs)
+                        || in_ids(r, "left_job_id", &jobs) && in_ids(r, "right_job_id", &jobs)
+                })
+                .cloned()
+                .collect(),
+            "job_dedupe_events" => rows
+                .iter()
+                .filter(|r| in_ids(r, "canonical_job_id", &jobs))
+                .cloned()
+                .collect(),
+            _ => Vec::new(),
+        };
+        out.insert(table.to_string(), selected);
+    }
+    Ok(out)
+}
+async fn relational_json(pool: &SqlitePool, filter: &ExportFilter) -> ApiResult<Vec<u8>> {
+    let selected = export_closure(pool, filter).await?;
+    let mut data = serde_json::Map::new();
+    for (table, rows) in selected {
+        data.insert(table, serde_json::Value::Array(rows));
     }
     serde_json::to_vec_pretty(&serde_json::json!({"format":"jobscraper-relational-json","version":1,"exportedAt":now(),"filter":filter,"tables":data})).map_err(|e|e.to_string())
 }
 async fn csv_bytes(pool: &SqlitePool, kind: &str, filter: &ExportFilter) -> ApiResult<Vec<u8>> {
-    let (sql,headers)=match kind {
-        "jobs"=>("SELECT j.id,j.title,j.company,j.location,j.canonical_url,j.availability,j.posted_at,j.extraction_at FROM jobs j ORDER BY j.created_at","id,title,company,location,canonical_url,availability,posted_at,extraction_at"),
-        "applications"=>("SELECT a.id,a.job_id,a.persona_id,a.current_stage,j.title,j.company,a.applied_at,a.created_at,a.updated_at FROM applications a LEFT JOIN jobs j ON j.id=a.job_id ORDER BY a.created_at","id,job_id,persona_id,stage,title,company,applied_at,created_at,updated_at"),
-        "events"=>("SELECT id,application_id,event_type,from_stage,to_stage,occurred_at,reason,payload_json FROM application_events ORDER BY occurred_at","id,application_id,event_type,from_stage,to_stage,occurred_at,reason,payload_json"),
-        "interviews"=>("SELECT id,application_id,stage,scheduled_at,completed_at,outcome,notes FROM interviews ORDER BY scheduled_at","id,application_id,stage,scheduled_at,completed_at,outcome,notes"),
-        "source_outcomes"=>("SELECT s.id,s.name,j.company,j.availability,count(*) AS jobs FROM jobs j JOIN sources s ON s.id=j.source_id GROUP BY s.id,s.name,j.company,j.availability ORDER BY s.name,j.company","source_id,source_name,company,availability,jobs"),
-        _=>return Err("Export kind must be jobs, applications, events, interviews, source_outcomes, or relational_json".into()),
-    };
-    let rows = sqlx::query(sql)
-        .fetch_all(pool)
-        .await
-        .map_err(|e| e.to_string())?;
+    let selected = export_closure(pool, filter).await?;
+    let (table,fields,headers)=match kind {"jobs"=>("jobs",vec!["id","title","company","location","canonical_url","availability","posted_at","extraction_at"],"id,title,company,location,canonical_url,availability,posted_at,extraction_at"),"applications"=>("applications",vec!["id","job_id","persona_id","current_stage","applied_at","created_at","updated_at"],"id,job_id,persona_id,stage,applied_at,created_at,updated_at"),"events"=>("application_events",vec!["id","application_id","event_type","from_stage","to_stage","occurred_at","reason","payload_json"],"id,application_id,event_type,from_stage,to_stage,occurred_at,reason,payload_json"),"interviews"=>("interviews",vec!["id","application_id","stage","scheduled_at","completed_at","outcome","notes"],"id,application_id,stage,scheduled_at,completed_at,outcome,notes"),"source_outcomes"=>("jobs",vec!["source_id","company","availability"],"source_id,company,availability"),_=>return Err("Export kind must be jobs, applications, events, interviews, source_outcomes, or relational_json".into())};
     let mut text = format!("{headers}\r\n");
-    for row in rows {
+    for row in &selected[table] {
         let mut values = Vec::new();
-        for index in 0..row.len() {
-            values.push(csv_cell(
-                row.try_get::<Option<String>, _>(index).ok().flatten(),
-            ));
+        for field in &fields {
+            values.push(csv_cell(row_text(row, field).map(str::to_owned)));
         }
         text.push_str(&values.join(","));
         text.push_str("\r\n");
@@ -3009,6 +3214,8 @@ mod matching_persistence_tests {
     async fn relational_export_and_csv_escape_keep_stable_relationship_ids() {
         let pool = migrated_pool().await;
         seed_match(&pool).await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('other','Other','https://other.test','json','1',0,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('other-job','other','Other','Elsewhere','text','[]','other','t','1','t','t')").execute(&pool).await.unwrap();
         let archive = relational_json(&pool, &ExportFilter::default())
             .await
             .unwrap();
@@ -3026,6 +3233,28 @@ mod matching_persistence_tests {
         .unwrap();
         assert!(csv.starts_with("id,title"));
         assert!(csv.contains("\r\n"));
+        let filtered = relational_json(
+            &pool,
+            &ExportFilter {
+                source_id: Some("s".into()),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+        let filtered: serde_json::Value = serde_json::from_slice(&filtered).unwrap();
+        assert_eq!(filtered["tables"]["jobs"].as_array().unwrap().len(), 1);
+        assert_eq!(filtered["tables"]["sources"][0]["id"], "s");
+        assert!(relational_json(
+            &pool,
+            &ExportFilter {
+                start_at: Some("2026-02-01T00:00:00Z".into()),
+                end_at: Some("2026-01-01T00:00:00Z".into()),
+                ..Default::default()
+            }
+        )
+        .await
+        .is_err());
         pool.close().await;
     }
 
