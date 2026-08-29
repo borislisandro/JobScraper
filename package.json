@@ -9,7 +9,7 @@
     "check": "tsc -b --pretty false",
     "lint": "eslint .",
     "tauri": "tauri",
-    "test": "vitest run --passWithNoTests && node --test sidecar/worker.protocol.test.mjs sidecar/adapters.test.mjs sidecar/security.test.mjs sidecar/platform.execution.test.mjs"
+    "test": "vitest run --passWithNoTests && node --test sidecar/worker.protocol.test.mjs sidecar/adapters.test.mjs sidecar/security.test.mjs sidecar/platform.execution.test.mjs sidecar/starter-pack.contract.test.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
