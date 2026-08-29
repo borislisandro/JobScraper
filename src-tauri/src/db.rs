@@ -2725,8 +2725,126 @@ async fn relational_json(pool: &SqlitePool, filter: &ExportFilter) -> ApiResult<
     }
     serde_json::to_vec_pretty(&serde_json::json!({"format":"jobscraper-relational-json","version":1,"exportedAt":now(),"filter":filter,"tables":data})).map_err(|e|e.to_string())
 }
+fn outcomes_csv(selected: &HashMap<String, Vec<serde_json::Value>>, company: bool) -> Vec<u8> {
+    let jobs = &selected["jobs"];
+    let apps = &selected["applications"];
+    let events = &selected["application_events"];
+    let sources = &selected["sources"];
+    let source_names: HashMap<String, String> = sources
+        .iter()
+        .filter_map(|r| Some((row_text(r, "id")?.into(), row_text(r, "name")?.into())))
+        .collect();
+    let labels: HashMap<String, String> = jobs
+        .iter()
+        .filter_map(|j| {
+            Some((
+                row_text(j, "id")?.into(),
+                if company {
+                    row_text(j, "company").unwrap_or("Unknown").into()
+                } else {
+                    source_names.get(row_text(j, "source_id")?)?.clone()
+                },
+            ))
+        })
+        .collect();
+    let mut groups: HashMap<String, Vec<&serde_json::Value>> = HashMap::new();
+    for app in apps {
+        if let Some(label) = row_text(app, "job_id").and_then(|id| labels.get(id)) {
+            groups.entry(label.clone()).or_default().push(app)
+        }
+    }
+    let mut text="dimension,name,applications,applied,first_response,interview,offer,accepted,rejected,withdrawn,applied_rate,first_response_rate,interview_rate,offer_rate,accepted_rate,rejected_rate,withdrawn_rate,first_response_mean_hours,first_response_samples,small_sample\r\n".to_string();
+    for (name, rows) in groups {
+        let total = rows.len() as f64;
+        let mut c = [0usize; 7];
+        let mut hours = Vec::new();
+        for app in rows {
+            let stage = row_text(app, "current_stage").unwrap_or("");
+            let app_id = row_text(app, "id").unwrap_or("");
+            let applied = row_text(app, "applied_at");
+            if applied.is_some() || stage != "planned" {
+                c[0] += 1
+            }
+            if ["interviewing", "offer", "accepted"].contains(&stage) {
+                c[2] += 1
+            }
+            if ["offer", "accepted"].contains(&stage) {
+                c[3] += 1
+            }
+            c[4] += usize::from(stage == "accepted");
+            c[5] += usize::from(stage == "rejected");
+            c[6] += usize::from(stage == "withdrawn");
+            if let Some(start) = applied.and_then(|v| chrono::DateTime::parse_from_rfc3339(v).ok())
+            {
+                if let Some(response) = events
+                    .iter()
+                    .filter(|e| {
+                        row_text(e, "application_id") == Some(app_id)
+                            && ["screening", "interviewing", "offer", "rejected"]
+                                .contains(&row_text(e, "to_stage").unwrap_or(""))
+                    })
+                    .filter_map(|e| {
+                        chrono::DateTime::parse_from_rfc3339(row_text(e, "occurred_at")?).ok()
+                    })
+                    .filter(|v| *v > start)
+                    .min()
+                {
+                    c[1] += 1;
+                    hours.push((response - start).num_minutes() as f64 / 60.0)
+                }
+            }
+        }
+        let rate = |n: usize, d: f64| {
+            if d == 0.0 {
+                "".into()
+            } else {
+                format!("{:.2}%", n as f64 * 100.0 / d)
+            }
+        };
+        let mean = if hours.is_empty() {
+            "".into()
+        } else {
+            format!("{:.2}", hours.iter().sum::<f64>() / hours.len() as f64)
+        };
+        let mut values = vec![
+            csv_cell(Some(if company {
+                "company".into()
+            } else {
+                "source".into()
+            })),
+            csv_cell(Some(name)),
+            total.to_string(),
+        ];
+        values.extend(c.iter().map(ToString::to_string));
+        values.extend([
+            rate(c[0], total),
+            rate(c[1], c[0] as f64),
+            rate(c[2], c[0] as f64),
+            rate(c[3], c[0] as f64),
+            rate(c[4], c[0] as f64),
+            rate(c[5], c[0] as f64),
+            rate(c[6], c[0] as f64),
+            mean,
+            hours.len().to_string(),
+            if total < 3.0 || hours.len() < 3 {
+                "small_sample".into()
+            } else {
+                "".into()
+            },
+        ]);
+        text.push_str(&values.join(","));
+        text.push_str("\r\n");
+    }
+    text.into_bytes()
+}
 async fn csv_bytes(pool: &SqlitePool, kind: &str, filter: &ExportFilter) -> ApiResult<Vec<u8>> {
     let selected = export_closure(pool, filter).await?;
+    if kind == "source_outcomes" {
+        return Ok(outcomes_csv(&selected, false));
+    }
+    if kind == "company_outcomes" {
+        return Ok(outcomes_csv(&selected, true));
+    }
     let (table,fields,headers)=match kind {"jobs"=>("jobs",vec!["id","title","company","location","canonical_url","availability","posted_at","extraction_at"],"id,title,company,location,canonical_url,availability,posted_at,extraction_at"),"applications"=>("applications",vec!["id","job_id","persona_id","current_stage","applied_at","created_at","updated_at"],"id,job_id,persona_id,stage,applied_at,created_at,updated_at"),"events"=>("application_events",vec!["id","application_id","event_type","from_stage","to_stage","occurred_at","reason","payload_json"],"id,application_id,event_type,from_stage,to_stage,occurred_at,reason,payload_json"),"interviews"=>("interviews",vec!["id","application_id","stage","scheduled_at","completed_at","outcome","notes"],"id,application_id,stage,scheduled_at,completed_at,outcome,notes"),"source_outcomes"=>("jobs",vec!["source_id","company","availability"],"source_id,company,availability"),_=>return Err("Export kind must be jobs, applications, events, interviews, source_outcomes, or relational_json".into())};
     let mut text = format!("{headers}\r\n");
     for row in &selected[table] {
