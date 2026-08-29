@@ -735,8 +735,6 @@ pub async fn merge_duplicate_jobs(
             .await
             .map_err(|e| e.to_string())?;
     }
-    sqlx::query("INSERT INTO job_aliases(id,canonical_job_id,alias_job_id,reason,created_at) VALUES(?,?,?,?,?)").bind(id()).bind(&canonical_job_id).bind(&merged).bind("reviewed duplicate merge").bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-    sqlx::query("INSERT OR IGNORE INTO duplicate_groups(id,primary_job_id,member_job_id,reason,created_at) VALUES(?,?,?,?,?)").bind(id()).bind(&canonical_job_id).bind(&merged).bind("reviewed duplicate merge").bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("UPDATE duplicate_candidates SET status='merged',decided_at=? WHERE id=?")
         .bind(&t)
         .bind(candidate_id)
@@ -855,7 +853,6 @@ pub async fn unmerge_duplicate_jobs(
         }
     }
     let t = now();
-    sqlx::query("UPDATE job_aliases SET removed_at=? WHERE canonical_job_id=? AND alias_job_id=? AND removed_at IS NULL").bind(&t).bind(&canonical_job_id).bind(&merged_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("UPDATE duplicate_merge_audits SET undone_at=? WHERE id=?")
         .bind(&t)
         .bind(&audit)
@@ -2443,7 +2440,6 @@ async fn relational_rows(pool: &SqlitePool, table: &str) -> ApiResult<Vec<serde_
         "personas",
         "resume_documents",
         "persona_skills",
-        "persona_filters",
         "embeddings",
         "match_results",
         "review_decisions",
@@ -2453,7 +2449,6 @@ async fn relational_rows(pool: &SqlitePool, table: &str) -> ApiResult<Vec<serde_
         "application_documents",
         "interviews",
         "reminders",
-        "job_aliases",
         "duplicate_candidates",
         "duplicate_merge_audits",
         "duplicate_merge_conflicts",
@@ -2542,7 +2537,6 @@ async fn export_closure(
         "personas",
         "resume_documents",
         "persona_skills",
-        "persona_filters",
         "embeddings",
         "match_results",
         "review_decisions",
@@ -2552,7 +2546,6 @@ async fn export_closure(
         "application_documents",
         "interviews",
         "reminders",
-        "job_aliases",
         "duplicate_candidates",
         "duplicate_merge_audits",
         "duplicate_merge_conflicts",
@@ -2725,7 +2718,7 @@ async fn export_closure(
                 })
                 .cloned()
                 .collect(),
-            "persona_skills" | "persona_filters" => rows
+            "persona_skills" => rows
                 .iter()
                 .filter(|r| in_ids(r, "persona_id", &persona_ids))
                 .cloned()
@@ -2745,7 +2738,7 @@ async fn export_closure(
                 .filter(|r| in_ids(r, "audit_id", &audit_ids))
                 .cloned()
                 .collect(),
-            "job_aliases" | "duplicate_candidates" => rows
+            "duplicate_candidates" => rows
                 .iter()
                 .filter(|r| {
                     in_ids(r, "canonical_job_id", &jobs)
