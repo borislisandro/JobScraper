@@ -387,4 +387,36 @@ mod tests {
             .eligible
         );
     }
+    #[test]
+    fn salary_unknown_passes_but_known_lower_conflicts() {
+        let p = PersonaProfile {
+            titles: vec![],
+            skills: vec![],
+            include: vec![],
+            include_mode: "any".into(),
+            exclude: vec![],
+            location: None,
+            work_mode: None,
+            seniority: None,
+            salary_min: Some(100.0),
+            unknown_policy: "pass".into(),
+        };
+        let base_job = JobProfile {
+            title: "Engineer".into(),
+            location: None,
+            work_mode: None,
+            seniority: None,
+            salary_min: None,
+            description: "normal".into(),
+            skills: vec![],
+        };
+        // Unknown salary passes (with a warning) under the default "pass" unknown policy.
+        assert!(score(&p, &base_job).eligible);
+        // A known-but-lower salary is a hard reject, not a warning.
+        let lower = JobProfile {
+            salary_min: Some(50.0),
+            ..base_job
+        };
+        assert!(!score(&p, &lower).eligible);
+    }
 }
