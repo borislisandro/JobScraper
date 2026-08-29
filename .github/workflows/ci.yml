@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    # The app ships Windows-only (WebView2, schtasks.exe, Edge); the Rust half in the
+    # other job below needs a Windows runner for the same reason, so this job matches
+    # it rather than running on a cheaper Linux runner.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm lint
+      - run: pnpm test
+
+  rust:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: cargo fmt --check
+        working-directory: src-tauri
+      # Plain clippy, not -D warnings: there are pre-existing warnings (see repo notes)
+      # that weren't mass-fixed as part of adding this gate. Surface them, don't block on them.
+      - run: cargo clippy --lib
+        working-directory: src-tauri
+      - run: cargo test --lib
+        working-directory: src-tauri
