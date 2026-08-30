@@ -17,3 +17,4 @@ src-tauri/resources/models/bge-small-en-v1.5/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts
+graphify-out/

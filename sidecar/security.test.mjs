@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { jitterMs, makeUrlGuard, parseRobots, privateAddress, retryAfterMs, robotsAllows } from "./worker.mjs";
+import { jitterMs, makeUrlGuard, parseRobots, privateAddress, requiredFor, retryAfterMs, robotsAllows, workdaySite, workdayTenant } from "./worker.mjs";
 
 test("jitter and Retry-After stay bounded and deterministic",()=>{
   assert.equal(jitterMs(()=>0),1500);
@@ -49,4 +49,19 @@ Disallow:
   assert.equal(robotsAllows(parseRobots("User-agent: *\nDisallow: /*.pdf$\n"),"/docs/a.pdf?x=1"),true);
   assert.equal(robotsAllows(parseRobots("# comment\nUser-agent: *\nDisallow:\n"),"/anything"),true);
   assert.equal(robotsAllows(parseRobots("User-agent: *\nDisallow: /search-jobs/\n"),"/search-jobs"),true,"prefix match is literal, not fuzzy");
+});
+
+test("Workday tenant and site detection reads real tenant shapes",()=>{
+  // Tenant is the subdomain before the .wdN datacentre segment.
+  assert.equal(workdayTenant("intel.wd1.myworkdayjobs.com"),"intel");
+  assert.equal(workdayTenant("nvidia.wd5.myworkdayjobs.com"),"nvidia");
+  assert.equal(workdayTenant("careers.micron.com"),null);
+  assert.equal(workdayTenant("evil-myworkdayjobs.com"),null);
+  // Site segment comes from the tenant's own robots.txt: Sitemap line first, else first Allow.
+  assert.equal(workdaySite("Sitemap: https://x.wd1.myworkdayjobs.com/External_Career/siteMap.xml\n"),"External_Career");
+  assert.equal(workdaySite("User-agent: *\nAllow: /NVIDIAExternalCareerSite/\nDisallow: /refreshFacet/\n"),"NVIDIAExternalCareerSite");
+  assert.equal(workdaySite("User-agent: *\nDisallow:\n"),null);
+  assert.equal(workdaySite(""),null);
+  // Workday requires both halves; a tenant alone cannot build a CXS URL.
+  assert.deepEqual(requiredFor("workday"),["tenant","site"]);
 });
