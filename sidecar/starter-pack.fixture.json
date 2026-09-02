@@ -1,240 +1,291 @@
 [
- {
-  "adapterId": "custom-api",
-  "baseUrl": "https://careers.microchip.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "www.microchip.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "wd5.myworkdaysite.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "microchiphr"
+    },
+    "name": "Microchip"
   },
-  "name": "Microchip"
- },
- {
-  "adapterId": "workday",
-  "baseUrl": "https://analogdevices.wd1.myworkdayjobs.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "analogdevices.wd1.myworkdayjobs.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "site": "External",
-   "starterPackVersion": "2026-08-28",
-   "tenant": "analogdevices"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://analogdevices.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "analogdevices.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "analogdevices"
+    },
+    "name": "Analog Devices"
   },
-  "name": "Analog Devices"
- },
- {
-  "adapterId": "workday",
-  "baseUrl": "https://broadcom.wd1.myworkdayjobs.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "broadcom.wd1.myworkdayjobs.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "site": "External_Career",
-   "starterPackVersion": "2026-08-28",
-   "tenant": "broadcom"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://broadcom.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "broadcom.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External_Career",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "broadcom"
+    },
+    "name": "Broadcom"
   },
-  "name": "Broadcom"
- },
- {
-  "adapterId": "workday",
-  "baseUrl": "https://intel.wd1.myworkdayjobs.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "intel.wd1.myworkdayjobs.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "site": "External",
-   "starterPackVersion": "2026-08-28",
-   "tenant": "intel"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://intel.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "intel.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "intel"
+    },
+    "name": "Intel"
   },
-  "name": "Intel"
- },
- {
-  "adapterId": "workday",
-  "baseUrl": "https://marvell.wd1.myworkdayjobs.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "marvell.wd1.myworkdayjobs.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "site": "MarvellCareers",
-   "starterPackVersion": "2026-08-28",
-   "tenant": "marvell"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://marvell.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "marvell.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "MarvellCareers",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "marvell"
+    },
+    "name": "Marvell"
   },
-  "name": "Marvell"
- },
- {
-  "adapterId": "eightfold",
-  "baseUrl": "https://careers.st.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "careers.st.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://stmicroelectronics.eightfold.ai/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "stmicroelectronics.com",
+      "eightfoldApi": "legacy",
+      "expectedHost": "stmicroelectronics.eightfold.ai",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 800,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "STMicroelectronics"
   },
-  "name": "STMicroelectronics"
- },
- {
-  "adapterId": "workday",
-  "baseUrl": "https://nvidia.wd5.myworkdayjobs.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "nvidia.wd5.myworkdayjobs.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "site": "NVIDIAExternalCareerSite",
-   "starterPackVersion": "2026-08-28",
-   "tenant": "nvidia"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://nvidia.wd5.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "nvidia.wd5.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "NVIDIAExternalCareerSite",
+      "splitFacet": "jobFamilyGroup",
+      "splitThreshold": 2000,
+      "starterPackVersion": "2026-09-02",
+      "tenant": "nvidia"
+    },
+    "name": "NVIDIA"
   },
-  "name": "NVIDIA"
- },
- {
-  "adapterId": "eightfold",
-  "baseUrl": "https://gf.com/careers",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "gf.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://careers.gf.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "globalfoundries.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "careers.gf.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 800,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "GlobalFoundries"
   },
-  "name": "GlobalFoundries"
- },
- {
-  "adapterId": "eightfold",
-  "baseUrl": "https://careers.micron.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "careers.micron.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://micron.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "micron.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "micron"
+    },
+    "name": "Micron"
   },
-  "name": "Micron"
- },
- {
-  "adapterId": "eightfold",
-  "baseUrl": "https://careers.qualcomm.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "careers.qualcomm.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://careers.qualcomm.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "qualcomm.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "careers.qualcomm.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 800,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "Qualcomm"
   },
-  "name": "Qualcomm"
- },
- {
-  "adapterId": "talentbrew-jibe",
-  "baseUrl": "https://careers.arm.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "careers.arm.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "arm",
+    "baseUrl": "https://careers.arm.com/search-jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.arm.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "Arm"
   },
-  "name": "Arm"
- },
- {
-  "adapterId": "icims",
-  "baseUrl": "https://careers.amd.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "careers.amd.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "amd",
+    "baseUrl": "https://careers.amd.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.amd.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "AMD"
   },
-  "name": "AMD"
- },
- {
-  "adapterId": "phenom",
-  "baseUrl": "https://careers.cisco.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "careers.cisco.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "cisco",
+    "baseUrl": "https://careers.cisco.com/global/en/search-results",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.cisco.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "Cisco"
   },
-  "name": "Cisco"
- },
- {
-  "adapterId": "custom-api",
-  "baseUrl": "https://jobs.apple.com/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "jobs.apple.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "apple",
+    "baseUrl": "https://jobs.apple.com/en-us/search?location=",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.apple.com",
+      "locale": "en-us",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 250,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "Apple"
   },
-  "name": "Apple"
- },
- {
-  "adapterId": "custom-api",
-  "baseUrl": "https://www.mediatek.com/careers",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "www.mediatek.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "mediatek",
+    "baseUrl": "https://careers.mediatek.com/en/jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.mediatek.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "MediaTek"
   },
-  "name": "MediaTek"
- },
- {
-  "adapterId": "custom-api",
-  "baseUrl": "https://www.u-blox.com/en/careers",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "www.u-blox.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "u-blox",
+    "baseUrl": "https://www.u-blox.com/en/job-openings",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "u-blox"
   },
-  "name": "u-blox"
- },
- {
-  "adapterId": "custom-api",
-  "baseUrl": "https://www.google.com/about/careers/applications/jobs/results",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "www.google.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "google",
+    "baseUrl": "https://www.google.com/about/careers/applications/jobs/results/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "www.google.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "Google"
   },
-  "name": "Google"
- },
- {
-  "adapterId": "custom-api",
-  "baseUrl": "https://www.skhynix.com/eng/careers/",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "www.skhynix.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "sk-hynix",
+    "baseUrl": "https://talent.skhynix.com/hub/en/apply/job",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "SK hynix"
   },
-  "name": "SK hynix"
- },
- {
-  "adapterId": "reference",
-  "baseUrl": "https://www.marvell.com/company/careers.html",
-  "configJson": {
-   "adapterVersion": "1.1.0",
-   "expectedHost": "www.marvell.com",
-   "mode": "direct",
-   "schemaVersion": "1.1.0",
-   "starterPackVersion": "2026-08-28"
+  {
+    "adapterId": "reference",
+    "baseUrl": "https://www.marvell.com/company/careers.html",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "www.marvell.com",
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02"
+    },
+    "name": "Marvell (reference)"
   },
-  "name": "Marvell (reference)"
- }
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://nxp.wd3.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "nxp.wd3.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "careers",
+      "starterPackVersion": "2026-09-02",
+      "tenant": "nxp"
+    },
+    "name": "NXP"
+  }
 ]

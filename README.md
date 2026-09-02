@@ -1,33 +1,52 @@
 # JobScraper
 
-Windows 11 local-first Tauri 2 desktop application for manually collecting jobs, matching them to local personas, reviewing them, and tracking applications. It makes no startup network calls, has no telemetry or background scheduler, and never submits applications.
+Windows 11 local-first Tauri 2 desktop application for manually collecting jobs, filtering them, and tracking applications. It makes no startup network calls, has no telemetry or background scheduler, and never submits applications.
+
+## The four pages
+
+- **Jobs** — the home page. Tick the sources you want to look at; those sources scope both the list and what **Update Jobs** re-reads. Ticking is a view, not a setting — nothing is switched off by it, and which sources you follow at all lives on the Sources page. Openings their board has not listed in two complete reads are hidden behind **Include closed**; one missed read is badged instead. The first 200 results load immediately, with more available on demand. Update Jobs reads listing rows only; a job's detail page and full description are downloaded when that job is expanded. A run that fails or is cancelled keeps every listing it had already read, and **Full refresh** still leaves detail pages lazy. Filter by words in the title or stored listing content, sort by posting date, expand any row for the full listing, and press **Save** (adds it to Applications) or **Apply** (saves it and opens the posting in your browser). Saved and applied jobs are badged in the list.
+- **Sources** — add a careers page by URL, select or deselect it, test it, and edit its detected settings.
+- **Applications** — the board of everything you saved or applied to, with notes, documents, interviews and reminders.
+- **Diagnostics** — local health information and the recent activity log.
+
+Analytics, backup and export exist in the backend but have no UI in this build. Personas, relevance matching and resume import were removed: nothing could reach them, and they carried a bundled ONNX model, a FastEmbed dependency and roughly 1,300 lines of Rust with them.
 
 ## Run locally
 
-Use Node 24 LTS and pnpm:
+Use Node 24 and pnpm 11. Developer mode installs the locked dependencies,
+prepares the bundled sidecar, and starts Tauri without creating artifacts:
 
 ```powershell
-pnpm install
-pnpm check
-pnpm build
-pnpm tauri dev
+pnpm app:dev
 ```
 
-Before a release build, prepare the project-owned Node sidecar and pinned model
-(the installed application needs neither system Node nor network model access):
+Create the current-user NSIS installer, the folder-based portable ZIP, or both:
 
 ```powershell
-.\scripts\package-sidecar.ps1 `
-  -NodePath C:\path\to\node.exe `
-  -PnpmPath C:\path\to\pnpm.mjs
-.\scripts\fetch-bge-model.ps1
-.\scripts\prepare-release.ps1 -PreflightOnly
-pnpm tauri build
+pnpm package:installer
+pnpm package:portable
+pnpm package:all
 ```
 
-Rust stores all application state under `%LOCALAPPDATA%\JobScraper`, using SQLite WAL, migrations, foreign keys, a 5-second busy timeout, and FTS5. Browser work is isolated in `sidecar/worker.mjs` and uses versioned JSONL over stdin/stdout. It only starts after a Test or Scrape action and is terminated by cancellation/exit.
+The commands accept `-NodePath` and `-PnpmPath` after `--`; otherwise they use
+`JOBSCRAPER_NODE_RUNTIME` and `JOBSCRAPER_PNPM`, then `PATH`. Release builds
+require Windows x64, Rust MSVC, Node 24, and pnpm 11. They run all release gates
+and write versioned files plus `SHA256SUMS.txt` under `artifacts/<version>/`.
+The portable ZIP needs an installed WebView2 Runtime and keeps its data under
+`%LOCALAPPDATA%\JobScraper`, just like the installed edition.
 
-The current model/adapter boundary expects a bundled offline `bge-small-en-v1.5` 384-dimensional ONNX artifact. No remote model loading is permitted.
+Measure where a scrape's time goes. The benchmark drives the same worker the app drives, opens
+the development database read-only, and never writes jobs, run history, or source state:
+
+```powershell
+node scripts/benchmark-scrape.mjs --fixtures   # deterministic, no network
+node scripts/benchmark-scrape.mjs              # plus one check per enabled source and warm updates
+```
+
+Diagnostics shows the same metrics per run under "Scrape performance": the latest total, the
+slowest measured step, per-source medians and p95, and the worker/request/database breakdowns.
+
+Rust stores all application state under `%LOCALAPPDATA%\JobScraper`, using SQLite WAL, migrations, foreign keys, and a 5-second busy timeout. Job search is literal substring matching, not FTS5: the token index was dropped in migration 0017 because it could not match `C++` or `Verification/Validation`. Browser work is isolated in `sidecar/worker.mjs` and uses versioned JSONL over stdin/stdout. It only starts after a Test or Scrape action and is terminated by cancellation/exit.
 
 ## Verification matrix
 
@@ -35,17 +54,20 @@ The current model/adapter boundary expects a bundled offline `bge-small-en-v1.5`
 | --- | --- |
 | Worker protocol, CSS/XPath, feeds, pagination, robots, Retry-After, URL guard, platform HTTP execution | Passed with Node 24 fixtures, including local Workday/Eightfold/iCIMS/Jibe/Phenom listing, pagination/cursor, cookie, and detail requests |
 | Frontend typecheck, workflow tests, production build | Passed |
-| Rust formatting, metadata, compile, and tests | Passed: `cargo fmt --check`, metadata, `cargo check`, and all 43 Rust library tests. |
-| Backup archive and restore lifecycle | Checksummed ZIP manifest, controlled-document enumeration, validation, staging, pre-pool intent application, safety snapshot, same-volume swap/rollback, and fault-injection tests pass. |
-| Offline BGE matching | FastEmbed 6 uses only pinned local resources; 384-D normalized BLOB cache, 350/50 chunks, guarded 45/25/20/10 writes, any/all filters, explanations, and stale-run cancellation are implemented. Both source-tree and installed-resource BGE inference smoke tests return 384 dimensions without runtime downloads. |
+| Scrape performance instrumentation | Every completed, failed or cancelled run records worker buckets, request kinds, app critical path, and database work in `app_logs` and the terminal run event; Diagnostics ranks them and `scripts/benchmark-scrape.mjs` reproduces them. Node, frontend, and Rust metric tests pass. |
+| Rust formatting, metadata, compile, and tests | Passed: `cargo fmt --check`, `cargo check` with no warnings, and 64 Rust library tests. |
+| Backup archive and restore lifecycle (no UI in this build; restore status still shows in Diagnostics) | Checksummed ZIP manifest, controlled-document enumeration, validation, staging, pre-pool intent application, safety snapshot, same-volume swap/rollback, and fault-injection tests pass. |
 | Reminder/refocus | One-shot Task Scheduler XML, scoped UUID reconciliation, reminder-only local DB/toast path, durable apply attempts, Rust focus events, interviews, and ghost lifecycle are implemented; pure lifecycle tests pass. Live toast and scheduled delivery while closed still require manual observation. |
-| Source orchestration/security | Stable starter pack, manual two-domain Scrape All, cooperative cancellation/tree cleanup, session capture, DNS/IP/redirect and Playwright navigation guards, Retry-After, and jitter are implemented. Node fixtures pass. Installed Node 24 plus system Edge completed `started`, `progress`, `job`, `completed` against a local fixture and left no new Edge process. |
-| Sources and resume/persona UI | Structured source forms, capture-session controls, normalized preview table, PDF/DOCX import and correction, immutable resume versions, and full create/edit/archive persona controls are implemented. Frontend workflow and Rust document fixture tests pass. |
-| Application tracking | Recruiter/contact/outcome fields, legal stage service, immutable events, derived response, audited notes, exact document snapshots, interviews/reminders, review actions, and board details are implemented. Frontend and Rust migration/transition tests pass. |
-| Analytics | Filtered event-derived funnel, response metrics, trends, source/company outcomes, score/review/freshness tables, explicit denominators, and small-sample flags are implemented. Frontend semantics and migrated SQLite tests pass. |
-| Deduplication | Exact/fingerprint matching, conservative fuzzy review, lossless conflict snapshots, explicit conflict decisions, merge/unmerge, history UI, and audit evidence are implemented. Frontend and Rust transaction tests pass. |
-| Export and data management | Relationship-closed filtered JSON; RFC4180 jobs/applications/events/interviews/source/company CSV; overwrite-safe save dialog; and token/hash/expiry-bound purge preview are implemented. Frontend and Rust tests pass. |
-| Tauri package | Current-user NSIS build passes. Silent clean install places binaries under `%LOCALAPPDATA%\Programs\JobScraper`, preserves `%LOCALAPPDATA%\JobScraper` data across reinstall/uninstall, and includes physical production Node modules plus pinned offline model resources. |
+| Source orchestration/security | Stable starter pack, five cross-domain lanes with one serial stream per domain, cheap preflight checks, on-demand description enrichment, cooperative cancellation/tree cleanup, session capture, DNS/IP/redirect and Playwright navigation guards, Retry-After, and request pacing are implemented. Node fixtures pass. |
+| Partial reads and completeness | Jobs are published as they are accepted, so a board that fails or is cancelled on page 480 of 500 persists the 479 pages already read. `complete` requires reaching an extent the board itself declared: an unreadable page count is reported as unfinished rather than collapsed to one page, and a run that discovers nothing is never complete. Only a complete run may close a job, so a broken selector no longer reconciles a whole board to closed. |
+| Change checks | A source is skipped only when its own vendor total matches the last complete run's, and never more than three times running before it is read in full anyway — equal totals do not prove nothing changed, since one opening closing while another opens leaves the count identical. A failed check never skips a source; the full read has the retries behind it. |
+| Jobs page | Source selection scopes the list and Update Jobs alike without changing which sources are switched on; empty selection lists nothing. Closed openings are out of the list unless asked for, and `possibly_closed` ones are badged. Results are paged 200 at a time and text input is debounced. Title and full-text filters require every typed word, ignore case and treat punctuation as text. Posting-date sort puts undated listings last. Save/Apply are one idempotent application per job. Rust and frontend tests pass. |
+| Sources UI | Structured source forms, capture-session controls, and a normalized preview table are implemented. Frontend workflow tests pass. |
+| Application tracking | Recruiter/contact/outcome fields, legal stage service, immutable events, derived response, audited notes, exact document snapshots, interviews/reminders, and board details are implemented; stages are named the same everywhere, with `planned` shown as Saved. Frontend and Rust migration/transition tests pass. |
+| Analytics | Implemented in the backend and covered by migrated SQLite tests; no UI in this build. |
+| Deduplication | Identity only: source+external id, canonical URL, requisition id, and a same-source title/company/location fingerprint. Similar-but-distinct openings are never merged and nothing proposes a merge, so the fuzzy review and merged-history UI are gone; the merge/unmerge commands and their audit tables remain. Rust transaction tests pass. |
+| Export and data management | Implemented in the backend and covered by Rust tests; no UI in this build. |
+| Tauri package | The release orchestrator builds a current-user NSIS installer and a folder-based portable ZIP, verifies their sidecars and SHA-256 hashes, and preserves `%LOCALAPPDATA%\JobScraper` data across upgrades and uninstall. Silent clean installer acceptance and portable launch/move acceptance remain manual checks. |
 
 Restore archives contain only `snapshot/jobscraper.sqlite` and controlled `documents/...` entries listed with their byte size and SHA-256. Restore validates every ZIP entry before extracting under `%LOCALAPPDATA%\JobScraper\restore-staging`, then writes an intent. On the next startup, before a SQLite pool opens, it makes a `backups\pre-restore-*.zip` safety snapshot and atomically swaps the database and documents directory. Sessions, Credential Manager material, models, caches, logs, and temporary data are neither archived nor replaced. A failed swap rolls back and leaves its safety snapshot and diagnostic status.
 

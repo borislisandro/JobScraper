@@ -27,6 +27,11 @@ pub struct Source {
     pub disabled_reason: Option<String>,
     pub robots_override: bool,
     pub last_success_at: Option<String>,
+    /// What this source is currently holding: `job_count` is what is still on its board, and
+    /// `closed_count` is what was read from it and has since come off. Counted for the Sources
+    /// list, which is the one place a source's yield is worth seeing next to its name.
+    pub job_count: i64,
+    pub closed_count: i64,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -42,6 +47,7 @@ pub struct Job {
     pub canonical_url: Option<String>,
     pub apply_url: Option<String>,
     pub description_text: String,
+    pub description_status: String,
     pub posted_at: Option<String>,
     pub salary_min: Option<f64>,
     pub salary_max: Option<f64>,
@@ -53,48 +59,8 @@ pub struct Job {
     pub score: Option<f64>,
     pub eligible: Option<bool>,
     pub reasons: Option<String>,
-}
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PersonaInput {
-    pub id: Option<String>,
-    pub name: String,
-    pub target_titles: Vec<String>,
-    pub include_keywords: Vec<String>,
-    #[serde(default = "default_include_keyword_mode")]
-    pub include_keyword_mode: String,
-    pub exclude_keywords: Vec<String>,
-    pub location: Option<String>,
-    pub work_mode: Option<String>,
-    pub seniority: Option<String>,
-    pub salary_min: Option<f64>,
-    pub threshold: f64,
-    pub unknown_policy: String,
-    pub confirmed_skills: Vec<String>,
-    pub resume_document_id: Option<String>,
-}
-fn default_include_keyword_mode() -> String {
-    "any".into()
-}
-#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
-#[serde(rename_all = "camelCase")]
-pub struct Persona {
-    pub id: String,
-    pub name: String,
-    pub target_titles_json: String,
-    pub include_keywords_json: String,
-    pub include_keyword_mode: String,
-    pub exclude_keywords_json: String,
-    pub location: Option<String>,
-    pub work_mode: Option<String>,
-    pub seniority: Option<String>,
-    pub salary_min: Option<f64>,
-    pub threshold: f64,
-    pub unknown_policy: String,
-    pub resume_document_id: Option<String>,
-    pub created_at: String,
-    pub updated_at: String,
-    pub archived_at: Option<String>,
+    /// Stage of the newest application for this job; None when the job was never saved.
+    pub application_stage: Option<String>,
 }
 #[derive(Debug, Clone, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]

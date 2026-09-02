@@ -78,8 +78,9 @@ try {
   if (!events.some((event) => event.event === "job" && event.payload?.title === "Firmware Engineer")) {
     throw new Error(`Installed Edge did not extract fixture job: ${stdout}`);
   }
-  if (events.at(-1)?.event !== "completed" || events.at(-1)?.payload?.complete !== true) {
-    throw new Error(`Missing complete traversal event: ${stdout}`);
+  const completed = events.at(-1);
+  if (completed?.event !== "completed" || completed.payload?.complete !== false || completed.payload?.pages !== 1) {
+    throw new Error(`Missing safe single-page browser result: ${stdout}`);
   }
   await new Promise((resolve) => setTimeout(resolve, 2_000));
   const leaked = [...edgePids()].filter((pid) => !before.has(pid));

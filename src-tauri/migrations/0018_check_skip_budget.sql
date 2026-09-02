@@ -1,0 +1,14 @@
+-- The change check reads one page of a board and, when that page holds nothing new, falls back to
+-- comparing the vendor's total against the last complete run's discovered count. Equal totals were
+-- treated as proof that nothing changed, and the source was then skipped entirely.
+--
+-- Equal totals are not that proof. A board that closed one opening and published another has the
+-- same total, and if the new one is not on the first page — which it is not on any board sorted by
+-- relevance rather than by date — the check sees nothing and the source is never read. One in, one
+-- out is the most ordinary delta a job board has, so the miss is not an edge case, and because the
+-- next check compares against the same unchanged total it repeats forever.
+--
+-- Reading one page cannot detect a change on page forty, so this counter does not make the check
+-- correct; it bounds how long it can be wrong. A source that keeps reporting "unchanged" is read
+-- in full anyway once the streak reaches its limit, and any completed full read resets it.
+ALTER TABLE sources ADD COLUMN unchanged_checks INTEGER NOT NULL DEFAULT 0;

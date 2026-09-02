@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { personaFormValues, previewFromEvents, supportsSessionCapture } from "./source-ui";
+import { describeCheckSummary, describeFailure, describeLogEvent, describeOutcome, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
 
 describe("source preview and session controls", () => {
   it("only offers headed capture to browser-capable adapters", () => {
@@ -19,10 +19,71 @@ describe("source preview and session controls", () => {
   });
 });
 
-describe("persona edit values", () => {
-  it("loads every editable persona field and preserves its ID", () => {
-    const value = personaFormValues({ persona: { id: "p", name: "Embedded", targetTitlesJson: '["Firmware engineer"]', includeKeywordsJson: '["rust"]', includeKeywordMode: "all", excludeKeywordsJson: '["intern"]', location: "Lisbon", workMode: "hybrid", seniority: "senior", salaryMin: 90000, threshold: 72, unknownPolicy: "require_known", resumeDocumentId: "r" }, confirmedSkills: ["Rust", "Linux"] });
-    expect(value).toMatchObject({ id: "p", titles: "Firmware engineer", skills: "Rust, Linux", includeMode: "all", salary: "90000", threshold: 72 });
+describe("user-facing failure text", () => {
+  it("turns worker codes into one plain sentence and never leaks the code", () => {
+    expect(describeFailure("robots_denied")).toBe("This site asks automated tools not to read its job listings.");
+    expect(describeFailure("auth_required")).toBe("This site requires a login before it will show its jobs.");
+    expect(describeFailure("something_new")).toBe("This website doesn't work with JobScraper.");
+    expect(describeFailure()).toBe("This website doesn't work with JobScraper.");
   });
-  it("cancel/create values reset to a blank persona", () => expect(personaFormValues()).toMatchObject({ name: "", includeMode: "any", threshold: 60 }));
+  it("summarizes a run without adapter names, modes or timings", () => {
+    const done = describeOutcome([{ event: "completed", runId: "r", payload: { discovered: 33, mode: "direct", timingMs: 900 } }], "Arm");
+    expect(done).toBe("Arm: 33 listings found.");
+    expect(describeOutcome([{ event: "failed", runId: "r", payload: { code: "rate_limited" } }], "Arm"))
+      .toBe("Arm: This site is asking us to slow down. Try again in a few minutes.");
+  });
+});
+
+describe("warm update summaries", () => {
+  it("reports skipped sources separately from sources that were read", () => {
+    expect(describeUpdateSummary({ runId: "r", completedSources: 2, unchangedSources: 15, failedSources: 1, cancelledSources: 0 }))
+      .toBe("Updated: 2 read, 15 unchanged, 1 failed.");
+  });
+  it("never presents a failed or uncertain check as a changed source", () => {
+    const message = describeCheckSummary([
+      { sourceId: "a", name: "Arm", fresh: 2, stored: 10, changed: true, conclusive: true, requests: 1 },
+      { sourceId: "b", name: "Apple", fresh: 0, stored: 10, changed: false, conclusive: false, requests: 1, error: "timed out" },
+      { sourceId: "c", name: "Unknown", fresh: 0, stored: 10, changed: false, conclusive: false, requests: 1 },
+    ]);
+    expect(message).toContain("Changed: Arm (2 new)");
+    expect(message).toContain("Needs an update to confirm: Unknown");
+    expect(message).toContain("Could not check: Apple (timed out)");
+    expect(message).not.toContain("Changed: Arm (2 new), Apple");
+  });
+});
+
+describe("scrape activity log", () => {
+  it("compresses raw payloads into progress and elapsed-time summaries", () => {
+    expect(describeLogEvent({ event: "started", runId: "r", payload: { adapter: "amd", command: "scrape_source" } }))
+      .toBe("Started scrape · AMD");
+    expect(describeLogEvent({ event: "progress", runId: "r", payload: { phase: "fetching", requests: 42, elapsedMs: 15_000 } }))
+      .toBe("Fetching · 42 requests · 15.0s");
+    expect(describeLogEvent({ event: "progress", runId: "r", payload: { phase: "saving", current: 274, total: 685, elapsedMs: 43_200 } }))
+      .toBe("Saving · 274/685 (40%) · 43.2s");
+    expect(describeLogEvent({ event: "progress", runId: "r", payload: { phase: "enriching", current: 4, total: 10, requests: 4, elapsedMs: 2_000 } }))
+      .toBe("Descriptions · 4/10 · 4 requests · 2.0s");
+    expect(describeLogEvent({ event: "completed", runId: "r", payload: { mode: "enrichment", persisted: 9, failed: 1, requests: 10, elapsedMs: 4_200 } }))
+      .toBe("Descriptions done · 9 saved · 1 failed · 10 requests · 4.2s");
+    expect(describeLogEvent({ event: "completed", runId: "r", payload: { discovered: 1086, persisted: 685, filtered: 401, requests: 109, elapsedMs: 46_138 } }))
+      .toBe("Done · 1,086 found · 685 saved · 401 filtered · 109 requests · 46.1s");
+    expect(describeLogEvent({ event: "warning", runId: "r", payload: { code: "robots_override", message: "long text" } }))
+      .toBe("Robots override active");
+  });
+});
+
+describe("what a probe result means for saving", () => {
+  it("keeps a page that answered but listed nothing, so it can be saved and left off", () => {
+    const verdict = probeVerdict({ recommendedAdapter: "static-css", unsupported: true, reason: "no_listings", sampleJobs: [] });
+    expect(verdict).toEqual({ ok: true, adapterId: "static-css", found: 0 });
+  });
+  it("reports how many listings a working page produced", () => {
+    expect(probeVerdict({ recommendedAdapter: "workday", sampleJobs: [{}, {}, {}] }))
+      .toEqual({ ok: true, adapterId: "workday", found: 3 });
+  });
+  it("refuses a page that could not be read at all, and says why in one sentence", () => {
+    expect(probeVerdict({ recommendedAdapter: "static-css", unsupported: true, reason: "blocked" }))
+      .toEqual({ ok: false, error: "This site blocks automated tools from reading its job listings." });
+    expect(probeVerdict({ reason: "not_found" }))
+      .toEqual({ ok: false, error: "That page could not be found. Check the address and try again." });
+  });
 });

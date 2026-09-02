@@ -1,12 +1,12 @@
 use crate::notifications::{
-    is_managed_task_path, scoped_orphans, Reminder as ScheduledReminder, Scheduler,
-    WindowsTaskScheduler,
+    is_managed_task_path, run_scheduler_blocking, scoped_orphans, Reminder as ScheduledReminder,
+    Scheduler, WindowsTaskScheduler, SYNC_TASK,
 };
 use crate::{
-    domain::{Application, Persona, PersonaInput, Source, SourceInput, StageInput},
+    domain::{Application, Source, SourceInput, StageInput},
     AppState,
 };
-use base64::{engine::general_purpose::STANDARD, Engine};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -15,25 +15,19 @@ use sqlx::{
     Row, SqlitePool,
 };
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet},
     path::{Path, PathBuf},
     sync::{Arc, Mutex, OnceLock},
 };
-use tauri::{Emitter, State};
+use tauri::{ipc::InvokeBody, Emitter, State};
 use tauri_plugin_opener::OpenerExt;
 use url::Url;
 use uuid::Uuid;
 
 pub type ApiResult<T> = Result<T, String>;
-static RESCORE_CANCELLED: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
-static RESCORE_ACTIVE: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
+const MAX_ATTACHMENT_BYTES: usize = 20 * 1024 * 1024;
+const DOCUMENT_METADATA_HEADER: &str = "x-jobscraper-metadata";
 static PURGE_PREVIEWS: OnceLock<Mutex<HashMap<String, PurgePreviewState>>> = OnceLock::new();
-fn cancelled_runs() -> &'static Mutex<HashSet<String>> {
-    RESCORE_CANCELLED.get_or_init(|| Mutex::new(HashSet::new()))
-}
-fn active_runs() -> &'static Mutex<HashSet<String>> {
-    RESCORE_ACTIVE.get_or_init(|| Mutex::new(HashSet::new()))
-}
 fn purge_previews() -> &'static Mutex<HashMap<String, PurgePreviewState>> {
     PURGE_PREVIEWS.get_or_init(|| Mutex::new(HashMap::new()))
 }
@@ -53,6 +47,14 @@ pub struct Database {
 fn now() -> String {
     Utc::now().to_rfc3339()
 }
+pub const SYNC_HEARTBEAT: &str = "sync.heartbeatAt";
+const SYNC_BACKGROUND: &str = "sync.background";
+const HEARTBEAT_FRESH_SECS: i64 = 300;
+// Bump whenever any starter's URL, adapter or settings change. A pack corrected without a new
+// version reaches nobody: install_starter_pack stops at the version check, and every database
+// stamped with the old number keeps the values that did not work. That is exactly how installs
+// ended up reading jobs.cisco.com and www.careers.mediatek.com long after both were fixed here.
+const STARTER_PACK_VERSION: &str = "2026-09-02";
 /// Conflict snapshots are immutable audit evidence. Old, pre-operational snapshots
 /// deliberately fail closed: they cannot be used to delete or re-key a live row.
 fn dedupe_snapshot_id(snapshot: &str) -> ApiResult<String> {
@@ -122,6 +124,479 @@ fn ghost_due_from(occurred_at: &str, days: i64) -> ApiResult<String> {
 fn id() -> String {
     Uuid::new_v4().to_string()
 }
+#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct AppLog {
+    pub id: String,
+    pub at: String,
+    pub level: String,
+    pub source_id: Option<String>,
+    pub source_name: Option<String>,
+    pub action: String,
+    pub code: Option<String>,
+    pub message: String,
+    pub detail_json: String,
+}
+/// Records one line of user-visible activity. Logging must never fail a user action, so write
+/// errors are swallowed here rather than propagated into the caller's Result.
+pub async fn log(
+    pool: &SqlitePool,
+    level: &str,
+    source_id: Option<&str>,
+    source_name: Option<&str>,
+    action: &str,
+    code: Option<&str>,
+    message: &str,
+    detail: serde_json::Value,
+) {
+    let _ = sqlx::query("INSERT INTO app_logs(id,at,level,source_id,source_name,action,code,message,detail_json) VALUES(?,?,?,?,?,?,?,?,?)")
+        .bind(id()).bind(now()).bind(level).bind(source_id).bind(source_name)
+        .bind(action).bind(code).bind(message).bind(detail.to_string())
+        .execute(pool).await;
+}
+#[tauri::command]
+pub async fn list_app_logs(limit: i64, state: State<'_, Arc<AppState>>) -> ApiResult<Vec<AppLog>> {
+    sqlx::query_as::<_, AppLog>("SELECT id,at,level,source_id,source_name,action,code,message,detail_json FROM app_logs ORDER BY at DESC, rowid DESC LIMIT ?")
+        .bind(limit.clamp(1, 1000))
+        .fetch_all(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())
+}
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PerformancePhase {
+    pub key: String,
+    pub milliseconds: u64,
+}
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PerformanceRun {
+    pub id: String,
+    pub at: String,
+    pub source_id: Option<String>,
+    pub source_name: Option<String>,
+    pub action: String,
+    pub outcome: String,
+    pub total_ms: u64,
+    pub worker_ms: u64,
+    pub requests: u64,
+    pub pages: u64,
+    pub jobs: u64,
+    pub slowest_phase: Option<PerformancePhase>,
+    pub phases: BTreeMap<String, u64>,
+    pub requests_by_kind: serde_json::Value,
+    pub performance: serde_json::Value,
+}
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PerformanceAggregate {
+    pub source_id: Option<String>,
+    pub source_name: Option<String>,
+    pub action: String,
+    pub samples: usize,
+    pub median_ms: u64,
+    pub p95_ms: Option<u64>,
+    pub slowest_phase: Option<PerformancePhase>,
+}
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PerformanceHistory {
+    pub recent: Vec<PerformanceRun>,
+    pub aggregates: Vec<PerformanceAggregate>,
+}
+fn json_u64(value: Option<&serde_json::Value>) -> u64 {
+    value
+        .and_then(|value| {
+            value
+                .as_u64()
+                .or_else(|| value.as_f64().map(|n| n.max(0.0) as u64))
+        })
+        .unwrap_or(0)
+}
+fn insert_phase_group(
+    phases: &mut BTreeMap<String, u64>,
+    prefix: &str,
+    value: Option<&serde_json::Value>,
+) {
+    let Some(values) = value.and_then(serde_json::Value::as_object) else {
+        return;
+    };
+    for (key, value) in values {
+        if value.is_number() {
+            phases.insert(format!("{prefix}.{key}"), json_u64(Some(value)));
+        }
+    }
+}
+fn median(values: &mut [u64]) -> u64 {
+    values.sort_unstable();
+    match values.len() {
+        0 => 0,
+        n if n % 2 == 1 => values[n / 2],
+        n => values[n / 2 - 1].saturating_add(values[n / 2]) / 2,
+    }
+}
+fn p95(values: &mut [u64]) -> u64 {
+    values.sort_unstable();
+    values[((values.len() * 95).div_ceil(100)).saturating_sub(1)]
+}
+// app.active is the parent of every workMs entry, so ranking it against its own children would
+// always name the parent. It is reported as a phase but never as the answer to "what cost most".
+fn slowest(phases: &BTreeMap<String, u64>) -> Option<PerformancePhase> {
+    phases
+        .iter()
+        .filter(|(key, value)| **value > 0 && key.as_str() != "app.active")
+        .max_by_key(|(_, value)| **value)
+        .map(|(key, milliseconds)| PerformancePhase {
+            key: key.clone(),
+            milliseconds: *milliseconds,
+        })
+}
+fn performance_run(log: AppLog) -> Option<PerformanceRun> {
+    let detail: serde_json::Value = serde_json::from_str(&log.detail_json).ok()?;
+    let performance = detail.get("performance")?.clone();
+    if performance.get("version").and_then(|value| value.as_u64()) != Some(1) {
+        return None;
+    }
+    let worker = performance.get("worker");
+    let app = performance.get("app");
+    let mut phases = BTreeMap::new();
+    insert_phase_group(
+        &mut phases,
+        "worker",
+        worker.and_then(|value| value.get("bucketsMs")),
+    );
+    insert_phase_group(
+        &mut phases,
+        "app",
+        app.and_then(|value| value.get("criticalPathMs")),
+    );
+    insert_phase_group(
+        &mut phases,
+        "work",
+        app.and_then(|value| value.get("workMs")),
+    );
+    let total_ms = json_u64(app.and_then(|value| value.get("totalMs")))
+        .max(json_u64(worker.and_then(|value| value.get("totalMs"))));
+    let worker_ms = json_u64(worker.and_then(|value| value.get("totalMs")));
+    let outcome = if detail.get("code").and_then(|value| value.as_str()) == Some("cancelled") {
+        "cancelled"
+    } else if log.level == "error" {
+        "failed"
+    } else {
+        "completed"
+    };
+    let requests_by_kind = worker
+        .and_then(|value| value.get("requestsByKind"))
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    Some(PerformanceRun {
+        id: log.id,
+        at: log.at,
+        source_id: log.source_id,
+        source_name: log.source_name,
+        action: log.action,
+        outcome: outcome.into(),
+        total_ms,
+        worker_ms,
+        requests: json_u64(detail.get("requests")),
+        pages: json_u64(detail.get("pages")),
+        jobs: json_u64(
+            detail
+                .get("discovered")
+                .or_else(|| detail.get("completedSources")),
+        ),
+        slowest_phase: slowest(&phases),
+        phases,
+        requests_by_kind,
+        performance,
+    })
+}
+fn performance_history_from_logs(logs: Vec<AppLog>) -> PerformanceHistory {
+    let runs = logs
+        .into_iter()
+        .filter_map(performance_run)
+        .collect::<Vec<_>>();
+    let recent = runs.iter().take(50).cloned().collect::<Vec<_>>();
+    let mut groups: HashMap<(Option<String>, Option<String>, String), Vec<&PerformanceRun>> =
+        HashMap::new();
+    for run in runs.iter().filter(|run| run.outcome == "completed") {
+        let group = groups
+            .entry((
+                run.source_id.clone(),
+                run.source_name.clone(),
+                run.action.clone(),
+            ))
+            .or_default();
+        if group.len() < 20 {
+            group.push(run);
+        }
+    }
+    let mut aggregates = groups
+        .into_iter()
+        .map(|((source_id, source_name, action), runs)| {
+            let mut totals = runs.iter().map(|run| run.total_ms).collect::<Vec<_>>();
+            let samples = totals.len();
+            let median_ms = median(&mut totals);
+            let p95_ms = (samples >= 5).then(|| p95(&mut totals));
+            let mut phase_samples: HashMap<String, Vec<u64>> = HashMap::new();
+            for run in &runs {
+                for (key, value) in &run.phases {
+                    if key != "app.active" {
+                        phase_samples.entry(key.clone()).or_default().push(*value);
+                    }
+                }
+            }
+            let phase_medians = phase_samples
+                .into_iter()
+                .map(|(key, mut values)| (key, median(&mut values)))
+                .collect::<BTreeMap<_, _>>();
+            PerformanceAggregate {
+                source_id,
+                source_name,
+                action,
+                samples,
+                median_ms,
+                p95_ms,
+                slowest_phase: slowest(&phase_medians),
+            }
+        })
+        .collect::<Vec<_>>();
+    aggregates.sort_by(|a, b| {
+        b.median_ms
+            .cmp(&a.median_ms)
+            .then_with(|| a.action.cmp(&b.action))
+    });
+    PerformanceHistory { recent, aggregates }
+}
+#[tauri::command]
+pub async fn scrape_performance(state: State<'_, Arc<AppState>>) -> ApiResult<PerformanceHistory> {
+    let logs = sqlx::query_as::<_, AppLog>("SELECT id,at,level,source_id,source_name,action,code,message,detail_json FROM app_logs ORDER BY at DESC,rowid DESC LIMIT 1000")
+        .fetch_all(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(performance_history_from_logs(logs))
+}
+/// The setting holding the scrape-time title filter, the first of the app's two filter layers:
+/// this one decides what is ever stored, the Jobs page decides what is shown of what was stored.
+pub const SCRAPE_TITLE_FILTER: &str = "scrape.titleAny";
+/// Terms are separated by commas or newlines so a phrase ("design verification") stays one term.
+pub fn scrape_filter_terms(raw: &str) -> Vec<String> {
+    raw.split(['\n', ','])
+        .map(|term| term.trim().to_lowercase())
+        .filter(|term| !term.is_empty())
+        .collect()
+}
+/// No terms means no filter — an empty box must never silently discard an entire run.
+pub fn title_passes_scrape_filter(title: &str, terms: &[String]) -> bool {
+    if terms.is_empty() {
+        return true;
+    }
+    let title = title.to_lowercase();
+    terms.iter().any(|term| title.contains(term.as_str()))
+}
+#[derive(Debug, Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct JobDescription {
+    pub text: String,
+    pub status: String,
+    pub error: Option<String>,
+}
+/// One job's description, read when its card is opened. Kept out of the list query so that
+/// listing jobs does not move prose nobody is looking at.
+pub async fn load_job_description(pool: &SqlitePool, job_id: &str) -> ApiResult<JobDescription> {
+    sqlx::query_as("SELECT description_text AS text,description_status AS status,description_error AS error FROM jobs WHERE id=?")
+        .bind(job_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "Job was not found".into())
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PurgeAllJobsResult {
+    pub deleted: i64,
+    pub kept: i64,
+}
+/// Deletes every stored listing. Sightings, revisions, dedupe events and match results go with
+/// them by foreign key; the sources themselves are untouched, so the next update refills the list.
+///
+/// Two things are deliberately protected. A job you have saved or applied to is kept, because the
+/// application on it is your own work and not something a scraper can fetch again. And the caller
+/// has to type the confirmation exactly — a destructive command that fires on a stray click is a
+/// bug waiting to happen, so the word is checked here rather than only in the window.
+#[tauri::command]
+pub async fn purge_all_jobs(
+    confirmation: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<PurgeAllJobsResult> {
+    purge_jobs(&state.db.pool, &confirmation).await
+}
+/// The command body, taking a pool so the guarantees above can be tested without Tauri state.
+pub async fn purge_jobs(pool: &SqlitePool, confirmation: &str) -> ApiResult<PurgeAllJobsResult> {
+    if confirmation.trim() != "Confirm" {
+        return Err("Type Confirm to delete every stored job".into());
+    }
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    let deleted = sqlx::query(
+        "DELETE FROM jobs WHERE NOT EXISTS(SELECT 1 FROM applications a WHERE a.job_id=jobs.id) AND NOT EXISTS(SELECT 1 FROM review_decisions r WHERE r.job_id=jobs.id)",
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?
+    .rows_affected() as i64;
+    let kept: i64 = sqlx::query_scalar("SELECT count(*) FROM jobs")
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())?;
+    log(
+        pool,
+        "warning",
+        None,
+        None,
+        "purge_all_jobs",
+        None,
+        &format!("Deleted every stored job: {deleted} removed, {kept} kept because they have an application or a review."),
+        serde_json::json!({"deleted":deleted,"kept":kept}),
+    )
+    .await;
+    Ok(PurgeAllJobsResult { deleted, kept })
+}
+#[tauri::command]
+pub async fn get_setting(
+    key: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Option<String>> {
+    sqlx::query_scalar("SELECT value FROM settings WHERE key=?")
+        .bind(key)
+        .fetch_optional(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())
+}
+#[tauri::command]
+pub async fn set_setting(
+    key: String,
+    value: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    write_setting(&state.db.pool, &key, &value).await
+}
+async fn write_setting(pool: &SqlitePool, key: &str, value: &str) -> ApiResult<()> {
+    sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at")
+        .bind(key).bind(value).bind(now())
+        .execute(pool)
+        .await
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+/// A fresh cross-process heartbeat means another JobScraper process owns the batch.
+pub async fn sync_in_progress(pool: &SqlitePool) -> bool {
+    let value = sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key=?")
+        .bind(SYNC_HEARTBEAT)
+        .fetch_optional(pool)
+        .await
+        .ok()
+        .flatten();
+    value
+        .and_then(|value| chrono::DateTime::parse_from_rfc3339(&value).ok())
+        .is_some_and(|heartbeat| {
+            Utc::now()
+                .signed_duration_since(heartbeat.with_timezone(&Utc))
+                .num_seconds()
+                < HEARTBEAT_FRESH_SECS
+        })
+}
+pub async fn write_sync_heartbeat(pool: &SqlitePool) {
+    let _ = write_setting(pool, SYNC_HEARTBEAT, &now()).await;
+}
+pub async fn clear_sync_heartbeat(pool: &SqlitePool) {
+    let _ = sqlx::query("DELETE FROM settings WHERE key=?")
+        .bind(SYNC_HEARTBEAT)
+        .execute(pool)
+        .await;
+}
+
+#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
+pub struct NewJob {
+    pub title: String,
+    pub company: String,
+}
+/// `created_at` is insert-only, so re-scraping an existing listing cannot resurface it here.
+pub async fn new_jobs_since(
+    pool: &SqlitePool,
+    since: &str,
+    limit: i64,
+) -> ApiResult<(i64, Vec<NewJob>)> {
+    let count = sqlx::query_scalar(
+        "SELECT count(*) FROM jobs WHERE created_at >= ? AND availability != 'closed'",
+    )
+    .bind(since)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    let jobs = sqlx::query_as(
+        "SELECT title,company FROM jobs WHERE created_at >= ? AND availability != 'closed' ORDER BY created_at DESC LIMIT ?",
+    )
+    .bind(since)
+    .bind(limit.max(0))
+    .fetch_all(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok((count, jobs))
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BackgroundSyncStatus {
+    pub enabled: bool,
+    pub requested: bool,
+    pub debug_build: bool,
+}
+async fn background_sync_status_pool(pool: &SqlitePool) -> ApiResult<BackgroundSyncStatus> {
+    let requested = sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key=?")
+        .bind(SYNC_BACKGROUND)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .is_some_and(|value| value == "true");
+    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
+    let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    Ok(BackgroundSyncStatus {
+        enabled: run_scheduler_blocking(move || scheduler.exists(SYNC_TASK)).await?,
+        requested,
+        debug_build: cfg!(debug_assertions),
+    })
+}
+#[tauri::command]
+pub async fn background_sync_status(
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<BackgroundSyncStatus> {
+    background_sync_status_pool(&state.db.pool).await
+}
+#[tauri::command]
+pub async fn set_background_sync(
+    enabled: bool,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<BackgroundSyncStatus> {
+    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
+    let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    run_scheduler_blocking(move || {
+        if enabled {
+            scheduler.create_sync()?;
+        } else if scheduler.exists(SYNC_TASK)? {
+            scheduler.cancel(SYNC_TASK)?;
+        }
+        Ok(())
+    })
+    .await?;
+    write_setting(
+        &state.db.pool,
+        SYNC_BACKGROUND,
+        if enabled { "true" } else { "false" },
+    )
+    .await?;
+    background_sync_status_pool(&state.db.pool).await
+}
 pub fn normalize_canonical_url(value: &str) -> Option<String> {
     let mut url = Url::parse(value).ok()?;
     if !matches!(url.scheme(), "http" | "https") {
@@ -173,23 +648,16 @@ fn job_fingerprint(title: &str, company: &str, location: Option<&str>) -> String
         ))
     )
 }
-fn fuzzy_similarity(left: &str, right: &str) -> f64 {
-    let left_text = normalized_text(left);
-    let right_text = normalized_text(right);
-    let left: HashSet<_> = left_text.split_whitespace().map(str::to_owned).collect();
-    let right: HashSet<_> = right_text.split_whitespace().map(str::to_owned).collect();
-    if left.is_empty() || right.is_empty() {
-        return 0.0;
-    };
-    let shared = left.intersection(&right).count();
-    let jaccard = shared as f64 / left.union(&right).count() as f64;
-    // Seniority suffixes (for example, "II") should suggest, not silently merge,
-    // an otherwise exact multi-word title. One-word containment stays conservative.
-    if shared >= 2 && (left.is_subset(&right) || right.is_subset(&left)) {
-        jaccard.max(0.9)
-    } else {
-        jaccard
-    }
+fn worker_content_hash(title: &str, company: &str, description: &str) -> String {
+    format!(
+        "{:x}",
+        Sha256::digest(format!("{title}\n{company}\n{description}"))
+    )
+}
+#[derive(Default, Debug, Clone, Copy)]
+pub struct PersistBatchResult {
+    pub written: u32,
+    pub unchanged: u32,
 }
 const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
@@ -208,61 +676,132 @@ fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
     }
     Ok(())
 }
+/// sqlx refuses a database carrying a migration this binary does not have (VersionMissing), which
+/// is exactly what an older build sees after a newer one has run. The raw error names neither the
+/// cause nor the fix, and the user's data is fine, so say so.
+pub fn migration_error(error: sqlx::migrate::MigrateError) -> String {
+    match error {
+        sqlx::migrate::MigrateError::VersionMissing(version) => format!(
+            "This database was created by a newer version of JobScraper (schema {version}). Install the newer version to open it — your data is intact."
+        ),
+        other => other.to_string(),
+    }
+}
 impl Database {
-    pub async fn open(path: PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
+    /// Builds the pool without touching the disk, so application startup can manage its state
+    /// and paint a window before any I/O happens. Connecting and migrating is `prepare()`.
+    pub fn connect_lazy(path: PathBuf) -> Self {
         let opts = SqliteConnectOptions::new()
             .filename(&path)
             .create_if_missing(true)
             .foreign_keys(true);
-        let pool = SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect_with(opts)
-            .await?;
+        Self {
+            pool: SqlitePoolOptions::new()
+                .max_connections(5)
+                .connect_lazy_with(opts),
+            root: path.parent().unwrap_or(Path::new(".")).to_path_buf(),
+        }
+    }
+    pub async fn prepare(&self) -> ApiResult<()> {
         sqlx::query("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;")
-            .execute(&pool)
-            .await?;
-        sqlx::migrate!("./migrations").run(&pool).await?;
-        Ok(Self {
-            pool,
-            root: path.parent().unwrap().to_path_buf(),
-        })
+            .execute(&self.pool)
+            .await
+            .map_err(|e| e.to_string())?;
+        sqlx::migrate!("./migrations")
+            .run(&self.pool)
+            .await
+            .map_err(migration_error)?;
+        // Fast, bounded planner maintenance after schema/index changes. It never rewrites user
+        // rows or blocks startup with a whole-database VACUUM.
+        sqlx::query("PRAGMA optimize")
+            .execute(&self.pool)
+            .await
+            .map(|_| ())
+            .map_err(|e| e.to_string())
+    }
+    /// A process can disappear after opening a run but before its terminal event. Those partial
+    /// sightings must never affect availability, and the run must not remain "running" forever.
+    pub async fn recover_interrupted_runs(&self) -> ApiResult<u64> {
+        // Another process may own these running rows. Its heartbeat prevents this startup from
+        // deleting live sightings; a crashed owner becomes recoverable after five minutes.
+        if sync_in_progress(&self.pool).await {
+            return Ok(0);
+        }
+        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        sqlx::query(
+            "DELETE FROM job_occurrences WHERE run_id IN (SELECT id FROM scrape_runs WHERE status='running')",
+        )
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+        let recovered = sqlx::query("UPDATE scrape_runs SET status='cancelled',complete=0,failure_code='interrupted',diagnostics='The app exited before this run finished; partial sightings were discarded.',finished_at=? WHERE status='running'")
+            .bind(now())
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?
+            .rows_affected();
+        tx.commit().await.map_err(|e| e.to_string())?;
+        Ok(recovered)
+    }
+    pub async fn open(path: PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
+        let db = Self::connect_lazy(path);
+        db.prepare().await?;
+        Ok(db)
     }
     pub async fn install_starter_pack(&self) -> ApiResult<()> {
+        let installed: Option<String> = sqlx::query_scalar(
+            "SELECT value FROM schema_metadata WHERE key='starter_pack_version'",
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+        if installed.as_deref() == Some(STARTER_PACK_VERSION) {
+            return Ok(());
+        }
         // Stable IDs make this dated pack idempotent even when a user renames a
         // source. All active starters are disabled until explicitly enabled.
         //
-        // Live-fire verified 2026-08-29 (see the "Round 2" plan doc): only the five
-        // Workday tenants below actually return jobs anonymously. Every Eightfold,
-        // iCIMS, Phenom and custom-api source was confirmed dead end-to-end (auth
-        // gate, robots denial, bot-management redirect loop, or a 404'd/replatformed
-        // URL) and is seeded disabled with the specific reason found, per source,
-        // rather than a generic placeholder.
+        // Live-fire verified 2026-08-31: every source below returns real vacancies anonymously
+        // through the sidecar's own guarded fetch.
+        // The earlier pack guessed generic ATS adapters for hosts that do not serve one
+        // (Arm ships TalentBrew assets but Radancy markup; Cisco ships Phenom assets but
+        // an inline payload; Micron is a Workday tenant, not an Eightfold one) and those
+        // guesses are corrected here against the live contract, not against the vendor
+        // fingerprint. Microchip's board is a Workday tenant on wd5.myworkdaysite.com (its own
+        // careers host only 302s to a marketing page), and u-blox's openings come from the Algolia
+        // index its job-openings page queries client-side; both were verified live.
         let starters = [
-            ("00000000-0000-4000-8000-000000000001","Microchip","https://careers.microchip.com/","custom-api","www.microchip.com","active","{}","careers.microchip.com redirects (302) to a www.microchip.com marketing page, not a Workday tenant; no ATS endpoint was identified for Microchip."),
-            ("00000000-0000-4000-8000-000000000002","Analog Devices","https://analogdevices.wd1.myworkdayjobs.com/","workday","analogdevices.wd1.myworkdayjobs.com","active","{\"tenant\":\"analogdevices\",\"site\":\"External\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000003","Broadcom","https://broadcom.wd1.myworkdayjobs.com/","workday","broadcom.wd1.myworkdayjobs.com","active","{\"tenant\":\"broadcom\",\"site\":\"External_Career\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000004","Intel","https://intel.wd1.myworkdayjobs.com/","workday","intel.wd1.myworkdayjobs.com","active","{\"tenant\":\"intel\",\"site\":\"External\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000005","Marvell","https://marvell.wd1.myworkdayjobs.com/","workday","marvell.wd1.myworkdayjobs.com","active","{\"tenant\":\"marvell\",\"site\":\"MarvellCareers\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000006","STMicroelectronics","https://careers.st.com/","eightfold","careers.st.com","active","{}","careers.st.com does not resolve (DNS NXDOMAIN); no working STMicroelectronics careers host was identified."),
-            ("00000000-0000-4000-8000-000000000007","NVIDIA","https://nvidia.wd5.myworkdayjobs.com/","workday","nvidia.wd5.myworkdayjobs.com","active","{\"tenant\":\"nvidia\",\"site\":\"NVIDIAExternalCareerSite\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000008","GlobalFoundries","https://gf.com/careers","eightfold","gf.com","active","{}","gf.com/careers is a WordPress-hosted marketing page (robots.txt references wp-admin/wp-json, not Eightfold) and returns 403 to non-browser requests; no Eightfold or other ATS endpoint was identified."),
-            ("00000000-0000-4000-8000-000000000009","Micron","https://careers.micron.com/","eightfold","careers.micron.com","active","{}","Eightfold's allow-listed search paths (/api/career_hub, /api/apply/v2/jobs) require an authenticated PCSX session; anonymous requests are redirected to /login or rejected (\"Not authorized for PCSX\"). No public JSON endpoint is exposed."),
-            ("00000000-0000-4000-8000-000000000010","Qualcomm","https://careers.qualcomm.com/","eightfold","careers.qualcomm.com","active","{}","Eightfold's allow-listed search paths (/api/career_hub, /api/apply/v2/jobs) require an authenticated PCSX session; anonymous requests are redirected to /login. No public JSON endpoint is exposed."),
-            ("00000000-0000-4000-8000-000000000011","Arm","https://careers.arm.com/","talentbrew-jibe","careers.arm.com","active","{}","careers.arm.com's own job search path (/search-jobs/) is robots-disallowed, and its actual application backends (earlycareers-arm.icims.com, experienced-arm.icims.com) publish a blanket \"Disallow: /\". No path can be scraped without violating robots."),
-            ("00000000-0000-4000-8000-000000000012","AMD","https://careers.amd.com/","icims","careers.amd.com","active","{}","careers.amd.com returns a same-URL redirect loop to non-browser requests, consistent with bot-management middleware; the real ATS platform could not be confirmed without a JavaScript-executing client, which is out of scope."),
-            ("00000000-0000-4000-8000-000000000013","Cisco","https://careers.cisco.com/","phenom","careers.cisco.com","active","{}","jobs.cisco.com redirects to careers.cisco.com (confirmed Phenom-branded via its CareerConnectResources assets), but this tenant's custom build exposes no working /search-jobs/results endpoint (404) and its sitemaps list no job URLs (client-rendered). No public JSON endpoint was found."),
-            ("00000000-0000-4000-8000-000000000014","Apple","https://jobs.apple.com/","custom-api","jobs.apple.com","active","{}","jobs.apple.com runs a proprietary internal careers API; it is not one of the five supported ATS platforms."),
-            ("00000000-0000-4000-8000-000000000015","MediaTek","https://www.mediatek.com/careers","custom-api","www.mediatek.com","active","{}","www.mediatek.com/careers returns 404; MediaTek's current careers URL and ATS platform were not identified."),
-            ("00000000-0000-4000-8000-000000000016","u-blox","https://www.u-blox.com/en/careers","custom-api","www.u-blox.com","active","{}","www.u-blox.com/en/careers does not expose a recognizable ATS platform; it is not one of the five supported adapters."),
-            ("00000000-0000-4000-8000-000000000017","Google","https://www.google.com/about/careers/applications/jobs/results","custom-api","www.google.com","active","{}","Google's careers site runs a proprietary internal API; it is not one of the five supported ATS platforms."),
-            ("00000000-0000-4000-8000-000000000018","SK hynix","https://www.skhynix.com/eng/careers/","custom-api","www.skhynix.com","active","{}","www.skhynix.com/eng/careers/ returns 404; SK hynix's current careers URL and ATS platform were not identified."),
+            ("00000000-0000-4000-8000-000000000001","Microchip","https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External","workday","wd5.myworkdaysite.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"microchiphr\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000002","Analog Devices","https://analogdevices.wd1.myworkdayjobs.com/","workday","analogdevices.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"analogdevices\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000003","Broadcom","https://broadcom.wd1.myworkdayjobs.com/","workday","broadcom.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External_Career\",\"tenant\":\"broadcom\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000004","Intel","https://intel.wd1.myworkdayjobs.com/","workday","intel.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"intel\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000005","Marvell","https://marvell.wd1.myworkdayjobs.com/","workday","marvell.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"MarvellCareers\",\"tenant\":\"marvell\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000006","STMicroelectronics","https://stmicroelectronics.eightfold.ai/","eightfold","stmicroelectronics.eightfold.ai","active","{\"domain\":\"stmicroelectronics.com\",\"eightfoldApi\":\"legacy\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000007","NVIDIA","https://nvidia.wd5.myworkdayjobs.com/","workday","nvidia.wd5.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"NVIDIAExternalCareerSite\",\"splitFacet\":\"jobFamilyGroup\",\"splitThreshold\":2000,\"tenant\":\"nvidia\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000008","GlobalFoundries","https://careers.gf.com/","eightfold","careers.gf.com","active","{\"domain\":\"globalfoundries.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000009","Micron","https://micron.wd1.myworkdayjobs.com/","workday","micron.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"micron\"}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000010","Qualcomm","https://careers.qualcomm.com/","eightfold","careers.qualcomm.com","active","{\"domain\":\"qualcomm.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000011","Arm","https://careers.arm.com/search-jobs","arm","careers.arm.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000012","AMD","https://careers.amd.com/","amd","careers.amd.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000013","Cisco","https://careers.cisco.com/global/en/search-results","cisco","careers.cisco.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000014","Apple","https://jobs.apple.com/en-us/search?location=","apple","jobs.apple.com","active","{\"locale\":\"en-us\",\"maxPages\":500,\"requestDelayMs\":250}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000015","MediaTek","https://careers.mediatek.com/en/jobs","mediatek","careers.mediatek.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000016","u-blox","https://www.u-blox.com/en/job-openings","u-blox","","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
+            ("00000000-0000-4000-8000-000000000017","Google","https://www.google.com/about/careers/applications/jobs/results/","google","www.google.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
+            // SK hynix's listings live on two boards it does not host (skcareers.com and a
+            // Greenhouse board), so no single expectedHost describes this source's traffic.
+            ("00000000-0000-4000-8000-000000000018","SK hynix","https://talent.skhynix.com/hub/en/apply/job","sk-hynix","","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
             ("00000000-0000-4000-8000-000000000019","Marvell (reference)","https://www.marvell.com/company/careers.html","reference","www.marvell.com","reference","{}","Reference-only source: it is never scraped."),
+            ("00000000-0000-4000-8000-000000000020","NXP","https://nxp.wd3.myworkdayjobs.com/","workday","nxp.wd3.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"careers\",\"tenant\":\"nxp\"}","Starter source is disabled until you review and enable it."),
         ];
         for (source_id, name, url, adapter, host, kind, extra_config, reason) in starters {
             let t = now();
-            sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,0,0,?,?)")
+            sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,1,0,?,?)")
     .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(reason).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":host,"adapterVersion":"1.1.0","mode":"direct"});
+            let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":STARTER_PACK_VERSION,"adapterVersion":"1.1.0","mode":"direct"});
+            if !host.is_empty() {
+                config["expectedHost"] = serde_json::json!(host);
+            }
             if let (Some(base), Some(extra)) = (
                 config.as_object_mut(),
                 serde_json::from_str::<serde_json::Value>(extra_config)
@@ -278,28 +817,196 @@ impl Database {
             // and every historical reference remain intact.
             sqlx::query("UPDATE sources SET enabled=0,deleted_at=?,disabled_reason='Replaced by versioned starter-pack source' WHERE id<>? AND name=? AND base_url=? AND adapter_id=? AND enabled=0 AND deleted_at IS NULL AND created_at=updated_at AND disabled_reason='Starter source is disabled until you review and enable it.' AND NOT EXISTS (SELECT 1 FROM scrape_runs WHERE scrape_runs.source_id=sources.id) AND NOT EXISTS (SELECT 1 FROM jobs WHERE jobs.source_id=sources.id) AND EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=sources.id AND c.created_at=c.updated_at AND c.config_json LIKE '%starterPackVersion%')")
                 .bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            // INSERT OR IGNORE above cannot fix a row from a previous install of this
-            // pack. Reconcile the same fields the tuple above just corrected — same
-            // pattern as the original NVIDIA adapter fix — but only when the row is
-            // still exactly as this pack installed it (never edited by the user).
-            sqlx::query("UPDATE sources SET name=?,base_url=?,adapter_id=?,disabled_reason=?,updated_at=? WHERE id=? AND created_at=updated_at AND (name<>? OR base_url<>? OR adapter_id<>? OR disabled_reason<>?)")
+            // INSERT OR IGNORE cannot fix a row an earlier pack already wrote, so the fields this
+            // pack owns are asserted here. Deliberately not restricted to untouched rows: enabling
+            // a source counts as touching it, and the rows most in need of correcting are the ones
+            // someone tried to use. What belongs to the user is left alone — whether the source is
+            // switched on, and whether it was deleted.
+            sqlx::query("UPDATE sources SET name=?,base_url=?,adapter_id=?,disabled_reason=CASE WHEN enabled=0 THEN ? ELSE disabled_reason END,updated_at=? WHERE id=? AND (name<>? OR base_url<>? OR adapter_id<>? OR (enabled=0 AND disabled_reason IS NOT ?))")
                 .bind(name).bind(url).bind(adapter).bind(reason).bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).bind(reason).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            let existing_config: Option<String> = sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=? AND created_at=updated_at").bind(source_id).fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            // The config is replaced rather than merged into: merging leaves behind whatever an
+            // older pack wrote and this one dropped, and those leftovers are not inert — the
+            // "pageSize": 0 an earlier pack left on Micron and NVIDIA asks Workday for zero rows a
+            // page. Only the two settings that are genuinely the user's survive the replacement.
+            let existing_config: Option<String> =
+                sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=?")
+                    .bind(source_id)
+                    .fetch_optional(&self.pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
             if let Some(existing) = existing_config {
-                if let Ok(mut parsed) = serde_json::from_str::<serde_json::Value>(&existing) {
-                    if let (Some(obj), Some(want)) = (parsed.as_object_mut(), config.as_object()) {
-                        let changed = want.iter().any(|(k, v)| obj.get(k) != Some(v));
-                        if changed {
-                            obj.extend(want.clone());
-                            sqlx::query("UPDATE source_configs SET config_json=?,updated_at=? WHERE source_id=? AND created_at=updated_at")
-                                .bind(parsed.to_string()).bind(&t).bind(source_id).execute(&self.pool).await.map_err(|e| e.to_string())?;
+                let mut wanted = config.clone();
+                if let (Some(target), Ok(previous)) = (
+                    wanted.as_object_mut(),
+                    serde_json::from_str::<serde_json::Value>(&existing),
+                ) {
+                    for key in ["query", "headless"] {
+                        if let Some(kept) = previous.get(key) {
+                            target.insert(key.into(), kept.clone());
                         }
                     }
                 }
+                if wanted.to_string() != existing {
+                    sqlx::query(
+                        "UPDATE source_configs SET config_json=?,updated_at=? WHERE source_id=?",
+                    )
+                    .bind(wanted.to_string())
+                    .bind(&t)
+                    .bind(source_id)
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
+                }
             }
         }
-        sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version','2026-08-28') ON CONFLICT(key) DO UPDATE SET value=excluded.value")
-            .execute(&self.pool).await.map_err(|e| e.to_string())?;
+        // A source the app stored under a guessed adapter keeps that guess forever, and the
+        // generic selector adapter turns a board's navigation shell into "jobs" (Apple's 11
+        // menu links were the case that surfaced this). Every host below has exactly one
+        // adapter that reads it, live-verified, so an existing source pointed at that host is
+        // moved onto it — keeping the user's enabled state, filters and any other settings.
+        // The fourth field relocates the source. It is set only for the hosts an earlier
+        // starter pack itself seeded wrongly — careers.st.com does not resolve at all, gf.com
+        // and careers.micron.com are marketing pages — so rewriting those addresses corrects
+        // this app's own mistake rather than overriding an address the user chose.
+        // jobs.intel.com and jobs.cisco.com are vanity addresses for the same boards: the first
+        // now answers with a 404 redirector, the second redirects to careers.cisco.com. Pointing
+        // them at the board they stand for keeps the source the user meant.
+        let upgrades: [(&str, &str, &str, &str); 21] = [
+            ("careers.microchip.com", "workday", "{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"microchiphr\"}", "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External"),
+            ("www.microchip.com", "workday", "{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"microchiphr\"}", "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External"),
+            ("jobs.intel.com", "workday", "{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"intel\"}", "https://intel.wd1.myworkdayjobs.com/"),
+            ("jobs.cisco.com", "cisco", "{\"maxPages\":500}", "https://careers.cisco.com/global/en/search-results"),
+            ("jobs.apple.com", "apple", "{\"maxPages\":500,\"requestDelayMs\":250}", ""),
+            ("careers.arm.com", "arm", "{\"maxPages\":500}", ""),
+            ("careers.amd.com", "amd", "{\"maxPages\":500}", ""),
+            ("careers.mediatek.com", "mediatek", "{\"maxPages\":500}", ""),
+            ("www.mediatek.com", "mediatek", "{\"maxPages\":500}", "https://careers.mediatek.com/en/jobs"),
+            ("careers.cisco.com", "cisco", "{\"maxPages\":500}", ""),
+            ("talent.skhynix.com", "sk-hynix", "{\"maxPages\":500}", ""),
+            ("www.skhynix.com", "sk-hynix", "{\"maxPages\":500}", "https://talent.skhynix.com/hub/en/apply/job"),
+            ("www.u-blox.com", "u-blox", "{\"maxPages\":500}", ""),
+            ("www.google.com", "google", "{\"maxPages\":500}", ""),
+            ("careers.qualcomm.com", "eightfold", "{\"domain\":\"qualcomm.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}", ""),
+            ("careers.gf.com", "eightfold", "{\"domain\":\"globalfoundries.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}", ""),
+            ("gf.com", "eightfold", "{\"domain\":\"globalfoundries.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}", "https://careers.gf.com/"),
+            ("stmicroelectronics.eightfold.ai", "eightfold", "{\"domain\":\"stmicroelectronics.com\",\"eightfoldApi\":\"legacy\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}", ""),
+            ("careers.st.com", "eightfold", "{\"domain\":\"stmicroelectronics.com\",\"eightfoldApi\":\"legacy\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}", "https://stmicroelectronics.eightfold.ai/"),
+            ("careers.micron.com", "workday", "{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"micron\"}", "https://micron.wd1.myworkdayjobs.com/"),
+            ("nvidia.wd5.myworkdayjobs.com", "workday", "{\"maxPages\":500,\"site\":\"NVIDIAExternalCareerSite\",\"splitFacet\":\"jobFamilyGroup\",\"splitThreshold\":2000,\"tenant\":\"nvidia\"}", ""),
+        ];
+        let known_sources = sqlx::query("SELECT s.id,s.base_url,s.adapter_id,s.enabled,c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.deleted_at IS NULL AND s.kind<>'reference'")
+            .fetch_all(&self.pool).await.map_err(|e| e.to_string())?;
+        for row in known_sources {
+            let source_id: String = row.get("id");
+            let base_url: String = row.get("base_url");
+            let Ok(parsed_url) = Url::parse(&base_url) else {
+                continue;
+            };
+            let host = parsed_url
+                .host_str()
+                .unwrap_or_default()
+                .to_ascii_lowercase();
+            // google.com only serves a job board under /about/careers; the bare host is not one.
+            let Some((_, target, extra, relocation)) = upgrades.iter().find(|(candidate, ..)| {
+                *candidate == host
+                    && (*candidate != "www.google.com"
+                        || parsed_url.path().starts_with("/about/careers"))
+            }) else {
+                continue;
+            };
+            let adapter_id: String = row.get("adapter_id");
+            let enabled: bool = row.get("enabled");
+            let config_text: String = row.get("config_json");
+            let mut config = serde_json::from_str::<serde_json::Value>(&config_text)
+                .unwrap_or_else(|_| serde_json::json!({}));
+            let Some(object) = config.as_object_mut() else {
+                continue;
+            };
+            // None of these keys mean anything on these hosts: the selector fields belong to
+            // the adapter being replaced, and a saved listingPath would override the endpoint
+            // the corrected adapter derives (the stale "/api/career_hub" Eightfold default is
+            // exactly that case, and it survives even when the adapter id already looks right).
+            for key in [
+                "itemSelector",
+                "titleSelector",
+                "companySelector",
+                "locationSelector",
+                "dateSelector",
+                "urlSelector",
+                "descriptionSelector",
+                "nextSelector",
+                "urlPrefix",
+                "itemsPath",
+                "listingPath",
+            ] {
+                object.remove(key);
+            }
+            if let Ok(serde_json::Value::Object(extra)) = serde_json::from_str(extra) {
+                object.extend(extra);
+            }
+            // A saved expectedHost that does not name the host the adapter actually reads raises
+            // a host-drift warning on every response: after a relocation it names the old
+            // address, and SK hynix's listings come from two boards it does not host at all.
+            if matches!(*target, "sk-hynix" | "u-blox") {
+                object.remove("expectedHost");
+            } else if let Some(moved) = Url::parse(relocation)
+                .ok()
+                .and_then(|u| u.host_str().map(str::to_string))
+            {
+                object.insert("expectedHost".into(), serde_json::json!(moved));
+            }
+            if *target == "apple" {
+                let locale = parsed_url
+                    .path_segments()
+                    .and_then(|mut parts| parts.next())
+                    .filter(|part| part.len() == 5 && part.as_bytes().get(2) == Some(&b'-'))
+                    .unwrap_or("en-us")
+                    .to_lowercase();
+                object.insert("locale".into(), serde_json::json!(locale));
+            }
+            object.insert("adapterVersion".into(), serde_json::json!("1.1.0"));
+            object.insert("mode".into(), serde_json::json!("direct"));
+            // A source that is still disabled keeps whatever reason it was disabled with.
+            let reason = if enabled {
+                None
+            } else {
+                let existing: Option<String> =
+                    sqlx::query_scalar("SELECT disabled_reason FROM sources WHERE id=?")
+                        .bind(&source_id)
+                        .fetch_one(&self.pool)
+                        .await
+                        .map_err(|e| e.to_string())?;
+                existing
+            };
+            let t = now();
+            if adapter_id != *target {
+                sqlx::query("UPDATE sources SET adapter_id=?,adapter_version='1.1.0',disabled_reason=?,updated_at=? WHERE id=?")
+                    .bind(target).bind(reason).bind(&t).bind(&source_id).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            }
+            if !relocation.is_empty() {
+                sqlx::query("UPDATE sources SET base_url=?,updated_at=? WHERE id=? AND base_url=?")
+                    .bind(relocation)
+                    .bind(&t)
+                    .bind(&source_id)
+                    .bind(&base_url)
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
+            }
+            if config.to_string() != config_text {
+                sqlx::query(
+                    "UPDATE source_configs SET config_json=?,updated_at=? WHERE source_id=?",
+                )
+                .bind(config.to_string())
+                .bind(&t)
+                .bind(&source_id)
+                .execute(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+            }
+        }
+        sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+            .bind(STARTER_PACK_VERSION).execute(&self.pool).await.map_err(|e| e.to_string())?;
         Ok(())
     }
     pub async fn persist_worker_job(
@@ -308,6 +1015,39 @@ impl Database {
         source_id: &str,
         payload: &serde_json::Value,
     ) -> ApiResult<()> {
+        self.persist_worker_jobs(run_id, source_id, std::slice::from_ref(payload))
+            .await
+            .map(|_| ())
+    }
+
+    /// Changed jobs arrive in a burst after the board has been read. One transaction per row made
+    /// SQLite durability, not parsing, the visible final phase of large runs. Keep chunks bounded
+    /// in the caller and commit every chunk together.
+    pub async fn persist_worker_jobs(
+        &self,
+        run_id: &str,
+        source_id: &str,
+        payloads: &[serde_json::Value],
+    ) -> ApiResult<PersistBatchResult> {
+        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut result = PersistBatchResult::default();
+        for payload in payloads {
+            if Self::persist_worker_job_in(&mut tx, run_id, source_id, payload).await? {
+                result.written += 1;
+            } else {
+                result.unchanged += 1;
+            }
+        }
+        tx.commit().await.map_err(|e| e.to_string())?;
+        Ok(result)
+    }
+
+    async fn persist_worker_job_in(
+        tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+        run_id: &str,
+        source_id: &str,
+        payload: &serde_json::Value,
+    ) -> ApiResult<bool> {
         let title = payload
             .get("title")
             .and_then(|v| v.as_str())
@@ -337,40 +1077,267 @@ impl Database {
         );
         let t = now();
         let job_id = id();
-        let description = payload
+        let incoming_description = payload
             .get("descriptionText")
             .and_then(|v| v.as_str())
             .unwrap_or("");
-        let hash = payload
+        let incoming_hash = payload
             .get("contentHash")
             .and_then(|v| v.as_str())
             .unwrap_or("");
+        let listing_hash = payload
+            .get("listingHash")
+            .and_then(|v| v.as_str())
+            .filter(|value| !value.is_empty());
+        // Identity, not similarity. Two openings that merely read alike — same title, same
+        // company, same city — are two openings, so the title/company/location fingerprint only
+        // re-identifies a row from the SAME source whose URL or generated id changed under it.
+        let stable_identity = external.is_some() || canonical.is_some() || requisition.is_some();
+        let existing:Option<(String,Option<String>,Option<String>,String,Option<String>,String,Option<String>)>=sqlx::query_as("SELECT id,content_hash,listing_hash,description_text,description_html,description_status,description_checked_at FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=?) OR (?=0 AND source_id=? AND dedupe_fingerprint=?) ORDER BY created_at LIMIT 1").bind(source_id).bind(external).bind(canonical.as_deref()).bind(canonical.as_deref()).bind(requisition).bind(requisition).bind(stable_identity).bind(source_id).bind(&fingerprint).fetch_optional(&mut **tx).await.map_err(|e|e.to_string())?;
+        let incoming_status = payload
+            .get("descriptionStatus")
+            .and_then(|value| value.as_str())
+            .filter(|value| matches!(*value, "complete" | "pending" | "failed"))
+            .unwrap_or("complete");
+        // The row is already exactly this job. Rewriting it would copy an unchanged description
+        // — several kilobytes — back over itself and log a duplicate merge that did not happen.
+        // The sighting is the only thing this run has to say, so it is the only thing written.
+        if let Some((id, stored_content, stored_listing, _, _, stored_status, _)) = &existing {
+            if incoming_status == "complete"
+                && stored_status == "complete"
+                && !incoming_hash.is_empty()
+                && stored_content.as_deref() == Some(incoming_hash)
+                && listing_hash.is_some()
+                && stored_listing.as_deref() == listing_hash
+            {
+                sqlx::query(
+                    "INSERT OR IGNORE INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,?,?)",
+                )
+                .bind(crate::db::id())
+                .bind(id)
+                .bind(run_id)
+                .bind(&t)
+                .execute(&mut **tx)
+                .await
+                .map_err(|e| e.to_string())?;
+                return Ok(false);
+            }
+        }
+        let (actual, stored_description, stored_html, stored_checked) = existing
+            .map(|(id, _, _, description, html, _, checked)| (id, description, html, checked))
+            .unwrap_or_else(|| (job_id, String::new(), None, None));
+        let pending = incoming_status == "pending";
+        let description = if pending && !stored_description.is_empty() {
+            stored_description.as_str()
+        } else {
+            incoming_description
+        };
+        let description_html = if pending && stored_html.is_some() {
+            stored_html
+        } else {
+            payload
+                .get("descriptionHtml")
+                .and_then(|v| v.as_str())
+                .map(|s| s.chars().take(250_000).collect::<String>())
+        };
+        let hash = if pending || incoming_hash.is_empty() {
+            worker_content_hash(title, company, description)
+        } else {
+            incoming_hash.to_owned()
+        };
+        let checked_at = if incoming_status == "complete" {
+            Some(t.clone())
+        } else {
+            stored_checked
+        };
+        let description_error = payload.get("descriptionError").and_then(|v| v.as_str());
+        sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,requisition_id,dedupe_fingerprint,title,company,location,location_countries,work_mode,description_text,description_html,detail_url,description_status,description_error,description_checked_at,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,listing_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET external_id=COALESCE(excluded.external_id,jobs.external_id),canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,requisition_id=COALESCE(excluded.requisition_id,jobs.requisition_id),dedupe_fingerprint=excluded.dedupe_fingerprint,title=excluded.title,company=excluded.company,location=excluded.location,location_countries=excluded.location_countries,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,detail_url=COALESCE(excluded.detail_url,jobs.detail_url),description_status=excluded.description_status,description_error=excluded.description_error,description_checked_at=excluded.description_checked_at,posted_at=excluded.posted_at,closing_at=excluded.closing_at,salary_min=excluded.salary_min,salary_max=excluded.salary_max,salary_currency=excluded.salary_currency,salary_period=excluded.salary_period,salary_confidence=excluded.salary_confidence,seniority=excluded.seniority,skills_json=excluded.skills_json,content_hash=excluded.content_hash,listing_hash=COALESCE(excluded.listing_hash,jobs.listing_hash),provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,adapter_version=excluded.adapter_version,updated_at=excluded.updated_at")
+            .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(requisition).bind(&fingerprint).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(crate::locations::stored(&crate::locations::resolve(payload.get("location").and_then(|v|v.as_str()),canonical.as_deref()))).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(description_html).bind(payload.get("detailUrl").and_then(|v|v.as_str())).bind(incoming_status).bind(description_error).bind(checked_at).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(listing_hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut **tx).await.map_err(|e|e.to_string())?;
+        sqlx::query(
+            "INSERT OR IGNORE INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,?,?)",
+        )
+        .bind(id())
+        .bind(&actual)
+        .bind(run_id)
+        .bind(&t)
+        .execute(&mut **tx)
+        .await
+        .map_err(|e| e.to_string())?;
+        Ok(true)
+    }
+    /// Records that a job the worker recognised is still on the board, without touching the row
+    /// itself. Returns 1 when the hash matched a stored job, 0 when it did not — a miss means the
+    /// row was deleted or archived between the run starting and this event, and the next full read
+    /// will pick it up again. Cheap by design: one indexed lookup and one insert, no rewrite.
+    pub async fn record_job_seen(
+        &self,
+        run_id: &str,
+        source_id: &str,
+        listing_hash: &str,
+    ) -> ApiResult<u32> {
+        self.record_jobs_seen(run_id, source_id, &[listing_hash.to_owned()])
+            .await
+    }
+
+    /// Persists all unchanged sightings under one transaction. Worker-side hashes are unique, but
+    /// deduplicating here keeps this boundary safe for older or third-party workers too.
+    pub async fn record_jobs_seen(
+        &self,
+        run_id: &str,
+        source_id: &str,
+        listing_hashes: &[String],
+    ) -> ApiResult<u32> {
         let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
-        let existing:Option<String>=sqlx::query_scalar("SELECT id FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=?) OR dedupe_fingerprint=? ORDER BY created_at LIMIT 1").bind(source_id).bind(external).bind(canonical.as_deref()).bind(canonical.as_deref()).bind(requisition).bind(requisition).bind(&fingerprint).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?;
-        let coalesced = existing.is_some();
-        let actual = existing.unwrap_or(job_id);
-        sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,title,company,location,work_mode,description_text,description_html,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,title=excluded.title,company=excluded.company,location=excluded.location,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,skills_json=excluded.skills_json,content_hash=excluded.content_hash,provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,updated_at=excluded.updated_at")
-  .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(payload.get("descriptionHtml").and_then(|v|v.as_str()).map(|s|s.chars().take(250_000).collect::<String>())).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-        sqlx::query("UPDATE jobs SET requisition_id=COALESCE(?,requisition_id),dedupe_fingerprint=? WHERE id=?").bind(requisition).bind(&fingerprint).bind(&actual).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-        sqlx::query("INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,?,?)")
-            .bind(id())
-            .bind(&actual)
-            .bind(run_id)
-            .bind(&t)
-            .execute(&mut *tx)
+        let seen_at = now();
+        let mut recorded = 0;
+        let mut unique = std::collections::HashSet::new();
+        for listing_hash in listing_hashes {
+            if listing_hash.is_empty() || !unique.insert(listing_hash) {
+                continue;
+            }
+            recorded += sqlx::query("INSERT OR IGNORE INTO job_occurrences(id,job_id,run_id,seen_at) SELECT ?,id,?,? FROM jobs WHERE source_id=? AND listing_hash=? ORDER BY created_at LIMIT 1")
+                .bind(id())
+                .bind(run_id)
+                .bind(&seen_at)
+                .bind(source_id)
+                .bind(listing_hash)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?
+                .rows_affected() as u32;
+        }
+        tx.commit().await.map_err(|e| e.to_string())?;
+        Ok(recorded)
+    }
+
+    /// Detail work is deliberately separate from the listing transaction. The listing hash is an
+    /// optimistic lock: if another board read changed the row while a detail request was in
+    /// flight, the stale response is ignored instead of overwriting newer data.
+    pub async fn pending_enrichment_job(
+        &self,
+        job_id: &str,
+    ) -> ApiResult<Option<(String, serde_json::Value)>> {
+        let row = sqlx::query("SELECT source_id,id,external_id,canonical_url,apply_url,title,company,location,work_mode,posted_at,listing_hash,detail_url FROM jobs WHERE id=? AND availability<>'archived' AND detail_url IS NOT NULL AND listing_hash IS NOT NULL AND description_status IN ('pending','failed')")
+            .bind(job_id)
+            .fetch_optional(&self.pool)
             .await
             .map_err(|e| e.to_string())?;
-        if coalesced {
-            sqlx::query("INSERT INTO job_dedupe_events(id,canonical_job_id,method,evidence_json,created_at) VALUES(?,?, 'exact',?,?)").bind(id()).bind(&actual).bind(serde_json::json!({"externalId":external,"canonicalUrl":canonical,"requisitionId":requisition,"fingerprint":fingerprint}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-        }
-        let location = payload
-            .get("location")
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
-        for row in sqlx::query("SELECT id,title,company,coalesce(location,'') FROM jobs WHERE id<>? AND lower(company)=lower(?) AND dedupe_fingerprint<>? ORDER BY updated_at DESC LIMIT 100").bind(&actual).bind(company).bind(&fingerprint).fetch_all(&mut *tx).await.map_err(|e|e.to_string())? { let other:String=row.get(0);let title_score=fuzzy_similarity(title,&row.get::<String,_>(1));let location_score=if location.is_empty(){1.0}else{fuzzy_similarity(location,&row.get::<String,_>(3))};if title_score>=0.84&&location_score>=0.70 {let (left,right)=if actual<other{(&actual,&other)}else{(&other,&actual)};sqlx::query("INSERT OR IGNORE INTO duplicate_candidates(id,left_job_id,right_job_id,method,score,status,evidence_json,created_at) VALUES(?,?,?,?,?,'suggested',?,?)").bind(id()).bind(left).bind(right).bind("fuzzy").bind((title_score+location_score)/2.0).bind(serde_json::json!({"title":title_score,"location":location_score,"company":"exact normalized"}).to_string()).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;}}
-        tx.commit().await.map_err(|e| e.to_string())?;
-        Ok(())
+        Ok(row.map(|row| {
+            (
+                row.get::<String, _>("source_id"),
+                serde_json::json!({
+                    "jobId": row.get::<String, _>("id"),
+                    "externalId": row.get::<Option<String>, _>("external_id"),
+                    "canonicalUrl": row.get::<Option<String>, _>("canonical_url"),
+                    "applyUrl": row.get::<Option<String>, _>("apply_url"),
+                    "title": row.get::<String, _>("title"),
+                    "company": row.get::<String, _>("company"),
+                    "location": row.get::<Option<String>, _>("location"),
+                    "workMode": row.get::<Option<String>, _>("work_mode"),
+                    "postedAt": row.get::<Option<String>, _>("posted_at"),
+                    "listingHash": row.get::<String, _>("listing_hash"),
+                    "detailUrl": row.get::<String, _>("detail_url")
+                }),
+            )
+        }))
     }
+
+    pub async fn persist_enriched_jobs(
+        &self,
+        source_id: &str,
+        payloads: &[serde_json::Value],
+    ) -> ApiResult<u64> {
+        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let checked_at = now();
+        let mut written = 0;
+        for payload in payloads {
+            let Some(job_id) = payload.get("jobId").and_then(|value| value.as_str()) else {
+                continue;
+            };
+            let Some(listing_hash) = payload.get("listingHash").and_then(|value| value.as_str())
+            else {
+                continue;
+            };
+            let description = payload
+                .get("descriptionText")
+                .and_then(|value| value.as_str())
+                .unwrap_or_default();
+            let title = payload
+                .get("title")
+                .and_then(|value| value.as_str())
+                .unwrap_or_default();
+            let company = payload
+                .get("company")
+                .and_then(|value| value.as_str())
+                .unwrap_or_default();
+            written += sqlx::query("UPDATE jobs SET description_text=?,description_html=?,content_hash=?,description_status='complete',description_error=NULL,description_checked_at=?,updated_at=? WHERE id=? AND source_id=? AND listing_hash=?")
+                .bind(description)
+                .bind(payload.get("descriptionHtml").and_then(|value| value.as_str()))
+                .bind(worker_content_hash(title, company, description))
+                .bind(&checked_at)
+                .bind(&checked_at)
+                .bind(job_id)
+                .bind(source_id)
+                .bind(listing_hash)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?
+                .rows_affected();
+        }
+        tx.commit().await.map_err(|e| e.to_string())?;
+        Ok(written)
+    }
+
+    pub async fn record_enrichment_failures(
+        &self,
+        source_id: &str,
+        payloads: &[serde_json::Value],
+    ) -> ApiResult<u64> {
+        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let checked_at = now();
+        let mut written = 0;
+        for payload in payloads {
+            let Some(job_id) = payload.get("jobId").and_then(|value| value.as_str()) else {
+                continue;
+            };
+            let Some(listing_hash) = payload.get("listingHash").and_then(|value| value.as_str())
+            else {
+                continue;
+            };
+            let message = payload
+                .get("message")
+                .and_then(|value| value.as_str())
+                .unwrap_or("Description download failed")
+                .chars()
+                .take(1000)
+                .collect::<String>();
+            written += sqlx::query("UPDATE jobs SET description_status='failed',description_error=?,description_checked_at=? WHERE id=? AND source_id=? AND listing_hash=?")
+                .bind(message)
+                .bind(&checked_at)
+                .bind(job_id)
+                .bind(source_id)
+                .bind(listing_hash)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?
+                .rows_affected();
+        }
+        tx.commit().await.map_err(|e| e.to_string())?;
+        Ok(written)
+    }
+    /// How many runs of sighting history each source keeps. Availability needs only the current
+    /// run; the rest is for looking at when a source behaves oddly.
+    const RUNS_KEPT: i64 = 10;
+    /// Marks what this run did and did not find. Only a complete, successful read may change
+    /// availability at all — a partial read proves nothing about what is missing, which is why
+    /// the worker is careful never to claim completeness it cannot back up.
+    ///
+    /// Seen means active, and resets the counter. Unseen costs one strike: the first is
+    /// `possibly_closed`, the second is `closed`. Two complete reads rather than one because a
+    /// board can drop a listing for a moment and put it back. `archived` is never touched.
+    ///
+    /// These rules also existed as a pure Rust function in availability.rs that nothing called,
+    /// so the spec and the implementation could drift apart silently. This is the one that runs.
     pub async fn reconcile_availability(
         &self,
         run_id: &str,
@@ -383,13 +1350,27 @@ impl Database {
         let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
         sqlx::query("UPDATE jobs SET missing_full_runs=0,availability='active',updated_at=? WHERE source_id=? AND availability!='archived' AND id IN (SELECT job_id FROM job_occurrences WHERE run_id=?)").bind(now()).bind(source_id).bind(run_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
         sqlx::query("UPDATE jobs SET missing_full_runs=missing_full_runs+1,availability=CASE WHEN missing_full_runs+1>=2 THEN 'closed' ELSE 'possibly_closed' END,updated_at=? WHERE source_id=? AND availability NOT IN ('archived','closed') AND id NOT IN (SELECT job_id FROM job_occurrences WHERE run_id=?)").bind(now()).bind(source_id).bind(run_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        // One occurrence row per job per run, never pruned, meant a full update added tens of
+        // thousands of rows that nothing would read again: the availability rules above look only
+        // at this run, and missing_full_runs carries the history. Keeping the last few runs leaves
+        // the sighting trail useful for diagnostics without letting it grow forever.
+        sqlx::query("DELETE FROM job_occurrences WHERE run_id IN (SELECT id FROM scrape_runs WHERE source_id=? AND id NOT IN (SELECT id FROM scrape_runs WHERE source_id=? ORDER BY started_at DESC LIMIT ?))")
+            .bind(source_id).bind(source_id).bind(Self::RUNS_KEPT).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        // Dedupe events are an audit trail of merges, not state. They are pruned on the same
+        // window so the two tables cannot drift apart.
+        let cutoff: Option<String> = sqlx::query_scalar("SELECT min(started_at) FROM (SELECT started_at FROM scrape_runs WHERE source_id=? ORDER BY started_at DESC LIMIT ?)")
+            .bind(source_id).bind(Self::RUNS_KEPT).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?.flatten();
+        if let Some(cutoff) = cutoff {
+            sqlx::query("DELETE FROM job_dedupe_events WHERE created_at<? AND canonical_job_id IN (SELECT id FROM jobs WHERE source_id=?)")
+                .bind(&cutoff).bind(source_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        }
         tx.commit().await.map_err(|e| e.to_string())?;
         Ok(())
     }
 }
 #[tauri::command]
 pub async fn list_sources(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Source>> {
-    sqlx::query_as::<_,Source>("SELECT id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,last_success_at,created_at,updated_at FROM sources WHERE deleted_at IS NULL ORDER BY name") .fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as::<_,Source>("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.deleted_at IS NULL ORDER BY s.name") .fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn get_source_config(
@@ -768,7 +1749,7 @@ pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) ->
   .bind(&source_id).bind(&input.name).bind(&input.base_url).bind(&input.adapter_id).bind("1.0.0").bind(input.enabled).bind(&input.kind).bind(&input.disabled_reason).bind(input.robots_override).bind(if input.robots_override {Some(t.clone())} else {None}).bind(input.allow_private_network).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(source_id) DO UPDATE SET config_json=excluded.config_json,updated_at=excluded.updated_at").bind(id()).bind(&source_id).bind(input.config_json.to_string()).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
-    sqlx::query_as("SELECT id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,last_success_at,created_at,updated_at FROM sources WHERE id=?").bind(source_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.id=?").bind(source_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn delete_source(
@@ -788,358 +1769,386 @@ pub async fn delete_source(
         .map_err(|e| e.to_string())?;
     Ok(())
 }
-#[tauri::command]
-pub async fn list_jobs(
-    persona_id: Option<String>,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<Vec<crate::domain::Job>> {
-    jobs_query(persona_id, None, &state.db.pool).await
+/// Filters the Jobs page sends. Everything is optional; the source scope is not a filter but
+/// the enabled set on the Sources page, so "no sources selected" always means "no jobs".
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct JobFilter {
+    /// Words that must all appear somewhere in the job title, in any order.
+    pub title: String,
+    /// Words that must all appear in title, company, location or description.
+    pub keyword: String,
+    /// "posted" orders by posting date (unknown dates last); anything else by last seen.
+    pub sort: String,
+    /// Only jobs already saved into Applications.
+    pub saved_only: bool,
+    /// Include openings two complete reads have failed to find. Off by default: the point of the
+    /// page is what can still be applied to, and until now every closed listing sat in the list
+    /// looking exactly like a live one.
+    pub include_closed: bool,
+    /// How far back to look, in days. None shows everything. The window opens on one year so a
+    /// list years deep does not greet you with listings nobody can apply to any more; it is view
+    /// state, not a saved preference, so every launch starts at a year again.
+    pub posted_within_days: Option<i64>,
+    /// ISO country codes to show, any of them. Empty means everywhere. The codes were worked out
+    /// when each job was stored (see locations.rs), so this is an exact test rather than a guess at
+    /// query time, and a posting open in several offices answers to each of their countries.
+    pub countries: Vec<String>,
+    /// Also show listings whose country could not be worked out at all — a board that published
+    /// "2 Locations" and a link that named no office. Off, because a country filter that quietly
+    /// includes everything unplaceable is the filter people complain about.
+    pub include_unknown_locations: bool,
+    /// Which of the followed sources to show. Empty means all of them, which is the default.
+    /// This is the view, not the collection: whether a source is followed at all is
+    /// `sources.enabled`, and narrowing the list must never quietly retire a board.
+    pub source_ids: Vec<String>,
 }
-#[tauri::command]
-pub async fn search_jobs(
-    query: String,
-    persona_id: Option<String>,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<Vec<crate::domain::Job>> {
-    jobs_query(persona_id, Some(query), &state.db.pool).await
+// The list never renders a description — it is read only when a card is opened, through
+// load_job_description(). Keyword search still matches against the real column in the WHERE clause;
+// only the projection is trimmed, because that is what crosses into the window.
+const JOB_SELECT: &str = "SELECT j.id,j.source_id,j.title,j.company,j.location,j.work_mode,j.canonical_url,j.apply_url,'' AS description_text,j.description_status,j.posted_at,j.salary_min,j.salary_max,j.salary_currency,j.seniority,j.availability,j.created_at,j.updated_at,NULL AS score,NULL AS eligible,NULL AS reasons,(SELECT a.current_stage FROM applications a WHERE a.job_id=j.id ORDER BY a.created_at DESC LIMIT 1) AS application_stage FROM jobs j JOIN sources s ON s.id=j.source_id";
+// Substring matching, not FTS. FTS5 tokenizes on word boundaries and treats punctuation as
+// syntax, so "verification" missed "Verification/Validation" while "C++" raised a syntax error.
+// instr() over lower() is what a user typing into a search box actually expects, and every
+// word they type has to appear — order and case never matter.
+fn term_clauses(field: &str, text: &str) -> (String, Vec<String>) {
+    let terms: Vec<String> = text
+        .split_whitespace()
+        .take(8)
+        .map(|word| word.to_lowercase())
+        .collect();
+    let sql = terms
+        .iter()
+        .map(|_| format!(" AND instr(lower({field}),?)>0"))
+        .collect::<String>();
+    (sql, terms)
 }
-async fn jobs_query(
-    persona: Option<String>,
-    search: Option<String>,
-    pool: &SqlitePool,
-) -> ApiResult<Vec<crate::domain::Job>> {
-    let q = search.unwrap_or_default();
-    let p = persona.unwrap_or_default();
-    sqlx::query_as::<_,crate::domain::Job>("SELECT j.id,j.source_id,j.title,j.company,j.location,j.work_mode,j.canonical_url,j.apply_url,j.description_text,j.posted_at,j.salary_min,j.salary_max,j.salary_currency,j.seniority,j.availability,j.created_at,j.updated_at,m.score,m.eligible,m.explanation_json AS reasons FROM jobs j LEFT JOIN match_results m ON m.job_id=j.id AND m.persona_id=? WHERE (?='' OR j.rowid IN (SELECT rowid FROM jobs_fts WHERE jobs_fts MATCH ?)) ORDER BY COALESCE(m.score,-1) DESC,j.updated_at DESC LIMIT 500").bind(p).bind(&q).bind(&q).fetch_all(pool).await.map_err(|e|e.to_string())
-}
-#[tauri::command]
-pub async fn list_personas(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Persona>> {
-    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at,archived_at FROM personas WHERE archived_at IS NULL ORDER BY name").fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
-}
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PersonaDetails {
-    pub persona: Persona,
-    pub confirmed_skills: Vec<String>,
-}
-/// Returns editable persona data. Skills live in their own normalized table, so
-/// listing personas deliberately does not leak them into every card response.
-#[tauri::command]
-pub async fn get_persona(
-    persona_id: String,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<PersonaDetails> {
-    let persona: Persona = sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at,archived_at FROM personas WHERE id=? AND archived_at IS NULL")
-        .bind(&persona_id)
-        .fetch_one(&state.db.pool)
-        .await
-        .map_err(|_| "Active persona was not found".to_string())?;
-    let confirmed_skills = sqlx::query_scalar(
-        "SELECT skill FROM persona_skills WHERE persona_id=? AND confirmed=1 ORDER BY skill",
+// Codes are stored as ",PT,ES," precisely so one of them is a substring test, which an index on the
+// column serves without a join table or a LIKE pattern that starts with a wildcard.
+const LOCATION_UNKNOWN: &str = "j.location_countries IS NULL OR j.location_countries=''";
+fn location_clauses(countries: &[String], include_unknown: bool) -> (String, Vec<String>) {
+    // Two letters, upper case, nothing else: the codes come from the picker, and a filter is never
+    // a place to accept free text into SQL.
+    let codes: Vec<String> = countries
+        .iter()
+        .take(250)
+        .map(|code| code.trim().to_uppercase())
+        .filter(|code| code.len() == 2 && code.chars().all(|c| c.is_ascii_alphabetic()))
+        .collect();
+    if codes.is_empty() {
+        return (String::new(), Vec::new());
+    }
+    let any = codes
+        .iter()
+        .map(|_| "instr(coalesce(j.location_countries,''),?)>0".to_string())
+        .collect::<Vec<_>>()
+        .join(" OR ");
+    let unknown = if include_unknown {
+        format!(" OR {LOCATION_UNKNOWN}")
+    } else {
+        String::new()
+    };
+    (
+        format!(" AND (({any}){unknown})"),
+        codes.iter().map(|code| format!(",{code},")).collect(),
     )
-    .bind(&persona_id)
-    .fetch_all(&state.db.pool)
+}
+/// Works out the country of every listing that has none yet — and of every listing at all when the
+/// resolver's rules have changed since they were last worked out. An empty string is a resolved
+/// answer of "nowhere recognisable" and is not revisited within a version. Waiting for the next
+/// scrape instead would leave a filter that silently misses everything already collected, and
+/// leaving old answers alone would leave the wrong countries in place for good.
+const RESOLVER_VERSION_KEY: &str = "locations.resolverVersion";
+pub async fn backfill_location_countries(pool: &SqlitePool) -> ApiResult<u64> {
+    let stamped: Option<String> = sqlx::query_scalar("SELECT value FROM settings WHERE key=?")
+        .bind(RESOLVER_VERSION_KEY)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    if stamped.as_deref() != Some(crate::locations::RESOLVER_VERSION) {
+        sqlx::query("UPDATE jobs SET location_countries=NULL")
+            .execute(pool)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+    let rows: Vec<(String, Option<String>, Option<String>)> = sqlx::query_as(
+        "SELECT id,location,canonical_url FROM jobs WHERE location_countries IS NULL",
+    )
+    .fetch_all(pool)
     .await
     .map_err(|e| e.to_string())?;
-    Ok(PersonaDetails {
-        persona,
-        confirmed_skills,
-    })
-}
-#[tauri::command]
-pub async fn archive_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
-    sqlx::query("UPDATE personas SET archived_at=?,updated_at=? WHERE id=?")
-        .bind(now())
-        .bind(now())
-        .bind(persona_id)
-        .execute(&state.db.pool)
-        .await
-        .map_err(|e| e.to_string())?;
-    Ok(())
-}
-#[tauri::command]
-pub async fn delete_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
-    let deps:i64=sqlx::query_scalar("SELECT (SELECT count(*) FROM applications WHERE persona_id=?)+(SELECT count(*) FROM review_decisions WHERE persona_id=?)+(SELECT count(*) FROM match_results WHERE persona_id=?)").bind(&persona_id).bind(&persona_id).bind(&persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())?;
-    if deps > 0 {
-        return Err("Persona has review, match, or application history; archive it instead".into());
-    }
-    sqlx::query("DELETE FROM personas WHERE id=?")
-        .bind(persona_id)
-        .execute(&state.db.pool)
-        .await
-        .map_err(|e| e.to_string())?;
-    Ok(())
-}
-#[tauri::command]
-pub async fn save_persona(
-    input: PersonaInput,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<Persona> {
-    let persona_id = input.id.unwrap_or_else(id);
-    let t = now();
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
-    if !["any", "all"].contains(&input.include_keyword_mode.as_str()) {
-        return Err("Include keyword mode must be any or all".into());
-    }
-    sqlx::query("INSERT INTO personas(id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,target_titles_json=excluded.target_titles_json,include_keywords_json=excluded.include_keywords_json,include_keyword_mode=excluded.include_keyword_mode,exclude_keywords_json=excluded.exclude_keywords_json,location=excluded.location,work_mode=excluded.work_mode,seniority=excluded.seniority,salary_min=excluded.salary_min,threshold=excluded.threshold,unknown_policy=excluded.unknown_policy,resume_document_id=excluded.resume_document_id,updated_at=excluded.updated_at")
- .bind(&persona_id).bind(&input.name).bind(serde_json::to_string(&input.target_titles).unwrap()).bind(serde_json::to_string(&input.include_keywords).unwrap()).bind(&input.include_keyword_mode).bind(serde_json::to_string(&input.exclude_keywords).unwrap()).bind(&input.location).bind(&input.work_mode).bind(&input.seniority).bind(input.salary_min).bind(input.threshold.clamp(0.0,100.0)).bind(&input.unknown_policy).bind(&input.resume_document_id).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-    sqlx::query("DELETE FROM persona_skills WHERE persona_id=?")
-        .bind(&persona_id)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| e.to_string())?;
-    for skill in input.confirmed_skills {
-        sqlx::query(
-            "INSERT INTO persona_skills(id,persona_id,skill,confirmed,required) VALUES(?,?,?,1,0)",
+    if rows.is_empty() {
+        write_setting(
+            pool,
+            RESOLVER_VERSION_KEY,
+            crate::locations::RESOLVER_VERSION,
         )
-        .bind(id())
-        .bind(&persona_id)
-        .bind(skill)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| e.to_string())?;
+        .await?;
+        return Ok(0);
+    }
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    for (id, location, url) in &rows {
+        let codes = crate::locations::resolve(location.as_deref(), url.as_deref());
+        sqlx::query("UPDATE jobs SET location_countries=? WHERE id=?")
+            .bind(crate::locations::stored(&codes))
+            .bind(id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
-    rescore(&state.db.pool, &state.model_root, &persona_id, None).await?;
-    sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,resume_document_id,created_at,updated_at,archived_at FROM personas WHERE id=?").bind(persona_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    // Only once the pass has actually landed: a crash halfway leaves the stamp behind and the
+    // remaining rows are picked up next launch.
+    write_setting(
+        pool,
+        RESOLVER_VERSION_KEY,
+        crate::locations::RESOLVER_VERSION,
+    )
+    .await?;
+    Ok(rows.len() as u64)
 }
-#[tauri::command]
-pub async fn rescore_persona(persona_id: String, state: State<'_, Arc<AppState>>) -> ApiResult<()> {
-    rescore(&state.db.pool, &state.model_root, &persona_id, None).await
+/// Switches on the starter-pack boards when the installer was told to include them. The installer
+/// cannot touch the database — it does not exist until first run — so it leaves a file behind and
+/// this reads it.
+///
+/// Answering that question is a decision made now, so it outranks whatever state those boards were
+/// left in before: one deleted or switched off in an earlier install comes back. That is what
+/// ticking the box means, and an install that answered Yes over an old database and silently
+/// changed nothing — because every starter row had been retired months earlier — is the bug this
+/// replaced. The file is deleted either way, so no later launch can undo what the user does next.
+pub async fn apply_starter_pack_opt_in(
+    pool: &SqlitePool,
+    local: &std::path::Path,
+) -> ApiResult<u64> {
+    let marker = local.join("starter-pack.optin");
+    if !marker.exists() {
+        return Ok(0);
+    }
+    let switched = sqlx::query("UPDATE sources SET enabled=1,deleted_at=NULL,disabled_reason=NULL,updated_at=? WHERE kind='active' AND (enabled=0 OR deleted_at IS NOT NULL) AND id IN (SELECT source_id FROM source_configs WHERE instr(config_json,'starterPackVersion')>0)")
+        .bind(now())
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .rows_affected();
+    let _ = std::fs::remove_file(&marker);
+    // Recorded because the failure this replaced was invisible: the answer was taken, nothing
+    // happened, and nothing said so.
+    log(
+        pool,
+        "info",
+        None,
+        None,
+        "starter_pack",
+        None,
+        &format!("Installer choice applied: {switched} company job boards switched on."),
+        serde_json::json!({ "switched": switched }),
+    )
+    .await;
+    Ok(switched)
 }
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CountryCount {
+    pub code: String,
+    pub jobs: i64,
+}
+/// Which countries the jobs on show are actually in, most first, plus how many cannot be placed.
+/// The picker is built from this rather than from the full list of 250 states: offering Portugal
+/// when the boards you follow have never posted a job there is a filter that can only disappoint.
+/// Scoped by the same source selection as the list itself, so narrowing the sources narrows the
+/// countries with them.
 #[tauri::command]
-pub async fn rescore_match(
-    job_id: String,
-    persona_id: String,
+pub async fn job_countries(
+    source_ids: Option<Vec<String>>,
     state: State<'_, Arc<AppState>>,
-) -> ApiResult<()> {
-    rescore(
+) -> ApiResult<(Vec<CountryCount>, i64)> {
+    job_countries_query(&source_ids.unwrap_or_default(), &state.db.pool).await
+}
+async fn job_countries_query(
+    source_ids: &[String],
+    pool: &SqlitePool,
+) -> ApiResult<(Vec<CountryCount>, i64)> {
+    let scope = if source_ids.is_empty() {
+        String::new()
+    } else {
+        format!(
+            " AND j.source_id IN ({})",
+            std::iter::repeat("?")
+                .take(source_ids.len())
+                .collect::<Vec<_>>()
+                .join(",")
+        )
+    };
+    // Codes are packed per job (",PT,ES,"), and the distinct packings number in the hundreds at
+    // most, so they are counted here rather than in a table the schema would have to maintain.
+    let sql = format!("SELECT coalesce(j.location_countries,'') AS codes,count(*) AS jobs FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.enabled=1 AND s.deleted_at IS NULL AND j.availability NOT IN ('archived','closed'){scope} GROUP BY codes");
+    let mut query = sqlx::query_as::<_, (String, i64)>(&sql);
+    for id in source_ids {
+        query = query.bind(id);
+    }
+    let rows = query.fetch_all(pool).await.map_err(|e| e.to_string())?;
+    let mut totals: std::collections::HashMap<String, i64> = std::collections::HashMap::new();
+    let mut unplaced = 0;
+    for (codes, jobs) in rows {
+        if codes.is_empty() {
+            unplaced += jobs;
+            continue;
+        }
+        for code in codes.split(',').filter(|code| !code.is_empty()) {
+            *totals.entry(code.to_string()).or_default() += jobs;
+        }
+    }
+    let mut counted: Vec<CountryCount> = totals
+        .into_iter()
+        .map(|(code, jobs)| CountryCount { code, jobs })
+        .collect();
+    counted.sort_by(|a, b| b.jobs.cmp(&a.jobs).then_with(|| a.code.cmp(&b.code)));
+    Ok((counted, unplaced))
+}
+#[tauri::command]
+pub async fn list_jobs(
+    filter: Option<JobFilter>,
+    offset: Option<i64>,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<JobPage> {
+    jobs_page_query(
+        filter.unwrap_or_default(),
+        offset.unwrap_or_default(),
         &state.db.pool,
-        &state.model_root,
-        &persona_id,
-        Some(&job_id),
     )
     .await
 }
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct RescoreRun {
-    pub run_id: String,
-    pub completed: u64,
-    pub total: u64,
-    pub cancelled: bool,
+pub struct JobPage {
+    pub items: Vec<crate::domain::Job>,
+    pub total: i64,
+    pub offset: i64,
+    pub has_more: bool,
 }
-#[tauri::command]
-pub async fn cancel_rescore(run_id: String) -> ApiResult<()> {
-    cancelled_runs()
-        .lock()
-        .map_err(|_| "Rescore cancellation lock failed")?
-        .insert(run_id);
-    Ok(())
+#[cfg(test)]
+async fn jobs_query(filter: JobFilter, pool: &SqlitePool) -> ApiResult<Vec<crate::domain::Job>> {
+    Ok(jobs_page_query(filter, 0, pool).await?.items)
 }
-#[tauri::command]
-pub async fn rescore_stale_matches(
-    persona_id: String,
-    run_id: String,
-    app: tauri::AppHandle,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<RescoreRun> {
-    if !active_runs()
-        .lock()
-        .map_err(|_| "Rescore active lock failed")?
-        .insert(run_id.clone())
+async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> ApiResult<JobPage> {
+    let (title_sql, title_terms) = term_clauses("j.title", &filter.title);
+    let (keyword_sql, keyword_terms) = term_clauses(
+        "j.title||' '||j.company||' '||coalesce(j.location,'')||' '||j.description_text",
+        &filter.keyword,
+    );
+    let (location_sql, location_terms) =
+        location_clauses(&filter.countries, filter.include_unknown_locations);
+    // Posting dates are stored as ISO strings, so text order is date order; the NULL test keeps
+    // undated listings at the bottom instead of letting them win the descending sort.
+    const JOB_PAGE_SIZE: i64 = 200;
+    let offset = offset.max(0);
+    let order = if filter.sort == "posted" {
+        "ORDER BY j.posted_at IS NULL,j.posted_at DESC,j.updated_at DESC,j.id"
+    } else {
+        "ORDER BY j.updated_at DESC,j.id"
+    };
+    let saved = if filter.saved_only {
+        " AND EXISTS(SELECT 1 FROM applications a WHERE a.job_id=j.id)"
+    } else {
+        ""
+    };
+    // reconcile_availability has been writing these states since the schema was created and no
+    // query has ever read them, so a posting absent from two complete reads was listed exactly
+    // like a live one. 'possibly_closed' stays visible and is badged instead — one absence is
+    // weak evidence, and a partial read cannot produce one at all.
+    let availability = if filter.include_closed {
+        " AND j.availability<>'archived'"
+    } else {
+        " AND j.availability NOT IN ('archived','closed')"
+    };
+    // Placeholders, never interpolated ids. These bind before the title and keyword terms because
+    // the clause is spliced ahead of them and positional binds go in string order.
+    let sources_sql = if filter.source_ids.is_empty() {
+        String::new()
+    } else {
+        format!(
+            " AND j.source_id IN ({})",
+            std::iter::repeat("?")
+                .take(filter.source_ids.len())
+                .collect::<Vec<_>>()
+                .join(",")
+        )
+    };
+    // A listing with no posting date is shown whatever the window: the board never said when it
+    // went up, which is not the same as saying it is old. The cutoff is a date this code builds
+    // from an integer, so it carries no user text and is safe to inline; the binds below stay in
+    // the order the clauses are spliced.
+    let posted = match filter.posted_within_days.filter(|days| *days > 0) {
+        Some(days) => format!(
+            " AND (j.posted_at IS NULL OR j.posted_at='' OR j.posted_at>='{}')",
+            (Utc::now().date_naive() - chrono::Duration::days(days)).format("%Y-%m-%d")
+        ),
+        None => String::new(),
+    };
+    // One WHERE, shared by the count and the rows. They used to be spelled out separately, so a
+    // filter added to one silently missed the other and the count disagreed with the list.
+    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}");
+    let count_sql =
+        format!("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id{where_sql}");
+    let mut count_query = sqlx::query_scalar::<_, i64>(&count_sql);
+    for bound in filter
+        .source_ids
+        .iter()
+        .chain(title_terms.iter())
+        .chain(keyword_terms.iter())
+        .chain(location_terms.iter())
     {
-        return Err("This rescore run ID is already active".into());
+        count_query = count_query.bind(bound);
     }
-    let run_for_task = run_id.clone();
-    let result = async {
-    let rows = sqlx::query("SELECT j.id FROM jobs j LEFT JOIN match_results m ON m.job_id=j.id AND m.persona_id=? AND m.algorithm_version='2.0.0' AND m.model_version=? WHERE m.id IS NULL OR m.filter_decision_json NOT LIKE '%' || j.content_hash || '%'").bind(&persona_id).bind(crate::embedding::MODEL_VERSION).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())?;
-    let total = rows.len() as u64;
-    let mut completed = 0;
-    for row in rows {
-        if cancelled_runs()
-            .lock()
-            .map_err(|_| "Rescore cancellation lock failed")?
-            .remove(&run_for_task)
-        {
-            return Ok(RescoreRun {
-                run_id: run_for_task.clone(),
-                completed,
-                total,
-                cancelled: true,
-            });
-        }
-        let job_id: String = row.get(0);
-        rescore(&state.db.pool, &state.model_root, &persona_id, Some(&job_id)).await?;
-        completed += 1;
-        let _ = app.emit(
-            "rescore-progress",
-            serde_json::json!({"runId":run_for_task.clone(),"completed":completed,"total" :total}),
-        );
+    let total = count_query
+        .fetch_one(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    let sql = format!("{JOB_SELECT}{where_sql} {order} LIMIT {JOB_PAGE_SIZE} OFFSET ?");
+    let mut query = sqlx::query_as::<_, crate::domain::Job>(&sql);
+    for bound in filter
+        .source_ids
+        .iter()
+        .chain(title_terms.iter())
+        .chain(keyword_terms.iter())
+        .chain(location_terms.iter())
+    {
+        query = query.bind(bound);
     }
-    Ok(RescoreRun {
-        run_id: run_for_task.clone(),
-        completed,
+    let items = query
+        .bind(offset)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(JobPage {
+        has_more: offset + (items.len() as i64) < total,
+        items,
         total,
-        cancelled: false,
+        offset,
     })
-    }.await;
-    active_runs()
-        .lock()
-        .map_err(|_| "Rescore active lock failed")?
-        .remove(&run_id);
-    cancelled_runs()
-        .lock()
-        .map_err(|_| "Rescore cancellation lock failed")?
-        .remove(&run_id);
-    result
 }
-async fn cached_embedding(
-    pool: &SqlitePool,
-    root: &std::path::Path,
-    owner_type: &str,
-    owner_id: &str,
-    text: &str,
-) -> ApiResult<Vec<f32>> {
-    let hash = crate::embedding::content_hash(text);
-    if let Some(blob) = sqlx::query_scalar::<_, Vec<u8>>("SELECT vector FROM embeddings WHERE owner_type=? AND owner_id=? AND model=? AND dimensions=? AND content_hash=? ORDER BY created_at DESC LIMIT 1")
-        .bind(owner_type).bind(owner_id).bind(crate::embedding::MODEL_VERSION).bind(crate::embedding::DIMENSIONS as i64).bind(&hash).fetch_optional(pool).await.map_err(|e| e.to_string())? {
-        return crate::embedding::blob_f32(&blob);
-    }
-    // Inference deliberately runs before the following short write transaction.
-    let vector = crate::embedding::embed_packaged(root, vec![text.to_string()])?
-        .into_iter()
-        .next()
-        .ok_or("BGE returned no embedding")?;
-    sqlx::query("INSERT OR IGNORE INTO embeddings(id,owner_type,owner_id,model,dimensions,content_hash,vector,created_at) VALUES(?,?,?,?,?,?,?,?)")
-        .bind(id()).bind(owner_type).bind(owner_id).bind(crate::embedding::MODEL_VERSION).bind(crate::embedding::DIMENSIONS as i64).bind(&hash).bind(crate::embedding::f32_blob(&vector)).bind(now()).execute(pool).await.map_err(|e| e.to_string())?;
-    Ok(vector)
-}
-async fn rescore(
-    pool: &SqlitePool,
-    root: &std::path::Path,
-    persona_id: &str,
-    only_job: Option<&str>,
+/// The enabled set is the source selection: it decides which jobs are listed and which sources
+/// Update Jobs re-reads. Toggling it must not require re-submitting the whole source form.
+#[tauri::command]
+pub async fn set_source_enabled(
+    source_id: String,
+    enabled: bool,
+    state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let p:Persona=sqlx::query_as("SELECT id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,location,work_mode,seniority,salary_min,threshold,unknown_policy,created_at,updated_at FROM personas WHERE id=?").bind(persona_id).fetch_one(pool).await.map_err(|e|e.to_string())?;
-    let skills: Vec<String> =
-        sqlx::query("SELECT skill FROM persona_skills WHERE persona_id=? AND confirmed=1")
-            .bind(persona_id)
-            .fetch_all(pool)
+    let kind: String =
+        sqlx::query_scalar("SELECT kind FROM sources WHERE id=? AND deleted_at IS NULL")
+            .bind(&source_id)
+            .fetch_optional(&state.db.pool)
             .await
             .map_err(|e| e.to_string())?
-            .into_iter()
-            .map(|r| r.get(0))
-            .collect();
-    let jobs=sqlx::query("SELECT id,title,company,location,work_mode,seniority,salary_min,description_text,skills_json,content_hash FROM jobs WHERE (? IS NULL OR id=?)").bind(only_job).bind(only_job).fetch_all(pool).await.map_err(|e|e.to_string())?;
-    let titles: Vec<String> = serde_json::from_str(&p.target_titles_json).unwrap_or_default();
-    let includes: Vec<String> = serde_json::from_str(&p.include_keywords_json).unwrap_or_default();
-    let excludes: Vec<String> = serde_json::from_str(&p.exclude_keywords_json).unwrap_or_default();
-    let resume: Option<(String, String)> = sqlx::query("SELECT content_hash,extracted_text FROM resume_documents WHERE id=(SELECT resume_document_id FROM personas WHERE id=?)")
-        .bind(persona_id).fetch_optional(pool).await.map_err(|e| e.to_string())?
-        .map(|row| (row.get("content_hash"), row.get("extracted_text")));
-    let resume_hash = resume.as_ref().map(|value| value.0.clone());
-    let resume_text = resume.as_ref().map(|value| value.1.as_str()).unwrap_or("");
-    let persona_text = format!(
-        "{} {} {} {} {}",
-        p.name,
-        p.target_titles_json,
-        skills.join(" "),
-        p.include_keywords_json,
-        resume_text
-    );
-    let persona_hash = crate::embedding::content_hash(&persona_text);
-    let persona_vector = cached_embedding(pool, root, "persona", persona_id, &persona_text).await?;
-    for j in jobs {
-        let jid: String = j.get("id");
-        let description: String = j.get("description_text");
-        let chunks = crate::embedding::chunk_text(&description);
-        let mut chunk_similarity = Vec::new();
-        for (index, chunk) in chunks.iter().enumerate() {
-            let vector = cached_embedding(
-                pool,
-                root,
-                "job-description-chunk",
-                &format!("{jid}:{index}"),
-                chunk,
-            )
-            .await?;
-            chunk_similarity.push(crate::embedding::cosine(&persona_vector, &vector).max(0.0));
-        }
-        let title_text: String = j.get("title");
-        let title_vector = cached_embedding(pool, root, "job-title", &jid, &title_text).await?;
-        let mut title_scores = Vec::new();
-        for title in &titles {
-            let owner = format!("{persona_id}:{}", crate::embedding::content_hash(title));
-            let vector = cached_embedding(pool, root, "persona-title", &owner, title).await?;
-            title_scores.push(crate::embedding::cosine(&vector, &title_vector).max(0.0));
-        }
-        let score = crate::matching::score_with_similarity(
-            &crate::matching::PersonaProfile {
-                titles: titles.clone(),
-                skills: skills.clone(),
-                include: includes.clone(),
-                include_mode: p.include_keyword_mode.clone(),
-                exclude: excludes.clone(),
-                location: p.location.clone(),
-                work_mode: p.work_mode.clone(),
-                seniority: p.seniority.clone(),
-                salary_min: p.salary_min,
-                unknown_policy: p.unknown_policy.clone(),
-            },
-            &crate::matching::JobProfile {
-                title: j.get("title"),
-                location: j.get("location"),
-                work_mode: j.get("work_mode"),
-                seniority: j.get("seniority"),
-                salary_min: j.get("salary_min"),
-                description: j.get("description_text"),
-                skills: serde_json::from_str(&j.get::<String, _>("skills_json"))
-                    .unwrap_or_default(),
-            },
-            Some(crate::embedding::mean_top_three(chunk_similarity)),
-            Some(title_scores.into_iter().fold(0.0, f64::max)),
-        );
-        let job_hash: String = j.get("content_hash");
-        let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
-        let still_current: Option<String> = sqlx::query_scalar("SELECT j.id FROM jobs j JOIN personas p ON p.id=? WHERE j.id=? AND j.content_hash=? AND p.updated_at=? AND ((? IS NULL AND p.resume_document_id IS NULL) OR EXISTS (SELECT 1 FROM resume_documents r WHERE r.id=p.resume_document_id AND r.content_hash=?))").bind(persona_id).bind(&jid).bind(&job_hash).bind(&p.updated_at).bind(&resume_hash).bind(&resume_hash).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?;
-        if still_current.is_some() {
-            sqlx::query("INSERT INTO match_results(id,job_id,persona_id,score,eligible,algorithm_version,model_version,filter_decision_json,components_json,explanation_json,created_at,updated_at) VALUES(?,?,?,?,?,'2.0.0',?,?,?,?,?,?) ON CONFLICT(job_id,persona_id,algorithm_version) DO UPDATE SET score=excluded.score,eligible=excluded.eligible,model_version=excluded.model_version,filter_decision_json=excluded.filter_decision_json,components_json=excluded.components_json,explanation_json=excluded.explanation_json,updated_at=excluded.updated_at").bind(id()).bind(&jid).bind(persona_id).bind(score.total).bind(score.eligible).bind(crate::embedding::MODEL_VERSION).bind(serde_json::json!({"reasons":score.filters,"personaContentHash":persona_hash,"resumeContentHash":resume_hash,"jobContentHash":job_hash,"algorithmHash":"2.0.0-45-25-20-10"}).to_string()).bind(serde_json::to_string(&score.components).unwrap()).bind(serde_json::to_string(&score.evidence).unwrap()).bind(now()).bind(now()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-        }
-        tx.commit().await.map_err(|e| e.to_string())?;
+            .ok_or("Source was not found")?;
+    if enabled && kind == "reference" {
+        return Err("Reference sources cannot be enabled for scraping".into());
     }
-    Ok(())
-}
-#[tauri::command]
-pub async fn get_match_explanation(
-    job_id: String,
-    persona_id: String,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<serde_json::Value> {
-    let row = sqlx::query("SELECT score,eligible,filter_decision_json,components_json,explanation_json,model_version,algorithm_version FROM match_results WHERE job_id=? AND persona_id=? ORDER BY updated_at DESC LIMIT 1").bind(job_id).bind(persona_id).fetch_one(&state.db.pool).await.map_err(|_| "Match result was not found".to_string())?;
-    Ok(
-        serde_json::json!({"score":row.get::<f64,_>(0),"eligible":row.get::<bool,_>(1),"filters":serde_json::from_str::<serde_json::Value>(&row.get::<String,_>(2)).unwrap_or_default(),"components":serde_json::from_str::<serde_json::Value>(&row.get::<String,_>(3)).unwrap_or_default(),"evidence":serde_json::from_str::<serde_json::Value>(&row.get::<String,_>(4)).unwrap_or_default(),"modelVersion":row.get::<String,_>(5),"algorithmVersion":row.get::<String,_>(6)}),
-    )
-}
-#[tauri::command]
-pub async fn list_review_queue(
-    persona_id: String,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<Vec<crate::domain::Job>> {
-    sqlx::query_as("SELECT j.id,j.source_id,j.title,j.company,j.location,j.work_mode,j.canonical_url,j.apply_url,j.description_text,j.posted_at,j.salary_min,j.salary_max,j.salary_currency,j.seniority,j.availability,j.created_at,j.updated_at,m.score,m.eligible,m.explanation_json AS reasons FROM jobs j JOIN match_results m ON m.job_id=j.id AND m.persona_id=? LEFT JOIN review_decisions d ON d.job_id=j.id AND d.persona_id=m.persona_id WHERE m.eligible=1 AND m.score >= (SELECT threshold FROM personas WHERE id=m.persona_id) AND COALESCE(d.status,'unseen') IN ('unseen','reviewing') ORDER BY m.score DESC,j.posted_at DESC").bind(persona_id).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
-}
-#[tauri::command]
-pub async fn set_review_decision(
-    job_id: String,
-    persona_id: String,
-    status: String,
-    reason: Option<String>,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<()> {
-    if !["unseen", "reviewing", "shortlisted", "dismissed"].contains(&status.as_str()) {
-        return Err("Invalid review state".into());
-    };
-    sqlx::query("INSERT INTO review_decisions(id,job_id,persona_id,status,reason,decided_at) VALUES(?,?,?,?,?,?) ON CONFLICT(job_id,persona_id) DO UPDATE SET status=excluded.status,reason=excluded.reason,decided_at=excluded.decided_at").bind(id()).bind(job_id).bind(persona_id).bind(status).bind(reason).bind(now()).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
+    // disabled_reason records why a source cannot work (a dead URL, an auth wall) — never the
+    // fact that it is currently unticked, which the enabled flag already says. Selecting a source
+    // clears the recorded reason because the user is overriding that finding on purpose.
+    sqlx::query("UPDATE sources SET enabled=?,disabled_reason=CASE WHEN ? THEN NULL ELSE disabled_reason END,updated_at=? WHERE id=?").bind(enabled).bind(enabled).bind(now()).bind(&source_id).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
     Ok(())
 }
 #[tauri::command]
@@ -1315,110 +2324,123 @@ pub struct AttachApplicationDocument {
     pub document_type: String,
     pub filename: Option<String>,
     pub mime_type: Option<String>,
-    pub base64: Option<String>,
-    pub resume_document_id: Option<String>,
     pub event_id: Option<String>,
 }
-fn controlled_resume_bytes(root: &Path, stored: &str) -> ApiResult<Vec<u8>> {
-    let documents = root
-        .join("documents")
-        .canonicalize()
-        .map_err(|e| e.to_string())?;
-    let file = Path::new(stored)
-        .canonicalize()
-        .map_err(|_| "Resume source is missing".to_string())?;
-    if !file.starts_with(&documents) {
-        return Err("Resume source is outside controlled documents".into());
+fn validate_attachment_size(size: usize) -> ApiResult<()> {
+    if size > MAX_ATTACHMENT_BYTES {
+        Err("Attachment exceeds 20 MB".into())
+    } else {
+        Ok(())
+    }
+}
+fn decode_attachment_metadata(encoded: &str) -> ApiResult<AttachApplicationDocument> {
+    let metadata = URL_SAFE_NO_PAD
+        .decode(encoded)
+        .map_err(|_| "Invalid attachment metadata")?;
+    serde_json::from_slice(&metadata).map_err(|_| "Invalid attachment metadata".into())
+}
+fn attachment_request(
+    request: &tauri::ipc::Request<'_>,
+) -> ApiResult<(AttachApplicationDocument, Vec<u8>)> {
+    let content = match request.body() {
+        InvokeBody::Raw(bytes) => bytes,
+        _ => return Err("Attachment bytes are required".into()),
     };
-    std::fs::read(file).map_err(|e| e.to_string())
+    validate_attachment_size(content.len())?;
+    let encoded = request
+        .headers()
+        .get(DOCUMENT_METADATA_HEADER)
+        .ok_or("Attachment metadata is required")?
+        .to_str()
+        .map_err(|_| "Invalid attachment metadata")?;
+    let input = decode_attachment_metadata(encoded)?;
+    Ok((input, content.clone()))
 }
 #[tauri::command]
 pub async fn attach_application_document(
-    input: AttachApplicationDocument,
+    request: tauri::ipc::Request<'_>,
     state: State<'_, Arc<AppState>>,
+) -> ApiResult<ApplicationDocument> {
+    let (input, content) = attachment_request(&request)?;
+    attach_application_document_pool(input, content, &state.db.pool).await
+}
+async fn attach_application_document_pool(
+    input: AttachApplicationDocument,
+    content: Vec<u8>,
+    pool: &SqlitePool,
 ) -> ApiResult<ApplicationDocument> {
     if !["resume", "cover_letter", "other"].contains(&input.document_type.as_str()) {
         return Err("Document type must be resume, cover_letter, or other".into());
     }
-    let (filename, mime, content) = match (input.base64, input.resume_document_id) {
-        (Some(encoded), None) => {
-            let bytes = STANDARD
-                .decode(encoded)
-                .map_err(|_| "Invalid attachment bytes")?;
-            let filename = input
-                .filename
-                .filter(|v| !v.trim().is_empty())
-                .ok_or("Attachment filename is required")?;
-            (
-                filename,
-                input
-                    .mime_type
-                    .unwrap_or_else(|| "application/octet-stream".into()),
-                bytes,
-            )
-        }
-        (None, Some(resume_id)) => {
-            let row =
-                sqlx::query("SELECT filename,mime_type,path FROM resume_documents WHERE id=?")
-                    .bind(resume_id)
-                    .fetch_one(&state.db.pool)
-                    .await
-                    .map_err(|_| "Resume version was not found".to_string())?;
-            let filename: String = row.get(0);
-            let mime: String = row.get(1);
-            let path: String = row.get(2);
-            (
-                filename,
-                mime,
-                controlled_resume_bytes(&state.db.root, &path)?,
-            )
-        }
-        _ => return Err("Attach either controlled resume version or local file bytes".into()),
-    };
-    if content.len() > 20 * 1024 * 1024 {
-        return Err("Attachment exceeds 20 MB".into());
-    };
+    let filename = input
+        .filename
+        .filter(|v| !v.trim().is_empty())
+        .ok_or("Attachment filename is required")?;
+    let mime = input
+        .mime_type
+        .unwrap_or_else(|| "application/octet-stream".into());
     let document_id = id();
     let sha256 = format!("{:x}", Sha256::digest(&content));
     let size = content.len() as i64;
     let t = now();
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
     sqlx::query("INSERT INTO application_documents(id,application_id,kind,document_type,filename,content,mime_type,sha256,size,event_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(&document_id).bind(&input.application_id).bind(&input.document_type).bind(&input.document_type).bind(&filename).bind(content).bind(&mime).bind(&sha256).bind(size).bind(&input.event_id).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'document_attached',?,?)").bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"documentId":document_id,"sha256":sha256,"filename":filename}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
-    sqlx::query_as("SELECT id,application_id,kind,document_type,filename,mime_type,sha256,size,event_id,created_at FROM application_documents WHERE id=?").bind(document_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
-}
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ApplicationDocumentExport {
-    pub filename: String,
-    pub mime_type: String,
-    pub base64: String,
-    pub sha256: String,
+    sqlx::query_as("SELECT id,application_id,kind,document_type,filename,mime_type,sha256,size,event_id,created_at FROM application_documents WHERE id=?").bind(document_id).fetch_one(pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn export_application_document(
     document_id: String,
     state: State<'_, Arc<AppState>>,
-) -> ApiResult<ApplicationDocumentExport> {
-    let row = sqlx::query(
-        "SELECT filename,mime_type,content,sha256 FROM application_documents WHERE id=?",
-    )
-    .bind(document_id)
-    .fetch_one(&state.db.pool)
-    .await
-    .map_err(|_| "Application document was not found".to_string())?;
-    let bytes: Vec<u8> = row.get(2);
-    let sha256: String = row.get(3);
+) -> ApiResult<tauri::ipc::Response> {
+    Ok(tauri::ipc::Response::new(
+        export_application_document_bytes(&document_id, &state.db.pool).await?,
+    ))
+}
+async fn export_application_document_bytes(
+    document_id: &str,
+    pool: &SqlitePool,
+) -> ApiResult<Vec<u8>> {
+    let row = sqlx::query("SELECT content,sha256 FROM application_documents WHERE id=?")
+        .bind(document_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|_| "Application document was not found".to_string())?;
+    let bytes: Vec<u8> = row.get(0);
+    let sha256: String = row.get(1);
     if format!("{:x}", Sha256::digest(&bytes)) != sha256 {
         return Err("Application document checksum failed".into());
     };
-    Ok(ApplicationDocumentExport {
-        filename: row.get(0),
-        mime_type: row.get(1),
-        base64: STANDARD.encode(bytes),
-        sha256,
-    })
+    Ok(bytes)
+}
+#[cfg(test)]
+mod document_ipc_tests {
+    use super::*;
+
+    #[test]
+    fn metadata_keeps_unicode_and_uses_url_safe_base64() {
+        let json = serde_json::json!({
+            "applicationId": "app-1",
+            "documentType": "resume",
+            "filename": "currículo_日本語.pdf",
+            "mimeType": "application/pdf"
+        });
+        let encoded = URL_SAFE_NO_PAD.encode(json.to_string());
+        assert!(!encoded.contains(['+', '/', '=']));
+        let input = decode_attachment_metadata(&encoded).unwrap();
+        assert_eq!(input.filename.as_deref(), Some("currículo_日本語.pdf"));
+        assert_eq!(input.application_id, "app-1");
+    }
+
+    #[test]
+    fn attachment_limit_accepts_exactly_twenty_megabytes() {
+        assert!(validate_attachment_size(MAX_ATTACHMENT_BYTES).is_ok());
+        assert_eq!(
+            validate_attachment_size(MAX_ATTACHMENT_BYTES + 1).unwrap_err(),
+            "Attachment exceeds 20 MB"
+        );
+    }
 }
 #[tauri::command]
 pub async fn create_application(
@@ -1426,6 +2448,22 @@ pub async fn create_application(
     persona_id: Option<String>,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Application> {
+    // Save is idempotent. Pressing it twice — or pressing Apply on a job already saved — must
+    // land on the one application, not stack duplicates in the board.
+    if let Some(existing) = sqlx::query_scalar::<_, String>(
+        "SELECT id FROM applications WHERE job_id=? ORDER BY created_at LIMIT 1",
+    )
+    .bind(&job_id)
+    .fetch_optional(&state.db.pool)
+    .await
+    .map_err(|e| e.to_string())?
+    {
+        return sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
+            .bind(existing)
+            .fetch_one(&state.db.pool)
+            .await
+            .map_err(|e| e.to_string());
+    }
     let application_id = id();
     let t = now();
     let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
@@ -1883,6 +2921,25 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
     let mut scheduled = 0;
     let mut missed = 0;
     let mut errors = 0;
+    let snapshot = run_scheduler_blocking({
+        let scheduler = scheduler.clone();
+        move || scheduler.list_managed()
+    })
+    .await;
+    let (mut managed_tasks, snapshot_error) = match snapshot {
+        Ok(tasks) => (tasks.into_iter().collect::<HashSet<_>>(), None),
+        Err(error) => (HashSet::new(), Some(error)),
+    };
+    if let Some(error) = snapshot_error {
+        errors += 1;
+        let _ = sqlx::query(
+            "UPDATE reminders SET last_error=?,last_reconciled_at=? WHERE status='pending'",
+        )
+        .bind(error)
+        .bind(now())
+        .execute(pool)
+        .await;
+    }
     let mut expected_tasks = HashSet::new();
     for row in rows {
         let id: String = row.get(0);
@@ -1894,7 +2951,13 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
         let existing: Option<String> = row.get(4);
         if status != "pending" {
             if let Some(task) = existing.filter(|task| is_managed_task_path(task)) {
-                if let Err(error) = scheduler.cancel(&task) {
+                let result = run_scheduler_blocking({
+                    let scheduler = scheduler.clone();
+                    let task = task.clone();
+                    move || scheduler.cancel(&task)
+                })
+                .await;
+                if let Err(error) = result {
                     sqlx::query(
                         "UPDATE reminders SET last_error=?,last_reconciled_at=? WHERE id=?",
                     )
@@ -1906,6 +2969,7 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
                     .map_err(|e| e.to_string())?;
                     errors += 1;
                 } else {
+                    managed_tasks.remove(&task);
                     sqlx::query("UPDATE reminders SET os_task_id=NULL,last_reconciled_at=?,last_error=NULL WHERE id=?")
                         .bind(now()).bind(&id).execute(pool).await.map_err(|e|e.to_string())?;
                 }
@@ -1923,13 +2987,10 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
             missed += 1;
             continue;
         }
-        let task = existing.as_deref().map(|v| scheduler.exists(v)).transpose();
-        let task = match task {
-            Ok(Some(value)) => value,
-            Ok(None) => false,
-            Err(error) => {
+        let task = match existing.as_deref() {
+            Some(task) if !is_managed_task_path(task) => {
                 sqlx::query("UPDATE reminders SET last_error=?,last_reconciled_at=? WHERE id=?")
-                    .bind(error)
+                    .bind("Task path is outside JobScraper scope")
                     .bind(now())
                     .bind(&id)
                     .execute(pool)
@@ -1938,11 +2999,20 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
                 errors += 1;
                 false
             }
+            Some(task) => managed_tasks.contains(task),
+            None => false,
         };
         if !task {
-            match scheduler.create(&reminder) {
+            let result = run_scheduler_blocking({
+                let scheduler = scheduler.clone();
+                let reminder = reminder.clone();
+                move || scheduler.create(&reminder)
+            })
+            .await;
+            match result {
                 Ok(task_id) => {
                     sqlx::query("UPDATE reminders SET os_task_id=?,last_reconciled_at=?,last_error=NULL WHERE id=?").bind(&task_id).bind(now()).bind(&id).execute(pool).await.map_err(|e|e.to_string())?;
+                    managed_tasks.insert(task_id.clone());
                     expected_tasks.insert(task_id);
                     scheduled += 1
                 }
@@ -1963,31 +3033,23 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
             expected_tasks.insert(task);
         }
     }
-    // Enumeration can list many system tasks, but only UUID-validated names in
-    // JobScraper namespace are ever selected or deleted.
-    match scheduler.list_managed() {
-        Ok(tasks) => {
-            for task in scoped_orphans(&tasks, &expected_tasks) {
-                if let Err(error) = scheduler.cancel(&task) {
-                    errors += 1;
-                    let _ = sqlx::query(
-                        "UPDATE reminders SET last_error=?,last_reconciled_at=? WHERE os_task_id=?",
-                    )
-                    .bind(error)
-                    .bind(now())
-                    .bind(task)
-                    .execute(pool)
-                    .await;
-                }
-            }
-        }
-        Err(error) => {
+    // The one scoped snapshot drives both existence checks and strict orphan cleanup.
+    let managed_tasks = managed_tasks.into_iter().collect::<Vec<_>>();
+    for task in scoped_orphans(&managed_tasks, &expected_tasks) {
+        let result = run_scheduler_blocking({
+            let scheduler = scheduler.clone();
+            let task = task.clone();
+            move || scheduler.cancel(&task)
+        })
+        .await;
+        if let Err(error) = result {
             errors += 1;
             let _ = sqlx::query(
-                "UPDATE reminders SET last_error=?,last_reconciled_at=? WHERE status='pending'",
+                "UPDATE reminders SET last_error=?,last_reconciled_at=? WHERE os_task_id=?",
             )
             .bind(error)
             .bind(now())
+            .bind(task)
             .execute(pool)
             .await;
         }
@@ -2327,6 +3389,8 @@ async fn relational_rows(pool: &SqlitePool, table: &str) -> ApiResult<Vec<serde_
         "source_configs",
         "scrape_runs",
         "scrape_run_events",
+        "app_logs",
+        "settings",
         "jobs",
         "job_occurrences",
         "job_revisions",
@@ -2424,6 +3488,8 @@ async fn export_closure(
         "source_configs",
         "scrape_runs",
         "scrape_run_events",
+        "app_logs",
+        "settings",
         "jobs",
         "job_occurrences",
         "job_revisions",
@@ -2865,13 +3931,16 @@ pub async fn preview_purge(
             (jobs,vec![],vec![],protected,"Deletes only closed jobs without applications or review history; dependent scrape sightings/revisions/matches are deleted by foreign-key policy.".into())
         }
         "scrape_logs" => {
+            // app_logs holds the same class of diagnostics for actions that never produced a
+            // scrape_run, so one retention control covers both tables.
             let events: Vec<String> =
-                sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE created_at<?")
+                sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE created_at<? UNION ALL SELECT id FROM app_logs WHERE at<?")
+                    .bind(&before)
                     .bind(&before)
                     .fetch_all(&state.db.pool)
                     .await
                     .map_err(|e| e.to_string())?;
-            (vec![],events,vec![],0,"Deletes only old scrape run event diagnostics; sources, runs, jobs, and history remain.".into())
+            (vec![],events,vec![],0,"Deletes only old scrape run and activity log diagnostics; sources, runs, jobs, and history remain.".into())
         }
         "sessions" => {
             let root = state.db.root.join("sessions");
@@ -2948,12 +4017,22 @@ pub async fn apply_purge(
         }
     }
     for event in &stored.event_ids {
-        let changed = sqlx::query("DELETE FROM scrape_run_events WHERE id=?")
+        // The preview mixes ids from both diagnostic tables; a UUID exists in exactly one.
+        let mut changed = sqlx::query("DELETE FROM scrape_run_events WHERE id=?")
             .bind(event)
             .execute(&mut *tx)
             .await
-            .map_err(|e| e.to_string())?;
-        if changed.rows_affected() != 1 {
+            .map_err(|e| e.to_string())?
+            .rows_affected();
+        if changed == 0 {
+            changed = sqlx::query("DELETE FROM app_logs WHERE id=?")
+                .bind(event)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?
+                .rows_affected();
+        }
+        if changed != 1 {
             return Err("Purge preview changed; no rows were deleted".into());
         }
     }
@@ -3004,90 +4083,745 @@ mod matching_persistence_tests {
         sqlx::query("INSERT INTO resume_documents(id,persona_id,filename,path,extracted_text,mime_type,content_hash,created_at,updated_at) VALUES('r','p','r.txt','r.txt','resume','text/plain','resume-v1','t','t')").execute(pool).await.unwrap();
         sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','Engineer','Company','description','[]','job-v1','t','1','t','t')").execute(pool).await.unwrap();
     }
-    async fn guard(
-        pool: &SqlitePool,
-        job_hash: &str,
-        persona_updated: &str,
-        resume_hash: Option<&str>,
-    ) -> bool {
-        sqlx::query_scalar::<_,String>("SELECT j.id FROM jobs j JOIN personas p ON p.id='p' WHERE j.id='j' AND j.content_hash=? AND p.updated_at=? AND ((? IS NULL AND p.resume_document_id IS NULL) OR EXISTS (SELECT 1 FROM resume_documents r WHERE r.id=p.resume_document_id AND r.content_hash=?))").bind(job_hash).bind(persona_updated).bind(resume_hash).bind(resume_hash).fetch_optional(pool).await.unwrap().is_some()
+    #[tokio::test]
+    async fn new_jobs_since_ignores_rescraped_and_closed_rows() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for (job, title, availability, created_at) in [
+            ("old", "Old role", "active", "2026-08-31T09:59:59+00:00"),
+            ("new", "New role", "active", "2026-08-31T10:00:01+00:00"),
+            (
+                "closed",
+                "Closed role",
+                "closed",
+                "2026-08-31T10:00:02+00:00",
+            ),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Chip Co','','[]',?,?, 't','1',?,?)")
+                .bind(job).bind(title).bind(job).bind(availability).bind(created_at).bind(created_at).execute(&pool).await.unwrap();
+        }
+        // Simulate a re-scrape: updated_at changes, while insert-only created_at remains old.
+        sqlx::query("UPDATE jobs SET updated_at='2026-08-31T10:00:03+00:00' WHERE id='old'")
+            .execute(&pool)
+            .await
+            .unwrap();
+        let (count, jobs) = new_jobs_since(&pool, "2026-08-31T10:00:00+00:00", 3)
+            .await
+            .unwrap();
+        assert_eq!(count, 1);
+        assert_eq!(jobs.len(), 1);
+        assert_eq!(jobs[0].title, "New role");
     }
     #[tokio::test]
-    async fn cache_hit_and_model_dimension_hash_invalidate() {
+    async fn a_fresh_heartbeat_blocks_the_interrupted_run_sweep() {
         let pool = migrated_pool().await;
-        let vector = crate::embedding::f32_blob(&vec![
-            1.0 / (crate::embedding::DIMENSIONS as f32)
-                .sqrt();
-            crate::embedding::DIMENSIONS
-        ]);
-        sqlx::query("INSERT INTO embeddings(id,owner_type,owner_id,model,dimensions,content_hash,vector,created_at) VALUES('e','job','j',?,?,?,?,'now')").bind(crate::embedding::MODEL_VERSION).bind(crate::embedding::DIMENSIONS as i64).bind(crate::embedding::content_hash("same")).bind(vector).execute(&pool).await.unwrap();
-        assert!(
-            cached_embedding(&pool, std::path::Path::new("missing"), "job", "j", "same")
-                .await
-                .is_ok()
-        );
-        let miss = sqlx::query_scalar::<_, i64>("SELECT count(*) FROM embeddings WHERE owner_type='job' AND owner_id='j' AND content_hash!=?").bind(crate::embedding::content_hash("same")).fetch_one(&pool).await.unwrap();
-        assert_eq!(miss, 0);
-        pool.close().await;
-    }
-    #[tokio::test]
-    async fn corrupt_cache_blob_is_rejected() {
-        let pool = migrated_pool().await;
-        sqlx::query("INSERT INTO embeddings(id,owner_type,owner_id,model,dimensions,content_hash,vector,created_at) VALUES('e','job','j',?,?,?,X'00','now')").bind(crate::embedding::MODEL_VERSION).bind(crate::embedding::DIMENSIONS as i64).bind(crate::embedding::content_hash("same")).execute(&pool).await.unwrap();
-        assert!(
-            cached_embedding(&pool, std::path::Path::new("missing"), "job", "j", "same")
-                .await
-                .is_err()
-        );
-        pool.close().await;
-    }
-    #[tokio::test]
-    async fn persona_job_and_resume_snapshots_guard_upsert() {
-        let pool = migrated_pool().await;
-        seed_match(&pool).await;
-        assert!(guard(&pool, "job-v1", "persona-v1", Some("resume-v1")).await);
-        assert!(!guard(&pool, "job-v2", "persona-v1", Some("resume-v1")).await);
-        assert!(!guard(&pool, "job-v1", "persona-v2", Some("resume-v1")).await);
-        assert!(!guard(&pool, "job-v1", "persona-v1", Some("resume-v2")).await);
-        pool.close().await;
-    }
-    #[tokio::test]
-    async fn match_result_fields_commit_together_and_rollback_is_empty() {
-        let pool = migrated_pool().await;
-        seed_match(&pool).await;
-        let mut tx = pool.begin().await.unwrap();
-        sqlx::query("INSERT INTO match_results(id,job_id,persona_id,score,eligible,algorithm_version,model_version,filter_decision_json,components_json,explanation_json,created_at,updated_at) VALUES('m','j','p',72,1,'2.0.0','model','{\"jobContentHash\":\"job-v1\"}','{\"semantic\":45}','{\"matched_skills\":[\"rust\"]}','t','t')").execute(&mut *tx).await.unwrap();
-        tx.commit().await.unwrap();
-        let row=sqlx::query("SELECT score,components_json,explanation_json,filter_decision_json,model_version,algorithm_version FROM match_results WHERE id='m'").fetch_one(&pool).await.unwrap();
-        assert_eq!(row.get::<f64, _>(0), 72.0);
-        assert!(row.get::<String, _>(1).contains("semantic"));
-        assert!(row.get::<String, _>(2).contains("matched_skills"));
-        assert!(row.get::<String, _>(3).contains("job-v1"));
-        assert_eq!(row.get::<String, _>(4), "model");
-        assert_eq!(row.get::<String, _>(5), "2.0.0");
-        let mut tx = pool.begin().await.unwrap();
-        sqlx::query("INSERT INTO match_results(id,job_id,persona_id,score,eligible,algorithm_version,model_version,filter_decision_json,components_json,explanation_json,created_at,updated_at) VALUES('rollback','j','p',0,0,'x','x','{}','{}','{}','t','t')").execute(&mut *tx).await.unwrap();
-        tx.rollback().await.unwrap();
+        let db = Database {
+            pool: pool.clone(),
+            root: PathBuf::new(),
+        };
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','Engineer','S','','[]','h','t','1','t','t')").execute(&pool).await.unwrap();
+        sqlx::query(
+            "INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES('o','j','r','t')",
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+        write_sync_heartbeat(&pool).await;
+        assert_eq!(db.recover_interrupted_runs().await.unwrap(), 0);
         assert_eq!(
-            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM match_results WHERE id='rollback'")
+            sqlx::query_scalar::<_, String>("SELECT status FROM scrape_runs WHERE id='r'")
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+            "running"
+        );
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM job_occurrences")
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+            1
+        );
+        sqlx::query("UPDATE settings SET value='2020-01-01T00:00:00+00:00' WHERE key=?")
+            .bind(SYNC_HEARTBEAT)
+            .execute(&pool)
+            .await
+            .unwrap();
+        assert_eq!(db.recover_interrupted_runs().await.unwrap(), 1);
+        assert_eq!(
+            sqlx::query_scalar::<_, String>("SELECT status FROM scrape_runs WHERE id='r'")
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+            "cancelled"
+        );
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM job_occurrences")
                 .fetch_one(&pool)
                 .await
                 .unwrap(),
             0
         );
-        pool.close().await;
     }
-    #[test]
-    fn cancellation_registry_rejects_duplicate_and_cleans_up() {
-        let run = "unit-run".to_string();
-        let mut active = active_runs().lock().unwrap();
-        assert!(active.insert(run.clone()));
-        assert!(!active.insert(run.clone()));
-        active.remove(&run);
-        drop(active);
-        cancelled_runs().lock().unwrap().insert(run.clone());
-        assert!(cancelled_runs().lock().unwrap().remove(&run));
-        assert!(!cancelled_runs().lock().unwrap().contains(&run));
+    // The two-strike rule used to live twice: once as SQL here and once as a pure function in
+    // availability.rs that nothing called and that only its own tests exercised. This covers the
+    // copy that actually runs, against a real database.
+    #[tokio::test]
+    async fn only_a_complete_run_closes_jobs_and_only_on_the_second_absence() {
+        let pool = migrated_pool().await;
+        let db = Database {
+            pool: pool.clone(),
+            root: std::path::PathBuf::new(),
+        };
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','s','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for id in ["seen", "missing"] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s','Engineer','Chip Co','text','[]',?,'t','1','t','t')").bind(id).bind(id).execute(&pool).await.unwrap();
+        }
+        let state = |id: &'static str| {
+            let pool = pool.clone();
+            async move {
+                sqlx::query_scalar::<_, String>("SELECT availability FROM jobs WHERE id=?")
+                    .bind(id)
+                    .fetch_one(&pool)
+                    .await
+                    .unwrap()
+            }
+        };
+        // Each run sights "seen" and never "missing".
+        let sight = |run: &'static str| {
+            let pool = pool.clone();
+            async move {
+                sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES(?,'s','scrape','completed',?)").bind(run).bind(run).execute(&pool).await.unwrap();
+                sqlx::query(
+                    "INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,'seen',?,'t')",
+                )
+                .bind(run)
+                .bind(run)
+                .execute(&pool)
+                .await
+                .unwrap();
+            }
+        };
+
+        // A partial read proves nothing about what is missing, so it changes nothing.
+        sight("r0").await;
+        db.reconcile_availability("r0", "s", false).await.unwrap();
+        assert_eq!(state("missing").await, "active");
+
+        sight("r1").await;
+        db.reconcile_availability("r1", "s", true).await.unwrap();
+        assert_eq!(state("seen").await, "active");
+        assert_eq!(
+            state("missing").await,
+            "possibly_closed",
+            "one absence is a doubt"
+        );
+
+        sight("r2").await;
+        db.reconcile_availability("r2", "s", true).await.unwrap();
+        assert_eq!(
+            state("missing").await,
+            "closed",
+            "the second absence closes it"
+        );
+
+        // Reappearing clears both the state and the strikes behind it.
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r3','s','scrape','completed','r3')").execute(&pool).await.unwrap();
+        for job in ["seen", "missing"] {
+            sqlx::query(
+                "INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,'r3','t')",
+            )
+            .bind(job)
+            .bind(job)
+            .execute(&pool)
+            .await
+            .unwrap();
+        }
+        db.reconcile_availability("r3", "s", true).await.unwrap();
+        assert_eq!(state("missing").await, "active");
+        let strikes: i64 =
+            sqlx::query_scalar("SELECT missing_full_runs FROM jobs WHERE id='missing'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert_eq!(strikes, 0, "a returning job starts its count over");
+    }
+
+    // Narrowing the list to one board used to mean switching every other board off, which also
+    // stopped them being read. The view scope is now its own filter over the followed sources,
+    // and being followed is still sources.enabled — the two must not collapse back into one.
+    #[tokio::test]
+    async fn showing_one_source_narrows_the_list_without_touching_the_others() {
+        let pool = migrated_pool().await;
+        for id in ["intel", "arm"] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,'https://example.test','json','1',1,'active',0,0,'t','t')").bind(id).bind(id).execute(&pool).await.unwrap();
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,'Verification Engineer','Chip Co','text','[]',?,'t','1','t','t')").bind(id).bind(id).bind(id).execute(&pool).await.unwrap();
+        }
+        let ids = |page: &JobPage| page.items.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+
+        // No narrowing is the default and means everything followed, not nothing.
+        let all = jobs_page_query(JobFilter::default(), 0, &pool)
+            .await
+            .unwrap();
+        assert_eq!(all.total, 2);
+
+        let one = jobs_page_query(
+            JobFilter {
+                source_ids: vec!["intel".into()],
+                ..Default::default()
+            },
+            0,
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(ids(&one), vec!["intel"]);
+        assert_eq!(
+            one.total, 1,
+            "the count follows the narrowed view, not the page"
+        );
+
+        // The narrowing binds as a parameter, so an id is never SQL.
+        let hostile = jobs_page_query(
+            JobFilter {
+                source_ids: vec!["' OR 1=1 --".into()],
+                ..Default::default()
+            },
+            0,
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(hostile.total, 0);
+
+        // Narrowing the view must leave both boards switched on for the next Update Jobs.
+        let still_on: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE enabled=1 AND kind='active'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert_eq!(still_on, 2);
+    }
+
+    // reconcile_availability has written these states since the schema was created and the Jobs
+    // list never read them, so a posting absent from two complete reads sat in the list looking
+    // exactly like a live one. What the list shows is now what can still be applied to.
+    #[tokio::test]
+    async fn closed_jobs_leave_the_list_unless_they_are_asked_for() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','s','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for (id, availability) in [
+            ("live", "active"),
+            ("maybe", "possibly_closed"),
+            ("gone", "closed"),
+            ("filed", "archived"),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s','Verification Engineer','Chip Co','text','[]',?,?,'t','1','t','t')").bind(id).bind(id).bind(availability).execute(&pool).await.unwrap();
+        }
+        let ids = |jobs: &[crate::domain::Job]| {
+            let mut out = jobs.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+            out.sort();
+            out
+        };
+
+        let default = jobs_query(JobFilter::default(), &pool).await.unwrap();
+        // One absence is weak evidence and a partial read cannot produce one, so possibly_closed
+        // stays in the list and is badged rather than hidden.
+        assert_eq!(ids(&default), vec!["live", "maybe"]);
+        assert_eq!(default.len(), 2, "the total counts what is shown");
+
+        let everything = jobs_query(
+            JobFilter {
+                include_closed: true,
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        // Archived is never listed either way; nothing writes it today, but the column allows it.
+        assert_eq!(ids(&everything), vec!["gone", "live", "maybe"]);
+
+        // The badge needs the state to survive the projection, which drops other columns.
+        let closed = everything.iter().find(|j| j.id == "gone").unwrap();
+        assert_eq!(closed.availability, "closed");
+    }
+
+    // Filtering happens on the codes the resolver worked out when each job was stored, so what
+    // these cases prove is the plumbing: any of several countries, a multi-country listing counted
+    // once, and what happens to a listing nothing could place.
+    #[tokio::test]
+    async fn country_codes_filter_jobs_and_unknown_places_stay_out_unless_asked() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','workday','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for (id, location, url) in [
+            ("lisbon", "Lisbon", "https://x.test/lisbon"),
+            ("madrid", "Madrid", "https://x.test/madrid"),
+            ("multi", "Sibiu, Caen", "https://x.test/multi"),
+            (
+                "counted",
+                "2 Locations",
+                "https://x.wd1.myworkdayjobs.com/External/job/Porto/Engineer_JR1",
+            ),
+            (
+                "nowhere",
+                "3 Locations",
+                "https://x.wd1.myworkdayjobs.com/External/job/JR9/Engineer_JR9",
+            ),
+        ] {
+            let codes =
+                crate::locations::stored(&crate::locations::resolve(Some(location), Some(url)));
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,location,location_countries,canonical_url,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s','Engineer','Chip Co',?,?,?,'text','[]',?,'t','1','t','t')").bind(id).bind(location).bind(codes).bind(url).bind(id).execute(&pool).await.unwrap();
+        }
+        let ids = |jobs: &[crate::domain::Job]| {
+            let mut out = jobs.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+            out.sort();
+            out
+        };
+        let by = |codes: &[&str], include_unknown: bool| JobFilter {
+            countries: codes.iter().map(|code| (*code).to_string()).collect(),
+            include_unknown_locations: include_unknown,
+            ..Default::default()
+        };
+        // A city stands in for its country, and a listing that published only a count is placed by
+        // its own link — the Micron case, filed under Portugal without a re-scrape.
+        let portugal = jobs_query(by(&["PT"], false), &pool).await.unwrap();
+        assert_eq!(ids(&portugal), vec!["counted", "lisbon"]);
+        // Several countries at once, and a posting open in two offices answers to either.
+        assert_eq!(
+            ids(&jobs_query(by(&["RO", "ES"], false), &pool).await.unwrap()),
+            vec!["madrid", "multi"]
+        );
+        assert_eq!(
+            ids(&jobs_query(by(&["FR"], false), &pool).await.unwrap()),
+            vec!["multi"]
+        );
+        // What nothing could place stays out of a country filter unless it is asked for.
+        assert_eq!(
+            ids(&jobs_query(by(&["PT"], true), &pool).await.unwrap()),
+            vec!["counted", "lisbon", "nowhere"]
+        );
+        // No country chosen means everywhere, including the unplaceable.
+        assert_eq!(
+            jobs_query(JobFilter::default(), &pool).await.unwrap().len(),
+            5
+        );
+        // Junk codes cannot reach the query; an all-invalid filter is no filter.
+        assert_eq!(
+            jobs_query(by(&["'; DROP TABLE jobs--", "zzz"], false), &pool)
+                .await
+                .unwrap()
+                .len(),
+            5
+        );
+    }
+    // A wrong country stored by an older version of the resolver has to be corrected on its own:
+    // waiting for a re-scrape leaves jobs filed under a country nobody would find them in, which is
+    // how Californian listings sat under Cuba after the rules that caused it had already been fixed.
+    #[tokio::test]
+    async fn changing_the_resolver_rules_re_places_every_stored_job() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','workday','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        // Stored by a previous version, with the answer that version gave.
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,location,location_countries,canonical_url,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','Engineer','Chip Co','US CA Santa Clara',',CU,US,','https://x.test/j','','[]','h','t','1','t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES(?,'1','t')")
+            .bind(RESOLVER_VERSION_KEY)
+            .execute(&pool)
+            .await
+            .unwrap();
+        assert_eq!(backfill_location_countries(&pool).await.unwrap(), 1);
+        let codes: String = sqlx::query_scalar("SELECT location_countries FROM jobs WHERE id='j'")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(
+            codes, ",US,",
+            "the stale Cuban answer is replaced, not kept"
+        );
+        // Same version twice does no work at all.
+        assert_eq!(backfill_location_countries(&pool).await.unwrap(), 0);
+    }
+    // Some boards publish no posting date at all — u-blox's index has no date field, and Arm's
+    // search results carry none. A window filter must not read "undated" as "old": those listings
+    // are current, and hiding them behind a date the board never published loses them entirely.
+    #[tokio::test]
+    async fn a_listing_with_no_posting_date_survives_every_window() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','arm','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        let today = Utc::now().date_naive();
+        for (id, posted) in [
+            ("fresh", Some(today.to_string())),
+            (
+                "old",
+                Some((today - chrono::Duration::days(400)).to_string()),
+            ),
+            ("undated", None),
+            ("blank", Some(String::new())),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,posted_at,canonical_url,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s','Engineer','Arm',?,?,'','[]',?,'t','1','t','t')").bind(id).bind(posted).bind(format!("https://x.test/{id}")).bind(id).execute(&pool).await.unwrap();
+        }
+        let ids = |jobs: &[crate::domain::Job]| {
+            let mut out = jobs.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+            out.sort();
+            out
+        };
+        // The narrowest window still shows both undated forms alongside today's listing.
+        let week = jobs_query(
+            JobFilter {
+                posted_within_days: Some(7),
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(ids(&week), vec!["blank", "fresh", "undated"]);
+        // Sorting by date puts what has one first and leaves the undated at the end rather than
+        // dropping them or floating them to the top.
+        let sorted = jobs_query(
+            JobFilter {
+                sort: "posted".into(),
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(sorted.first().unwrap().id, "fresh");
+        assert_eq!(sorted.len(), 4);
+    }
+    // The installer cannot write to a database that does not exist yet, so its answer arrives as a
+    // file. What matters is that it is spent: a user who switches a board off must not find it on
+    // again next launch.
+    #[tokio::test]
+    async fn the_installer_opt_in_switches_the_pack_on_once_and_is_then_gone() {
+        let root = std::env::temp_dir().join(format!("jobscraper-optin-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        db.prepare().await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        let enabled_count = || async {
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM sources WHERE enabled=1")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap()
+        };
+        // The pack installs switched off, and stays that way when the installer was not told to
+        // include it.
+        assert_eq!(enabled_count().await, 0);
+        assert_eq!(
+            apply_starter_pack_opt_in(&db.pool, &root).await.unwrap(),
+            0,
+            "no marker, no change"
+        );
+        let marker = root.join("starter-pack.optin");
+        std::fs::write(&marker, "1").unwrap();
+        let switched = apply_starter_pack_opt_in(&db.pool, &root).await.unwrap();
+        assert!(switched >= 19, "every active starter is on, got {switched}");
+        assert_eq!(enabled_count().await, switched as i64);
+        // Reference-only sources are never scraped, so they are never switched on.
+        let reference: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE kind='reference' AND enabled=1")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(reference, 0);
+        // Spent: the file is gone, and a board switched off afterwards stays off.
+        assert!(!marker.exists());
+        sqlx::query("UPDATE sources SET enabled=0,updated_at='later' WHERE id='00000000-0000-4000-8000-000000000003'").execute(&db.pool).await.unwrap();
+        assert_eq!(apply_starter_pack_opt_in(&db.pool, &root).await.unwrap(), 0);
+        let broadcom: i64 = sqlx::query_scalar(
+            "SELECT enabled FROM sources WHERE id='00000000-0000-4000-8000-000000000003'",
+        )
+        .fetch_one(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(
+            broadcom, 0,
+            "a board the user switched off is not switched back on"
+        );
+        std::fs::remove_dir_all(&root).ok();
+    }
+
+    // Installing over a database where the pack had been deleted long ago: answering Yes has to
+    // bring those boards back, because that is what answering Yes means. This install answered
+    // Yes, changed nothing, and said nothing — the app opened with one source in it.
+    #[tokio::test]
+    async fn the_opt_in_revives_boards_retired_by_an_earlier_install() {
+        let root = std::env::temp_dir().join(format!("jobscraper-revive-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        db.prepare().await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        // Exactly the state the reported install was in: every starter soft-deleted, one source
+        // left alive, and each row edited since it was created.
+        sqlx::query("UPDATE sources SET deleted_at='2026-08-29T16:05:49Z',updated_at='2026-08-29T16:05:49Z' WHERE id<>'00000000-0000-4000-8000-000000000020'")
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        let alive: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE deleted_at IS NULL")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(alive, 1, "the database starts with one source, as reported");
+        std::fs::write(root.join("starter-pack.optin"), "1").unwrap();
+        let switched = apply_starter_pack_opt_in(&db.pool, &root).await.unwrap();
+        assert!(switched >= 19, "retired boards come back, got {switched}");
+        let listed: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM sources WHERE deleted_at IS NULL AND enabled=1 AND kind='active'",
+        )
+        .fetch_one(&db.pool)
+        .await
+        .unwrap();
+        assert!(
+            listed >= 19,
+            "and they are on the Sources tab, got {listed}"
+        );
+        // A reference source is not a board and stays retired.
+        let reference: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM sources WHERE kind='reference' AND deleted_at IS NULL",
+        )
+        .fetch_one(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(reference, 0);
+        std::fs::remove_dir_all(&root).ok();
+    }
+    // The pack is the source of truth for its own sources, and it has to reach installs that
+    // already have them. An install carrying jobs.cisco.com and "pageSize": 0 from an older pack
+    // read nothing at all, and every route to fixing it — a new version, a reconcile — stopped at
+    // a row somebody had switched on.
+    #[tokio::test]
+    async fn a_corrected_pack_repairs_rows_an_earlier_one_got_wrong() {
+        let root = std::env::temp_dir().join(format!("jobscraper-pack-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        let cisco = "00000000-0000-4000-8000-000000000013";
+        // Exactly the reported state: an older pack's URL and settings, the stale key it left
+        // behind, a search term of the user's own, and the row switched on and therefore "edited".
+        sqlx::query("UPDATE sources SET base_url='https://jobs.cisco.com/',adapter_id='phenom',enabled=1,disabled_reason=NULL,updated_at='2026-08-30T00:00:00Z' WHERE id=?")
+            .bind(cisco).execute(&db.pool).await.unwrap();
+        sqlx::query("UPDATE source_configs SET config_json=?,updated_at='2026-08-30T00:00:00Z' WHERE source_id=?")
+            .bind(r#"{"maxPages":500,"pageSize":0,"query":"verification","starterPackVersion":"2026-08-30"}"#)
+            .bind(cisco).execute(&db.pool).await.unwrap();
+        sqlx::query("DELETE FROM schema_metadata WHERE key='starter_pack_version'")
+            .execute(&db.pool)
+            .await
+            .unwrap();
+
+        db.install_starter_pack().await.unwrap();
+
+        let (url, adapter, enabled, reason): (String, String, i64, Option<String>) =
+            sqlx::query_as(
+                "SELECT base_url,adapter_id,enabled,disabled_reason FROM sources WHERE id=?",
+            )
+            .bind(cisco)
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(url, "https://careers.cisco.com/global/en/search-results");
+        assert_eq!(adapter, "cisco");
+        // What the user decided is theirs: switched on stays switched on, with no "disabled" note.
+        assert_eq!(enabled, 1);
+        assert_eq!(reason, None);
+        let config: String =
+            sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=?")
+                .bind(cisco)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        let config: serde_json::Value = serde_json::from_str(&config).unwrap();
+        assert_eq!(config["expectedHost"], "careers.cisco.com");
+        // The stale key is gone rather than merged forward: "pageSize": 0 asks a board for nothing.
+        assert!(config.get("pageSize").is_none(), "{config}");
+        // The user's own search term is not collateral damage.
+        assert_eq!(config["query"], "verification");
+        assert_eq!(config["starterPackVersion"], STARTER_PACK_VERSION);
+        std::fs::remove_dir_all(&root).ok();
+    }
+    // The picker is built from this, so what it must never do is offer a country the jobs on show
+    // are not in — that was the whole complaint about a 250-entry list.
+    #[tokio::test]
+    async fn the_offered_countries_are_only_those_the_shown_sources_hire_in() {
+        let pool = migrated_pool().await;
+        for source in ["a", "b"] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,'https://example.test','workday','1',1,'active',0,0,'t','t')").bind(source).bind(source).execute(&pool).await.unwrap();
+        }
+        for (id, source, codes, availability) in [
+            ("lisbon", "a", ",PT,", "active"),
+            ("porto", "a", ",PT,", "active"),
+            ("madrid", "a", ",ES,", "active"),
+            ("munich", "b", ",DE,", "active"),
+            ("both", "b", ",DE,FR,", "active"),
+            ("nowhere", "b", "", "active"),
+            ("gone", "a", ",IE,", "closed"),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,location_countries,canonical_url,availability,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,'Engineer','Chip Co',?,?,?,'','[]',?,'t','1','t','t')").bind(id).bind(source).bind(codes).bind(format!("https://x.test/{id}")).bind(availability).bind(id).execute(&pool).await.unwrap();
+        }
+        let listed = |counted: &[CountryCount]| {
+            counted
+                .iter()
+                .map(|entry| (entry.code.clone(), entry.jobs))
+                .collect::<Vec<_>>()
+        };
+        // Both sources: every country, most jobs first, and the unplaceable counted separately.
+        let (all, unplaced) = job_countries_query(&[], &pool).await.unwrap();
+        assert_eq!(
+            listed(&all),
+            // Most jobs first; ties fall back to the code so the order never wobbles.
+            vec![
+                ("DE".into(), 2),
+                ("PT".into(), 2),
+                ("ES".into(), 1),
+                ("FR".into(), 1)
+            ]
+        );
+        assert_eq!(unplaced, 1);
+        // One source: the other's countries are not offered at all.
+        let (only_a, _) = job_countries_query(&["a".into()], &pool).await.unwrap();
+        assert_eq!(listed(&only_a), vec![("PT".into(), 2), ("ES".into(), 1)]);
+        // A closed listing's country is not on offer either — the page does not show those.
+        assert!(!only_a.iter().any(|entry| entry.code == "IE"));
+    }
+    // scrape_all reads this column for every source on every batch through runtime SQL, so a
+    // rename or a missed migration would surface as a failed update rather than a failed build.
+    #[tokio::test]
+    async fn the_check_skip_budget_column_exists_and_starts_unspent() {
+        let pool = migrated_pool().await;
+        seed_match(&pool).await;
+        let streak: i64 =
+            sqlx::query_scalar("SELECT s.unchanged_checks FROM sources s WHERE s.id='s'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert_eq!(streak, 0, "a source starts with its full budget");
+        sqlx::query("UPDATE sources SET unchanged_checks=unchanged_checks+1 WHERE id='s'")
+            .execute(&pool)
+            .await
+            .unwrap();
+        let spent: i64 = sqlx::query_scalar("SELECT unchanged_checks FROM sources WHERE id='s'")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(spent, 1, "a skip is spendable");
+    }
+    // The Jobs page is the whole app now, so its list must be literal: only selected sources,
+    // every typed word present in the title, newest posting first, saved jobs marked as such.
+    #[tokio::test]
+    async fn job_list_scopes_to_selected_sources_and_filters_titles_literally() {
+        let pool = migrated_pool().await;
+        for (id, enabled) in [("on", 1), ("off", 0)] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,'https://example.test','json','1',?,'active',0,0,'t','t')").bind(id).bind(id).bind(enabled).execute(&pool).await.unwrap();
+        }
+        for (id, source, title, posted) in [
+            (
+                "a",
+                "on",
+                "Senior Verification Engineer",
+                Some("2026-02-01"),
+            ),
+            (
+                "b",
+                "on",
+                "Design Verification/Validation Lead",
+                Some("2026-03-01"),
+            ),
+            ("c", "on", "Marketing Manager", None),
+            ("d", "off", "Verification Engineer", Some("2026-04-01")),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,location,description_text,skills_json,content_hash,posted_at,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,'Chip Co','Lisbon','text','[]',?,?,'t','1','t','t')").bind(id).bind(source).bind(title).bind(id).bind(posted).execute(&pool).await.unwrap();
+        }
+        sqlx::query("INSERT INTO applications(id,job_id,current_stage,created_at,updated_at) VALUES('app','a','planned','t','t')").execute(&pool).await.unwrap();
+
+        let titles =
+            |jobs: &[crate::domain::Job]| jobs.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+        // Punctuation is text, not query syntax, and case never matters.
+        let found = jobs_query(
+            JobFilter {
+                title: "VERIFICATION".into(),
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(titles(&found), vec!["a", "b"]);
+        // Every typed word has to appear, in any order.
+        let both = jobs_query(
+            JobFilter {
+                title: "engineer verification".into(),
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(titles(&both), vec!["a"]);
+        // Newest posting first, undated last.
+        let sorted = jobs_query(
+            JobFilter {
+                sort: "posted".into(),
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(titles(&sorted), vec!["b", "a", "c"]);
+        assert_eq!(sorted[1].application_stage.as_deref(), Some("planned"));
+        assert_eq!(sorted[0].application_stage, None);
+        // A source nobody selected contributes nothing, whatever the filter says.
+        let saved = jobs_query(
+            JobFilter {
+                saved_only: true,
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(titles(&saved), vec!["a"]);
+        sqlx::query("UPDATE sources SET enabled=0")
+            .execute(&pool)
+            .await
+            .unwrap();
+        assert!(jobs_query(JobFilter::default(), &pool)
+            .await
+            .unwrap()
+            .is_empty());
+    }
+    #[tokio::test]
+    async fn job_list_pages_are_bounded_stable_and_report_the_total() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','s','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for index in 0..205 {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Company','','[]',?,'t','1','t','t')")
+                .bind(format!("job-{index:03}"))
+                .bind(format!("Engineer {index:03}"))
+                .bind(format!("hash-{index:03}"))
+                .execute(&pool)
+                .await
+                .unwrap();
+        }
+        let first = jobs_page_query(JobFilter::default(), 0, &pool)
+            .await
+            .unwrap();
+        let second = jobs_page_query(JobFilter::default(), 200, &pool)
+            .await
+            .unwrap();
+        assert_eq!(
+            (first.items.len(), first.total, first.has_more),
+            (200, 205, true)
+        );
+        assert_eq!(
+            (second.items.len(), second.total, second.has_more),
+            (5, 205, false)
+        );
+        assert_ne!(first.items.last().unwrap().id, second.items[0].id);
     }
     #[test]
     fn reminder_utc_math_and_focus_dedupe_are_deterministic() {
@@ -3104,6 +4838,32 @@ mod matching_persistence_tests {
         assert!(mark_focus_prompt(&mut shown, "first"));
         assert!(!mark_focus_prompt(&mut shown, "first"));
         assert!(mark_focus_prompt(&mut shown, "second"));
+    }
+
+    #[tokio::test]
+    async fn current_starter_pack_version_performs_no_writes() {
+        let root = std::env::temp_dir().join(format!("jobscraper-current-pack-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+            .bind(STARTER_PACK_VERSION)
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        let mut observer = db.pool.acquire().await.unwrap();
+        let before: i64 = sqlx::query_scalar("PRAGMA data_version")
+            .fetch_one(&mut *observer)
+            .await
+            .unwrap();
+        db.install_starter_pack().await.unwrap();
+        let after: i64 = sqlx::query_scalar("PRAGMA data_version")
+            .fetch_one(&mut *observer)
+            .await
+            .unwrap();
+        assert_eq!(
+            after, before,
+            "the current pack must stop after its version lookup"
+        );
     }
 
     #[tokio::test]
@@ -3170,14 +4930,181 @@ mod matching_persistence_tests {
         assert!(intel_config.contains("\"tenant\":\"intel\""));
         assert!(intel_config.contains("\"site\":\"External\""));
         assert!(intel_config.contains("\"expectedHost\":\"intel.wd1.myworkdayjobs.com\""));
-        let (microchip_adapter, microchip_reason): (String, Option<String>) =
-            sqlx::query_as("SELECT adapter_id, disabled_reason FROM sources WHERE id=?")
+        // careers.microchip.com only 302s to a marketing page; the board itself is a Workday
+        // tenant on wd5.myworkdaysite.com, so the host-keyed relocation moves the source there.
+        let (microchip_adapter, microchip_url, microchip_config): (String, String, String) =
+            sqlx::query_as("SELECT s.adapter_id, s.base_url, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id=?")
                 .bind(microchip_id)
                 .fetch_one(&db.pool)
                 .await
                 .unwrap();
-        assert_eq!(microchip_adapter, "custom-api");
-        assert!(microchip_reason.unwrap().contains("not a Workday tenant"));
+        assert_eq!(microchip_adapter, "workday");
+        assert_eq!(
+            microchip_url,
+            "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External"
+        );
+        assert!(microchip_config.contains("\"tenant\":\"microchiphr\""));
+        assert!(microchip_config.contains("\"site\":\"External\""));
+        assert!(microchip_config.contains("\"expectedHost\":\"wd5.myworkdaysite.com\""));
+        db.pool.close().await;
+    }
+
+    #[tokio::test]
+    async fn an_enabled_microchip_source_is_relocated_to_its_workday_tenant() {
+        // Enabling a source stamps updated_at, which puts it outside the tuple reconcile's
+        // "never edited" guard — so the only path that can still correct an address this app
+        // seeded wrongly is the host-keyed upgrade table. The user's enabled state survives it.
+        let root = std::env::temp_dir().join(format!("jobscraper-microchip-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let microchip_id = "00000000-0000-4000-8000-000000000001";
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Microchip','https://careers.microchip.com/','custom-api','1.1.0',1,'active',NULL,1,0,'2026-01-01T00:00:00Z','2026-08-31T00:00:00Z')")
+            .bind(microchip_id).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+            .bind("config-microchip").bind(microchip_id).bind(r#"{"schemaVersion":"1.1.0","starterPackVersion":"2026-08-30","expectedHost":"www.microchip.com","adapterVersion":"1.1.0","mode":"direct"}"#).bind("2026-01-01T00:00:00Z").bind("2026-01-01T00:00:00Z").execute(&db.pool).await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        let (adapter, base_url, enabled, config): (String, String, bool, String) =
+            sqlx::query_as("SELECT s.adapter_id, s.base_url, s.enabled, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id=?")
+                .bind(microchip_id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(adapter, "workday");
+        assert_eq!(
+            base_url,
+            "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External"
+        );
+        assert!(enabled, "the user's choice to enable this source is kept");
+        assert!(config.contains("\"tenant\":\"microchiphr\""));
+        assert!(config.contains("\"expectedHost\":\"wd5.myworkdaysite.com\""));
+        db.pool.close().await;
+    }
+
+    #[tokio::test]
+    async fn existing_apple_sources_upgrade_to_the_api_adapter_without_losing_selection() {
+        let root = std::env::temp_dir().join(format!("jobscraper-apple-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let stamp = "2026-01-01T00:00:00Z";
+        for (source_id, adapter, enabled, url) in [
+            (
+                "old-apple",
+                "static-css",
+                0,
+                "https://jobs.apple.com/pt-pt/search?location=portugal-PRTC",
+            ),
+            (
+                "current-apple",
+                "static-css",
+                1,
+                "https://jobs.apple.com/pt-pt/search?location=",
+            ),
+        ] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Apple',?,?,'1.1.0',?,'active',0,0,?,?)")
+                .bind(source_id).bind(url).bind(adapter).bind(enabled).bind(stamp).bind("2026-01-02T00:00:00Z").execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+                .bind(format!("config-{source_id}")).bind(source_id).bind(r#"{"itemSelector":"li","titleSelector":"a","urlPrefix":"/careers/pt","pageSize":20}"#).bind(stamp).bind("2026-01-02T00:00:00Z").execute(&db.pool).await.unwrap();
+        }
+        db.install_starter_pack().await.unwrap();
+        let rows: Vec<(String, String, bool, String)> = sqlx::query_as("SELECT s.id,s.adapter_id,s.enabled,c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id IN ('old-apple','current-apple') ORDER BY s.id")
+            .fetch_all(&db.pool).await.unwrap();
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].1, "apple");
+        assert!(rows[0].2);
+        assert_eq!(rows[1].1, "apple");
+        assert!(!rows[1].2);
+        for (_, _, _, config) in rows {
+            let config: serde_json::Value = serde_json::from_str(&config).unwrap();
+            assert_eq!(config["locale"], "pt-pt");
+            assert_eq!(config["maxPages"], 500);
+            assert!(config.get("itemSelector").is_none());
+            assert!(config.get("titleSelector").is_none());
+            assert!(config.get("urlPrefix").is_none());
+        }
+        db.pool.close().await;
+    }
+
+    // Apple was not the only host the generic detector guessed wrong: Arm was saved as
+    // static-css (which stores its navigation links), Qualcomm as an Eightfold source with
+    // no tenant domain (which 422s on the first request), and an NVIDIA Workday source
+    // without the facet split silently truncates at Workday's own paging cap. All three are
+    // corrected in place, and a source on a host with no known adapter is left alone.
+    #[tokio::test]
+    async fn wrongly_detected_sources_move_to_the_adapter_that_reads_their_host() {
+        let root = std::env::temp_dir().join(format!("jobscraper-upgrade-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        for (source_id, adapter, enabled, url, config) in [
+            (
+                "user-arm",
+                "static-css",
+                1,
+                "https://careers.arm.com/search-jobs/",
+                r#"{"itemSelector":"li","titleSelector":"a","query":"firmware"}"#,
+            ),
+            (
+                "user-qualcomm",
+                "eightfold",
+                1,
+                "https://careers.qualcomm.com/",
+                r#"{"listingPath":"/api/career_hub"}"#,
+            ),
+            (
+                "user-nvidia",
+                "workday",
+                1,
+                "https://nvidia.wd5.myworkdayjobs.com/",
+                r#"{"tenant":"nvidia","site":"NVIDIAExternalCareerSite"}"#,
+            ),
+            (
+                "user-other",
+                "static-css",
+                1,
+                "https://jobs.example.test/careers",
+                r#"{"itemSelector":"li","titleSelector":"a"}"#,
+            ),
+        ] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Fixture',?,?,'1.1.0',?,'active',0,0,'t1','t2')")
+                .bind(source_id).bind(url).bind(adapter).bind(enabled).execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,'t1','t2')")
+                .bind(format!("config-{source_id}")).bind(source_id).bind(config).execute(&db.pool).await.unwrap();
+        }
+        db.install_starter_pack().await.unwrap();
+        let rows: Vec<(String, String, String)> = sqlx::query_as("SELECT s.id,s.adapter_id,c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id LIKE 'user-%' ORDER BY s.id")
+            .fetch_all(&db.pool).await.unwrap();
+        let by_id: std::collections::HashMap<_, _> = rows
+            .into_iter()
+            .map(|(id, adapter, config)| {
+                (
+                    id,
+                    (
+                        adapter,
+                        serde_json::from_str::<serde_json::Value>(&config).unwrap(),
+                    ),
+                )
+            })
+            .collect();
+        let (arm_adapter, arm_config) = &by_id["user-arm"];
+        assert_eq!(arm_adapter, "arm");
+        assert!(arm_config.get("itemSelector").is_none());
+        assert_eq!(
+            arm_config["query"], "firmware",
+            "user filters survive the move"
+        );
+        let (qualcomm_adapter, qualcomm_config) = &by_id["user-qualcomm"];
+        assert_eq!(qualcomm_adapter, "eightfold");
+        assert_eq!(qualcomm_config["domain"], "qualcomm.com");
+        assert_eq!(qualcomm_config["eightfoldApi"], "pcsx");
+        assert!(qualcomm_config.get("listingPath").is_none());
+        let (_, nvidia_config) = &by_id["user-nvidia"];
+        assert_eq!(nvidia_config["splitFacet"], "jobFamilyGroup");
+        assert_eq!(nvidia_config["splitThreshold"], 2000);
+        let (other_adapter, other_config) = &by_id["user-other"];
+        assert_eq!(
+            other_adapter, "static-css",
+            "an unknown host is never reassigned"
+        );
+        assert_eq!(other_config["itemSelector"], "li");
         db.pool.close().await;
     }
 
@@ -3220,6 +5147,436 @@ mod matching_persistence_tests {
         db.pool.close().await;
     }
 
+    // The scrape filter decides what is stored at all, so "no terms" must mean "keep everything":
+    // an empty or whitespace-only box that discarded every listing would look like a dead scraper.
+    // A job whose detail page was skipped emits only a "seen" event. If that did not record an
+    // occurrence, the availability sweep would treat every recognised job as missing from the run
+    // and close the entire board — the incremental path's one way to lose data.
+    #[tokio::test]
+    async fn a_skipped_job_still_counts_as_seen_and_stays_active() {
+        let root = std::env::temp_dir().join(format!("jobscraper-seen-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        for (job, hash) in [("kept", "hash-kept"), ("gone", "hash-gone")] {
+            sqlx::query("INSERT INTO jobs(id,source_id,external_id,title,company,listing_hash,content_hash,description_text,description_html,skills_json,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Engineer','S',?,'c','','','[]','{}','t','1.1.0','t','t')")
+                .bind(job).bind(job).bind(hash).execute(&db.pool).await.unwrap();
+        }
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+
+        assert_eq!(
+            db.record_jobs_seen(
+                "r",
+                "s",
+                &[
+                    "hash-kept".into(),
+                    "hash-kept".into(),
+                    "hash-never-stored".into(),
+                ],
+            )
+            .await
+            .unwrap(),
+            1,
+            "the batch records known hashes once and ignores unknown hashes"
+        );
+        db.reconcile_availability("r", "s", true).await.unwrap();
+
+        let state: Vec<(String, String, i64)> =
+            sqlx::query_as("SELECT id,availability,missing_full_runs FROM jobs ORDER BY id")
+                .fetch_all(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(state[1], ("kept".into(), "active".into(), 0));
+        assert_eq!(state[0], ("gone".into(), "possibly_closed".into(), 1));
+        db.pool.close().await;
+    }
+
+    // Re-persisting an identical job used to rewrite its whole description, run a second UPDATE
+    // and log a dedupe event, once per job per run. It must now cost one occurrence row and leave
+    // the job's own updated_at alone, while a genuinely changed job still writes through.
+    #[tokio::test]
+    async fn an_unchanged_job_is_recorded_as_seen_without_being_rewritten() {
+        let root = std::env::temp_dir().join(format!("jobscraper-unchanged-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+        let payload = |hash: &str, text: &str| {
+            serde_json::json!({"externalId":"E1","title":"Engineer","company":"S",
+                "canonicalUrl":"https://example.test/job/1","descriptionText":text,"contentHash":hash,
+                "listingHash":"l1","location":"Lisbon","postedAt":"2026-08-01"})
+        };
+        db.persist_worker_job("r", "s", &payload("h1", "first"))
+            .await
+            .unwrap();
+        let first: (String, String) =
+            sqlx::query_as("SELECT updated_at,description_text FROM jobs WHERE external_id='E1'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+
+        db.persist_worker_job("r", "s", &payload("h1", "ignored"))
+            .await
+            .unwrap();
+        let after: (String, String) =
+            sqlx::query_as("SELECT updated_at,description_text FROM jobs WHERE external_id='E1'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(after, first, "an identical job leaves its row untouched");
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM job_occurrences")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            1,
+            "one run records one sighting even when an adapter repeats the job"
+        );
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM job_dedupe_events")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            0,
+            "re-seeing a job is not a merge and must not be logged as one"
+        );
+
+        let changed_listing = serde_json::json!({"externalId":"E1","title":"Engineer","company":"S",
+            "canonicalUrl":"https://example.test/job/1?office=porto","descriptionText":"first","contentHash":"h1",
+            "listingHash":"l2","location":"Porto","postedAt":"2026-08-02"});
+        db.persist_worker_job("r", "s", &changed_listing)
+            .await
+            .unwrap();
+        let listing: (String, String, String, String) = sqlx::query_as(
+            "SELECT location,posted_at,canonical_url,listing_hash FROM jobs WHERE external_id='E1'",
+        )
+        .fetch_one(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(
+            listing,
+            (
+                "Porto".into(),
+                "2026-08-02".into(),
+                "https://example.test/job/1?office=porto".into(),
+                "l2".into(),
+            ),
+            "a changed listing hash updates listing fields even when description content is unchanged"
+        );
+
+        let changed_content = serde_json::json!({"externalId":"E1","title":"Engineer","company":"S",
+            "canonicalUrl":"https://example.test/job/1?office=porto","descriptionText":"rewritten","contentHash":"h2",
+            "listingHash":"l2","location":"Porto","postedAt":"2026-08-02"});
+        db.persist_worker_job("r", "s", &changed_content)
+            .await
+            .unwrap();
+        let changed: String =
+            sqlx::query_scalar("SELECT description_text FROM jobs WHERE external_id='E1'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(changed, "rewritten", "a changed hash still writes through");
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM jobs")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            1,
+            "all three sightings are the same job"
+        );
+        db.pool.close().await;
+    }
+
+    #[tokio::test]
+    async fn interrupted_runs_are_finalized_and_partial_sightings_are_discarded() {
+        let root = std::env::temp_dir().join(format!("jobscraper-recovery-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','json','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','Engineer','S','','[]','h','t','1.1.0','t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query(
+            "INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES('o','j','r','t')",
+        )
+        .execute(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(db.recover_interrupted_runs().await.unwrap(), 1);
+        let run: (String, i64, Option<String>) =
+            sqlx::query_as("SELECT status,complete,failure_code FROM scrape_runs WHERE id='r'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(run, ("cancelled".into(), 0, Some("interrupted".into())));
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM job_occurrences")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            0
+        );
+    }
+
+    #[tokio::test]
+    async fn enrichment_selects_one_job_and_rejects_a_stale_listing_response() {
+        let root = std::env::temp_dir().join(format!("jobscraper-enrich-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+        let listing = serde_json::json!({"externalId":"E1","title":"Engineer","company":"S","canonicalUrl":"https://example.test/job/1","detailUrl":"https://example.test/api/1","descriptionStatus":"pending","descriptionText":"","listingHash":"listing-1"});
+        db.persist_worker_job("r", "s", &listing).await.unwrap();
+        let job_id: String = sqlx::query_scalar("SELECT id FROM jobs WHERE external_id='E1'")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        let (source_id, pending) = db.pending_enrichment_job(&job_id).await.unwrap().unwrap();
+        assert_eq!(source_id, "s");
+        assert_eq!(pending["jobId"], job_id);
+        let stale = serde_json::json!({"jobId":job_id,"title":"Engineer","company":"S","descriptionText":"stale","listingHash":"listing-old"});
+        assert_eq!(db.persist_enriched_jobs("s", &[stale]).await.unwrap(), 0);
+        let current = serde_json::json!({"jobId":job_id,"title":"Engineer","company":"S","descriptionText":"Full description","descriptionHtml":"<p>Full description</p>","listingHash":"listing-1"});
+        assert_eq!(db.persist_enriched_jobs("s", &[current]).await.unwrap(), 1);
+        let row: (String, String) =
+            sqlx::query_as("SELECT description_status,description_text FROM jobs WHERE id=?")
+                .bind(&job_id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(row, ("complete".into(), "Full description".into()));
+    }
+
+    // Sighting rows were never pruned, so a full update added one per job per run forever. The
+    // trail is kept for the last few runs and no further; the current run must always survive,
+    // because the availability rules read it.
+    #[tokio::test]
+    async fn sighting_history_is_kept_for_recent_runs_and_pruned_beyond_them() {
+        let root = std::env::temp_dir().join(format!("jobscraper-prune-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,external_id,title,company,content_hash,description_text,description_html,skills_json,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','E','Engineer','S','c','','','[]','{}','t','1.1.0','t','t')").execute(&db.pool).await.unwrap();
+        // 14 runs oldest-first, each having seen the job once.
+        for n in 0..14 {
+            let run = format!("run-{n:02}");
+            sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES(?,'s','scrape','completed',?)")
+                .bind(&run).bind(format!("2026-08-{:02}T00:00:00Z", n + 1)).execute(&db.pool).await.unwrap();
+            sqlx::query(
+                "INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,'j',?,'t')",
+            )
+            .bind(format!("occ-{n:02}"))
+            .bind(&run)
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        }
+        db.reconcile_availability("run-13", "s", true)
+            .await
+            .unwrap();
+
+        let kept: Vec<String> =
+            sqlx::query_scalar("SELECT run_id FROM job_occurrences ORDER BY run_id")
+                .fetch_all(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(
+            kept.len(),
+            10,
+            "only the retained window of runs keeps its sightings"
+        );
+        assert_eq!(kept.first().unwrap(), "run-04");
+        assert!(
+            kept.contains(&"run-13".to_string()),
+            "the current run always survives"
+        );
+        let availability: String = sqlx::query_scalar("SELECT availability FROM jobs WHERE id='j'")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(
+            availability, "active",
+            "pruning history must not close a job that was seen"
+        );
+        db.pool.close().await;
+    }
+
+    // The Sources list shows what each source is holding. A wrong count here reads as a fact
+    // rather than as a broken screen, so the split between "on the board" and "come off it" is
+    // pinned: possibly_closed is still on the board until a second read confirms otherwise, and
+    // a source with nothing stored reports zero rather than dropping out of the list.
+    #[tokio::test]
+    async fn the_sources_list_reports_live_and_closed_counts_per_source() {
+        let root = std::env::temp_dir().join(format!("jobscraper-counts-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        for source in ["busy", "empty"] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,'https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')")
+                .bind(source).bind(source).execute(&db.pool).await.unwrap();
+        }
+        for (job, availability) in [
+            ("a", "active"),
+            ("b", "active"),
+            ("c", "possibly_closed"),
+            ("d", "closed"),
+            ("e", "closed"),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,external_id,title,company,availability,content_hash,description_text,description_html,skills_json,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'busy',?,'Engineer','S',?,'c','','','[]','{}','t','1.1.0','t','t')")
+                .bind(job).bind(job).bind(availability).execute(&db.pool).await.unwrap();
+        }
+        let counts: Vec<(String, i64, i64)> = sqlx::query_as(
+            "SELECT s.id,COALESCE(c.live,0),COALESCE(c.gone,0) FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.deleted_at IS NULL ORDER BY s.id",
+        )
+        .fetch_all(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(
+            counts,
+            vec![("busy".to_string(), 3, 2), ("empty".to_string(), 0, 0),]
+        );
+        db.pool.close().await;
+    }
+
+    // Purging every job is irreversible, so the two promises the dialog makes are pinned here:
+    // it does nothing without the exact word, and it never deletes a job you have applied to.
+    #[tokio::test]
+    async fn purging_every_job_needs_the_word_and_spares_applied_jobs() {
+        let root = std::env::temp_dir().join(format!("jobscraper-purge-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        for job in ["plain", "applied", "reviewed"] {
+            sqlx::query("INSERT INTO jobs(id,source_id,external_id,title,company,content_hash,description_text,description_html,skills_json,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Engineer','S','c','','','[]','{}','t','1.1.0','t','t')")
+                .bind(job).bind(job).execute(&db.pool).await.unwrap();
+        }
+        sqlx::query("INSERT INTO personas(id,name,target_titles_json,created_at,updated_at) VALUES('p','P','[]','t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO applications(id,job_id,current_stage,created_at,updated_at) VALUES('a','applied','applied','t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO review_decisions(id,job_id,persona_id,status,decided_at) VALUES('r','reviewed','p','dismissed','t')").execute(&db.pool).await.unwrap();
+        // A sighting on the job that will be deleted, to prove dependants go with it.
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('run','s','scrape','completed','t')").execute(&db.pool).await.unwrap();
+        sqlx::query(
+            "INSERT INTO job_occurrences(id,job_id,run_id,seen_at) VALUES('o','plain','run','t')",
+        )
+        .execute(&db.pool)
+        .await
+        .unwrap();
+
+        let count = || async {
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM jobs")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap()
+        };
+        assert_eq!(count().await, 3);
+        // The word has to be exact — a near miss must leave everything alone.
+        for wrong in ["", "confirm", "CONFIRM", "Confirm all", "yes"] {
+            let refused = purge_jobs(&db.pool, wrong).await;
+            assert!(refused.is_err(), "{wrong:?} should not be accepted");
+            assert_eq!(count().await, 3, "{wrong:?} must not delete anything");
+        }
+        let result = purge_jobs(&db.pool, " Confirm ").await.unwrap();
+        assert_eq!((result.deleted, result.kept), (1, 2));
+        let left: Vec<String> = sqlx::query_scalar("SELECT id FROM jobs ORDER BY id")
+            .fetch_all(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(left, ["applied", "reviewed"], "your own work survives");
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM job_occurrences")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            0,
+            "the deleted job's sighting history went with it"
+        );
+        db.pool.close().await;
+    }
+
+    // The age filter decides what is stored, so the two ways it could quietly lose data are
+    // pinned: a listing whose board publishes no date must survive it, and a half-typed box must
+    // widen the filter rather than narrow it to nothing.
+    // The Jobs page opens on a one-year window, so the window decides what most people ever see.
+    // A listing the board never dated must survive it — the board not saying when a job went up
+    // is not the same as the job being old — and "Any time" must genuinely mean everything.
+    #[tokio::test]
+    async fn the_posted_window_hides_old_listings_but_never_undated_ones() {
+        let root = std::env::temp_dir().join(format!("jobscraper-window-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        let today = Utc::now().date_naive();
+        let day = |back: i64| {
+            (today - chrono::Duration::days(back))
+                .format("%Y-%m-%d")
+                .to_string()
+        };
+        let rows: Vec<(&str, Option<String>)> = vec![
+            ("fresh", Some(day(3))),
+            ("old", Some(day(400))),
+            ("undated", None),
+            ("blank", Some(String::new())),
+            ("stamped", Some(format!("{}T09:14:00Z", day(10)))),
+        ];
+        for (id, posted) in &rows {
+            sqlx::query("INSERT INTO jobs(id,source_id,external_id,title,company,posted_at,content_hash,description_text,description_html,skills_json,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Engineer','S',?,'c','','','[]','{}','t','1.1.0','t','t')")
+                .bind(id).bind(id).bind(posted.clone()).execute(&db.pool).await.unwrap();
+        }
+        let shown = |days: Option<i64>| {
+            let pool = db.pool.clone();
+            async move {
+                let page = jobs_page_query(
+                    JobFilter {
+                        posted_within_days: days,
+                        ..Default::default()
+                    },
+                    0,
+                    &pool,
+                )
+                .await
+                .unwrap();
+                let mut ids = page.items.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+                ids.sort();
+                (ids, page.total)
+            }
+        };
+        let (year, total) = shown(Some(365)).await;
+        assert_eq!(
+            year,
+            ["blank", "fresh", "stamped", "undated"],
+            "only the 400-day-old listing is out of the year"
+        );
+        assert_eq!(total, 4, "the count follows the window, not just the page");
+        let (week, _) = shown(Some(7)).await;
+        assert_eq!(
+            week,
+            ["blank", "fresh", "undated"],
+            "a ten-day-old timestamp falls outside a week"
+        );
+        let (any, any_total) = shown(None).await;
+        assert_eq!(any.len(), 5, "Any time means every listing");
+        assert_eq!(any_total, 5);
+        db.pool.close().await;
+    }
+    #[test]
+    fn scrape_title_filter_keeps_everything_until_terms_are_given() {
+        assert!(scrape_filter_terms("").is_empty());
+        assert!(scrape_filter_terms("  ,\n , ").is_empty());
+        assert!(title_passes_scrape_filter("Anything at all", &[]));
+        let terms = scrape_filter_terms("Verification, design verification\nRTL , ");
+        assert_eq!(terms, ["verification", "design verification", "rtl"]);
+        assert!(title_passes_scrape_filter(
+            "Senior RTL Design Engineer",
+            &terms
+        ));
+        assert!(title_passes_scrape_filter("ASIC VERIFICATION LEAD", &terms));
+        assert!(!title_passes_scrape_filter(
+            "Retail Sales Associate",
+            &terms
+        ));
+        // A phrase stays one term, so the comma is the only separator that splits it.
+        let phrase = scrape_filter_terms("design verification");
+        assert!(!title_passes_scrape_filter("Design Engineer", &phrase));
+    }
+
     #[test]
     fn application_transition_rules_require_explicit_override() {
         assert!(legal_stage_transition("applied", "screening"));
@@ -3256,6 +5613,48 @@ mod matching_persistence_tests {
     }
 
     #[tokio::test]
+    async fn application_document_bytes_round_trip_and_verify_checksum() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('docs','Docs','https://example.test','json','1',0,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('docs-job','docs','Role','Company','','[]','hash','t','1','t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO applications(id,job_id,current_stage,created_at,updated_at) VALUES('docs-app','docs-job','planned','t','t')").execute(&pool).await.unwrap();
+        let bytes = vec![0, 1, 2, 127, 128, 255];
+        let document = attach_application_document_pool(
+            AttachApplicationDocument {
+                application_id: "docs-app".into(),
+                document_type: "resume".into(),
+                filename: Some("currículo_日本語.pdf".into()),
+                mime_type: Some("application/pdf".into()),
+                event_id: None,
+            },
+            bytes.clone(),
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(document.filename, "currículo_日本語.pdf");
+        assert_eq!(document.size, bytes.len() as i64);
+        assert_eq!(
+            export_application_document_bytes(&document.id, &pool)
+                .await
+                .unwrap(),
+            bytes
+        );
+        sqlx::query("UPDATE application_documents SET content=X'01' WHERE id=?")
+            .bind(&document.id)
+            .execute(&pool)
+            .await
+            .unwrap();
+        assert_eq!(
+            export_application_document_bytes(&document.id, &pool)
+                .await
+                .unwrap_err(),
+            "Application document checksum failed"
+        );
+        pool.close().await;
+    }
+
+    #[tokio::test]
     async fn analytics_fixture_uses_event_response_and_date_boundaries() {
         let pool = migrated_pool().await;
         sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('as','Analytics source','https://example.test','json','1',0,'active',0,0,'t','t')").execute(&pool).await.unwrap();
@@ -3285,7 +5684,7 @@ mod matching_persistence_tests {
     }
 
     #[test]
-    fn dedupe_normalization_and_conservative_fuzzy_thresholds() {
+    fn dedupe_normalization_and_identity_fingerprints() {
         assert_eq!(
             normalize_canonical_url("HTTPS://EXAMPLE.test:443/jobs/?utm_source=x&id=2#top")
                 .unwrap(),
@@ -3296,8 +5695,43 @@ mod matching_persistence_tests {
             job_fingerprint("Firmware Engineer", "Chip Co", Some("Lisbon")),
             job_fingerprint(" firmware engineer ", "CHIP co", Some("lisbon"))
         );
-        assert!(fuzzy_similarity("Firmware Engineer", "Firmware Engineer II") >= 0.84);
-        assert!(fuzzy_similarity("Firmware Engineer", "Marketing Manager") < 0.70);
+    }
+
+    #[tokio::test]
+    async fn distinct_external_jobs_are_not_merged_by_title_company_and_location() {
+        let root = std::env::temp_dir().join(format!("jobscraper-identity-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('apple','Apple','https://jobs.apple.com/','apple','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('run','apple','scrape','running','t')").execute(&db.pool).await.unwrap();
+        for (external_id, url) in [
+            ("2001", "https://jobs.apple.com/en-us/details/2001/engineer"),
+            ("2002", "https://jobs.apple.com/en-us/details/2002/engineer"),
+        ] {
+            db.persist_worker_job(
+                "run",
+                "apple",
+                &serde_json::json!({
+                    "externalId": external_id,
+                    "canonicalUrl": url,
+                    "applyUrl": url,
+                    "title": "Software Engineer",
+                    "company": "Apple",
+                    "location": "Cupertino, United States",
+                    "descriptionText": "A real opening",
+                    "contentHash": external_id,
+                    "adapterVersion": "1.1.0"
+                }),
+            )
+            .await
+            .unwrap();
+        }
+        let count: i64 = sqlx::query_scalar("SELECT count(*) FROM jobs WHERE source_id='apple'")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(count, 2);
+        db.pool.close().await;
     }
 
     #[test]
@@ -3413,6 +5847,129 @@ mod matching_persistence_tests {
         assert_eq!(old, vec!["e1".to_string()]);
         pool.close().await;
     }
+    #[tokio::test]
+    async fn settings_survive_the_migration_that_once_dropped_them() {
+        // Migration 0012 dropped `settings` as dead, so building the one-time robots
+        // acknowledgement on it failed at runtime with "no such table". 0014 brings it back for
+        // its first real consumer; this fails if a later cleanup drops it again.
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES('robots.autoAcknowledged','true','t') ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+            .execute(&pool).await.unwrap();
+        let stored: Option<String> = sqlx::query_scalar("SELECT value FROM settings WHERE key=?")
+            .bind("robots.autoAcknowledged")
+            .fetch_optional(&pool)
+            .await
+            .unwrap();
+        assert_eq!(stored.as_deref(), Some("true"));
+        pool.close().await;
+    }
+    #[tokio::test]
+    async fn a_database_from_a_newer_build_is_refused_in_plain_language() {
+        // The white-screen bug: a dev build migrated the shared database forward and the older
+        // installed binary could no longer open its own data. sqlx says "VersionMissing"; the
+        // user needs to be told what to do and that nothing is lost.
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO _sqlx_migrations(version,description,installed_on,success,checksum,execution_time) VALUES(99,'from the future',current_timestamp,1,X'00',0)")
+            .execute(&pool).await.unwrap();
+        let message = sqlx::migrate!("./migrations")
+            .run(&pool)
+            .await
+            .map_err(migration_error)
+            .expect_err("a database ahead of this binary must be refused");
+        assert!(message.contains("newer version of JobScraper"), "{message}");
+        assert!(message.contains("schema 99"), "{message}");
+        assert!(message.contains("data is intact"), "{message}");
+        pool.close().await;
+    }
+    #[tokio::test]
+    async fn connect_lazy_touches_no_disk_so_the_window_can_paint_first() {
+        // Startup manages this pool before the window has rendered anything, so building it must
+        // not open, create, or migrate a file — only prepare() may fail.
+        let missing = std::env::temp_dir()
+            .join("jobscraper-no-such-dir")
+            .join("jobscraper.db");
+        let db = Database::connect_lazy(missing.clone());
+        assert!(!missing.exists());
+        assert!(db.prepare().await.is_err());
+        assert!(!missing.exists());
+    }
+    #[tokio::test]
+    async fn activity_log_records_failures_that_never_reached_a_scrape_run() {
+        // The case this table exists for: a probe of an unsaved source that died in the worker.
+        // It has no source_id and no scrape_run, and used to leave no trace anywhere.
+        let pool = migrated_pool().await;
+        log(
+            &pool,
+            "error",
+            None,
+            Some("Arm"),
+            "probe_source",
+            Some("worker_exit"),
+            "Scraper worker exited with exit code: 1",
+            serde_json::json!({"stderr":"boom"}),
+        )
+        .await;
+        log(
+            &pool,
+            "info",
+            None,
+            Some("Arm"),
+            "probe_source",
+            None,
+            "Configured automatically as static-css.",
+            serde_json::json!({}),
+        )
+        .await;
+        let rows = sqlx::query_as::<_, AppLog>("SELECT id,at,level,source_id,source_name,action,code,message,detail_json FROM app_logs ORDER BY at DESC, rowid DESC LIMIT ?")
+            .bind(200i64).fetch_all(&pool).await.unwrap();
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].message, "Configured automatically as static-css.");
+        assert_eq!(rows[1].level, "error");
+        assert_eq!(rows[1].code.as_deref(), Some("worker_exit"));
+        assert!(rows[1].source_id.is_none());
+        assert!(rows[1].detail_json.contains("boom"));
+        pool.close().await;
+    }
+    #[tokio::test]
+    async fn scrape_log_purge_covers_app_logs_and_deletes_from_whichever_table_owns_the_id() {
+        // app_logs records the same class of diagnostics for actions that never produced a
+        // scrape_run, so one retention control has to see and delete both tables.
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','s','https://example.test','json','1',0,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','test','completed','2026-01-01T00:00:00Z')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_run_events(id,run_id,level,event_type,payload_json,created_at) VALUES('e1','r','info','started','{}','2026-01-01T00:00:00Z')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO app_logs(id,at,level,source_id,source_name,action,code,message,detail_json) VALUES('a1','2026-01-01T00:00:00Z','error','s','S','probe_source','worker_exit','crashed','{}'),('a2','2026-03-01T00:00:00Z','info','s','S','probe_source',NULL,'fine','{}')").execute(&pool).await.unwrap();
+        let mut old: Vec<String> = sqlx::query_scalar("SELECT id FROM scrape_run_events WHERE created_at<? UNION ALL SELECT id FROM app_logs WHERE at<?")
+            .bind("2026-02-01T00:00:00Z")
+            .bind("2026-02-01T00:00:00Z")
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+        old.sort();
+        assert_eq!(old, vec!["a1".to_string(), "e1".to_string()]);
+        // The apply step tries scrape_run_events first, then app_logs; exactly one row goes.
+        let mut removed = sqlx::query("DELETE FROM scrape_run_events WHERE id=?")
+            .bind("a1")
+            .execute(&pool)
+            .await
+            .unwrap()
+            .rows_affected();
+        if removed == 0 {
+            removed = sqlx::query("DELETE FROM app_logs WHERE id=?")
+                .bind("a1")
+                .execute(&pool)
+                .await
+                .unwrap()
+                .rows_affected();
+        }
+        assert_eq!(removed, 1);
+        let left: i64 = sqlx::query_scalar("SELECT count(*) FROM app_logs")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(left, 1);
+        pool.close().await;
+    }
     #[test]
     fn purge_preview_hash_detects_tampering_and_file_boundary_is_relative() {
         let original = purge_hash("sessions", &[], &[], &["source/session.json".into()]);
@@ -3448,5 +6005,217 @@ mod matching_persistence_tests {
         assert!(source.contains("12.00"));
         assert!(source.contains("small_sample"));
         assert!(company.contains("\"Chip \"\"Co\"\"\""));
+    }
+}
+
+#[cfg(test)]
+mod performance_history_tests {
+    use super::*;
+
+    fn worker_run(total: u64, response: u64) -> String {
+        serde_json::json!({
+            "requests": 7, "pages": 3, "discovered": 120,
+            "performance": { "version": 1,
+                "worker": { "totalMs": total, "bucketsMs": { "response": response, "pacing": 300, "body": 40 },
+                            "requestsByKind": { "listing": { "count": 2 }, "detail": { "count": 5 } } },
+                "app": { "totalMs": total + 400,
+                         "criticalPathMs": { "prepare": 40, "startup": 300, "active": total, "shutdown": 20, "finalize": 40 },
+                         "workMs": { "jobPersistence": 120, "knownHashLoad": 30 } } }
+        }).to_string()
+    }
+    fn log(id: &str, level: &str, action: &str, detail: String) -> AppLog {
+        AppLog {
+            id: id.into(),
+            at: format!("2026-08-31T09:00:{id:0>2}Z"),
+            level: level.into(),
+            source_id: Some("src-amd".into()),
+            source_name: Some("AMD".into()),
+            action: action.into(),
+            code: None,
+            message: "Finished".into(),
+            detail_json: detail,
+        }
+    }
+
+    #[test]
+    fn rows_without_versioned_metrics_are_ignored() {
+        let logs = vec![
+            log(
+                "1",
+                "warning",
+                "scrape_source",
+                serde_json::json!({ "code": "robots_unparseable" }).to_string(),
+            ),
+            log(
+                "2",
+                "info",
+                "scrape_source",
+                serde_json::json!({ "requests": 4 }).to_string(),
+            ),
+            log(
+                "3",
+                "info",
+                "scrape_source",
+                serde_json::json!({ "performance": { "version": 2, "worker": {} } }).to_string(),
+            ),
+            log("4", "info", "scrape_source", "not json at all".into()),
+            log("5", "info", "scrape_source", worker_run(12_000, 6_100)),
+        ];
+        let history = performance_history_from_logs(logs);
+        assert_eq!(
+            history.recent.len(),
+            1,
+            "only the instrumented run is measurable"
+        );
+        assert_eq!(history.recent[0].id, "5");
+        assert_eq!(history.aggregates.len(), 1);
+    }
+
+    #[test]
+    fn a_run_reports_its_totals_phases_and_slowest_step() {
+        let history = performance_history_from_logs(vec![log(
+            "1",
+            "info",
+            "scrape_source",
+            worker_run(12_000, 6_100),
+        )]);
+        let run = &history.recent[0];
+        assert_eq!(
+            run.total_ms, 12_400,
+            "the app total is the whole command, not just the worker"
+        );
+        assert_eq!(run.worker_ms, 12_000);
+        assert_eq!((run.requests, run.pages, run.jobs), (7, 3, 120));
+        assert_eq!(run.outcome, "completed");
+        let slowest = run.slowest_phase.as_ref().unwrap();
+        assert_eq!(
+            slowest.key, "worker.response",
+            "the parent app.active phase never wins"
+        );
+        assert_eq!(slowest.milliseconds, 6_100);
+        assert_eq!(run.phases["work.jobPersistence"], 120);
+        assert_eq!(run.phases["app.startup"], 300);
+        assert_eq!(run.requests_by_kind["detail"]["count"], 5);
+    }
+
+    #[test]
+    fn failures_and_cancellations_are_listed_but_never_averaged() {
+        let mut cancelled = log("1", "info", "scrape_source", worker_run(400, 100));
+        cancelled.detail_json = cancelled
+            .detail_json
+            .replace("\"requests\":7", "\"requests\":7,\"code\":\"cancelled\"");
+        let mut failed = log("2", "error", "scrape_source", worker_run(9_000, 8_000));
+        failed.message = "network_error".into();
+        let history = performance_history_from_logs(vec![
+            cancelled,
+            failed,
+            log("3", "info", "scrape_source", worker_run(12_000, 6_100)),
+            log("4", "info", "scrape_source", worker_run(12_000, 6_100)),
+        ]);
+        assert_eq!(
+            history
+                .recent
+                .iter()
+                .map(|run| run.outcome.as_str())
+                .collect::<Vec<_>>(),
+            ["cancelled", "failed", "completed", "completed"]
+        );
+        assert_eq!(history.aggregates.len(), 1);
+        assert_eq!(
+            history.aggregates[0].samples, 2,
+            "only completed runs are averaged"
+        );
+        assert_eq!(history.aggregates[0].median_ms, 12_400);
+    }
+
+    #[test]
+    fn medians_p95_and_ordering_are_deterministic() {
+        let mut logs = Vec::new();
+        for (index, total) in [1_000_u64, 2_000, 3_000, 4_000, 100_000]
+            .into_iter()
+            .enumerate()
+        {
+            logs.push(log(
+                &format!("{index}"),
+                "info",
+                "scrape_source",
+                worker_run(total, total / 2),
+            ));
+        }
+        // A second, cheaper group so ordering has something to sort.
+        let mut check = log("9", "info", "check_source", worker_run(500, 100));
+        check.source_name = Some("Arm".into());
+        check.source_id = Some("src-arm".into());
+        logs.push(check);
+        let history = performance_history_from_logs(logs);
+        let scrape = history
+            .aggregates
+            .iter()
+            .find(|row| row.action == "scrape_source")
+            .unwrap();
+        assert_eq!(scrape.samples, 5);
+        assert_eq!(
+            scrape.median_ms, 3_400,
+            "the median is the middle sample, not the mean"
+        );
+        assert_eq!(
+            scrape.p95_ms,
+            Some(100_400),
+            "p95 appears once five samples exist"
+        );
+        assert_eq!(
+            scrape.slowest_phase.as_ref().unwrap().key,
+            "worker.response"
+        );
+        let check = history
+            .aggregates
+            .iter()
+            .find(|row| row.action == "check_source")
+            .unwrap();
+        assert_eq!(check.p95_ms, None, "one sample cannot support a p95");
+        assert_eq!(check.median_ms, 900);
+        assert_eq!(
+            history.aggregates[0].action, "scrape_source",
+            "the slowest group is listed first"
+        );
+    }
+
+    #[test]
+    fn history_is_capped_at_fifty_runs_and_twenty_samples_per_group() {
+        let logs = (0..70)
+            .map(|index| {
+                log(
+                    &format!("{index}"),
+                    "info",
+                    "scrape_source",
+                    worker_run(1_000 + index, 100),
+                )
+            })
+            .collect::<Vec<_>>();
+        let history = performance_history_from_logs(logs);
+        assert_eq!(history.recent.len(), 50);
+        assert_eq!(history.aggregates[0].samples, 20);
+    }
+
+    #[test]
+    fn a_batch_run_ranks_its_own_work_without_worker_metrics() {
+        let detail = serde_json::json!({
+            "requests": 31, "completedSources": 6, "peakDomains": 5,
+            "performance": { "version": 1, "app": {
+                "totalMs": 9_800,
+                "criticalPathMs": { "prepare": 500, "startup": 0, "active": 9_000, "shutdown": 0, "finalize": 300 },
+                "workMs": { "preflight": 800, "scrape": 8_100 } } }
+        }).to_string();
+        let mut batch = log("1", "info", "scrape_all", detail);
+        batch.source_id = None;
+        batch.source_name = None;
+        let history = performance_history_from_logs(vec![batch]);
+        let run = &history.recent[0];
+        assert_eq!(run.total_ms, 9_800);
+        assert_eq!(run.worker_ms, 0, "a batch has no single worker");
+        assert_eq!(run.requests, 31);
+        assert_eq!(run.jobs, 6);
+        assert_eq!(run.slowest_phase.as_ref().unwrap().key, "work.scrape");
+        assert!(run.source_name.is_none());
     }
 }

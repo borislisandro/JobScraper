@@ -12,7 +12,13 @@ crate-type = ["cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+# tray-icon: closing the window leaves the app running in the notification area, the way Discord
+# and Steam do, so background checks and reminders keep working without a window open.
+tauri = { version = "2", features = ["tray-icon"] }
+# Living in the tray means the shortcut gets clicked again while the app is already running. Without
+# this that starts a second process on the same SQLite file, with a second tray icon; with it, the
+# window the user already has comes back.
+tauri-plugin-single-instance = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
@@ -35,5 +41,5 @@ aes-gcm = "0.10"
 keyring = "3"
 # UserDefinedEmbeddingModel reads only our bundled files. Keep only ORT's build
 # runtime provisioner; omit FastEmbed's hf-hub/model download features.
-fastembed = { version = "6", default-features = false, features = ["ort-download-binaries-native-tls"] }
 windows-sys = { version = "0.61", features = ["Win32_Storage_FileSystem"] }
+windows = { version = "0.61", features = ["Win32_System_Com", "Win32_System_Ole", "Win32_System_TaskScheduler", "Win32_System_Variant"] }

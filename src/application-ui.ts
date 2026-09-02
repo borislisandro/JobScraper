@@ -1,4 +1,11 @@
 export const applicationStages=["planned","applied","screening","interviewing","offer","accepted","rejected","withdrawn"] as const;
+// One vocabulary everywhere. "planned" is what the database calls a job the user pressed Save on,
+// and calling it "Planned" on the board while the Jobs page says "Saved" made them look like two
+// different things.
+const stageNames:Record<string,string>={planned:"Saved"};
+export const stageLabel=(stage?:string)=>!stage?"":stageNames[stage]??stage.charAt(0).toUpperCase()+stage.slice(1);
+/** True once the job has actually been applied to, rather than only saved for later. */
+export const isApplied=(stage?:string)=>!!stage&&stage!=="planned";
 export function boardMoveError(from:string,to:string){
  if(from===to)return undefined;
  if(to==="applied")return "Applied is recorded only by explicit confirmation after Open application.";

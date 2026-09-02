@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { jitterMs, makeUrlGuard, parseRobots, privateAddress, requiredFor, retryAfterMs, robotsAllows, workdaySite, workdayTenant } from "./worker.mjs";
+import { createServer } from "node:http";
+import { spawn } from "node:child_process";
+import { jitterMs, makeUrlGuard, parseRobots, privateAddress, requestSlotDelay, requiredFor, retryAfterMs, robotsAllows, workdaySite, workdayTenant } from "./worker.mjs";
 
 test("jitter and Retry-After stay bounded and deterministic",()=>{
   assert.equal(jitterMs(()=>0),1500);
@@ -64,4 +66,60 @@ test("Workday tenant and site detection reads real tenant shapes",()=>{
   assert.equal(workdaySite(""),null);
   // Workday requires both halves; a tenant alone cannot build a CXS URL.
   assert.deepEqual(requiredFor("workday"),["tenant","site"]);
+});
+
+// Every request paid a 1.5-3 s sleep regardless of what it was fetching, which is most of what a
+// detail-heavy run cost. A JSON search endpoint is paced for its own kind; an HTML listing page,
+// which is far heavier for a server to render, keeps the original spacing.
+test("request pacing follows what is being fetched, not one blanket delay",async()=>{
+ const {paceMs}=await import("./worker.mjs");
+ const lowest=()=>0,highest=()=>0.999999;
+ for(const adapter of ["workday","eightfold","apple","amd"]){
+  assert.equal(paceMs(adapter,lowest),250);
+  assert.ok(paceMs(adapter,highest)<=500,`${adapter} should stay well under the old floor`);
+ }
+ for(const adapter of ["static-css","arm","cisco","google"]){
+  assert.equal(paceMs(adapter,lowest),1500,`${adapter} keeps the wider spacing an HTML page deserves`);
+ }
+});
+
+test("request pacing starts immediately and couples only requests to the same origin",()=>{
+ const slots=new Map;
+ assert.equal(requestSlotDelay("https://a.test",250,1_000,slots),0);
+ assert.equal(requestSlotDelay("https://a.test",250,1_000,slots),250);
+ assert.equal(requestSlotDelay("https://b.test",250,1_000,slots),0);
+ assert.equal(requestSlotDelay("https://a.test",250,1_125,slots),375);
+});
+
+// Node rejects a response whose headers exceed 16KB with an opaque UND_ERR_HEADERS_OVERFLOW, and
+// real boards do send more than that: www.u-blox.com ships a 19KB content-security-policy header,
+// which made every one of its pages unreadable for a reason no adapter could report. The app
+// spawns the worker with --max-http-header-size=65536 (see sidecar.rs); this proves the worker
+// reads such a response under that flag, and records why the flag has to be there.
+test("a response with headers larger than Node's default limit is still readable",async()=>{
+ const oversized="x".repeat(19_000);
+ const server=createServer((req,res)=>{
+  res.setHeader("content-security-policy",`default-src 'self'; report-to ${oversized}`);
+  if(req.url==="/robots.txt")return res.setHeader("content-type","text/plain").end("User-agent: *\nAllow: /\n");
+  res.setHeader("content-type","application/json").end(JSON.stringify({total:1,jobPostings:[{title:"Firmware Engineer",jobReqId:"JR1",locationsText:"Thalwil"}]}));
+ });
+ await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
+ const base=`http://127.0.0.1:${server.address().port}`;
+ const run=args=>new Promise(resolve=>{
+  const child=spawn(process.execPath,[...args,"sidecar/worker.mjs"],{cwd:process.cwd()}),lines=[];
+  child.stdout.on("data",data=>lines.push(...String(data).trim().split("\n").filter(Boolean)));
+  child.on("close",()=>resolve(lines.map(line=>{try{return JSON.parse(line)}catch{return null}}).filter(Boolean)));
+  child.stdin.end(JSON.stringify({protocolVersion:1,command:"scrape_source",runId:"headers",known:[],
+   source:{name:"Fixture",baseUrl:base,adapterId:"workday",kind:"active",allowPrivateNetwork:true,robotsOverride:false,
+    configJson:{testNoDelay:true,maxPages:1,pageSize:1,listingPath:"/workday",tenant:"fixture",site:"External"}}})+"\n");
+ });
+ try{
+  const withFlag=await run(["--max-http-header-size=65536"]);
+  assert.equal(withFlag.at(-1).event,"completed",JSON.stringify(withFlag.at(-1)));
+  assert.equal(withFlag.filter(event=>event.event==="job").length,1);
+  // Without it the same board is simply unreachable — the failure this flag exists to prevent.
+  const withoutFlag=await run([]);
+  assert.equal(withoutFlag.at(-1).event,"failed");
+  assert.match(String(withoutFlag.at(-1).payload.message),/fetch failed|network_error/);
+ }finally{await new Promise(resolve=>server.close(resolve))}
 });
