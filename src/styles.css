@@ -1,18 +1,13 @@
-/* JobScraper — "Nocturne" from the GUI Redesign Plan canvas (JobScraper.dc.html).
-   The look is typographic, not boxed: one near-black ground, hairline rules instead of panels,
-   text for almost every control, and a single outlined button for the action that matters on a
-   screen. Colour carries no meaning here — rank does, through the neutral ramp.
-
-   Fonts are named and fall back to the system stack. The canvas imports Inter from Google Fonts;
-   this app never fetches a webfont (startup is asserted network-free in Diagnostics), so Inter is
-   used when the machine has it and the system UI face stands in when it does not. */
+/* JobScraper — proposed successor to src/styles.css.
+   Same tokens and typographic language; the changes are structural:
+   fluid width, real button affordances, settings out of Diagnostics,
+   a reading overlay instead of a 280px inner scroll box, row-level actions. */
 :root{
  --bg:#0b0b0b;--surface:#1b1b1b;--sheet:#181818;--drawer:#151515;
  --fg:#f4f4f4;--accent:#f4f4f4;
  --n100:#f8f8f8;--n200:#e9e9e9;--n300:#d3d3d3;--n400:#b5b5b5;--n500:#969696;
  --n600:#787878;--n700:#5c5c5c;--n800:#414141;--n900:#2a2a2a;
  --a200:#e9e9e9;--a300:#dcdcdc;
- /* Two rule weights only: .08 separates rows, .16 separates regions. */
  --rule:rgba(244,244,244,.08);
  --rule-strong:rgba(244,244,244,.16);
  --wash:rgba(244,244,244,.025);
@@ -21,6 +16,8 @@
  --radius-sm:4px;--radius-md:8px;
  --sans:"Inter",system-ui,"Segoe UI",sans-serif;
  --mono:ui-monospace,Consolas,"JetBrains Mono",monospace;
+ /* One inset for every page edge, and one measure for prose. Nothing else caps width. */
+ --pad:32px;--measure:82ch;
  font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--fg);background:var(--bg);
  color-scheme:dark;
 }
@@ -35,199 +32,249 @@ a:hover{color:var(--a200);text-decoration:underline}
 ::-webkit-scrollbar-thumb{background:#333;border-radius:99px}
 ::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes risein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(320%)}}
-@keyframes shimmer{0%{background-position:-380px 0}100%{background-position:380px 0}}
-@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ---- shell -------------------------------------------------------------------------------- */
+/* ---- shell ---- */
 main{display:grid;grid-template-rows:auto auto 1fr;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
-/* Title and tabs read as one line of text at the top of the window, so the chrome is a rule. */
-/* Two ways to grab the window, because the data-tauri-drag-region attribute does not apply to an
-   element's children and this bar has three of them. app-region does inherit, so the icon and the
-   title move the window like the empty space between them; the buttons opt out of it below. */
-.titlebar{display:flex;align-items:center;gap:9px;padding:0 0 0 32px;height:46px;user-select:none;
- -webkit-app-region:drag}
-.titlebar h1{font-size:13px;font-weight:600;letter-spacing:-.01em;margin:0}
-/* The window's own icon, a little taller than the title beside it so it reads as the app's mark. */
-.mark{display:block;width:28px;height:28px;border-radius:6px;flex:none;-webkit-user-drag:none}
-nav{display:flex;align-items:center;gap:30px;padding:0 32px 0 32px;height:34px;
- border-bottom:1px solid var(--rule);overflow-x:auto}
+.titlebar{display:flex;align-items:center;gap:9px;padding:0 0 0 var(--pad);height:46px;user-select:none;cursor:default}
+.titlebar h1{font-size:13px;font-weight:600;letter-spacing:0;margin:0}
+.mark{display:block;width:28px;height:28px;border-radius:6px;flex:none}
+.titlebar .spacer{flex:1}
+nav{display:flex;align-items:center;gap:30px;padding:0 var(--pad);height:34px;
+ border-bottom:1px solid var(--rule)}
 nav button{position:relative;display:flex;align-items:center;gap:7px;white-space:nowrap;
- border:0;background:none;padding:0 0 9px;border-radius:0;color:var(--n500);font-size:13px}
-nav button:hover{background:none;color:var(--n300)}
-/* The active tab is marked by a hairline under its own width — no fill, no weight change. */
+ border:0;background:none;padding:0 0 9px;border-radius:0;color:var(--n500);font-size:13px;cursor:pointer}
+nav button:hover{color:var(--n300)}
 nav button.active{color:var(--fg)}
 nav button.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--accent)}
-nav .badge{font-size:11px;color:var(--n600);background:none;border-radius:0;padding:0}
+nav .badge{font-size:11px;color:var(--n600)}
+nav .nav-right{margin-left:auto;display:flex;gap:18px;align-items:center;padding-bottom:9px}
 .pane{overflow:hidden;position:relative}
 .pane>div{height:100%}
-.view{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.toolbar{display:grid;gap:22px;grid-auto-rows:min-content;padding:26px 32px 18px;
- border-bottom:1px solid var(--rule);flex-shrink:0;max-width:1240px}
-.scroll{flex:1;overflow-y:auto;padding:0 32px 48px;display:grid;gap:0;align-content:start;
- grid-auto-rows:min-content;max-width:1240px}
-.scroll.narrow{max-width:1000px}
+.view{display:flex;flex-direction:column;height:100%;overflow:hidden;position:relative}
+/* Toolbars and scrollers are as wide as the window. Prose inside them keeps its own measure. */
+.toolbar{display:grid;gap:18px;grid-auto-rows:min-content;padding:22px var(--pad) 16px;
+ border-bottom:1px solid var(--rule);flex-shrink:0;position:relative}
+.scroll{flex:1;overflow-y:auto;padding:0 var(--pad) 48px;display:grid;gap:0;align-content:start;
+ grid-auto-rows:min-content}
 header{display:flex;align-items:baseline;gap:16px}
-header>div:first-child{display:contents}
-header h2{margin:0;font-size:20px;font-weight:500;letter-spacing:-.015em}
-header p{margin:0;font-size:12px;color:var(--n600);flex:1}
-header .count{white-space:nowrap}
-header .actions{margin-left:auto}
+header h2{margin:0;font-size:20px;font-weight:500;letter-spacing:0}
+header p{margin:0;font-size:12px;color:var(--n600);max-width:var(--measure)}
+header .count{white-space:nowrap;margin-left:auto}
+header .actions{margin-left:auto;display:flex;gap:10px;align-items:center}
 h3{margin:0;font-size:13px;font-weight:500}
 .muted,small{color:var(--n500)}
 .hint{font-size:11.5px;color:var(--n600);max-width:78ch;margin:0}
 .count{font-size:11px;color:var(--n600);font-variant-numeric:tabular-nums}
-/* Every uppercase micro-label in the design shares one treatment. */
-.caption,.filters label>span:first-child,.chips legend,.source-head,.rule h3,
-.runlog>header strong,thead th{
+.caption,.chips legend,.list-head span,.rule h3,.runlog>header strong,thead th,label>span:first-child{
  font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--n600);font-weight:400}
 
-/* ---- controls ----------------------------------------------------------------------------- */
+/* ---- controls: every action carries a visible edge ---- */
 button,input,select,textarea{font:inherit}
-/* The default control is a word, not a box. */
-button{font-size:12.5px;padding:0;border:0;border-radius:0;background:none;color:var(--n500);cursor:pointer}
-button:hover{color:var(--fg);background:none}
+button,input,select,textarea,a,label{-webkit-app-region:no-drag}
+button{font-size:12.5px;padding:5px 12px;border:1px solid var(--n800);border-radius:var(--radius-sm);
+ background:transparent;color:var(--n300);cursor:pointer;white-space:nowrap}
+button:hover{border-color:var(--n700);background:var(--wash-hover);color:var(--fg)}
+button:active{background:rgba(244,244,244,.04)}
 button:disabled{opacity:.4;cursor:not-allowed}
-button:disabled:hover{color:var(--n500)}
-/* One outlined button per screen: the action the screen exists for. */
-button.primary,button.quiet{padding:6px 15px;border:1px solid var(--accent);border-radius:var(--radius-sm);
- background:transparent;color:var(--a300);font-size:12.5px}
-button.primary:hover,button.quiet:hover{background:var(--wash-hover);color:var(--a200)}
-button.primary:disabled,button.quiet:disabled{border-color:var(--n800);color:var(--n600);opacity:1}
-button.danger{color:var(--n500)}
-button.danger:hover{color:var(--fg)}
-button.link,.link{font-size:12.5px;border:0;background:none;color:var(--n500);text-decoration:none;padding:0}
-button.link:hover,.link:hover{color:var(--fg);text-decoration:none}
-/* Inputs are a baseline, not a field: one rule under the text that lights up on focus. */
-input,select,textarea{background:transparent;border:0;border-bottom:1px solid rgba(244,244,244,.14);
- border-radius:0;padding:3px 0;color:var(--fg);font-size:13px;outline:none}
-input:focus,select:focus,textarea:focus,
-input:focus-visible,select:focus-visible,textarea:focus-visible{border-bottom-color:var(--accent)}
-button:focus-visible,summary:focus-visible,a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+button:disabled:hover{background:none;border-color:var(--n800);color:var(--n300)}
+button.primary{border-color:var(--accent);color:var(--a200)}
+button.primary:hover{background:var(--wash-hover)}
+button.danger:hover{border-color:#8c3a32;background:rgba(196,43,28,.14);color:#f0c9c4}
+button.small{padding:3px 9px;font-size:12px}
+/* Only navigation and dismissal stay wordless — never an action that changes data. */
+button.link{border:0;background:none;padding:0;color:var(--n500);font-size:12.5px}
+button.link:hover{color:var(--fg);background:none}
+button.icon{padding:0;width:28px;height:28px;display:grid;place-items:center;border-color:transparent}
+button.icon:hover{border-color:var(--n800)}
+button.icon svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.3;fill:none}
+input,select,textarea{background:transparent;border:1px solid var(--n900);border-radius:var(--radius-sm);
+ padding:5px 8px;color:var(--fg);font-size:13px;outline:none}
+input:hover,select:hover,textarea:hover{border-color:var(--n800)}
+input:focus,select:focus,textarea:focus{border-color:var(--n600)}
+button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+ outline:1px solid var(--accent);outline-offset:2px}
 select{cursor:pointer}
 select option{background:var(--sheet);color:var(--fg)}
 textarea{resize:vertical}
 label{display:grid;gap:5px;font-size:12.5px}
-label>span:first-child{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--n600)}
 input[type=checkbox]{accent-color:var(--accent);width:13px;height:13px;padding:0;border:0}
-label.inline{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--n400)}
-
-/* ---- status, states ----------------------------------------------------------------------- */
-/* Status is quoted, not boxed: a hairline in the accent and the sentence beside it. */
-.status{display:block;background:none;border:0;border-left:1px solid var(--accent);border-radius:0;
- padding:0 0 0 11px;font-family:var(--sans);font-size:12.5px;color:var(--n400);white-space:pre-wrap}
+label.inline{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--n400);
+ border:1px solid transparent;border-radius:var(--radius-sm);padding:4px 8px 4px 6px;cursor:pointer}
+label.inline:hover{border-color:var(--n900);background:var(--wash)}
+label.inline:has(:checked){border-color:var(--n800);color:var(--fg)}
+.status{display:block;border-left:1px solid var(--accent);padding:0 0 0 11px;font-size:12.5px;
+ color:var(--n400);margin:14px 0 0}
 .status.warning{border-left-color:var(--n400);color:var(--n300)}
-.warning{color:var(--n300)}
-.error{color:var(--n200)}
-/* No pill: a job's state is a word at the end of its row. */
-.pill{font-size:12px;color:var(--a300);background:none;border:0;border-radius:0;padding:0;
- white-space:nowrap;justify-self:start}
-.pill.good,.pill.applied{color:var(--n400);background:none;border:0}
-.empty{border:0;border-radius:0;background:none;padding:64px 0;display:grid;gap:10px;
- justify-items:start;text-align:left;margin:0}
+.warning{color:var(--n300)}.error{color:var(--n200)}
+.pill{font-size:12px;color:var(--a300);white-space:nowrap}
+.pill.good,.pill.applied{color:var(--n400)}
+.empty{padding:64px 0;display:grid;gap:10px;justify-items:start;margin:0}
 .empty strong{font-size:14px;font-weight:400;color:var(--n300)}
 .empty span{font-size:12.5px;color:var(--n600);max-width:46ch}
-.empty button{margin-top:8px}
-.skeletons{display:grid;gap:0}
-.skeletons div{border:0;border-top:1px solid var(--rule);border-radius:0;background:none;padding:12px 0;
- display:grid;grid-template-columns:minmax(240px,2.3fr) minmax(0,1.2fr) minmax(0,1fr) 92px;gap:20px;align-items:center}
-.skeletons span{height:9px;border-radius:2px;background:rgba(244,244,244,.06)}
-.skeletons span:first-child{height:11px;background:linear-gradient(90deg,rgba(244,244,244,.05) 0%,rgba(244,244,244,.11) 40%,rgba(244,244,244,.05) 80%);
- background-size:380px 100%;animation:shimmer 1.15s linear infinite}
-@media(prefers-reduced-motion:reduce){.skeletons span:first-child{animation:none}}
 
-/* ---- Jobs --------------------------------------------------------------------------------- */
-/* Source chips are words. The one that is on carries a hairline; the checkbox itself is hidden,
-   so the row reads as a line of names rather than a rack of controls. */
-.chips{display:flex;align-items:center;gap:18px;flex-wrap:wrap;border:0;border-radius:0;
- background:none;padding:0;margin:0}
-.chips legend{padding:0;flex-basis:100%;margin-bottom:8px}
-.chip{position:relative;display:inline-flex;align-items:center;font-size:12.5px;padding:0 0 5px;
- border:0;border-radius:0;background:none;color:var(--n600);cursor:pointer}
-.chip:hover{color:var(--n400)}
-.chip.on{color:var(--fg)}
-.chip.on::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(244,244,244,.6)}
+/* ---- Jobs ---- */
+.chips{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:0;padding:0;margin:0}
+/* A section's label carries that section's own resets, so "Select all" belongs to the chips and
+   "Clear all" to the filters instead of floating loose at the end of either row. */
+.chips legend,.section-label{display:flex;align-items:baseline;gap:12px;flex-basis:100%;padding:0;
+ margin-bottom:9px;font-size:12px;letter-spacing:normal;text-transform:none;color:var(--n500)}
+.section-label{margin-bottom:2px}
+.chips legend .lbl,.section-label .lbl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+ color:var(--n600)}
+.chips legend button.link,.section-label button.link{font-size:12px}
+.chip{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;
+ padding:4px 10px;border:1px solid var(--n900);border-radius:99px;color:var(--n500);cursor:pointer}
+.chip:hover{border-color:var(--n800);color:var(--n300)}
+.chip.on{color:var(--fg);border-color:var(--n700);background:rgba(244,244,244,.05)}
+.chip .n{font-size:11px;color:var(--n600);font-variant-numeric:tabular-nums}
+.chip.on .n{color:var(--n400)}
 .chip input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
-.chip-actions{display:flex;gap:14px;margin-left:auto}
-.chip-actions button{font-size:12px;color:var(--n600)}
-.chip-actions button:hover{color:var(--n400)}
-.filters{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;margin:0}
-/* Text fields get a fixed measure; a checkbox in the same row must keep its own size. */
-.filters input:not([type=checkbox]){width:190px}
-.filters .inline{border:0;border-radius:0;background:none;padding:0;color:var(--n400);cursor:pointer}
-.filters .inline:has(:checked){border:0;background:none;color:var(--fg)}
-/* The job list is a table of text. Column widths are shared by the header, every row and the
-   loading skeleton, so nothing shifts as results arrive. */
+/* Past about ten sources the chip row stops being a row. The chips then show the ones being
+   looked at, and the rest live behind one control that opens a searchable checklist. */
+.chip.more{border-style:dashed;color:var(--n400)}
+.chip.off{color:var(--n700);border-color:transparent;text-decoration:line-through}
+.picker{position:absolute;z-index:9;top:100%;left:var(--pad);margin-top:-8px;
+ width:min(620px,calc(100% - var(--pad) * 2));background:var(--sheet);border:1px solid var(--n800);
+ border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:14px;display:grid;gap:12px;
+ animation:risein .12s ease-out}
+.picker .top{display:flex;gap:10px;align-items:center}
+.picker .top input{flex:1;min-width:0}
+.picker .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0 20px;
+ max-height:250px;overflow-y:auto}
+.picker .list label{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px;
+ color:var(--n300);cursor:pointer;min-width:0}
+.picker .list label:hover{color:var(--fg)}
+.picker .list label span:first-of-type{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picker .list .n{margin-left:auto;font-size:11px;color:var(--n600);font-variant-numeric:tabular-nums}
+.picker .list .dead{color:var(--n600)}
+.picker footer{display:flex;gap:10px;align-items:center;border-top:1px solid var(--rule);padding-top:12px}
+.picker footer .count{margin-right:auto}
+.filters{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin:0}
+.filters label>span:first-child{margin-bottom:1px}
+.filters input:not([type=checkbox]){width:200px}
+.filters .grow{flex:1;min-width:200px}
+.filters .grow input{width:100%}
+/* Each chosen country is its own way out, on the row under the filters that added it. */
+.chosen{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-basis:100%;margin-top:2px}
+.chosen-label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--n600)}
+.chosen button{border:1px solid var(--n800);border-radius:99px;padding:3px 10px;font-size:12.5px;
+ color:var(--n300);display:inline-flex;align-items:center;gap:7px}
+.chosen button .x{color:var(--n600)}
+.chosen button:hover{border-color:#8c3a32;background:rgba(196,43,28,.12);color:#f0c9c4}
+.chosen button:hover .x{color:#f0c9c4}
+/* Toolbar collapse: the control that narrow windows need and wide ones ignore. */
+.toolbar-collapsed .chips,.toolbar-collapsed .filters{display:none}
+.filter-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--n500)}
+.filter-summary b{font-weight:400;color:var(--n300)}
+.list-head{display:grid;grid-template-columns:var(--cols);gap:20px;padding:11px 0 9px;
+ border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--bg);z-index:2}
+.list-head span:last-child{text-align:right}
+.list-head button{border:0;background:none;padding:0;color:var(--n600);font:inherit;
+ font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;display:inline-flex;gap:5px;align-items:center}
+.list-head button:hover{color:var(--n300);background:none}
+.list-head button .arrow{font-size:9px}
 .jobs{display:grid;gap:0}
-.jobs-head{display:grid;grid-template-columns:minmax(240px,2.3fr) minmax(0,1.2fr) minmax(0,1fr) 92px minmax(150px,auto);
- gap:20px;padding:11px 0 9px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--n600)}
-.jobs-head span:last-child{text-align:right}
-details.job{border:0;border-top:1px solid var(--rule);border-radius:0;background:none;overflow:visible}
-details.job[open]{border-color:var(--rule)}
-details.job>summary{display:grid;gap:20px;align-items:baseline;padding:12px 0;cursor:pointer;list-style:none;
- grid-template-columns:minmax(240px,2.3fr) minmax(0,1.2fr) minmax(0,1fr) 92px minmax(150px,auto)}
-details.job>summary:hover{background:var(--wash)}
-details.job>summary::-webkit-details-marker{display:none}
-details.job>summary::before{content:none}
-.job-title{font-size:13.5px;font-weight:400;color:var(--fg)}
-.job-meta,.job-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job{display:grid;grid-template-columns:var(--cols);gap:20px;align-items:center;
+ border-top:1px solid var(--rule);padding:10px 0;cursor:pointer}
+.job:first-child{border-top:0}
+.job:hover{background:var(--wash)}
+.job.read{color:var(--n600)}
+.job-title{font-size:13.5px;color:var(--fg)}
+.job-title,.job-meta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .job-meta{font-size:12.5px;color:var(--n400)}
-.job-meta:nth-of-type(3){color:var(--n500)}
-.job-posted{font-size:12px;color:var(--n600);min-width:0;overflow:hidden;white-space:nowrap;
- font-variant-numeric:tabular-nums}
-.job-pills{display:flex;gap:10px;align-items:baseline;justify-content:flex-end;min-width:0}
-.job-body{border-top:0;padding:2px 0 26px;display:grid;gap:14px;background:none;max-width:760px;
- animation:fadein .16s ease-out}
-.job-body>.muted{font-family:var(--sans);font-size:12px;color:var(--n600);margin:0}
-.job-description{margin:0;font-size:12.5px;line-height:1.7;color:var(--n300);white-space:pre-wrap;
- max-height:280px;overflow:auto}
-.actions{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.job-body .warning{margin:0;font-size:12px}
-.load-more{display:flex;justify-content:flex-start;padding:20px 0 0;border-top:1px solid var(--rule)}
+.job-meta.dim{color:var(--n500)}
+.job-posted{font-size:12px;color:var(--n600);white-space:nowrap;font-variant-numeric:tabular-nums}
+.job-state{display:flex;gap:10px;align-items:baseline;min-width:0}
+/* Row actions are always in the layout and always legible; hover is carried by the row wash
+   and the buttons' own border, not by fading the controls in. */
+.row-actions{display:flex;gap:8px;justify-content:flex-end}
+.row-actions button{border-color:var(--n900);color:var(--n400)}
+.job:hover .row-actions button,.job:focus-within .row-actions button{border-color:var(--n800);color:var(--n300)}
+.row-actions button:hover{border-color:var(--n700);color:var(--fg);background:var(--wash-hover)}
+.row-actions button.primary{border-color:var(--n700);color:var(--a300)}
+.job:hover .row-actions button.primary{border-color:var(--accent);color:var(--a200)}
+.load-more{display:flex;padding:20px 0 0;border-top:1px solid var(--rule)}
 
-/* ---- Sources ------------------------------------------------------------------------------ */
-.sources-layout{display:grid;grid-template-columns:1fr 380px;height:100%;overflow:hidden}
+/* ---- reading overlay ---- */
+.reader{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;z-index:8;
+ animation:risein .14s ease-out}
+.reader>header{display:grid;gap:6px;padding:20px var(--pad) 16px;border-bottom:1px solid var(--rule);flex-shrink:0}
+.reader .top{display:flex;align-items:center;gap:14px}
+.reader h2{margin:0;font-size:19px;font-weight:500;letter-spacing:0}
+.reader .sub{font-size:12.5px;color:var(--n500);display:flex;gap:10px;flex-wrap:wrap}
+.reader .nav-pair{display:flex;gap:6px;margin-left:auto}
+.reader .body{flex:1;overflow-y:auto;padding:26px var(--pad) 60px}
+.reader .body .measure{max-width:var(--measure)}
+.reader .facts{display:flex;gap:26px;flex-wrap:wrap;padding-bottom:20px;margin-bottom:22px;
+ border-bottom:1px solid var(--rule)}
+.reader .facts div{display:grid;gap:3px}
+.reader .facts span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--n600)}
+.reader .facts strong{font-size:12.5px;font-weight:400;color:var(--n300)}
+.reader .description{margin:0;font-size:13px;line-height:1.75;color:var(--n300);white-space:pre-wrap}
+.reader>footer{display:flex;gap:12px;align-items:center;padding:14px var(--pad);
+ border-top:1px solid var(--rule);flex-shrink:0;background:var(--bg)}
+.reader>footer .spacer{flex:1}
+
+/* ---- Sources ---- */
+.sources-layout{display:grid;grid-template-columns:1fr minmax(320px,26%);height:100%;overflow:hidden}
+.sources-layout.log-hidden{grid-template-columns:1fr}
 .sources-main{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--rule)}
-.sources-main>header{padding:26px 32px 18px;border-bottom:1px solid var(--rule);align-items:baseline;flex-shrink:0}
-.paused{display:flex;align-items:center;gap:14px;border:0;border-left:1px solid var(--accent);
- background:none;border-radius:0;padding:0 0 0 11px;font-size:12.5px;color:var(--n300);margin-bottom:14px}
-.paused .tag{font-size:10.5px;letter-spacing:.09em;color:var(--n600);background:none;border-radius:0;
- padding:0;flex-shrink:0}
+.sources-main>header{padding:22px var(--pad) 16px;border-bottom:1px solid var(--rule);flex-shrink:0}
+.paused{display:flex;align-items:center;gap:14px;border-left:1px solid var(--accent);
+ padding:0 0 0 11px;font-size:12.5px;color:var(--n300);margin:14px 0}
 .paused .text{flex:1}
-.source-table{border:0;border-radius:0;overflow:visible;background:none}
-.source-head,.source-row{display:grid;grid-template-columns:minmax(240px,2fr) 96px 84px 60px minmax(250px,auto);
- align-items:center;gap:20px;padding:13px 0}
-/* What the source holds, right-aligned so the figures line up down the column: what is still on
-   its board, and under it what has come off since. */
+.source-head,.source-row{display:grid;
+ /* The switch column is sized for a 13px checkbox, not for its heading, so "Last read" keeps
+    the width the sentence actually needs. */
+ grid-template-columns:minmax(240px,2.4fr) 88px 88px minmax(0,1.35fr) 34px 176px;
+ align-items:center;gap:20px;padding:12px 0}
+.source-head{padding:14px 0 9px;border-bottom:1px solid var(--rule)}
 .source-head .num{text-align:right}
-.source-jobs{display:grid;gap:2px;justify-items:end;text-align:right}
-.source-jobs strong{font-size:13px;font-weight:400;color:var(--n200);font-variant-numeric:tabular-nums}
-.source-jobs small{font-size:11px;color:var(--n600);white-space:nowrap}
-.source-head{padding:14px 0 9px;background:none;border-bottom:0}
 .source-head span:last-child{text-align:right}
-.source-row{border-top:1px solid var(--rule);border-bottom:0}
-.source-row.attention{background:none}
-.source-row>div:first-child{display:grid;gap:3px;min-width:0;padding-right:0}
+.source-row{border-top:1px solid var(--rule)}
+.source-row:hover{background:var(--wash)}
+.source-row>div:first-child{display:grid;gap:3px;min-width:0}
 .source-name{display:flex;align-items:center;gap:8px;min-width:0}
 .source-name strong{font-size:13.5px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .source-url{font-size:11.5px;color:var(--n600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.source-row .warning{font-size:11.5px;margin:0;color:var(--n500)}
-.source-adapter{font-size:12px;color:var(--n500)}
-.source-row .actions{justify-content:flex-end;gap:16px}
-.source-row .actions button{font-size:12px}
-.tag-session{font-size:11px;color:var(--n500);border:0;border-radius:0;padding:0}
-/* The switch is a checkbox again: the design marks "on" with a tick, not a track. */
-input.switch{appearance:auto;-webkit-appearance:auto;width:13px;height:13px;border-radius:0;padding:0;
- border:0;background:none;accent-color:var(--accent);cursor:pointer}
-input.switch:disabled{cursor:not-allowed;opacity:.5}
+.source-adapter{font-size:12px;color:var(--n500);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.source-jobs{display:grid;gap:2px;justify-items:end;text-align:right}
+.source-jobs strong{font-size:13px;font-weight:400;color:var(--n200);font-variant-numeric:tabular-nums}
+.source-jobs small{font-size:11px;color:var(--n600);white-space:nowrap}
+/* Health is a sentence in its own column instead of a warning wedged under the name. */
+.source-health{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--n500);min-width:0}
+.source-health .mark-ok{color:var(--n500)}
+.source-health .mark-bad{color:#d98b82}
+.source-health span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.source-row.attention{background:rgba(217,139,130,.05)}
+/* A source being read says so in its own row, in the same column that otherwise holds its
+   last result — so the running one is found by scanning the column, not the log. */
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.source-row.running{background:var(--wash)}
+.source-row.running .source-name strong{color:var(--fg)}
+.source-health.running{color:var(--n200)}
+.source-health .mark-run{width:7px;height:7px;border-radius:99px;background:var(--accent);flex:none;
+ animation:pulse 1.1s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.source-health .mark-run{animation:none;opacity:.7}}
+.source-health .bar{display:block;height:1px;width:100%;margin-top:5px;background:rgba(244,244,244,.12);
+ position:relative;overflow:hidden}
+.source-health .bar::after{content:"";position:absolute;inset:0;width:32%;background:var(--accent);
+ animation:sweep 1.3s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.source-health .bar::after{animation-duration:4s}}
+.source-health .run-text{display:grid;gap:0}
+.source-row .actions{display:flex;justify-content:flex-end;gap:8px}
+.tag-session{font-size:10.5px;letter-spacing:.06em;color:var(--n500);border:1px solid var(--n900);
+ border-radius:3px;padding:1px 5px}
+input.switch{appearance:auto;width:13px;height:13px;accent-color:var(--accent);cursor:pointer}
 .rule{display:flex;align-items:baseline;gap:14px;margin-top:34px;padding-top:18px;border-top:1px solid var(--rule)}
-.rule hr{display:none}
-.rule button{font-size:12.5px}
-.runlog{display:flex;flex-direction:column;overflow:hidden;background:none}
-.runlog>header{align-items:baseline;gap:10px;padding:26px 30px 12px;border-bottom:0;flex-shrink:0}
-.runlog>header strong{font-size:10.5px;font-weight:400;box-shadow:none;padding:0}
-.runlog>header .caption{margin-left:auto}
-.runlog .lines{flex:1;overflow-y:auto;padding:0 30px;display:grid;gap:6px;align-content:start;
+.rule .count{margin-right:auto}
+.runlog{display:flex;flex-direction:column;overflow:hidden}
+.runlog>header{display:flex;align-items:baseline;gap:10px;padding:22px 26px 12px;flex-shrink:0}
+.runlog>header strong{font-weight:400}
+.runlog>header .close{margin-left:auto}
+.runlog .lines{flex:1;overflow-y:auto;padding:0 26px;display:grid;gap:6px;align-content:start;
  grid-auto-rows:min-content;font-size:11.5px;line-height:1.6;font-variant-numeric:tabular-nums}
 .runlog .lines>div{display:grid;grid-template-columns:56px 1fr;gap:12px}
 .runlog time{color:var(--n600)}
@@ -235,178 +282,204 @@ input.switch:disabled{cursor:not-allowed;opacity:.5}
 .runlog .lines .warning,.runlog .lines .error{color:var(--n200)}
 .runlog .lines .ok{color:var(--n300)}
 .runlog .lines .dim{color:var(--n600)}
-.runlog footer{border-top:0;padding:16px 30px 26px;display:flex;gap:22px;flex-shrink:0}
-.runlog footer button{font-size:12px;color:var(--n600)}
-.runlog footer button:hover{color:var(--n400)}
+.runlog footer{padding:16px 26px 22px;display:flex;gap:10px;flex-shrink:0}
 
-/* ---- tables ------------------------------------------------------------------------------- */
-.panel{border:0;border-radius:0;overflow:visible;background:none}
-.panel-note{padding:0 0 10px;border-bottom:0;background:none;font-size:12px;color:var(--n500)}
+/* ---- tables ---- */
 table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
-thead tr{background:none}
-th{text-align:left;padding:10px 20px 8px 0;border-bottom:0}
-td{padding:10px 20px 10px 0;border-bottom:0;border-top:1px solid var(--rule);color:var(--n300);
- vertical-align:baseline}
+th{text-align:left;padding:10px 20px 8px 0;border-bottom:1px solid var(--rule)}
+td{padding:9px 20px;padding-left:0;border-top:1px solid var(--rule);color:var(--n300);vertical-align:baseline}
 tr>*:last-child{padding-right:0}
-.log-table td:first-child{font-size:12.5px;color:var(--n600);white-space:nowrap}
-summary{cursor:pointer}
-td details>summary{font-size:11.5px;color:var(--n600);list-style:none}
-td details>summary::-webkit-details-marker{display:none}
-td details>summary::before{content:"\25B8 "}
-td details[open]>summary::before{content:"\25BE "}
+tbody tr:hover{background:var(--wash)}
+.log-table td:first-child{color:var(--n600);white-space:nowrap}
 
-/* ---- Applications ------------------------------------------------------------------------- */
-/* Columns of text separated by space, not cards in trays. */
-.board{display:grid;grid-template-columns:repeat(8,minmax(200px,1fr));gap:40px;min-height:100%;padding-top:22px}
-.board>section{display:grid;gap:2px;align-content:start;grid-auto-rows:min-content;background:none;
- border:0;border-radius:0;padding:0;min-width:0}
+/* ---- Applications ---- */
+/* Columns share the window's width; the three terminal stages fold to rails when it is tight. */
+.board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) repeat(3,minmax(0,.72fr));
+ gap:26px;align-items:start;padding-top:20px}
+.board>section{display:grid;gap:2px;align-content:start;grid-auto-rows:min-content;min-width:0}
 .board>section.drop-active{background:var(--wash)}
-.board h3{display:flex;align-items:baseline;gap:10px;padding:0 0 10px;font-size:10.5px;font-weight:400;
- letter-spacing:.09em;text-transform:uppercase;color:var(--n500)}
-.board h3 .dot{display:none}
-.board h3 .count{margin-left:0;font-size:11px}
-.board .empty{border:0;border-top:1px solid var(--rule);padding:12px 0;color:var(--n600);font-size:12px}
-.card{border:0;border-top:1px solid var(--rule);border-radius:0;background:none;padding:12px 0;
- display:grid;gap:4px;grid-auto-rows:min-content}
+.board h3{display:flex;align-items:baseline;gap:8px;padding:0 0 10px;font-size:10.5px;font-weight:400;
+ letter-spacing:.09em;text-transform:uppercase;color:var(--n500);min-width:0}
+.board h3 .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board h3 .count{font-size:11px}
+.board .empty{border-top:1px solid var(--rule);padding:12px 0;color:var(--n600);font-size:12px}
+.card{border-top:1px solid var(--rule);padding:11px 0;display:grid;gap:5px;
+ grid-auto-rows:min-content;cursor:grab;min-width:0}
 .card:hover{background:var(--wash)}
-.board .card{cursor:pointer}
 .card strong{font-size:13px;font-weight:400;line-height:1.35;color:var(--fg)}
 .card p{margin:0;font-size:12px;color:var(--n500)}
-.card small{font-size:11.5px;color:var(--n600)}
-.card select{font-size:12px;padding:3px 0;width:100%}
-.card .actions{gap:14px}
-.card .actions button{font-size:12px}
-.card details>summary{font-size:11.5px;color:var(--n600);list-style:none}
-.card details>summary::-webkit-details-marker{display:none}
-.card details>summary::before{content:"\25B8 "}
-.card details[open]>summary::before{content:"\25BE "}
+.card .when{font-size:11.5px;color:var(--n600)}
+.card .flag{font-size:11.5px;color:#d9b982}
+.card .card-actions{display:flex;gap:8px;margin-top:5px}
+.card .card-actions button{border-color:var(--n900);color:var(--n400)}
+.card:hover .card-actions button,.card:focus-within .card-actions button{border-color:var(--n800);color:var(--n300)}
+.card .card-actions button:hover{border-color:var(--n700);color:var(--fg);background:var(--wash-hover)}
+.card .card-actions button.primary{border-color:var(--n700);color:var(--a300)}
+.card:hover .card-actions button.primary{border-color:var(--accent);color:var(--a200)}
 
-/* ---- Diagnostics -------------------------------------------------------------------------- */
-/* Health reads as label/value rows rather than a grid of tiles. */
-.health{display:grid;grid-template-columns:1fr;gap:0;margin-top:8px}
-.health>div{border:0;border-top:1px solid var(--rule);border-radius:0;background:none;padding:13px 0;
- display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:baseline;grid-auto-rows:min-content}
-.health>div.ok,.health>div.bad{border-color:var(--rule)}
-.health strong{display:flex;align-items:baseline;gap:8px;font-size:12.5px;font-weight:400;color:var(--n500)}
-.health .dot{display:none}
-.health .detail{font-size:12.5px;color:var(--n200);line-height:1.55;white-space:pre-wrap}
-.background-sync-setting{display:grid;gap:4px}
-.background-sync-setting small{font-size:11.5px;color:var(--n600)}
-pre{margin:18px 0 0;padding:0;background:none;border:0;border-radius:0;overflow:auto;
- font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--n600);white-space:pre-wrap}
-td pre{margin:0;font-size:11px}
+/* ---- Diagnostics ---- */
+.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 32px;
+ border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-top:8px}
+.summary-row>div{display:grid;gap:4px;padding:16px 0}
+.summary-row span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--n600)}
+.summary-row strong{font-size:15px;font-weight:400;color:var(--n200);font-variant-numeric:tabular-nums}
+.summary-row small{font-size:11.5px;color:var(--n600)}
+.summary-row .bad strong{color:#e2a29a}
+.attn{display:grid;gap:0}
+.attn>div{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr) auto;gap:20px;
+ align-items:center;padding:12px 0;border-top:1px solid var(--rule)}
+.attn strong{font-size:13px;font-weight:400}
+.attn .why{font-size:12.5px;color:var(--n400)}
+details.fold{border-top:1px solid var(--rule);padding:12px 0}
+details.fold>summary{font-size:12.5px;color:var(--n500);list-style:none;cursor:pointer}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"\25B8  ";color:var(--n600)}
+details.fold[open]>summary::before{content:"\25BE  "}
+details.fold pre{margin:14px 0 0;font-family:var(--mono);font-size:11.5px;line-height:1.7;
+ color:var(--n600);white-space:pre-wrap}
 
-/* ---- dialogs ------------------------------------------------------------------------------ */
-dialog[open]{position:fixed;inset:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;
- border:0;padding:0;background:rgba(0,0,0,.62);color:var(--fg);display:grid;place-items:center;
- animation:fadein .12s ease-out;overflow:hidden;z-index:20}
-dialog>form,dialog>.sheet{width:520px;max-width:calc(100% - 48px);max-height:82vh;
- background:var(--sheet);border:0;border-radius:var(--radius-md);display:flex;flex-direction:column;
- overflow:hidden;box-shadow:var(--shadow-md);animation:none}
-dialog header{padding:24px 26px 0;border-bottom:0;align-items:baseline;flex-shrink:0}
-dialog header h2,dialog header h3{margin:0;font-size:15px;font-weight:500}
-dialog header p{margin:0}
-.dialog-body{flex:1;overflow-y:auto;padding:22px 26px;display:grid;gap:22px;align-content:start;
- grid-auto-rows:min-content}
-.dialog-body>button{justify-self:start}
-dialog footer{display:flex;gap:20px;align-items:center;justify-content:flex-end;padding:0 26px 20px;
- border-top:0;background:none;flex-shrink:0}
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.field-grid .wide{grid-column:span 2}
-.advanced{border:0;border-radius:0;background:none;padding:0;display:grid;gap:20px}
-.advanced hr{display:none}
-.advanced .inline{justify-self:start}
-.found{border:0;border-radius:0;background:none;overflow:visible;padding:0}
-.found strong{display:block;padding:0 0 6px;border-bottom:0;font-size:10.5px;letter-spacing:.09em;
- text-transform:uppercase;color:var(--n600);font-weight:400}
-.found ul{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:12.5px;color:var(--n300)}
-/* Application details opens as a right-hand drawer rather than a centred sheet. */
-dialog.drawer[open]{place-items:stretch;justify-items:end;background:rgba(0,0,0,.5)}
-dialog.drawer>.sheet{width:440px;max-width:100%;height:100%;max-height:none;border-radius:0;border:0;
- background:var(--drawer);box-shadow:var(--shadow-md);animation:none}
-dialog.drawer header{padding:26px 30px 0}
-dialog.drawer .dialog-body{padding:26px 30px 40px;gap:30px}
-dialog.drawer section,dialog.drawer form{display:grid;gap:12px;grid-auto-rows:min-content;justify-items:stretch}
-dialog.drawer form>button,dialog.drawer section>button{justify-self:start}
-dialog.drawer hr{display:none}
-dialog.drawer .note{margin:0;border-left:0;padding:10px 0 0;border-top:1px solid var(--rule);display:grid;gap:3px}
-dialog.drawer .note p{margin:0;font-size:12.5px;color:var(--n300);line-height:1.6}
-dialog.drawer .note small{font-size:11px;color:var(--n600)}
-dialog.drawer .row{display:flex;align-items:baseline;gap:14px;border:0;border-top:1px solid var(--rule);
- border-radius:0;background:none;padding:8px 0}
-dialog.drawer .row>div{display:grid;gap:1px;flex:1;min-width:0}
-dialog.drawer .row small{font-size:11.5px;color:var(--n600)}
-dialog.drawer .event{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;
- padding:7px 0;border-top:1px solid rgba(244,244,244,.06);font-size:12px}
-dialog.drawer .event .dot{display:none}
-dialog.drawer .event small{color:var(--n600);font-variant-numeric:tabular-nums}
-dialog.drawer .event span{font-size:12px;color:var(--n400)}
-/* Apply confirmation: the one dialog that must read as a decision, not a form. */
-dialog.confirm>.sheet{width:392px}
-dialog.confirm .dialog-body{padding:22px 24px 6px;gap:12px}
-dialog.confirm .tag{display:none}
-dialog.confirm h2{margin:0;font-size:15px;font-weight:500}
-dialog.confirm p{margin:0;font-size:12.5px;color:var(--n500);line-height:1.65}
-dialog.confirm .detail{font-size:11.5px;color:var(--n600);background:none;border:0;border-radius:0;padding:0}
-dialog.confirm footer{padding:6px 24px 18px}
-/* "Not yet" sits away from the two answers, which stay together on the right. */
-dialog.confirm footer button.link{margin-right:auto}
-.close{font-size:14px;padding:0;border-radius:0;background:none;color:var(--n600)}
-.close:hover{color:var(--fg)}
+/* ---- settings panel ---- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;animation:fadein .12s ease-out}
+.panel-sheet{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;background:var(--drawer);
+ box-shadow:var(--shadow-md);z-index:21;display:flex;flex-direction:column;animation:risein .16s ease-out}
+.panel-sheet>header{display:flex;align-items:baseline;gap:12px;padding:24px 28px 0;flex-shrink:0}
+.panel-sheet h2{margin:0;font-size:15px;font-weight:500}
+.panel-sheet>header .close{margin-left:auto}
+.panel-body{flex:1;overflow-y:auto;padding:22px 28px 40px;display:grid;gap:30px;align-content:start}
+.panel-body section{display:grid;gap:12px;grid-auto-rows:min-content}
+.panel-body .caption{border-bottom:1px solid var(--rule);padding-bottom:8px}
+.setting{display:grid;gap:4px}
+.setting small{font-size:11.5px;color:var(--n600);line-height:1.55}
+.setting .row{display:flex;gap:10px;align-items:center}
+.setting .row input[type=text]{flex:1;min-width:0}
+.danger-zone{border:1px solid rgba(217,139,130,.28);border-radius:var(--radius-md);padding:14px;
+ display:grid;gap:8px}
+.danger-zone strong{font-size:12.5px;font-weight:400;color:var(--n200)}
+.danger-zone small{font-size:11.5px;color:var(--n600);line-height:1.55}
+.danger-zone button{justify-self:start}
 
-/* ---- splash ------------------------------------------------------------------------------- */
-/* Startup is a line of text with a hairline that sweeps, centred in the window it will become. */
-main.splash{grid-template-rows:1fr;place-items:center;align-content:center;justify-items:center;
- padding:0 32px}
-main.splash .card{max-width:460px;text-align:center;justify-items:center;gap:14px;padding:0;border:0;
- background:none;animation:fadein .3s ease-out}
-/* The splash has no titlebar row of its own, so its frame floats above it. */
-.splash-chrome{position:fixed;top:0;left:0;right:0;height:46px;display:flex;justify-content:flex-end;z-index:5;
- -webkit-app-region:drag}
-main.splash h1{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
-main.splash p{margin:0;font-size:13px;color:var(--n500)}
-main.splash .error{color:var(--n200)}
-.spinner{width:220px;height:1px;border:0;border-radius:0;background:rgba(244,244,244,.1);
- overflow:hidden;margin-top:6px;animation:none;position:relative}
-.spinner::after{content:"";position:absolute;inset:0;width:30%;background:var(--accent);
- animation:sweep 1.3s ease-in-out infinite}
-@media(prefers-reduced-motion:reduce){.spinner::after{animation-duration:4s}}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-
-/* ---- narrow windows ----------------------------------------------------------------------- */
-@media(max-width:1100px){
- .sources-layout{grid-template-columns:1fr}
- .runlog{display:none}
- .jobs-head,details.job>summary{grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) 92px minmax(110px,auto)}
- .jobs-head span:nth-child(3),details.job>summary>.job-meta:nth-of-type(3){display:none}
- .skeletons div{grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) 92px}
- .skeletons span:nth-child(4){display:none}
- .field-grid{grid-template-columns:1fr}
- .board{grid-template-columns:repeat(8,minmax(180px,1fr));gap:24px}
-}
-/* The scrape filter governs what is stored, so it sits above the source list under its own label
-   rather than blending into the row of display filters on the Jobs page. */
-/* It sits between the page header and the scrolling table, both of which are inset by 32px. With
-   no inset of its own it started hard against the window edge, and its 300px input plus the note
-   beside it then pushed the label off-screen entirely. */
-.scrape-filter{border:0;border-radius:0;background:none;padding:0 32px;margin:0 0 26px;
- max-width:1240px;display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;min-width:0}
-.scrape-filter>label{min-width:0}
-.scrape-filter input{width:300px;max-width:100%}
-/* The note explains the box, so it belongs under it rather than competing for the same line. */
-.scrape-filter .hint{flex:1 0 100%;margin:0;order:1}
-.scrape-filter output.status{margin:0}
-/* Chosen countries sit under the filter row, each one its own way out. */
-.chosen-countries{display:flex;flex-wrap:wrap;gap:10px;flex-basis:100%;margin-top:-6px}
-.chosen-countries button{font-size:12.5px;color:var(--n400);border-bottom:1px solid rgba(244,244,244,.25);padding-bottom:2px}
-.chosen-countries button:hover{color:var(--fg)}
-
-/* ---- window frame ------------------------------------------------------------------------- */
-/* The system titlebar is off, so these three are the window's own. Sized and ordered the way
-   Windows does it, because muscle memory is the whole point of a titlebar. */
-.window-controls{display:flex;margin-left:auto;-webkit-app-region:no-drag}
+/* ---- window frame ---- */
+.window-controls{display:flex}
 .window-controls button{width:46px;height:46px;display:grid;place-items:center;border:0;
  border-radius:0;background:none;color:var(--n400);padding:0}
 .window-controls button:hover{background:var(--wash-hover);color:var(--fg)}
 .window-controls button.close:hover{background:#c42b1c;color:#fff}
 .window-controls svg{width:10px;height:10px;stroke:currentColor;stroke-width:1;fill:none}
+
+/* Column visibility utilities: the cell count in the markup never changes, only what shows. */
+.only-wide{display:none}
+@media(min-width:1500px){.only-wide{display:block}}
+@media(max-width:1000px){.hide-md{display:none}}
+@media(max-width:820px){.hide-sm{display:none}}
+
+/* ---- width behaviour ------------------------------------------------------------
+   Columns are declared once per breakpoint and shared by the header and every row,
+   so widening the window adds columns rather than empty space. */
+.view{--cols:minmax(240px,2.6fr) minmax(0,1.2fr) minmax(0,1.3fr) 92px minmax(120px,.8fr) 150px}
+@media(min-width:1500px){
+ .view{--cols:minmax(280px,2.6fr) minmax(0,1.1fr) minmax(0,1.2fr) 92px 120px minmax(120px,.8fr) 150px}
+ :root{--pad:40px}
+}
+@media(max-width:1180px){
+ .board{grid-template-columns:repeat(5,minmax(150px,1fr));gap:20px}
+ .board .folded{display:none}
+}
+@media(max-width:1000px){
+ .view{--cols:minmax(0,2.6fr) minmax(0,1.2fr) 88px minmax(110px,.9fr) 130px}
+ .sources-layout{grid-template-columns:1fr}
+ .runlog{position:absolute;right:0;bottom:0;left:0;height:46%;background:var(--drawer);
+  border-top:1px solid var(--rule-strong);box-shadow:var(--shadow-md);z-index:6}
+ .source-head,.source-row{grid-template-columns:minmax(0,1.7fr) 68px minmax(0,1.7fr) 28px 152px;gap:12px}
+ /* Two short lines beat one truncated sentence: the read time and its result both stay readable. */
+ .source-health{align-items:flex-start}
+ .source-health span{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.4}
+ .source-head .adapter,.source-row .source-adapter{display:none}
+}
+@media(max-width:820px){
+ :root{--pad:20px}
+ .view{--cols:minmax(0,2.4fr) minmax(0,1fr) 130px}
+ .board{grid-template-columns:repeat(3,minmax(150px,1fr))}
+}
+
+/* Live application surfaces not present in the static design canvas. */
+.titlebar .icon{margin-right:8px;-webkit-app-region:no-drag}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.status{margin:14px 0 0}
+.source-table,.panel{border:0;border-radius:0;overflow:visible;background:none}
+.panel-note{padding:0 0 10px;font-size:12px;color:var(--n500)}
+.rule hr{display:none}
+.reader .description.muted{color:var(--n500)}
+.reader .description.warning{color:var(--n300)}
+.skeletons{display:grid;gap:0}
+.skeletons div{border-top:1px solid var(--rule);padding:12px 0;display:grid;
+ grid-template-columns:minmax(240px,2.6fr) minmax(0,1.2fr) minmax(0,1.3fr) 92px;gap:20px}
+.skeletons span{height:9px;border-radius:2px;background:rgba(244,244,244,.06)}
+.skeletons span:first-child{height:11px;background:linear-gradient(90deg,rgba(244,244,244,.05),rgba(244,244,244,.11),rgba(244,244,244,.05));background-size:380px 100%;animation:sweep 1.15s linear infinite}
+.scrape-filter input{width:100%}
+.scrape-filter .status{margin-top:6px}
+.health{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:24px;margin-top:16px}
+.health>div{border-top:1px solid var(--rule);padding:12px 0;display:grid;gap:5px}
+.health strong{font-size:12.5px;font-weight:400;color:var(--n500)}
+.health .dot{display:none}
+.health .detail{font-size:12px;color:var(--n300);white-space:pre-wrap}
+pre{margin:18px 0 0;padding:0;background:none;border:0;overflow:auto;font:11.5px/1.7 var(--mono);color:var(--n600);white-space:pre-wrap}
+td pre{margin:0;font-size:11px}
+summary{cursor:pointer}
+td details>summary,.card details>summary{font-size:11.5px;color:var(--n600);list-style:none}
+td details>summary::-webkit-details-marker,.card details>summary::-webkit-details-marker{display:none}
+td details>summary::before,.card details>summary::before{content:"\25B8  "}
+td details[open]>summary::before,.card details[open]>summary::before{content:"\25BE  "}
+
+dialog[open]{position:fixed;inset:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;
+ border:0;background:rgba(0,0,0,.58);display:grid;place-items:center;z-index:30;color:var(--fg)}
+dialog>form,dialog>.sheet{width:520px;max-width:calc(100% - 48px);max-height:82vh;background:var(--sheet);
+ border:1px solid var(--n800);border-radius:var(--radius-md);box-shadow:var(--shadow-md);display:flex;flex-direction:column;overflow:hidden}
+dialog header{padding:24px 26px 0;align-items:baseline;flex-shrink:0}
+dialog header h2,dialog header h3{margin:0;font-size:15px;font-weight:500}
+dialog header p{margin:0}
+.dialog-body{flex:1;overflow-y:auto;padding:22px 26px;display:grid;gap:22px;align-content:start;grid-auto-rows:min-content}
+.dialog-body>button{justify-self:start}
+dialog footer{display:flex;gap:20px;align-items:center;justify-content:flex-end;padding:0 26px 20px;flex-shrink:0}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.field-grid .wide{grid-column:span 2}
+.advanced{display:grid;gap:20px}
+.advanced hr{display:none}
+.advanced .inline{justify-self:start}
+.close{font-size:14px;padding:0;background:none;color:var(--n600)}
+.close:hover{color:var(--fg)}
+dialog.drawer[open]{place-items:stretch;justify-items:end;background:rgba(0,0,0,.5)}
+dialog.drawer>.sheet{width:440px;max-width:100%;height:100%;max-height:none;border-radius:0;border:0;background:var(--drawer)}
+dialog.drawer header{padding:26px 30px 0}
+dialog.drawer .dialog-body{padding:26px 30px 40px;gap:30px}
+dialog.drawer section,dialog.drawer form{display:grid;gap:12px;grid-auto-rows:min-content}
+dialog.drawer form>button,dialog.drawer section>button{justify-self:start}
+dialog.drawer hr{display:none}
+dialog.drawer .note{margin:0;padding:10px 0 0;border-top:1px solid var(--rule);display:grid;gap:3px}
+dialog.drawer .note p{margin:0;font-size:12.5px;color:var(--n300);line-height:1.6}
+dialog.drawer .row{display:flex;align-items:baseline;gap:14px;border-top:1px solid var(--rule);padding:10px 0}
+dialog.drawer .row>div{display:grid;gap:1px;flex:1;min-width:0}
+dialog.drawer .event{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;padding:8px 0}
+dialog.drawer .event .dot{display:none}
+dialog.confirm>.sheet{width:392px}
+dialog.confirm .dialog-body{padding:22px 24px 6px;gap:12px}
+dialog.confirm .tag{display:none}
+dialog.confirm h2{margin:0;font-size:15px;font-weight:500}
+dialog.confirm p{margin:0;font-size:12.5px;color:var(--n500);line-height:1.65}
+dialog.confirm .detail{font-size:11.5px;color:var(--n600)}
+dialog.confirm footer{padding:6px 24px 18px}
+dialog.confirm footer button.link{margin-right:auto}
+
+main.splash{grid-template-rows:1fr;place-items:center;align-content:center;justify-items:center;position:relative}
+main.splash .card{max-width:460px;text-align:center;justify-items:center;gap:14px;padding:0;display:grid}
+.splash-chrome{position:fixed;top:0;left:0;right:0;height:46px;display:flex;justify-content:flex-end;z-index:5;-webkit-app-region:drag}
+main.splash h1{font-size:15px;font-weight:600;margin:0}
+main.splash p{margin:0;font-size:13px;color:var(--n500)}
+.spinner{width:220px;height:1px;background:rgba(244,244,244,.1);position:relative;overflow:hidden}
+.spinner::after{content:"";position:absolute;inset:0;width:30%;background:var(--accent);animation:sweep 1.2s ease-in-out infinite}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+@media(max-width:820px){
+ .field-grid{grid-template-columns:1fr}.field-grid .wide{grid-column:auto}
+ .nav-right .count{display:none}
+ .reader .top{align-items:flex-start}.reader .nav-pair{flex-wrap:wrap;justify-content:flex-end}
+}
