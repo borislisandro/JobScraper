@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "name": "Applied Materials",
+  "level": "full",
+  "ok": false,
+  "startedAt": "2026-09-02T14:48:42.906Z",
+  "finishedAt": "2026-09-02T14:50:45.052Z",
+  "source": {
+    "id": "applied-materials",
+    "name": "Applied Materials",
+    "baseUrl": "https://careers.appliedmaterials.com/careers",
+    "adapterId": "eightfold",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "domain": "appliedmaterials.com",
+      "eightfoldApi": "pcsx",
+      "sortBy": "",
+      "maxPages": 500,
+      "expectedHost": "careers.appliedmaterials.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "7dc2c124fa91e513d67494cbb1a9cecab6d6c41cc9b4692eec0491d6763bf183",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "applied-materials",
+      "payload": {
+        "command": "scrape_source",
+        "complete": false,
+        "discovered": 1943,
+        "persisted": 1941,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 196,
+        "boardTotal": 1943,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [
+          "Eightfold repeated vacancies or changed its total while paging; this read is unfinished and cannot close stored jobs."
+        ],
+        "timingMs": 122054,
+        "pages": 195,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 122054,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 208,
+              "pacing": 1030,
+              "backoff": 0,
+              "response": 120272,
+              "body": 374,
+              "browser": 0,
+              "adapterOther": 139,
+              "emit": 29
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 620,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 195,
+                "pacingMs": 1030,
+                "backoffMs": 0,
+                "responseMs": 119652,
+                "bodyMs": 370
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 1941,
+    "uniqueIdentities": 1941,
+    "uniqueHashes": 1941,
+    "samples": [
+      {
+        "externalId": "790312945109",
+        "title": "Shift Supervisor (M2) - Boise, ID",
+        "company": "Applied Materials",
+        "location": "Boise,ID, Boise, ID, US",
+        "postedAt": "2026-08-31",
+        "canonicalUrl": "https://careers.appliedmaterials.com/careers/job/790312945109",
+        "applyUrl": "https://careers.appliedmaterials.com/careers/job/790312945109",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "790317602392",
+        "title": "ETCH Customer Engineer II",
+        "company": "Applied Materials",
+        "location": "Hiroshima,JPN, Hiroshima, Hiroshima, JP",
+        "postedAt": "2026-07-31",
+        "canonicalUrl": "https://careers.appliedmaterials.com/careers/job/790317602392",
+        "applyUrl": "https://careers.appliedmaterials.com/careers/job/790317602392",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "790294244312",
+        "title": "Global Supply Chain New College Graduate",
+        "company": "Applied Materials",
+        "location": "Singapore,SGP, SG",
+        "postedAt": "2025-04-12",
+        "canonicalUrl": "https://careers.appliedmaterials.com/careers/job/790294244312",
+        "applyUrl": "https://careers.appliedmaterials.com/careers/job/790294244312",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": null,
+  "warm": null,
+  "errors": [
+    "Full traversal is unfinished",
+    "Cold read did not emit every discovered row; inspect duplicates or filtered records"
+  ]
+}

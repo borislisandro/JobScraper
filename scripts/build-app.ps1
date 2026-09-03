@@ -96,7 +96,7 @@ function Get-Sha256 {
 function Assert-PortableLayout {
   param([string]$PortableRoot)
 
-  $expectedTopLevel = @('JobScraper.exe', 'README.txt', 'sidecar')
+  $expectedTopLevel = @('JobScraper.exe', 'README.txt', 'repair-startup.ps1', 'sidecar')
   $actualTopLevel = @(Get-ChildItem -LiteralPath $PortableRoot | ForEach-Object { $_.Name } | Sort-Object)
   if (($actualTopLevel -join '|') -ne (($expectedTopLevel | Sort-Object) -join '|')) {
     throw "Portable root has unexpected contents: $($actualTopLevel -join ', ')"
@@ -105,6 +105,7 @@ function Assert-PortableLayout {
   foreach ($required in @(
     'JobScraper.exe',
     'README.txt',
+    'repair-startup.ps1',
     'sidecar\node.exe',
     'sidecar\worker.mjs',
     'sidecar\adapters.mjs',
@@ -213,6 +214,7 @@ try {
       Copy-Item -LiteralPath $releaseExe -Destination (Join-Path $portableRoot 'JobScraper.exe')
       Copy-Item -LiteralPath $sidecarSource -Destination (Join-Path $portableRoot 'sidecar') -Recurse
       Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'PORTABLE-README.txt') -Destination (Join-Path $portableRoot 'README.txt')
+      Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'repair-startup.ps1') -Destination (Join-Path $portableRoot 'repair-startup.ps1')
       Assert-PortableLayout -PortableRoot $portableRoot
       Invoke-Native -FilePath $script:resolvedNode -CommandArguments @((Join-Path $PSScriptRoot 'smoke-installed-sidecar.mjs'), $portableRoot)
 

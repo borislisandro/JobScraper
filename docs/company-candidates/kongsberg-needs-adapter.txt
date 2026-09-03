@@ -1,0 +1,46 @@
+KONGSBERG CAREERS - NEEDS ADAPTER REPORT
+
+Employer: Kongsberg
+Official Careers Page: https://www.kongsberg.com/careers/
+Board: https://www.kongsberg.com/careers/vacancies/ (in-house)
+Platform: Custom in-house career platform
+
+ENDPOINT DETAILS:
+- Careers overview: https://www.kongsberg.com/careers/
+- Vacancies listing: https://www.kongsberg.com/careers/vacancies/
+- Response Format: HTML with server-side rendering
+- Content-Type: text/html
+
+OBSERVABLE STRUCTURE:
+Kongsberg operates its own in-house careers platform hosted on their main website. Vacancies are published under the /careers/ section with individual job pages accessible via links on the listing page. The platform appears to be a custom implementation with no external recruitment platform integration.
+
+PAGINATION:
+The vacancies listing page uses server-side pagination with likely HTML page controls. Total vacancy count may be embedded in the page or discoverable through traversal.
+
+DESCRIPTION LOCATION:
+Full job descriptions are available on individual job detail pages. Each vacancy has a dedicated URL under /careers/ with the job slug.
+
+RESPONSE STRUCTURE:
+The vacancies listing page contains HTML with job cards or table rows, each including:
+- Job title
+- Department/location
+- Posted date (if available)
+- Link to detail page
+
+ADAPTER REQUIREMENTS:
+A Kongsberg adapter would need to:
+1. Parse the vacancies listing page HTML to extract job titles, locations, and URLs
+2. Identify and traverse all pagination pages
+3. Determine the total number of open positions from the page
+4. For each vacancy, follow the detail page link
+5. Parse the detail page HTML to extract:
+   - Full job title, description, and requirements
+   - Location(s)
+   - Department/team
+   - Job type/contract type
+   - Qualifications needed
+   - Application instructions
+6. Extract unique identifiers for tracking each vacancy
+7. Handle any dynamic content loading (JavaScript/AJAX)
+
+This is a custom HTML scraping implementation against Kongsberg's in-house career platform with no external API or recruitment service.

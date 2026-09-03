@@ -1,0 +1,32 @@
+{
+  "id": "etched",
+  "name": "Etched",
+  "baseUrl": "https://jobs.ashbyhq.com/etched",
+  "adapterId": "ashby",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "token": "etched",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+  },
+  "onboardingEvidence": {
+    "observedAt": "2026-09-02",
+    "officialCareersUrl": "https://www.etched.com/join",
+    "provenanceEvidence": "https://www.etched.com/careers redirects to /join. That official page contains 108 distinct jobs.ashbyhq.com/etched posting URLs, exactly matching all IDs in the hosted board and posting API. Twelve featured links are repeated in the markup, making 120 raw links but only 108 unique jobs.",
+    "boardUrl": "https://jobs.ashbyhq.com/etched",
+    "publishedTotal": 108,
+    "countEvidence": "108 unique official careers links = 108 entries in window.__appData.jobBoard.jobPostings = 108 public API jobs. Both set differences are empty. No separate scalar total was exposed; the independently published arrays and links were reconciled.",
+    "listingEndpoint": "https://api.ashbyhq.com/posting-api/job-board/etched",
+    "pagination": "GET with Accept: application/json; top-level keys jobs and apiVersion. Full board in one response, all 108 isListed values true. Descriptions are inline in descriptionPlain/descriptionHtml.",
+    "identityEvidence": "Design Verification Engineer - Internal IP (7aeafe31-c2c6-43e0-bb31-01868dcfad39): San Jose; RTL Design Engineer (c3ca158a-015d-413d-bd14-5470e546ed15): San Jose; Firmware Engineer (Taiwan) (3eb65028-9648-48f5-bfc9-94b3128863f2): Taipei. Another Internal IP verification requisition is in Austin, with a different ID.",
+    "country": "US",
+    "countrySource": "https://www.etched.com/privacy-notice",
+    "countryEvidence": "The official footer labels Etched HQ at 3155 Olsen Dr, San Jose, CA 95117; the controller section confirms Etched, Inc. is incorporated in the United States at that address.",
+    "tags": ["semiconductor", "ai", "asic"],
+    "tagsSource": "https://www.etched.com/join",
+    "robotsEvidence": "https://jobs.ashbyhq.com/robots.txt returns 200 and disallows /meeting/, /b/ and /api/. https://api.ashbyhq.com/robots.txt returns 401 Unauthorized, while the public posting API returns 200. Override remains enabled.",
+    "notes": "Use the current officially linked Ashby board, not the older Greenhouse etchedai board still indexed by search engines. etched.io is an unrelated marketing business."
+  }
+}

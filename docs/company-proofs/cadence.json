@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "name": "Cadence",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T14:45:37.813Z",
+  "finishedAt": "2026-09-02T14:46:00.626Z",
+  "source": {
+    "id": "cadence",
+    "name": "Cadence",
+    "baseUrl": "https://cadence.wd1.myworkdayjobs.com/",
+    "adapterId": "workday",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "tenant": "cadence",
+      "site": "External_Careers",
+      "maxPages": 500,
+      "expectedHost": "cadence.wd1.myworkdayjobs.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "7dc2c124fa91e513d67494cbb1a9cecab6d6c41cc9b4692eec0491d6763bf183",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cadence",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 562,
+        "persisted": 562,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 30,
+        "boardTotal": 562,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 19326,
+        "pages": 29,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 19326,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 71,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 18700,
+              "body": 506,
+              "browser": 0,
+              "adapterOther": 39,
+              "emit": 9
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 451,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 29,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 18249,
+                "bodyMs": 502
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 562,
+    "uniqueIdentities": 562,
+    "uniqueHashes": 562,
+    "samples": [
+      {
+        "externalId": "R55335-1",
+        "title": "Design Architect",
+        "company": "Cadence",
+        "location": "BANGALORE",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BANGALORE/Design-Architect_R55335-1",
+        "applyUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BANGALORE/Design-Architect_R55335-1",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "R52773",
+        "title": "Software Engineer II , Synthesis",
+        "company": "Cadence",
+        "location": "SAN JOSE",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/SAN-JOSE/Sr-Principal-Software-Engineer_R52773",
+        "applyUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/SAN-JOSE/Sr-Principal-Software-Engineer_R52773",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "R24363-1",
+        "title": "Product Validation Engineer II",
+        "company": "Cadence",
+        "location": "BEIJING",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BEIJING/Product-Validation-Engineer-II_R24363-1",
+        "applyUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BEIJING/Product-Validation-Engineer-II_R24363-1",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cadence",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 1884,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1884,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 14,
+              "pacing": 147,
+              "backoff": 0,
+              "response": 1712,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 450,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 147,
+                "backoffMs": 0,
+                "responseMs": 1263,
+                "bodyMs": 3
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "R55335-1",
+        "title": "Design Architect",
+        "company": "Cadence",
+        "location": "BANGALORE",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BANGALORE/Design-Architect_R55335-1",
+        "applyUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BANGALORE/Design-Architect_R55335-1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2689
+      },
+      {
+        "externalId": "R52773",
+        "title": "Software Engineer II , Synthesis",
+        "company": "Cadence",
+        "location": "SAN JOSE",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/SAN-JOSE/Sr-Principal-Software-Engineer_R52773",
+        "applyUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/SAN-JOSE/Sr-Principal-Software-Engineer_R52773",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2952
+      },
+      {
+        "externalId": "R24363-1",
+        "title": "Product Validation Engineer II",
+        "company": "Cadence",
+        "location": "BEIJING",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BEIJING/Product-Validation-Engineer-II_R24363-1",
+        "applyUrl": "https://cadence.wd1.myworkdayjobs.com/External_Careers/job/BEIJING/Product-Validation-Engineer-II_R24363-1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1077
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cadence",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 562,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 2,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1353,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1353,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1310,
+              "body": 28,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 512,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 797,
+                "bodyMs": 24
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

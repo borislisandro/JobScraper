@@ -1,0 +1,13 @@
+{
+  "id": "renesas",
+  "name": "Renesas",
+  "baseUrl": "https://jobs.renesas.com/jobs",
+  "adapterId": "renesas",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "jobs.renesas.com"
+  }
+}

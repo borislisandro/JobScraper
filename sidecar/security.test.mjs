@@ -79,8 +79,15 @@ test("request pacing follows what is being fetched, not one blanket delay",async
   assert.ok(paceMs(adapter,highest)<=500,`${adapter} should stay well under the old floor`);
  }
  for(const adapter of ["static-css","arm","cisco","google"]){
-  assert.equal(paceMs(adapter,lowest),1500,`${adapter} keeps the wider spacing an HTML page deserves`);
+  assert.equal(paceMs(adapter,lowest),1500,`${adapter} keeps the wider spacing an HTML listing deserves`);
+  // A detail page is one static document, not a search: Arm needs one per job for its posting date,
+  // and listing pace made that read seven minutes long.
+  assert.equal(paceMs(adapter,lowest,"detail"),500,`${adapter} detail pages are paced for what they are`);
+  assert.ok(paceMs(adapter,highest,"detail")<=1000);
+  assert.equal(paceMs(adapter,lowest,"listing"),1500,`${adapter} listing pace is untouched`);
  }
+ // A JSON endpoint is paced by its kind whatever it is fetching.
+ assert.equal(paceMs("workday",lowest,"detail"),250);
 });
 
 test("request pacing starts immediately and couples only requests to the same origin",()=>{

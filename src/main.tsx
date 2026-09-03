@@ -6,13 +6,14 @@ import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-
 import { ask } from "@tauri-apps/plugin-dialog";
 import { aggregateRows, formatDuration, latestSummary, phaseRows, recentFailures, requestKindRows } from "./performance-ui";
 import { COUNTRIES } from "./countries";
+import { describePreset, parsePresets, presetFrom, PRESETS_KEY, withoutPreset, withPreset, type FilterPreset } from "./presets";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { jobCountries } from "./api";
+import { captureJob, jobCountries, listCompanyCatalog, newSince, REVIEWED_KEY, saveCapturedJob, setJobDismissed, type CapturedJob, type CatalogCompany } from "./api";
 import { api, appLogs, backgroundSyncStatus, DEFAULT_POSTED_WINDOW, jobDescription, launchAtLoginStatus, POSTED_WINDOWS, purgeAllJobs, setBackgroundSync, setLaunchAtLogin, startupStatus, type StartupStatus, cancelScrape, cancelScrapeAll, captureSession, deleteBrowserSession, getSetting, setSetting, hasBrowserSession, scrapeAll, scrapePerformance, sourceConfig, startAutomaticSync, validateAttachmentSize, type Application, type Job, type JobDescription, type JobFilter, type Source, type WorkerEvent } from "./api";
 import { listenForApplyConfirmation } from "./apply-prompts";
 import { listenForScrapeEvents } from "./scrape-events";
-import { describeFailure, describeLogEvent, describeOutcome, describeUnsupported, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
-import { applicationStages, boardMoveError, isApplied, stageLabel } from "./application-ui";
+import { catalogSource, describeFailure, describeLogEvent, describeOutcome, describeUnsupported, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
+import { DOCUMENT_TYPES, documentTypeLabel, applicationStages, boardMoveError, isApplied, stageLabel } from "./application-ui";
 import "./styles.css";
 
 const queryClient=new QueryClient({defaultOptions:{queries:{refetchOnWindowFocus:false}}}); const pages=["Jobs","Sources","Applications","Diagnostics"] as const; type Page=typeof pages[number];
@@ -75,7 +76,7 @@ function App(){
  // was every trace of it in the window: the Updating…/Cancel state of Update Jobs, the running
  // state of Update this source, the test preview, and the finished message. Leaving the page
  // mounted keeps all of it, so leaving and coming back shows the run exactly where it got to.
- const views:Record<Page,React.ReactNode>={Jobs:<Jobs onCount={setJobCount}/>,Sources:<Sources/>,Applications:<Applications/>,Diagnostics:<Diagnostics/>};
+ const views:Record<Page,React.ReactNode>={Jobs:<Jobs onCount={setJobCount}/>,Sources:<Sources/>,Applications:<Applications onConfirmAttempt={setAttempt}/>,Diagnostics:<Diagnostics/>};
  const open=(next:Page)=>{setPage(next);setVisited(current=>current.includes(next)?current:[...current,next])};
  const lastUpdate=allSources.map(source=>source.lastSuccessAt?new Date(source.lastSuccessAt).getTime():0).reduce((latest,value)=>Math.max(latest,value),0);
  const updateNow=()=>{const runId=crypto.randomUUID();setUpdating(true);setUpdateStatus("Updating sources");scrapeAll(runId,[],false)
@@ -131,17 +132,29 @@ function SourcePicker({sources,shown,onShow}:{sources:Source[];shown:Set<string>
  </fieldset>}
 function useJobActions(job:Job,onStatus:(message:string)=>void){
  const qc=useQueryClient();const [busy,setBusy]=useState(false);
- const refresh=()=>{qc.removeQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["apps"]})};
+ // Invalidate, not remove: removing the cache blanked the list back to the loading skeleton for
+ // every page already scrolled through, so acting on one row threw the reader back to the top of
+ // the list. Invalidating keeps the rows on screen while it refetches quietly underneath them —
+ // and still lands on a correct, gap-free result: an infinite query's invalidation refetches every
+ // loaded page in order, recomputing each page's offset from the one before it, so a dismissal that
+ // shrinks the filtered set does not duplicate or skip a row the way stale fixed offsets would.
+ const refresh=()=>{qc.invalidateQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["apps"]})};
  const act=(open:boolean)=>{setBusy(true);
   // Save and Apply are the same save; Apply just also opens the posting. Saving twice is
   // harmless because the backend returns the existing application for a job.
   api.createApp(job.id).then(application=>open?api.openApply(application.id):undefined)
    .then(()=>{onStatus(open?`Opened ${job.title} in your browser and saved it to Applications.`:`Saved ${job.title} to Applications.`);refresh()})
    .catch(error=>onStatus(String(error))).finally(()=>setBusy(false))};
- return{busy,act};}
+ // "Not for me". Reversible, and the row is only hidden — the listing stays scraped, searchable
+ // and counted, which is what makes dismissing safe to do quickly.
+ const dismiss=(dismissed:boolean)=>{setBusy(true);
+  setJobDismissed(job.id,dismissed)
+   .then(()=>{onStatus(dismissed?`Dismissed ${job.title}.`:`${job.title} is back in the list.`);refresh()})
+   .catch(error=>onStatus(String(error))).finally(()=>setBusy(false))};
+ return{busy,act,dismiss};}
 const jobSalary=(job:Job)=>job.salaryMin||job.salaryMax?`${job.salaryMin??"?"}–${job.salaryMax??"?"} ${job.salaryCurrency??""}`.trim():"not listed";
 export const JobCard=React.memo(function JobCard({job,sourceName,onStatus,onOpen}:{job:Job;sourceName?:string;onStatus:(message:string)=>void;onOpen?:(job:Job)=>void}){
- const {busy,act}=useJobActions(job,onStatus);const stage=job.applicationStage;
+ const {busy,act,dismiss}=useJobActions(job,onStatus);const stage=job.applicationStage;
  const gone=job.availability==="closed"?"Closed":job.availability==="possibly_closed"?"May be gone":null;
  const open=()=>onOpen?.(job);
  return <div className="job" role="button" tabIndex={0} onClick={open} onKeyDown={event=>{if(event.key==="Enter"||event.key===" ")open()}}>
@@ -156,11 +169,18 @@ export const JobCard=React.memo(function JobCard({job,sourceName,onStatus,onOpen
      :"The last complete read of this board did not list this job."}>{gone}</span>}
     {stage&&<span className={isApplied(stage)?"pill applied":"pill good"}>{isApplied(stage)?`Applied · ${stageLabel(stage)}`:"Saved"}</span>}
    </span>
-   <span className="row-actions"><button className="small" disabled={busy} onClick={event=>{event.stopPropagation();if(stage)open();else act(false)}}>{stage?"Open":"Save"}</button>
-    {!isApplied(stage)&&<button className="small primary" disabled={busy||!job.applyUrl} onClick={event=>{event.stopPropagation();act(true)}}>Apply</button>}</span>
+   <span className="row-actions">{job.dismissedAt
+     ? <button className="small" disabled={busy} onClick={event=>{event.stopPropagation();dismiss(false)}}>Undismiss</button>
+     : <>
+      {/* Judging a listing has to be as cheap as reading it, or a list this long never gets shorter. */}
+      {!stage&&<button className="small quiet" disabled={busy} title="Hide this from the list. Nothing is deleted, and you can bring it back."
+       onClick={event=>{event.stopPropagation();dismiss(true)}}>Not for me</button>}
+      <button className="small" disabled={busy} onClick={event=>{event.stopPropagation();if(stage)open();else act(false)}}>{stage?"Open":"Save"}</button>
+      {!isApplied(stage)&&<button className="small primary" disabled={busy||!job.applyUrl} onClick={event=>{event.stopPropagation();act(true)}}>Apply</button>}
+     </>}</span>
   </div>});
 function JobReader({jobs,index,sourceName,onMove,onClose,onStatus}:{jobs:Job[];index:number;sourceName:(job:Job)=>string|undefined;onMove:(index:number)=>void;onClose:()=>void;onStatus:(message:string)=>void}){
- const job=jobs[index];const [description,setDescription]=useState<JobDescription>();const {busy,act}=useJobActions(job,onStatus);
+ const job=jobs[index];const [description,setDescription]=useState<JobDescription>();const {busy,act,dismiss}=useJobActions(job,onStatus);
  const fetchDescription=()=>{setDescription(undefined);jobDescription(job.id).then(setDescription).catch(error=>setDescription({text:"",status:"failed",error:String(error)}))};
  useEffect(()=>{let active=true;setDescription(undefined);jobDescription(job.id).then(value=>active&&setDescription(value)).catch(error=>active&&setDescription({text:"",status:"failed",error:String(error)}));return()=>{active=false}},[job.id]);
  return <section className="reader" aria-label="Job details"><header><div className="top"><h2>{job.title}</h2><span className="nav-pair"><button className="small" disabled={!index} onClick={()=>onMove(index-1)}>↑ Previous</button><button className="small" disabled={index>=jobs.length-1} onClick={()=>onMove(index+1)}>↓ Next</button><button className="small" onClick={onClose}>Close</button></span></div>
@@ -168,12 +188,53 @@ function JobReader({jobs,index,sourceName,onMove,onClose,onStatus}:{jobs:Job[];i
   <div className="body"><div className="measure"><div className="facts"><div><span>Work mode</span><strong>{job.workMode||"not listed"}</strong></div><div><span>Seniority</span><strong>{job.seniority||"not listed"}</strong></div><div><span>Salary</span><strong>{jobSalary(job)}</strong></div><div><span>Source</span><strong>{sourceName(job)||job.company}</strong></div><div><span>Status</span><strong>{job.applicationStage?stageLabel(job.applicationStage):job.availability.replace("_"," ")}</strong></div></div>
    {description===undefined?<p className="description muted">Loading the description…</p>:description.status==="pending"?<p className="description muted">This listing has no downloadable description.</p>:description.status==="failed"?<p className="description warning">Description download failed{description.error?`: ${description.error}`:"."} <button className="link" onClick={fetchDescription}>Retry</button></p>:<p className="description">{description.text||"This listing published no description."}</p>}</div></div>
   <footer><button className="primary" disabled={busy||!job.applyUrl} onClick={()=>act(true)}>Apply — opens the posting</button>{!job.applicationStage&&<button disabled={busy} onClick={()=>act(false)}>Save for later</button>}{job.canonicalUrl&&<a className="link" href={job.canonicalUrl} target="_blank" rel="noreferrer">Open listing in browser</a>}<span className="spacer"/><span className="count">{index+1} of {jobs.length}</span></footer></section>}
+// A link someone sent you is not a board. This reads that one page, shows what it found, and lets
+// the person who pasted it fix what the page did not say — which is most of it when the site
+// publishes no JobPosting markup at all.
+function CaptureJob({onClose,onSaved}:{onClose:()=>void;onSaved:(message:string)=>void}){
+ const [url,setUrl]=useState("");const [draft,setDraft]=useState<CapturedJob>();
+ const [busy,setBusy]=useState(false);const [error,setError]=useState("");
+ const read=()=>{if(!/^https?:/i.test(url.trim()))return setError("Paste the full web address of the vacancy.");
+  setBusy(true);setError("");
+  captureJob(url.trim())
+   .then(events=>{const final=events.at(-1);
+    if(!final||final.event!=="completed")throw Error(describeFailure(final?.payload?.code as string|undefined));
+    setDraft(final.payload as unknown as CapturedJob)})
+   .catch(problem=>setError(String(problem))).finally(()=>setBusy(false))};
+ const save=()=>{if(!draft)return;setBusy(true);
+  saveCapturedJob(draft).then(()=>{onSaved(`Saved "${draft.title}".`);onClose()})
+   .catch(problem=>setError(String(problem))).finally(()=>setBusy(false))};
+ const field=(label:string,key:keyof CapturedJob,placeholder="")=>
+  <label key={key}><span>{label}</span>
+   <input value={String(draft?.[key]??"")} placeholder={placeholder}
+    onChange={event=>setDraft(current=>current&&{...current,[key]:event.target.value})}/></label>;
+ return <dialog open className="confirm" aria-label="Add a job from a link">
+  <div className="sheet"><div className="dialog-body">
+   <h2>Add a job from a link</h2>
+   {error&&<output className="status">{error}</output>}
+   <label><span>Vacancy address</span>
+    <input autoFocus value={url} placeholder="https://company.com/careers/job/1234"
+     onChange={event=>setUrl(event.target.value)}
+     onKeyDown={event=>{if(event.key==="Enter"){event.preventDefault();read()}}}/></label>
+   {!draft
+    ? <p className="hint">The page is read once, here. Nothing is stored until you have seen what it found.</p>
+    : <>
+      {!draft.structured&&<p className="hint warning">This page publishes no job markup, so only the title could be read with any confidence. Check the fields below before saving.</p>}
+      <div className="field-grid">{field("Title","title")}{field("Company","company")}{field("Location","location","not listed")}{field("Posted","postedAt","YYYY-MM-DD")}</div>
+      {draft.descriptionText&&<p className="hint">{draft.descriptionText.slice(0,240)}{draft.descriptionText.length>240?"…":""}</p>}
+     </>}
+  </div>
+  <footer><button className="link" onClick={onClose}>Cancel</button>
+   {draft
+    ? <button className="primary" disabled={busy||!draft.title.trim()} onClick={save}>{busy?"Saving…":"Save job"}</button>
+    : <button className="primary" disabled={busy||!url.trim()} onClick={read}>{busy?"Reading…":"Read the page"}</button>}</footer></div></dialog>}
 function Jobs({onCount}:{onCount:(count:number)=>void}){
  const qc=useQueryClient();
  const [title,setTitle]=useState(""),[keyword,setKeyword]=useState(""),[sort,setSort]=useState<JobFilter["sort"]>("recent"),[savedOnly,setSavedOnly]=useState(false),[includeClosed,setIncludeClosed]=useState(false);
  // Countries are matched on the codes worked out when each job was stored, so this sends codes and
  // not city names. A listing whose country could not be worked out at all is left out while a
  // country filter is on — it is the one that would otherwise show up under every country.
+ const [includeDismissed,setIncludeDismissed]=useState(false);const [capturing,setCapturing]=useState(false);
  const [countries,setCountries]=useState<string[]>([]),[includeUnknownLocations,setIncludeUnknownLocations]=useState(false);
  // View state, so it resets to a year on every launch rather than remembering a narrow window
  // you set once and then wondered about.
@@ -197,7 +258,16 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
  // The free-text box it replaced added a country on every keystroke, so "in" became India mid-word
  // and typing towards "Nigeria" stopped at "Niger".
  const addCountry=(code:string)=>{if(code)setCountries(current=>current.includes(code)?current:[...current,code])};
- const filter:JobFilter={title:useDebounced(title),keyword:useDebounced(keyword),sort,savedOnly,includeClosed,postedWithinDays:postedWithin,sourceIds:shownIds,countries,includeUnknownLocations};
+ // "New" means new to the reader, not new to the board: the moment they last said they were done
+ // is kept in settings, so closing the app does not turn everything unread again.
+ const {data:reviewedAt}=useQuery({queryKey:["reviewed-at"],queryFn:()=>getSetting(REVIEWED_KEY)});
+ const [onlyNew,setOnlyNew]=useState(false);
+ const {data:newCount=0}=useQuery({queryKey:["new-since",reviewedAt],queryFn:()=>newSince(reviewedAt??null),enabled:!!reviewedAt});
+ const markReviewed=()=>setSetting(REVIEWED_KEY,new Date().toISOString())
+  .then(()=>{setOnlyNew(false);qc.invalidateQueries({queryKey:["reviewed-at"]});qc.invalidateQueries({queryKey:["new-since"]});
+   setStatus("Marked as reviewed. What arrives from now on is what counts as new.")})
+  .catch(error=>setStatus(String(error)));
+ const filter:JobFilter={title:useDebounced(title),keyword:useDebounced(keyword),sort,savedOnly,includeClosed,postedWithinDays:postedWithin,sourceIds:shownIds,countries,includeUnknownLocations,includeDismissed,firstSeenAfter:onlyNew?reviewedAt??null:null};
  const {data,isLoading,fetchNextPage,hasNextPage,isFetchingNextPage}=useInfiniteQuery({queryKey:["jobs",filter],queryFn:({pageParam})=>api.jobs(filter,pageParam),initialPageParam:0,getNextPageParam:last=>last.hasMore?last.offset+last.items.length:undefined,refetchOnWindowFocus:true});
  const jobs=data?.pages.flatMap(page=>page.items)??[],total=data?.pages[0]?.total??0;
  const [status,setStatus]=useState("");const [batch,setBatch]=useState<string>();const automaticStarted=useRef(0);
@@ -217,6 +287,18 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
  // "Filtered" means the view differs from the default one, which is what makes the empty state
  // honest: hiding closed jobs is the default, so turning them back on counts as a change too.
  const filtered=!!(title.trim()||keyword.trim()||savedOnly||includeClosed||countries.length||includeUnknownLocations||postedWithin!==DEFAULT_POSTED_WINDOW);
+ // Saved views. The filters stay view state that resets on every launch — nothing narrows behind
+ // your back — but a view you use daily is worth naming once instead of rebuilding each morning.
+ const {data:savedViews=[]}=useQuery({queryKey:["saved-views"],queryFn:()=>getSetting(PRESETS_KEY).then(parsePresets)});
+ const [naming,setNaming]=useState<string>();
+ const storeViews=(next:FilterPreset[])=>setSetting(PRESETS_KEY,JSON.stringify(next))
+  .then(()=>qc.invalidateQueries({queryKey:["saved-views"]})).catch(error=>setStatus(String(error)));
+ const applyView=(view:FilterPreset)=>{setTitle(view.title);setKeyword(view.keyword);setSort(view.sort);
+  setSavedOnly(view.savedOnly);setIncludeClosed(view.includeClosed);setPostedWithin(view.postedWithinDays);
+  setCountries(view.countries);setIncludeUnknownLocations(view.includeUnknownLocations);
+  setStatus(`Showing "${view.name}".`)};
+ const saveView=(name:string)=>{if(!name.trim())return;
+  storeViews(withPreset(savedViews,presetFrom(name,filter)));setNaming(undefined)};
  const clearFilters=()=>{setTitle("");setKeyword("");setSavedOnly(false);setIncludeClosed(false);setCountries([]);setIncludeUnknownLocations(false);setPostedWithin(DEFAULT_POSTED_WINDOW)};
  // The nav badge counts what the page is showing, so narrowing the view moves it too.
  useEffect(()=>onCount(selected.length?total:0),[selected.length,total,onCount]);
@@ -226,6 +308,7 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
    <header><div><h2>Jobs</h2><p>Sources update automatically when the app opens. The choices here only change what you are looking at.</p></div>
     <span className="count">{total?`${total} job${total===1?"":"s"}${jobs.length<total?` · showing ${jobs.length}`:""}`:""}</span>
     {batch&&<button className="small danger" onClick={()=>cancelScrapeAll(batch)}>Cancel update</button>}
+    <button className="small" onClick={()=>setCapturing(true)} title="For a referral or a recruiter link: read one vacancy from its own page">Add from link</button>
     <button className="small" onClick={()=>setToolbarOpen(open=>!open)}>{toolbarOpen?"Hide filters":"Show filters"}</button></header>
    {!toolbarOpen&&<div className="filter-summary"><span>{filtered?<><b>Filters active</b> · {selected.length} sources</>:<><b>All recent jobs</b> · {selected.length} sources</>}</span><button className="link" onClick={()=>setToolbarOpen(true)}>Edit filters</button>{filtered&&<button className="link" onClick={clearFilters}>Clear</button>}</div>}
    <SourcePicker sources={sourceList} shown={new Set(shownIds)} onShow={setShown}/>
@@ -242,6 +325,22 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
       <option value="">{options.length?(countries.length?"Add another…":"Anywhere"):"Nothing to filter yet"}</option>
       {options.filter(entry=>!countries.includes(entry.code)).map(entry=>
        <option key={entry.code} value={entry.code}>{entry.name} ({entry.jobs})</option>)}</select></label>
+    <div className="saved-views">
+     {savedViews.map(view=><span key={view.name} className="saved-view">
+      <button type="button" onClick={()=>applyView(view)} title={describePreset(view,countryName)}>{view.name}</button>
+      <button type="button" className="drop" aria-label={`Delete the view "${view.name}"`}
+       onClick={()=>storeViews(withoutPreset(savedViews,view.name))}>×</button></span>)}
+     {naming===undefined
+      ? <button type="button" className="link" disabled={!filtered}
+         title={filtered?"Keep these filters under a name":"Set a filter first — a view of everything is what Clear all already gives you"}
+         onClick={()=>setNaming("")}>Save view</button>
+      : <input autoFocus value={naming} placeholder="Name this view" maxLength={60}
+         onChange={event=>setNaming(event.target.value)}
+         onBlur={()=>naming.trim()?saveView(naming):setNaming(undefined)}
+         onKeyDown={event=>{if(event.key==="Enter"){event.preventDefault();saveView(naming)}
+          if(event.key==="Escape")setNaming(undefined)}}/>}
+    </div>
+    <label className="inline" title="Listings you dismissed are hidden. Nothing was deleted."><input type="checkbox" checked={includeDismissed} onChange={e=>setIncludeDismissed(e.target.checked)}/> Show dismissed</label>
     <label className="inline"><input type="checkbox" checked={savedOnly} onChange={e=>setSavedOnly(e.target.checked)}/> Saved and applied only</label>
     <label className="inline" title="Jobs their board has not listed in two complete reads are hidden by default."><input type="checkbox" checked={includeClosed} onChange={e=>setIncludeClosed(e.target.checked)}/> Include closed</label>
     {!!countries.length&&<div className="chosen"><span className="chosen-label">Countries</span>{countries.map(code=>
@@ -250,7 +349,14 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
    </section>
   </div>
   <div className="scroll">
+   {capturing&&<CaptureJob onClose={()=>setCapturing(false)} onSaved={message=>{setStatus(message);qc.removeQueries({queryKey:["jobs"]})}}/>}
    {status&&<output className="status">{status}</output>}
+   {/* The daily loop: what has arrived since you last said you were done, and a way to say it again. */}
+   {(!!newCount||onlyNew)&&<div className="new-since">
+    <button type="button" className={onlyNew?"link on":"link"} onClick={()=>setOnlyNew(!onlyNew)}>
+     {onlyNew?"Showing new only":`${newCount.toLocaleString()} new since you last looked`}</button>
+    <button type="button" className="link" onClick={markReviewed}>Mark all reviewed</button></div>}
+   {!reviewedAt&&<div className="new-since"><button type="button" className="link" onClick={markReviewed}>Start tracking what is new</button></div>}
    {!followed.length?<div className="empty"><strong>No sources are switched on</strong>
      <span>Switching a source off on the Sources tab retires it. Anything you already saved stays on the Applications tab.</span></div>
     :!selected.length?<div className="empty"><strong>No sources selected</strong>
@@ -281,9 +387,39 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
 // ---------------------------------------------------------------------------------------------
 const logTone=(event:string)=>event==="failed"?"error":event==="warning"||event==="needs_user_action"?"warning":event==="completed"?"ok":"dim";
 function SessionBadge({sourceId}:{sourceId:string}){const {data:saved}=useQuery({queryKey:["session",sourceId],queryFn:()=>hasBrowserSession(sourceId)});return saved?<span className="tag-session">SESSION</span>:null}
+export function CompanyPicker({sources,onClose,onManual}:{sources:Source[];onClose:()=>void;onManual:()=>void}){
+ const qc=useQueryClient(),dialog=useRef<HTMLDialogElement>(null),searchInput=useRef<HTMLInputElement>(null),[search,setSearch]=useState(""),[status,setStatus]=useState("");
+ const {data:companies=[],isLoading,error,refetch}=useQuery({queryKey:["company-catalog"],queryFn:listCompanyCatalog,staleTime:Infinity});
+ // A native modal keeps keyboard focus inside the picker and restores it to Browse on close.
+ useEffect(()=>{const node=dialog.current;node?.showModal();searchInput.current?.focus();return()=>node?.close()},[]);
+ const add=useMutation({mutationFn:async(company:CatalogCompany)=>{
+  const existing=catalogSource(company,sources);
+  if(existing){await api.setSourceEnabled(existing.id,true);return{...existing,enabled:true,disabledReason:undefined}}
+  // Omit the catalog ID: a deleted starter retains its stable ID as a tombstone. Reusing it
+  // would update an invisible row instead of adding the company the user explicitly chose.
+  return api.saveSource({name:company.name,baseUrl:company.baseUrl,adapterId:company.adapterId,kind:company.kind,enabled:true,
+   disabledReason:null,robotsOverride:true,allowPrivateNetwork:false,configJson:{schemaVersion:"1.1.0",adapterVersion:"1.1.0",mode:"direct",...company.config}})},
+  onMutate:()=>setStatus(""),onSuccess:async source=>{qc.setQueryData<Source[]>(["sources"],current=>[...(current||[]).filter(item=>item.id!==source.id),source]);setStatus(`${source.name} is selected for automatic updates.`);await qc.invalidateQueries({queryKey:["sources"]})}});
+ const countryName=(code:string)=>COUNTRIES.find(country=>country.code===code)?.name||code;
+ const words=search.toLowerCase().trim().split(/\s+/).filter(Boolean),visible=companies.filter(company=>words.every(word=>`${company.name} ${company.country} ${countryName(company.country)} ${company.tags.join(" ")}`.toLowerCase().includes(word))).sort((a,b)=>a.name.localeCompare(b.name));
+ return <dialog ref={dialog} className="company-picker" aria-labelledby="company-picker-title" onCancel={onClose}><div className="sheet">
+  <header><h3 id="company-picker-title">Browse companies</h3><button type="button" className="link" onClick={onClose}>Close</button></header>
+  <div className="dialog-body"><p className="hint">Choose a company to follow. Its jobs board and settings are ready to use. Companies are listed by home country; openings may be worldwide.</p>
+   <label><span>Search companies, countries or sectors</span><input ref={searchInput} type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder="Company, Canada, semiconductor…"/></label>
+   {isLoading?<p className="muted">Loading companies…</p>:error?<p role="alert" className="error">Could not load companies. <button onClick={()=>refetch()}>Try again</button></p>:<>
+    <span className="hint" aria-live="polite">{visible.length} of {companies.length} companies</span>
+    <div className="company-list">{visible.map(company=>{const existing=catalogSource(company,sources),pending=add.isPending&&add.variables?.id===company.id;return <article className="company-row" key={company.id}>
+     <div><strong>{company.name}</strong><small>{countryName(company.country)} · {company.tags.map(tag=>tag.replaceAll("-"," ")).join(" · ")}</small></div>
+     <button className={existing?.enabled?"link":""} disabled={add.isPending||existing?.enabled} aria-label={`${existing?.enabled?"Added":existing?"Enable":"Add"} ${company.name}`} onClick={()=>add.mutate(company)}>{pending?"Adding…":existing?.enabled?"Added":existing?"Enable":"Add"}</button>
+    </article>})}</div>{!visible.length&&<p className="muted">No matching companies. Try another search or add a source manually.</p>}</>}
+  </div><footer><button className="link" onClick={onManual}>Add source manually</button><output role="status">{add.error?String(add.error):status}</output></footer>
+ </div></dialog>
+}
 function Sources(){
  const qc=useQueryClient(); const {data:sources=[],isLoading,error}=useQuery({queryKey:["sources"],queryFn:api.listSources});
  const [selected,setSelected]=useState<Source|undefined>(); const [result,setResult]=useState(""); const [notices,setNotices]=useState<string[]>([]); const [paused,setPaused]=useState<WorkerEvent>(); const [preview,setPreview]=useState<ReturnType<typeof previewFromEvents>>();
+ const [browsing,setBrowsing]=useState(false);
+ const manualSource=()=>{setBrowsing(false);setSelected({id:"",name:"",baseUrl:"https://",adapterId:"static-css",adapterVersion:"1.1.0",enabled:false,kind:"active",robotsOverride:true,jobCount:0,closedCount:0})};
  const [log,setLog]=useState<{id:number;runId:string;event:string;t:string;m:string;tone:string}[]>([]); const [lastRun,setLastRun]=useState<string>();const [rebuilding,setRebuilding]=useState(false);const [logShown,setLogShown]=useState(true);
  const runStarts=useRef(new Map<string,number>()),nextLogId=useRef(0);
  // Worker warnings are the only way the user learns that a site changed the terms — a redirect to
@@ -327,7 +463,7 @@ function Sources(){
   <section className="sources-main">
    <header><div><h2>Sources</h2><p>Every selected source is read automatically when the app opens.</p></div>
     <div className="actions">{!logShown&&<button onClick={()=>setLogShown(true)}>Show run log</button>}<button disabled={rebuilding} onClick={rebuild}>{rebuilding?"Re-scrubbing…":"Re-scrub all"}</button>
-     <button className="primary" onClick={()=>setSelected({id:"",name:"",baseUrl:"https://",adapterId:"static-css",adapterVersion:"1.1.0",enabled:false,kind:"active",robotsOverride:true,jobCount:0,closedCount:0})}>Add source</button></div></header>
+     <button onClick={manualSource}>Add source manually</button><button className="primary" onClick={()=>setBrowsing(true)}>Browse companies</button></div></header>
    <div className="scroll">
     {paused&&<aside className="paused" aria-live="polite"><span className="tag">PAUSED</span>
      <span className="text">Login or CAPTCHA needs your action in headed Edge.</span>
@@ -373,6 +509,7 @@ function Sources(){
     <button className="danger" disabled={!lastRun} onClick={()=>lastRun&&cancelScrape(lastRun)}>Cancel run</button></footer>
   </aside>}
   {selected&&<SourceForm source={selected} onCancel={()=>setSelected(undefined)} onSave={submit}/>}
+  {browsing&&<CompanyPicker sources={sources} onClose={()=>setBrowsing(false)} onManual={manualSource}/>}
  </div>}
 // Asked once, ever: after the first yes every blocked source overrides silently.
 const ROBOTS_ACK="robots.autoAcknowledged";
@@ -381,9 +518,10 @@ const ROBOTS_ACK="robots.autoAcknowledged";
 const SCRAPE_TITLE_FILTER="scrape.titleAny";
 const configFields:Record<string,string[]>={"static-css":["itemSelector","titleSelector","companySelector","locationSelector","dateSelector","urlSelector","descriptionSelector","nextSelector","detailUrlField"],"static-xpath":["itemXPath","titleXPath","companyXPath","locationXPath","urlXPath","descriptionXPath","nextXPath"],playwright:["urlTemplate","itemSelector","titleSelector","nextSelector"],json:["urlTemplate","itemsPath","pageParam","detailUrlField"],rss:["urlTemplate"],apple:["locale","query"],workday:["tenant","site","listingPath","query","pageSize","detailUrlField","splitFacet","splitThreshold"],eightfold:["domain","eightfoldApi","query","pageSize"],icims:["listingPath","query","pageSize","detailUrlField"],"talentbrew-jibe":["listingPath","query","pageSize","detailUrlField"],phenom:["listingPath","query","pageSize","detailUrlField"],
  // Company boards derive their own URLs, so the only thing there is to set is how far to read.
- arm:["maxPages"],amd:["maxPages"],mediatek:["maxPages"],google:["maxPages"],cisco:["maxPages"],"sk-hynix":[],"u-blox":[]};
+ arm:["maxPages"],amd:["maxPages"],asml:[],mediatek:["maxPages"],google:["maxPages"],cisco:["maxPages"],"sk-hynix":[],"u-blox":[],
+ greenhouse:["token"],ashby:["token"],lever:["token","pageSize"],oracle:["apiHost","siteNumber","query","pageSize"]};
 // Mirrors requiredFor() in sidecar/worker.mjs: fields an adapter cannot build a request without.
-const requiredFields=(id:string)=>id==="static-css"?["itemSelector","titleSelector"]:id==="static-xpath"?["itemXPath","titleXPath"]:id==="json"?["itemsPath"]:id==="workday"?["tenant","site"]:id==="eightfold"?["domain"]:[];
+const requiredFields=(id:string)=>id==="static-css"?["itemSelector","titleSelector"]:id==="static-xpath"?["itemXPath","titleXPath"]:id==="json"?["itemsPath"]:id==="workday"?["tenant","site"]:id==="eightfold"?["domain"]:["greenhouse","ashby","lever"].includes(id)?["token"]:id==="oracle"?["apiHost","siteNumber"]:[];
 // What the form collects. Reading the site is deliberately NOT part of it: the probe can take
 // tens of seconds, and holding the dialog open for it made Save feel like it had hung.
 export type SourceDraft={id?:string;kind:string;name:string;baseUrl:string;adapterId:string;config:Record<string,unknown>;enabled:boolean;robots:boolean;local:boolean;headless:boolean;manual:boolean};
@@ -426,16 +564,16 @@ function Settings({open,onClose}:{open:boolean;onClose:()=>void}){
  const {data:launchAtLogin,error:launchError,refetch:refetchLaunchAtLogin}=useQuery({queryKey:["launch-at-login"],queryFn:launchAtLoginStatus,enabled:open});
  const [message,setMessage]=useState("");const [backgroundBusy,setBackgroundBusy]=useState(false);const [launchBusy,setLaunchBusy]=useState(false);
  const [purging,setPurging]=useState(false);const [confirmation,setConfirmation]=useState("");const [purgeBusy,setPurgeBusy]=useState(false);
- const toggleBackground=(enabled:boolean)=>{setBackgroundBusy(true);setBackgroundSync(enabled).then(()=>{setMessage(enabled?"Background checks enabled.":"Background checks disabled.");return refetchBackground()}).catch(error=>setMessage(String(error))).finally(()=>setBackgroundBusy(false))};
- const toggleLaunch=(enabled:boolean)=>{setLaunchBusy(true);setLaunchAtLogin(enabled).then(()=>{setMessage(enabled?"Start at sign-in enabled.":"Start at sign-in disabled.");return refetchLaunchAtLogin()}).catch(error=>setMessage(String(error))).finally(()=>setLaunchBusy(false))};
+ const toggleBackground=(enabled:boolean)=>{setBackgroundBusy(true);setBackgroundSync(enabled).then(result=>{setMessage(result.issue??(result.enabled?"Background checks enabled.":"Background checks disabled."));return refetchBackground()}).catch(error=>setMessage(String(error))).finally(()=>setBackgroundBusy(false))};
+ const toggleLaunch=(enabled:boolean)=>{setLaunchBusy(true);setLaunchAtLogin(enabled).then(result=>{setMessage(result.issue??(result.enabled?"Start at sign-in enabled.":"Start at sign-in disabled."));return refetchLaunchAtLogin()}).catch(error=>setMessage(String(error))).finally(()=>setLaunchBusy(false))};
  const closePurge=()=>{setPurging(false);setConfirmation("")};
  const purge=()=>{setPurgeBusy(true);purgeAllJobs(confirmation).then(result=>{setMessage(`Deleted ${result.deleted.toLocaleString()} stored job${result.deleted===1?"":"s"}${result.kept?`; kept ${result.kept.toLocaleString()} with an application or review`:""}.`);closePurge();for(const key of ["diagnostics","jobs","sources","apps"])qc.invalidateQueries({queryKey:[key]})}).catch(error=>setMessage(String(error))).finally(()=>setPurgeBusy(false))};
  if(!open)return null;
  return <><div className="scrim" onClick={onClose}/><aside className="panel-sheet" role="dialog" aria-modal="true" aria-label="Settings"><header><h2>Settings</h2><button className="link close" onClick={onClose}>Close</button></header>
   <div className="panel-body">{message&&<output className="status">{message}</output>}
    <section><span className="caption">Startup</span>
-    <div className="setting"><label className="inline"><input type="checkbox" checked={launchAtLogin?.enabled??false} disabled={!launchAtLogin||launchBusy} onChange={event=>toggleLaunch(event.target.checked)}/> Open JobScraper when I sign in</label><small>Windows opens the full app after you sign in.{launchAtLogin?.debugBuild?" This development build registers its debug executable.":""}</small>{launchError&&<small className="warning">Windows Task Scheduler did not answer: {String(launchError)}</small>}</div>
-    <div className="setting"><label className="inline"><input type="checkbox" checked={background?.enabled??false} disabled={!background||backgroundBusy} onChange={event=>toggleBackground(event.target.checked)}/> Check for new jobs in the background</label><small>Runs hidden at sign-in and every 4 hours, then shows one notification when new listings appear.{background?.debugBuild?" This development build uses the JobScraper-dev database.":""}</small>{backgroundError&&<small className="warning">Windows Task Scheduler did not answer: {String(backgroundError)}</small>}</div>
+    <div className="setting"><label className="inline"><input type="checkbox" checked={launchAtLogin?.enabled??false} disabled={!launchAtLogin||launchBusy} onChange={event=>toggleLaunch(event.target.checked)}/> Start JobScraper when I sign in</label><small>Starts in the notification area without opening a window.{launchAtLogin?.debugBuild?" This development build registers its debug executable.":""}</small>{launchAtLogin?.issue&&<small className="warning" role="alert">{launchAtLogin.issue}</small>}{launchError&&<small className="warning">{String(launchError)}</small>}</div>
+    <div className="setting"><label className="inline"><input type="checkbox" checked={background?.enabled??false} disabled={!background||backgroundBusy} onChange={event=>toggleBackground(event.target.checked)}/> Check for new jobs in the background</label><small>Runs hidden at sign-in and every 4 hours, then shows one notification when new listings appear.{background?.debugBuild?" This development build uses the JobScraper-dev database.":""}</small>{background?.issue&&<small className="warning" role="alert">{background.issue}</small>}{backgroundError&&<small className="warning">{String(backgroundError)}</small>}</div>
    </section>
    <section><span className="caption">Collecting</span><ScrapeFilter/></section>
    <section><span className="caption">Reminders</span><div className="setting"><small>Rebuild pending application and interview reminders after changing system tasks or restoring data.</small><div className="row"><button onClick={()=>api.reconcileReminders().then(result=>setMessage(JSON.stringify(result))).catch(error=>setMessage(String(error)))}>Reconcile reminders</button></div></div></section>
@@ -444,17 +582,20 @@ function Settings({open,onClose}:{open:boolean;onClose:()=>void}){
   </div></aside>
   {purging&&<dialog open className="confirm" aria-label="Delete every stored job"><div className="sheet"><div className="dialog-body"><h2>Delete every stored job?</h2><p>This removes all {data?.jobCount?.toLocaleString()??""} stored listings and their sighting history. Sources, settings, and saved applications stay.</p><p className="detail">This cannot be undone.</p><label><span>Type Confirm to continue</span><input autoFocus value={confirmation} onChange={event=>setConfirmation(event.target.value)} placeholder="Confirm"/></label></div><footer><button className="link" onClick={closePurge}>Cancel</button><button className="danger" disabled={purgeBusy||confirmation.trim()!=="Confirm"} onClick={purge}>{purgeBusy?"Deleting…":"Delete all jobs"}</button></footer></div></dialog>}
  </>}
-function SourceForm({source,onCancel,onSave}:{source:Source;onCancel:()=>void;onSave:(draft:SourceDraft)=>void}){
+export function SourceForm({source,onCancel,onSave}:{source:Source;onCancel:()=>void;onSave:(draft:SourceDraft)=>void}){
  const qc=useQueryClient();const canCapture=Boolean(source.id&&source.kind!=="reference"&&supportsSessionCapture(source.adapterId));
  const {data:savedSession}=useQuery({queryKey:["session",source.id],queryFn:()=>hasBrowserSession(source.id),enabled:canCapture});
  const [url,setUrl]=useState(source.baseUrl==="https://"?"":source.baseUrl),[name,setName]=useState(source.name),[adapter,setAdapter]=useState(source.id?source.adapterId:""),[config,setConfig]=useState<Record<string,unknown>>({pageSize:20,maxPages:50});
  const [enabled,setEnabled]=useState(source.id?source.enabled:true),[robots,setRobots]=useState(source.id?source.robotsOverride:true),[local,setLocal]=useState(false),[headless,setHeadless]=useState(true),[adjust,setAdjust]=useState(false),[error,setError]=useState(""),[sessionStatus,setSessionStatus]=useState("");
- useEffect(()=>{if(source.id)sourceConfig(source.id).then(setConfig).catch(()=>{})},[source.id]);
+ const [configReady,setConfigReady]=useState(!source.id);
+ useEffect(()=>{if(source.id)sourceConfig(source.id).then(config=>{setConfig(config);setHeadless(config.headless!==false);setConfigReady(true)}).catch(()=>setError("Could not load the saved settings. Close this form and try again."))},[source.id]);
  const missing=(requiredFields(adapter)).filter(key=>!String(config[key]||"").trim());
  // An adapter chosen by hand under Adjust is taken as-is; everything else configures itself.
  const save=(event:React.FormEvent)=>{event.preventDefault();
   if(!(url.startsWith("http://")||url.startsWith("https://")))return setError("Enter the full web address of the jobs page.");
-  const manual=adjust&&!!adapter;
+  // An existing source already has proven settings. Saving a new name must not probe again and
+  // replace a catalog token with generic selectors just because Advanced stayed closed.
+  const manual=!!source.id||(adjust&&!!adapter);
   if(manual&&missing.length)return setError(`${adapter} needs: ${missing.join(", ")}.`);
   setError("");
   onSave({id:source.id||undefined,kind:source.kind,name,baseUrl:url,adapterId:adapter,config,enabled,robots,local,headless,manual})};
@@ -481,7 +622,7 @@ function SourceForm({source,onCancel,onSave}:{source:Source;onCancel:()=>void;on
    {source.kind==="reference"&&<p className="warning">Reference source never scrapes.</p>}{error&&<p className="error">{error}</p>}
   </div>
   <footer><button type="button" onClick={onCancel}>Cancel</button>
-   <button className="primary" disabled={!url}>Save</button></footer></form></dialog>
+   <button className="primary" disabled={!url||!configReady}>Save</button></footer></form></dialog>
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -489,14 +630,31 @@ function SourceForm({source,onCancel,onSave}:{source:Source;onCancel:()=>void;on
 // ---------------------------------------------------------------------------------------------
 function localDateTimeValue(utc:string){const date=new Date(utc);const offset=date.getTimezoneOffset()*60_000;return new Date(date.getTime()-offset).toISOString().slice(0,16)}
 export function InterviewPanel({applicationId,refresh}:{applicationId:string;refresh:()=>void}){const [open,setOpen]=useState(false);const [opened,setOpened]=useState(false);const {data:items=[],refetch}=useQuery({queryKey:["interviews",applicationId],queryFn:()=>api.interviews(applicationId),enabled:open,staleTime:Infinity});const [stage,setStage]=useState("phone screen");const [when,setWhen]=useState("");const [notes,setNotes]=useState("");const [outcome,setOutcome]=useState("");const [editing,setEditing]=useState<string>();const [message,setMessage]=useState("");const save=()=>{if(!when)return;api.saveInterview({id:editing,applicationId,stage,scheduledAt:new Date(when).toISOString(),notes:notes||null,outcome:outcome||null}).then(()=>{setMessage(editing?"Interview and reminders rescheduled.":"Interview reminders scheduled for 24h and 1h before.");setWhen("");setNotes("");setOutcome("");setEditing(undefined);refetch();refresh()}).catch(e=>setMessage(String(e)))};return <details onToggle={event=>{const next=event.currentTarget.open;setOpen(next);if(next)setOpened(true)}}><summary>Interviews &amp; reminders</summary>{opened&&<><label>Stage<select value={stage} onChange={e=>setStage(e.target.value)}><option>phone screen</option><option>recruiter</option><option>technical</option><option>onsite</option><option>final</option><option>custom</option></select></label><label>Local date/time<input type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)}/></label><label>Notes<input value={notes} onChange={e=>setNotes(e.target.value)}/></label><label>Outcome<input value={outcome} onChange={e=>setOutcome(e.target.value)}/></label><button type="button" onClick={save}>{editing?"Reschedule interview":"Schedule interview"}</button>{items.map(item=><div key={item.id}><span>{item.stage} · {new Date(item.scheduledAt).toLocaleString()} {item.outcome&&`· ${item.outcome}`}</span><button type="button" onClick={()=>{setEditing(item.id);setStage(item.stage);setWhen(localDateTimeValue(item.scheduledAt));setNotes(item.notes||"");setOutcome(item.outcome||"")}}>Edit</button><button type="button" onClick={()=>api.deleteInterview(item.id).then(()=>refetch())}>Cancel</button></div>)}<label>Ghost threshold days<input type="number" defaultValue={14} min="1" max="365" onBlur={e=>api.ghostThreshold(applicationId,Number(e.target.value)).then(()=>setMessage("Ghost reminder rescheduled.")).catch(err=>setMessage(String(err)))}/></label>{message&&<small>{message}</small>}</>}</details>}
-function ApplicationDrawer({applicationId,onClose,refresh}:{applicationId:string;onClose:()=>void;refresh:()=>void}){
+export function ApplicationDrawer({applicationId,onClose,refresh}:{applicationId:string;onClose:()=>void;refresh:()=>void}){
+ // What the next attachment will be filed as; the picker sits above the file input.
+ const [documentType,setDocumentType]=useState<string>("cv");
  const {data,refetch:queryRefetch}=useQuery({queryKey:["application-details",applicationId],queryFn:()=>api.applicationDetails(applicationId)});const refetch=()=>queryRefetch();const [note,setNote]=useState("");const [message,setMessage]=useState("");if(!data)return <dialog open className="drawer" aria-label="Application details"><div className="sheet"><div className="dialog-body"><p className="muted">Loading details…</p></div></div></dialog>;const app=data.application;
  const saveDetails=(event:React.FormEvent<HTMLFormElement>)=>{event.preventDefault();const form=new FormData(event.currentTarget);api.saveApplicationDetails({applicationId,recruiterName:form.get("name")||null,recruiterEmail:form.get("email")||null,recruiterPhone:form.get("phone")||null,sourceAttribution:form.get("source")||null,rejectionReason:form.get("rejection")||null,rejectionCategory:form.get("category")||null,withdrawnReason:form.get("withdrawn")||null}).then(()=>{setMessage("Details saved.");refetch();refresh()}).catch(e=>setMessage(String(e)))};const attachFile=(file:File,type:string)=>{try{validateAttachmentSize(file.size)}catch(error){setMessage(String(error));return}file.arrayBuffer().then(bytes=>api.attachDocument({applicationId,documentType:type,filename:file.name,mimeType:file.type||"application/octet-stream"},bytes)).then(()=>{setMessage("Immutable snapshot attached.");refetch()}).catch(e=>setMessage(String(e)))};const exportFile=(item:typeof data.documents[number])=>api.exportDocument(item.id).then(bytes=>{const url=URL.createObjectURL(new Blob([bytes],{type:item.mimeType}));const link=document.createElement("a");link.href=url;link.download=item.filename;link.click();URL.revokeObjectURL(url)}).catch(e=>setMessage(String(e)));
- const moveStage=(stage:string)=>{if(stage===app.currentStage)return;const error=boardMoveError(app.currentStage,stage);if(error)return setMessage(error);api.stage(app.id,stage).then(()=>{setMessage(`Moved to ${stageLabel(stage)}.`);refetch();refresh()}).catch(error=>setMessage(String(error)))};
+ // "Applied" is normally reached only through Open application + explicit confirmation, so it
+ // is not a plain board move — but sometimes the user applied outside JobScraper entirely, and
+ // there has to be a way to say so. A stated reason is the manual override; skipping it here
+ // just re-shows why the direct move was refused, same wording the drag-and-drop board gives.
+ const moveStage=(stage:string)=>{if(stage===app.currentStage)return;
+  if(stage==="applied"){const reason=prompt(`${boardMoveError(app.currentStage,"applied")} To set it manually anyway, say why:`);
+   if(reason===null)return;if(!reason.trim())return setMessage(boardMoveError(app.currentStage,"applied")!);
+   api.stage(app.id,"applied",reason.trim(),true).then(()=>{setMessage("Moved to Applied.");refetch();refresh()}).catch(error=>setMessage(String(error)));return}
+  const error=boardMoveError(app.currentStage,stage);if(error)return setMessage(error);
+  api.stage(app.id,stage).then(()=>{setMessage(`Moved to ${stageLabel(stage)}.`);refetch();refresh()}).catch(error=>setMessage(String(error)))};
+ // Removes the tracked application, not the job — the listing stays scraped and searchable, it
+ // just stops carrying a stage. Notes, documents and interview records go with it, so this asks
+ // first; there is no undo once confirmed.
+ const remove=()=>ask(`Remove ${app.title||"this job"} from Saved? Notes, documents and interview history go with it. This cannot be undone.`,{title:"Remove from saved?",kind:"warning"})
+  .then(confirmed=>{if(confirmed)api.deleteApplication(applicationId).then(()=>{refresh();onClose()}).catch(error=>setMessage(String(error)))});
  return <dialog open className="drawer" aria-label="Application details"><div className="sheet">
   <header><div><h2>{app.title||"Application"}</h2>
     <p>{app.company} · {stageLabel(app.currentStage)}{data.firstResponseAt?` · first response ${new Date(data.firstResponseAt).toLocaleString()}`:" · no response yet"}</p></div>
-   <button className="close" aria-label="Close" onClick={onClose}>✕</button></header>
+   <div className="actions"><button className="small danger" onClick={remove}>Remove from saved</button>
+    <button className="close" aria-label="Close" onClick={onClose}>✕</button></div></header>
   <div className="dialog-body">
    {message&&<output className="status">{message}</output>}
    <p className="hint">{data.sourceName}{data.sourceUrl&&<> · <a href={data.sourceUrl} target="_blank" rel="noreferrer">Open source</a></>}</p>
@@ -527,23 +685,40 @@ function ApplicationDrawer({applicationId,onClose,refresh}:{applicationId:string
    <hr/>
    <section><span className="caption">Documents</span>
     {data.documents.map(doc=><div className="row" key={doc.id}><div><span>{doc.filename}</span>
-      <small>{doc.documentType} · {doc.size} B · immutable snapshot</small></div>
+      <small>{documentTypeLabel(doc.documentType)} · {doc.size} B · immutable snapshot</small></div>
       <button onClick={()=>exportFile(doc)}>Export</button></div>)}
-    <label><span>Attach a local file</span><input type="file" onChange={e=>e.target.files?.[0]&&attachFile(e.target.files[0],"cover_letter")}/></label></section>
+    {/* Every attachment used to be filed as a cover letter, whatever it was, and the list below
+        then said so — a CV labelled as a cover letter is worse than no label at all. */}
+    <label><span>Attach as</span><select value={documentType} onChange={event=>setDocumentType(event.target.value)}>
+     {DOCUMENT_TYPES.map(type=><option key={type.value} value={type.value}>{type.label}</option>)}</select></label>
+    <label><span>Attach a local file</span><input type="file" onChange={e=>e.target.files?.[0]&&attachFile(e.target.files[0],documentType)}/></label></section>
    <hr/>
    <section><span className="caption">Timeline</span>
     {data.events.map(event=><div className="event" key={event.id}><span className="dot"/>
      <div><span>{event.eventType}{event.fromStage?` · ${stageLabel(event.fromStage)} → ${stageLabel(event.toStage)}`:""}{event.reason?` · ${event.reason}`:""}</span>
       <small>{new Date(event.occurredAt).toLocaleString()}</small></div></div>)}</section>
   </div></div></dialog>}
-function AppCard({app,details}:{app:Application;details:(id:string)=>void}){const drag=useDraggable({id:app.id,data:{application:app}});const[message,setMessage]=useState("");const when=app.appliedAt?`applied ${new Date(app.appliedAt).toLocaleDateString()}`:app.acceptedAt?`accepted ${new Date(app.acceptedAt).toLocaleDateString()}`:"saved";return <article className="card" ref={drag.setNodeRef} {...drag.listeners} {...drag.attributes} style={{opacity:drag.isDragging?.55:1}}><strong>{app.title||"Job"}</strong><p>{app.company}</p><span className="when">{when}</span><span className="card-actions"><button className="small" onPointerDown={e=>e.stopPropagation()} onClick={()=>details(app.id)}>Open</button>{app.currentStage==="planned"&&<button className="small primary" onPointerDown={e=>e.stopPropagation()} onClick={()=>api.openApply(app.id).then(()=>setMessage("Application opened. Confirm when JobScraper regains focus.")).catch(e=>setMessage(String(e)))}>Apply</button>}</span>{message&&<small>{message}</small>}</article>}
+function AppCard({app,details,onConfirmAttempt}:{app:Application;details:(id:string)=>void;onConfirmAttempt:(attempt:{applicationId:string;attemptId:string})=>void}){const drag=useDraggable({id:app.id,data:{application:app}});const[message,setMessage]=useState("");const when=app.appliedAt?`applied ${new Date(app.appliedAt).toLocaleDateString()}`:app.acceptedAt?`accepted ${new Date(app.acceptedAt).toLocaleDateString()}`:"saved";
+ // A "Not yet" answer stops JobScraper asking again on its own, but the question still needs an
+ // answer eventually; this is where the user comes back to give it, on their own time.
+ const confirm=()=>api.confirmApplication(app.id).then(attempt=>attempt&&onConfirmAttempt(attempt));
+ return <article className="card" ref={drag.setNodeRef} {...drag.listeners} {...drag.attributes} style={{opacity:drag.isDragging?.55:1}}><strong>{app.title||"Job"}</strong><p>{app.company}</p><span className="when">{when}</span><span className="card-actions"><button className="small" onPointerDown={e=>e.stopPropagation()} onClick={()=>details(app.id)}>Open</button>
+  {app.pendingConfirmation?<button className="small primary" onPointerDown={e=>e.stopPropagation()} onClick={confirm}>Confirm application</button>
+   :app.currentStage==="planned"&&<button className="small primary" onPointerDown={e=>e.stopPropagation()} onClick={()=>api.openApply(app.id).then(()=>setMessage("Application opened. Confirm when JobScraper regains focus.")).catch(e=>setMessage(String(e)))}>Apply</button>}</span>{message&&<small>{message}</small>}</article>}
 function StageColumn({stage,count,children}:{stage:string;count:number;children:React.ReactNode}){const drop=useDroppable({id:stage});
  const folded=["accepted","rejected","withdrawn"].includes(stage);return <section ref={drop.setNodeRef} className={[drop.isOver?"drop-active":"",folded?"folded":""].filter(Boolean).join(" ")}>
   <h3><span className="name">{stageLabel(stage)}</span><span className="count">{count}</span></h3>
   {count?children:<div className="empty">{stage==="planned"?"Nothing saved":"Nothing here"}</div>}</section>}
-function Applications(){const qc=useQueryClient();const {data:apps=[]}=useQuery({queryKey:["apps"],queryFn:api.apps});const [selected,setSelected]=useState<string>();const [error,setError]=useState("");
+function Applications({onConfirmAttempt}:{onConfirmAttempt:(attempt:{applicationId:string;attemptId:string})=>void}){const qc=useQueryClient();const {data:apps=[]}=useQuery({queryKey:["apps"],queryFn:api.apps});const [selected,setSelected]=useState<string>();const [error,setError]=useState("");
  const refresh=()=>{qc.invalidateQueries({queryKey:["apps"]});qc.invalidateQueries({queryKey:["jobs"]})};
- const move=(a:Application,stage:string)=>{if(stage===a.currentStage)return;const err=boardMoveError(a.currentStage,stage);if(err){setError(err);return}api.stage(a.id,stage).then(refresh).catch(e=>setError(String(e)))};
+ // Same manual-override escape as the drawer's Stage dropdown: dragging straight to Applied
+ // needs a stated reason instead of Open application + confirmation.
+ const move=(a:Application,stage:string)=>{if(stage===a.currentStage)return;
+  if(stage==="applied"){const reason=prompt(`${boardMoveError(a.currentStage,"applied")} To set it manually anyway, say why:`);
+   if(reason===null)return;if(!reason.trim())return setError(boardMoveError(a.currentStage,"applied")!);
+   api.stage(a.id,"applied",reason.trim(),true).then(refresh).catch(e=>setError(String(e)));return}
+  const err=boardMoveError(a.currentStage,stage);if(err){setError(err);return}
+  api.stage(a.id,stage).then(refresh).catch(e=>setError(String(e)))};
  const onDragEnd=(event:DragEndEvent)=>{const app=event.active.data.current?.application as Application|undefined;const stage=event.over?.id;if(app&&typeof stage==="string")move(app,stage)};
  const openCount=apps.filter(app=>!["accepted","rejected","withdrawn"].includes(app.currentStage)).length,interviewing=apps.filter(app=>app.currentStage==="interviewing").length;
  return <div className="view">
@@ -552,7 +727,7 @@ function Applications(){const qc=useQueryClient();const {data:apps=[]}=useQuery(
   <div className="scroll" style={{display:"block"}}>
    {!apps.length?<div className="empty"><strong>Nothing saved yet</strong><span>Press Save or Apply on a job and it lands here as Saved.</span></div>
     :<DndContext onDragEnd={onDragEnd}><div className="board">{applicationStages.map(stage=>{const cards=apps.filter(a=>a.currentStage===stage);
-     return <StageColumn stage={stage} count={cards.length} key={stage}>{cards.map(a=><AppCard app={a} details={setSelected} key={a.id}/>)}</StageColumn>})}</div></DndContext>}
+     return <StageColumn stage={stage} count={cards.length} key={stage}>{cards.map(a=><AppCard app={a} details={setSelected} onConfirmAttempt={onConfirmAttempt} key={a.id}/>)}</StageColumn>})}</div></DndContext>}
   </div>
   {selected&&<ApplicationDrawer applicationId={selected} onClose={()=>setSelected(undefined)} refresh={refresh}/>}
  </div>}

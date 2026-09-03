@@ -4,7 +4,42 @@
 // (Cisco's location objects, Google's pre-separated location spans, MediaTek's swapped
 // label/code) are the three fields that came back as noise from the live boards.
 import assert from "node:assert/strict";import {test}from "node:test";
-import {companyAdapterIds,companyDatesNeedDetail,companyNeedsCheerio,scrapeCompany}from "./company-adapters.mjs";
+import {companyAdapterIds,companyDatesNeedDetail,companyNeedsCheerio,scrapeCompany,enrichCompany}from "./company-adapters.mjs";
+
+test("Siemens Software uses the official tenant, full count and unique location postings",async()=>{
+ const posting=id=>({guid:id,reqid:"same-requisition",title_exact:"VIP Verification Engineer",title_slug:"vip-verification-engineer",company_exact:"Siemens",location_exact:"Taipei, TWN",description:"Verify EDA tools.",date_added:"2026-09-02"});
+ const run=(change={})=>scrapeCompany("siemens",{maxPages:3,hashListing:key=>key,request:async(url,options)=>{
+  assert.equal(options.headers["x-origin"],"jobs.sw.siemens.com");const page=Number(new URL(url).searchParams.get("page"));
+  return{text:JSON.stringify({featured_jobs:[posting("1")],jobs:[posting(String(page))],pagination:{total:2,page,offset:page-1,has_more_pages:page<2},...(typeof change==="function"?change(page):change)})};
+ }});
+ const result=await run();assert.equal(result.complete,true);assert.equal(result.total,2);assert.equal(result.jobs.length,2);
+ assert.equal(result.jobs[0].externalId,"1");assert.equal(result.jobs[1].externalId,"2","distinct location postings keep distinct identities");
+ assert.equal(result.jobs[0].url,"https://jobs.sw.siemens.com/taipei-twn/vip-verification-engineer/1/job/");
+ assert.equal((await run({featured_jobs:[posting("missing")]})).complete,false);
+ assert.equal((await run(page=>({pagination:{total:page===1?3:2,page,offset:page-1,has_more_pages:page<2}}))).complete,false);
+ assert.equal((await run({jobs:[posting("1")]})).complete,false);
+ assert.equal((await run(page=>({pagination:{total:3,page,offset:page-1,has_more_pages:false}}))).complete,false);
+ await assert.rejects(run({pagination:{total:2,page:1,offset:0}}),/pagination changed/);
+});
+
+test("SmartRecruiters reconciles all postings and defers the real description endpoint",async()=>{
+ const posting=id=>({id,name:`Verification ${id}`,company:{identifier:"RenesasElectronics",name:"Renesas Electronics"},visibility:"PUBLIC",location:{city:"Raanana",country:"il"},releasedDate:"2026-09-02"});
+ const calls=[],request=async url=>{calls.push(url);const offset=Number(new URL(url).searchParams.get("offset"));return{text:JSON.stringify({offset,totalFound:3,content:offset===0?[posting("1"),posting("2")]:[posting("3")]})}};
+ const context={request,maxPages:3,fetchDetail:false,hashListing:key=>key};
+ const result=await scrapeCompany("renesas",context);
+ assert.equal(result.complete,true);assert.equal(result.total,3);assert.equal(result.pages,2);
+ assert.equal(result.jobs[0].location,"Raanana, IL");assert.equal(result.jobs[0].descriptionStatus,"pending");
+ assert.match(calls[1],/offset=2$/);assert.match(result.jobs[0].detailUrl,/postings\/1$/);
+ const enriched=await enrichCompany("renesas",result.jobs[0],async url=>{
+  assert.equal(url,result.jobs[0].detailUrl);return{text:JSON.stringify({id:"1",active:true,jobAd:{sections:{jobDescription:{text:"<p>Verify ASICs.</p>"},qualifications:{text:"<p>SystemVerilog.</p>"}}}})};
+ });
+ assert.match(enriched.description,/Verify ASICs/);assert.match(enriched.description,/SystemVerilog/);
+ const cap=await scrapeCompany("renesas",{...context,maxPages:1});assert.equal(cap.complete,false);
+ const changed=await scrapeCompany("renesas",{...context,request:async url=>{const offset=Number(new URL(url).searchParams.get("offset"));return{text:JSON.stringify({offset,totalFound:offset?2:3,content:[posting(offset?"2":"1")]})}}});
+ assert.equal(changed.complete,false);
+ const repeated=await scrapeCompany("renesas",{...context,request:async url=>({text:JSON.stringify({offset:Number(new URL(url).searchParams.get("offset")),totalFound:2,content:[posting("1")]})})});assert.equal(repeated.complete,false);
+ await assert.rejects(scrapeCompany("renesas",{...context,request:async()=>({text:JSON.stringify({offset:0,totalFound:1,content:[{...posting("1"),company:{identifier:"wrong"}}]})})}),/wrong-company/);
+});
 
 const respond=routes=>{const seen=[];const request=async(url,options={})=>{seen.push({url,options});
  const hit=Object.entries(routes).find(([fragment])=>url.includes(fragment));
@@ -65,6 +100,36 @@ test("AMD reads the paged jobs API and stops at its reported total",async()=>{
  assert.deepEqual(result.jobs[0],{title:"Mechanical Engineer",location:"Austin, Texas",url:"https://careers.amd.com/careers-home/jobs/88885",externalId:"88885",postedAt:"2026-08-29",description:"Build things.",descriptionHtml:"Build things.",listingHash:"listing-hash"});
  assert.equal(result.total,1,"the board's own count is what the change check compares against")});
 
+const asmlItem=id=>({id,job_id:id,type:"job_detail_page",name:`Engineer ${id}`,url:`https://www.asml.com/en/careers/find-your-job/${id}`,job_location:"Veldhoven, Netherlands",job_date_posted:"2026-09-02T00:00:00",description:"<p>Design lithography systems.</p>"});
+const asmlPage=(offset,total,ids)=>({widgets:[{rfk_id:"asml_job_search",offset,total_item:total,content:ids.map(asmlItem),errors:[{type:"uri_not_found"}]}]});
+test("ASML traverses the published Sitecore widget and keeps inline descriptions and stable IDs",async()=>{
+ const offsets=[];
+ const result=await scrapeCompany("asml",{maxPages:3,request:async(url,options)=>{
+  assert.equal(url,"https://discover-euc1.sitecorecloud.io/discover/v2/126200477");
+  const search=options.body.widget.items[0].search;offsets.push(search.offset);assert.equal(search.limit,100);
+  return{text:JSON.stringify(search.offset===0?asmlPage(0,3,["J-1","J-2"]):asmlPage(2,3,["J-3"]))};}});
+ assert.deepEqual(offsets,[0,2]);assert.equal(result.complete,true);assert.equal(result.total,3);
+ assert.equal(result.jobs[0].externalId,"J-1");assert.equal(result.jobs[0].location,"Veldhoven, Netherlands");
+ assert.equal(result.jobs[0].descriptionHtml,"<p>Design lithography systems.</p>");
+});
+test("ASML capped, early-empty and changing-total reads cannot report completion",async()=>{
+ const capped=await scrape("asml",{"/discover/v2/":asmlPage(0,3,["J-1"])});assert.equal(capped.complete,false);
+ for(const changing of[false,true]){
+  const result=await scrapeCompany("asml",{request:async(_url,options)=>{
+   const offset=options.body.widget.items[0].search.offset;
+   return{text:JSON.stringify(offset===0?asmlPage(0,3,["J-1"]):asmlPage(offset,changing?2:3,changing?["J-2"]:[]))};}});
+  assert.equal(result.complete,false);if(changing)assert.equal(result.totalExact,false);
+ }
+});
+test("ASML rejects repeated pages, invalid totals, non-job records and search errors",async()=>{
+ for(const alter of[page=>delete page.widgets[0].total_item,page=>page.widgets[0].content[0].type="editorial",page=>page.widgets[0].errors=[{type:"invalid_query"}]]){
+  const page=asmlPage(0,1,["J-1"]);alter(page);await assert.rejects(scrape("asml",{"/discover/v2/":page}),/parse_error/);
+ }
+ for(const repeatOffset of[false,true])await assert.rejects(scrapeCompany("asml",{request:async(_url,options)=>{
+  const offset=options.body.widget.items[0].search.offset;
+  return{text:JSON.stringify(asmlPage(repeatOffset?0:offset,2,["J-1"]))};}}),/parse_error/);
+});
+
 test("MediaTek sends the locale cookie and reads the location out of the swapped label/code pair",async()=>{
  const item={id:"MTK1",title:"Linux Software Engineer",location:null,publishedDate:"2026-08-30T16:00:00.000+00:00",summary:"Kernel work.",properties:{location:{label:"0000009255",code:"Taipei"}}};
  const result=await scrape("mediatek",{"job.getJobs":{result:{data:{json:{pagination:{total_pages:1},jobs:[item]}}}}});
@@ -113,7 +178,7 @@ test("SK hynix combines its two boards and keeps only its own entity on the shar
  assert.equal(result.jobs[1].description,"<p>Stack DRAM.</p>","Greenhouse escapes its HTML once more than the shared normalizer decodes")});
 
 test("an unknown company adapter is refused as incomplete, not guessed at",async()=>{
- assert.deepEqual(companyAdapterIds,["arm","amd","mediatek","google","cisco","sk-hynix","u-blox"]);
+ assert.ok(companyAdapterIds.includes("asml"));
  await assert.rejects(scrapeCompany("nope",{request:async()=>({text:"{}"})}),/^Error: incomplete/)});
 
 test("JSON-only company paths do not load Cheerio",()=>{
@@ -260,3 +325,41 @@ test("a board that only dates its detail pages says so, and the date survives th
  const result=await scrape("arm",{"/search-jobs":listing,"/job/austin":detail});
  assert.equal(result.jobs[0].postedAt,"Jun. 09, 2026");
  assert.equal(result.jobs[0].externalId,"2026-19305")});
+
+// Synopsys is the second Radancy board here. Its own page states how many vacancies matched and
+// how many pages they fill, so both the card mapping and that reconciliation are what these cover:
+// reading every page the board named is not proof of having read every vacancy it counted.
+const radancyPage=(page,pages,total,cards)=>`<section id="search-results" data-total-job-results="${total}" data-total-pages="${pages}" data-current-page="${page}">
+<section id="search-results-list"><ul>${cards}</ul></section></section>`;
+const radancyCard=(id,title,place,posted)=>`<li class="search-results-list__list-item">
+<a class="sr-job-link" href="/job/lisbon/${id}/44408/${id}" data-job-id="${id}"><h2>${title}<img alt="circle arrow"></h2>
+<div class="sr-wrapper"><span class="job-location"><img alt="pin icon">${place}</span>
+<span class="category"><strong>Category: </strong>Engineering</span>
+<span class="job-date-posted"><strong>Posted: </strong>${posted}</span></div></a></li>`;
+
+test("a Radancy board is read from the page's own card markup and dated from the listing",async()=>{
+ const listing=radancyPage(1,1,1,radancyCard("100063255168","Digital Design Engineer","Lisbon, Portugal","09/01/2026"));
+ const result=await scrape("synopsys",{"/search-jobs":listing,"/job/lisbon":`<div class="ats-description"><p>Verify RTL.</p></div>`});
+ assert.equal(result.complete,true);
+ assert.equal(result.total,1);
+ assert.equal(result.totalExact,true);
+ assert.equal(result.jobs.length,1);
+ const [job]=result.jobs;
+ assert.equal(job.externalId,"100063255168");
+ assert.equal(job.title,"Digital Design Engineer");
+ assert.equal(job.location,"Lisbon, Portugal");
+ assert.equal(job.postedAt,"09/01/2026","the label is stripped and the board's own date kept");
+ assert.equal(job.url,"https://careers.synopsys.com/job/lisbon/100063255168/44408/100063255168");
+ assert.match(job.description,/Verify RTL/)});
+
+test("a Radancy page count reached with fewer vacancies than the board counted is unfinished",async()=>{
+ const listing=radancyPage(1,1,3,radancyCard("1","Analog Design Engineer","Porto, Portugal","09/01/2026"));
+ const result=await scrape("synopsys",{"/search-jobs":listing,"/job/lisbon":`<div class="ats-description">Text.</div>`});
+ assert.equal(result.complete,false,"one of three vacancies is not a finished board");
+ assert.match(result.warnings.join(" "),/listed 3 vacancies but 1 were read/)});
+
+test("a Radancy page that stops publishing its extent is treated as unfinished",async()=>{
+ const listing=`<section id="search-results-list"><ul>${radancyCard("2","Verification Engineer","Aveiro, Portugal","09/01/2026")}</ul></section>`;
+ const result=await scrape("synopsys",{"/search-jobs":listing,"/job/lisbon":`<div class="ats-description">Text.</div>`});
+ assert.equal(result.complete,false);
+ assert.match(result.warnings.join(" "),/published no page count/)});

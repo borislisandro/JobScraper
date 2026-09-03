@@ -1,0 +1,16 @@
+{
+  "id": "applied-materials",
+  "name": "Applied Materials",
+  "baseUrl": "https://careers.appliedmaterials.com/careers",
+  "adapterId": "eightfold",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "domain": "appliedmaterials.com",
+    "eightfoldApi": "pcsx",
+    "sortBy": "",
+    "maxPages": 500,
+    "expectedHost": "careers.appliedmaterials.com"
+  }
+}

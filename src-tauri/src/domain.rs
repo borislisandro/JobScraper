@@ -48,6 +48,8 @@ pub struct Job {
     pub apply_url: Option<String>,
     pub description_text: String,
     pub description_status: String,
+    /// When the reader said "not for me", if they did. The list hides these unless asked.
+    pub dismissed_at: Option<String>,
     pub posted_at: Option<String>,
     pub salary_min: Option<f64>,
     pub salary_max: Option<f64>,
@@ -83,6 +85,9 @@ pub struct Application {
     pub updated_at: String,
     pub title: Option<String>,
     pub company: Option<String>,
+    /// An apply attempt still awaits a decision, including one already answered "not_yet" and
+    /// silenced from the automatic prompt. The Applications card offers to ask again for this.
+    pub pending_confirmation: bool,
 }
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]

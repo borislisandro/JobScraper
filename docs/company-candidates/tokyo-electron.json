@@ -1,0 +1,15 @@
+{
+  "id": "00000000-0000-4000-8000-000000000136",
+  "name": "Tokyo Electron",
+  "baseUrl": "https://tel.wd3.myworkdayjobs.com",
+  "adapterId": "workday",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "tenant": "tel",
+    "site": "TEL-Careers",
+    "maxPages": 500,
+    "expectedHost": "tel.wd3.myworkdayjobs.com"
+  }
+}

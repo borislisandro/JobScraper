@@ -75,17 +75,21 @@ async fn start(
         startup.set(app, "scheduling", "Setting up reminders");
         // Scheduler failure is recorded on reminder rows and never blocks local application use.
         let _ = db::reconcile_reminders_pool(&state.db.pool).await;
-        // A sign-in task from an earlier version opens a window every morning; this brings it up to
-        // the current one. Failure here is never worth blocking a launch over.
-        if let Ok(true) = notifications::refresh_startup_task().await {
+        // Reconciliation failure must be visible without blocking local application use.
+        let refresh = notifications::refresh_login_tasks().await;
+        if !matches!(refresh, Ok(false)) {
+            let (level, message) = match refresh {
+                Ok(_) => ("info", "Sign-in and background tasks updated.".to_string()),
+                Err(error) => ("warn", error),
+            };
             db::log(
                 &state.db.pool,
-                "info",
+                level,
                 None,
                 None,
                 "launch_at_login",
                 None,
-                "Start-at-sign-in task rewritten to open JobScraper in the notification area.",
+                &message,
                 serde_json::json!({}),
             )
             .await;

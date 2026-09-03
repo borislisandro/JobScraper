@@ -1,0 +1,59 @@
+{
+  "id": "ceva",
+  "name": "CEVA",
+  "baseUrl": "https://www.ceva-ip.com",
+  "adapterId": "ceva",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "www.comeet.co"
+  },
+  "discovery": {
+    "status": "needs-adapter",
+    "officialCareersUrl": "https://www.ceva-ip.com/career/",
+    "boardUrl": "https://www.ceva-ip.com/career/",
+    "provenance": "The official careers page links Israel, Europe, APAC, France and USA lists. Official position pages embed COMEET.init with company-uid 76.005 and the public careers token used above; no guessed employer token was used.",
+    "provenanceDetailUrl": "https://www.ceva-ip.com/career/position/5E.173/",
+    "country": "US",
+    "countrySource": "https://www.ceva-ip.com/career/",
+    "countryEvidence": "The official careers page identifies Rockville, Maryland, USA as Headquarters.",
+    "tags": [
+      "semiconductor",
+      "ip",
+      "dsp"
+    ],
+    "tagsSource": "https://www.ceva-ip.com/career/",
+    "method": "GET",
+    "requestHeaders": {
+      "accept": "application/json"
+    },
+    "responseEvidence": "HTTP 200 JSON array. Row keys include uid, name, location, url_active_page, position_url, details, categories, is_internal. All 37 rows are public, with two details sections each.",
+    "pagination": "One unpaginated array, 37 rows. Independently reconciled UID-for-UID with the five official regional pages: 20 Israel, 6 Europe, 2 APAC, 5 France, 3 USA, plus the same general-application entry repeated across regions. No numeric total is displayed on the official careers homepage.",
+    "observedJobs": 37,
+    "countCaveat": "36 specific roles plus one general-application entry (AF.02C). Two Customer Solutions Engineer locations have distinct UIDs but share url_active_page; preserve the full UID and location when normalizing identity.",
+    "detailEndpointExample": "https://www.comeet.co/careers-api/2.0/company/76.005/positions/F9.66B?token=67526BE6752D332D33026BE135F033A8&details=true",
+    "detailEvidence": "HTTP 200. details=true is required for the details array; observed Description and Requirements contain 1822 and 1023 HTML characters for F9.66B. Join all sections in order, including requirements. The listing endpoint already includes these sections when details=true.",
+    "identitySamples": [
+      {
+        "title": "Formal verification engineer",
+        "location": "Ra'anana, Israel (IL)"
+      },
+      {
+        "title": "Digital Design Engineer",
+        "location": "Sophia Antipolis, France"
+      },
+      {
+        "title": "Wireless Chip Architect",
+        "location": "California, United States"
+      }
+    ],
+    "robotsUrls": [
+      "https://www.ceva-ip.com/robots.txt",
+      "https://www.comeet.co/robots.txt"
+    ],
+    "robotsEvidence": "Both HTTP 200. Ceva disallows wp-admin except admin-ajax, feeds and tracking/search URLs. Comeet disallows administrative/content/tracking paths; careers-api is not disallowed.",
+    "adapterGap": "This diagnostic generic JSON candidate preserves all rows but cannot concatenate details[].value. Its deferred position_url also omits details=true. Add a Comeet normalizer that joins ordered sections inline or appends details=true for deferred reads; preserve full uid. Do not admit a proof that retains only Description and drops Requirements."
+  }
+}

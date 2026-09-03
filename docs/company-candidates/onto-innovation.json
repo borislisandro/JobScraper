@@ -1,0 +1,15 @@
+{
+  "id": "onto-innovation",
+  "name": "Onto Innovation",
+  "baseUrl": "https://onto.wd1.myworkdayjobs.com",
+  "adapterId": "workday",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "tenant": "onto",
+    "site": "ONTO_Careers",
+    "maxPages": 500,
+    "expectedHost": "onto.wd1.myworkdayjobs.com"
+  }
+}

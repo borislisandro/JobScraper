@@ -1,0 +1,37 @@
+{
+  "id": "cirrus-logic",
+  "name": "Cirrus Logic",
+  "baseUrl": "https://jobs.eu.lever.co/cirrus",
+  "adapterId": "lever",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "token": "cirrus",
+    "maxPages": 500,
+    "requestDelayMs": 1000,
+    "expectedHost": "api.eu.lever.co"
+  },
+  "onboardingEvidence": {
+    "officialCareersUrl": "https://www.cirrus.com/careers",
+    "provenance": "On 2026-09-02 the official careers page's Search All Jobs link opened https://www.cirrus.com/careers/jobs. Its rendered page displayed 113 opportunities and linked each posting to https://jobs.eu.lever.co/cirrus/<uuid>. The official corporate page was readable in the browser despite direct corporate fetches returning 403.",
+    "platform": "Lever EU",
+    "token": "cirrus",
+    "publishedTotal": 113,
+    "listingEndpoint": "https://api.eu.lever.co/v0/postings/cirrus?mode=json",
+    "listingEvidence": "Anonymous GET without a limit returned all 113 postings, equal to both the corporate Displaying 113 opportunities count and 113 distinct posting links on the hosted Lever board. Pagination uses limit and skip; GET ?mode=json&limit=100&skip=100 returned the final 13 rows. Top level is an array, not an object with a total.",
+    "identitySamples": [
+      {"title": "Design Verification Engineer (EDI)", "location": "Edinburgh, Scotland; Newbury, England", "id": "945291b1-7cb5-4dba-bed3-9322b381086a", "url": "https://jobs.eu.lever.co/cirrus/945291b1-7cb5-4dba-bed3-9322b381086a"},
+      {"title": "Senior Formal Verification Engineer (CH-64001149)", "location": "Austin, Texas", "id": "37d8ca48-3156-422f-ad6a-183e8f67d2f0", "url": "https://jobs.eu.lever.co/cirrus/37d8ca48-3156-422f-ad6a-183e8f67d2f0"}
+    ],
+    "descriptionEvidence": "Descriptions are inline. descriptionPlain contains the introduction and summary; lists[].text/content carries responsibilities and qualifications, and additionalPlain contains further conditions. The reader must retain all sections, rather than treating descriptionPlain alone as the full job description.",
+    "robots": "Both https://api.eu.lever.co/robots.txt and https://jobs.eu.lever.co/robots.txt returned User-agent: *, Allow: /, Crawl-delay: 1. requestDelayMs is 1000; URL guards remain enabled.",
+    "country": "US",
+    "headquartersSource": "https://investor.cirrus.com/news-and-events/investor-news/news-details/2026/Cirrus-Logic-Named-to-Fast-Companys-Annual-List-of-the-Worlds-Most-Innovative-Companies-of-2026/default.aspx",
+    "headquartersEvidence": "Official company release identifies headquarters in Austin, Texas.",
+    "tags": ["semiconductor", "mixed-signal", "audio"],
+    "tagsSource": "https://investor.cirrus.com/news-and-events/investor-news/news-details/2026/Cirrus-Logic-Named-to-Fast-Companys-Annual-List-of-the-Worlds-Most-Innovative-Companies-of-2026/default.aspx",
+    "tagsEvidence": "The company describes its high-precision, low-power analog and mixed-signal processing solutions for audio, sensing and haptics.",
+    "notes": "The integration owner's Lever reader now infers api.eu.lever.co from the official jobs.eu.lever.co base URL and includes description, responsibility/qualification lists, and additional text. Admission requires a passing generated full proof. No shared files were changed by this task."
+  }
+}

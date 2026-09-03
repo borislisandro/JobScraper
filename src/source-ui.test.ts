@@ -87,3 +87,17 @@ describe("what a probe result means for saving", () => {
       .toEqual({ ok: false, error: "That page could not be found. Check the address and try again." });
   });
 });
+
+describe("run log wording", () => {
+  it("does not report a preview as a run that saved nothing", () => {
+    // The run log is where "Done · 20 found · 0 saved" appeared for a test, which reads as a board
+    // that returned nothing rather than a preview doing exactly what it was asked to.
+    const line = (command: string, persisted: number) =>
+      describeLogEvent({ event: "completed", runId: "r", payload: { command, discovered: 20, persisted, requests: 1 } } as never);
+    expect(line("test_source", 0)).toContain("20 found");
+    expect(line("test_source", 0)).toContain("preview only");
+    expect(line("test_source", 0)).not.toContain("0 saved");
+    // A real scrape still reports what it stored.
+    expect(line("scrape_source", 20)).toContain("20 saved");
+  });
+});

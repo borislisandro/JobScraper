@@ -1,0 +1,36 @@
+{
+  "id": "arista-networks",
+  "name": "Arista Networks",
+  "baseUrl": "https://www.arista.com/en/careers",
+  "adapterId": "arista-networks",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "api.smartrecruiters.com"
+  },
+  "onboardingEvidence": {
+    "officialCareersUrl": "https://www.arista.com/en/careers",
+    "provenance": "On 2026-09-02 the official careers page embedded static.smartrecruiters.com/job-widget/1.8.5/script/smart_widget.js and called widget with company_code AristaNetworks, jobAdType PUBLIC, and api_url https://www.smartrecruiters.com. The token was read from official markup, not guessed.",
+    "platform": "SmartRecruiters",
+    "token": "AristaNetworks",
+    "publishedTotal": 234,
+    "listingEndpoint": "https://api.smartrecruiters.com/v1/companies/AristaNetworks/postings?limit=100&offset=0",
+    "listingEvidence": "Anonymous GET with Accept: application/json returned offset, limit, totalFound, content. Offsets 0, 100 and 200 returned 100, 100 and 34 rows, each with totalFound 234. All 234 IDs were unique.",
+    "identitySamples": [
+      {"title": "Senior Hardware Design Engineer, High Speed Networking", "location": "Nashua, NH, United States", "id": "744000146260068"},
+      {"title": "Senior Hardware Design Engineer, Ethernet Switching", "location": "Roseville, CA, United States", "id": "744000136348879"},
+      {"title": "Hardware Design Engineer, Ethernet Switching", "location": "Bengaluru, KA, India", "id": "744000135166119"}
+    ],
+    "detailEndpoint": "https://api.smartrecruiters.com/v1/companies/AristaNetworks/postings/744000146260068",
+    "detailEvidence": "Public GET returned active posting and jobAd.sections with companyDescription, jobDescription, qualifications and additionalInformation. The description discusses high-speed networking/Ethernet PCBs and the qualification section specifies 100G/200G PAM4 switching.",
+    "robots": "https://api.smartrecruiters.com/robots.txt: User-agent LinkedInBot allows /v1/companies/; User-agent * disallows /. robotsOverride remains true; normal pacing and URL guards remain enabled.",
+    "country": "US",
+    "headquartersSource": "https://www.arista.com/en/company/quick-facts",
+    "headquartersEvidence": "Official Quick Facts identifies Santa Clara, California as headquarters.",
+    "tags": ["networking", "hardware"],
+    "tagsSource": "https://www.arista.com/en/company",
+    "notes": "Uses the shared SmartRecruiters reader owned by the integration agent. Admission requires a passing generated full worker proof; no catalog or tracker changes were made here."
+  }
+}

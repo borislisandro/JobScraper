@@ -1,0 +1,14 @@
+{
+  "id": "asm-international",
+  "name": "ASM International",
+  "baseUrl": "https://job-boards.eu.greenhouse.io/asm",
+  "adapterId": "greenhouse",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "token": "asm",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+  }
+}

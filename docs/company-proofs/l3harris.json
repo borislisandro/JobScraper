@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "name": "L3Harris",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:23:03.603Z",
+  "finishedAt": "2026-09-02T15:32:58.353Z",
+  "source": {
+    "id": "l3harris",
+    "name": "L3Harris",
+    "baseUrl": "https://careers.l3harris.com",
+    "adapterId": "l3harris",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "careers.l3harris.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "413f78f7ff9f268bfb31f090dca99eb0ce171974b6e8aac7cef4afc6daf8a7db",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "2c250acf46aa1fcfa9488ca2697787949222a0b2dbf792e9065d14d361483742"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "l3harris",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 1924,
+        "persisted": 1924,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 258,
+        "boardTotal": 1924,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 588553,
+        "pages": 129,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 588553,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 889,
+              "pacing": 461968,
+              "backoff": 0,
+              "response": 123002,
+              "body": 646,
+              "browser": 0,
+              "adapterOther": 2033,
+              "emit": 15
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 258,
+                "pacingMs": 461968,
+                "backoffMs": 0,
+                "responseMs": 123002,
+                "bodyMs": 646
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 129
+          }
+        }
+      }
+    },
+    "jobs": 1924,
+    "uniqueIdentities": 1924,
+    "uniqueHashes": 1924,
+    "samples": [
+      {
+        "externalId": "100038776560",
+        "title": "Sr Specialist, Product Analyst",
+        "company": "L3Harris",
+        "location": "Rochester, NY",
+        "postedAt": null,
+        "canonicalUrl": "https://careers.l3harris.com/en/job/rochester/sr-specialist-product-analyst/4832/100038776560",
+        "applyUrl": "https://careers.l3harris.com/en/job/rochester/sr-specialist-product-analyst/4832/100038776560",
+        "descriptionStatus": "pending",
+        "descriptionChars": 8
+      },
+      {
+        "externalId": "99854683968",
+        "title": "PCB Support Designer",
+        "company": "L3Harris",
+        "location": "Salt Lake City, UT",
+        "postedAt": null,
+        "canonicalUrl": "https://careers.l3harris.com/en/job/salt-lake-city/pcb-support-designer/4832/99854683968",
+        "applyUrl": "https://careers.l3harris.com/en/job/salt-lake-city/pcb-support-designer/4832/99854683968",
+        "descriptionStatus": "pending",
+        "descriptionChars": 21
+      },
+      {
+        "externalId": "96299148880",
+        "title": "Electro-Mechanical (AFTERNOONS)B",
+        "company": "L3Harris",
+        "location": "Waterdown, Ontario",
+        "postedAt": null,
+        "canonicalUrl": "https://careers.l3harris.com/en/job/waterdown/electro-mechanical-afternoons-b/4832/96299148880",
+        "applyUrl": "https://careers.l3harris.com/en/job/waterdown/electro-mechanical-afternoons-b/4832/96299148880",
+        "descriptionStatus": "pending",
+        "descriptionChars": 13
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "l3harris",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 2784,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2784,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 1023,
+              "backoff": 0,
+              "response": 1316,
+              "body": 71,
+              "browser": 0,
+              "adapterOther": 363,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 1023,
+                "backoffMs": 0,
+                "responseMs": 1316,
+                "bodyMs": 71
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "43598",
+        "title": "Sr Specialist, Product Analyst",
+        "company": "L3Harris",
+        "location": "Rochester, NY",
+        "postedAt": null,
+        "canonicalUrl": "https://careers.l3harris.com/en/job/rochester/sr-specialist-product-analyst/4832/100038776560",
+        "applyUrl": "https://careers.l3harris.com/en/job/rochester/sr-specialist-product-analyst/4832/100038776560",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7097
+      },
+      {
+        "externalId": "43586",
+        "title": "PCB Support Designer",
+        "company": "L3Harris",
+        "location": "Salt Lake City, UT",
+        "postedAt": null,
+        "canonicalUrl": "https://careers.l3harris.com/en/job/salt-lake-city/pcb-support-designer/4832/99854683968",
+        "applyUrl": "https://careers.l3harris.com/en/job/salt-lake-city/pcb-support-designer/4832/99854683968",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4136
+      },
+      {
+        "externalId": "37384",
+        "title": "Electro-Mechanical (AFTERNOONS)B",
+        "company": "L3Harris",
+        "location": "Waterdown, Ontario",
+        "postedAt": null,
+        "canonicalUrl": "https://careers.l3harris.com/en/job/waterdown/electro-mechanical-afternoons-b/4832/96299148880",
+        "applyUrl": "https://careers.l3harris.com/en/job/waterdown/electro-mechanical-afternoons-b/4832/96299148880",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5137
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "l3harris",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 1924,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 15,
+        "requests": 2,
+        "skipped": 15,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 3105,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 3105,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 2626,
+              "backoff": 0,
+              "response": 118,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 341,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 2,
+                "pacingMs": 2626,
+                "backoffMs": 0,
+                "responseMs": 118,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 1
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

@@ -1,0 +1,13 @@
+{
+  "id": "bae-systems",
+  "name": "BAE Systems",
+  "baseUrl": "https://jobs.baesystems.com",
+  "adapterId": "bae-systems",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "jobs.baesystems.com"
+  }
+}

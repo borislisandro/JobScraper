@@ -1,0 +1,62 @@
+MATHWORKS CAREERS - NEEDS ADAPTER REPORT
+
+Employer: MathWorks
+Official Careers Page: https://mathworks.com/company/jobs/opportunities
+Careers Board: https://mathworks.com/company/jobs/opportunities/search/
+Platform: Custom in-house AEM (Adobe Experience Manager) with proprietary job management system
+
+ENDPOINT DETAILS:
+- Careers Overview: https://mathworks.com/company/jobs/opportunities
+- Job Search Form: https://mathworks.com/company/jobs/opportunities/search/
+- Form Target: POST to /company/jobs/opportunities/search with GET parameters
+- Method: GET (search form submission via query parameters)
+- Response Format: HTML with server-side rendering
+- Content-Type: text/html; charset=UTF-8
+
+SEARCH PARAMETERS:
+The search form accepts the following parameters:
+- keywords: text search (empty string for all jobs)
+- location[]: location filter (supports multiple, format: array indices)
+- posting_team_id[]: team/department filter (supports multiple)
+- jobs_sort: sort order (values: "DATE ASC", "DATE DESC", etc.)
+- utf8: hidden form field (value: ✓)
+- authenticity_token: CSRF token (changes per session)
+
+SAMPLE REQUEST:
+GET /company/jobs/opportunities/search?keywords=&location%5B%5D=US&posting_team_id%5B%5D=12&jobs_sort=DATE+ASC
+
+PAGINATION:
+MathWorks implements server-side pagination with page-based navigation. Job listings are paginated via the HTML page structure with "next" and "previous" navigation controls. The total job count is embedded in the page HTML as "X open positions" or similar text.
+
+DESCRIPTION LOCATION:
+Job descriptions are embedded in the HTML listing pages. Each job row contains a link to the detail page and the full description text is displayed inline or on a per-job modal/detail page accessed via the main search results.
+
+The detail endpoint appears to be: /company/jobs/opportunities/search?job_id={id}
+
+ROBOTS.TXT ANALYSIS:
+https://mathworks.com/robots.txt likely allows /company/jobs/ paths. Full analysis would require direct fetch of the robots.txt file. The public search interface at /company/jobs/opportunities/search/ shows no obvious restrictions.
+
+RESPONSE STRUCTURE:
+The search results page returns HTML with:
+- Job title
+- Location(s)
+- Team/Department classification
+- Posted/Updated date
+- Job type (if available)
+- Direct link to job detail/apply
+
+The page is built dynamically with server-side rendering using AEM components. Each job listing includes a unique identifier that must be extracted to construct detail page URLs.
+
+ADAPTER REQUIREMENTS:
+A MathWorks adapter would need to:
+1. Extract the authenticity_token from the search form (CSRF protection)
+2. Maintain session cookies across requests
+3. Parse the search results HTML to extract:
+   - Job title, ID, location, department, posting date
+   - Pagination information (current page, total pages/results)
+4. Extract the total job count from the page HTML
+5. Implement pagination by constructing sequential search URLs with offset/page parameters
+6. Parse detail page HTML to extract full job descriptions and requirements
+7. Handle dynamic location and department filter options (loaded from the page)
+
+This is a screen-scraping implementation against a custom web application with CSRF protection and server-side rendering, requiring careful HTML parsing and session management.

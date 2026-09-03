@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "name": "Cirrus Logic",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T16:02:33.366Z",
+  "finishedAt": "2026-09-02T16:02:35.641Z",
+  "source": {
+    "id": "cirrus-logic",
+    "name": "Cirrus Logic",
+    "baseUrl": "https://jobs.eu.lever.co/cirrus",
+    "adapterId": "lever",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "token": "cirrus",
+      "maxPages": 500,
+      "requestDelayMs": 1000,
+      "expectedHost": "api.eu.lever.co"
+    },
+    "onboardingEvidence": {
+      "officialCareersUrl": "https://www.cirrus.com/careers",
+      "provenance": "On 2026-09-02 the official careers page's Search All Jobs link opened https://www.cirrus.com/careers/jobs. Its rendered page displayed 113 opportunities and linked each posting to https://jobs.eu.lever.co/cirrus/<uuid>. The official corporate page was readable in the browser despite direct corporate fetches returning 403.",
+      "platform": "Lever EU",
+      "token": "cirrus",
+      "publishedTotal": 113,
+      "listingEndpoint": "https://api.eu.lever.co/v0/postings/cirrus?mode=json",
+      "listingEvidence": "Anonymous GET without a limit returned all 113 postings, equal to both the corporate Displaying 113 opportunities count and 113 distinct posting links on the hosted Lever board. Pagination uses limit and skip; GET ?mode=json&limit=100&skip=100 returned the final 13 rows. Top level is an array, not an object with a total.",
+      "identitySamples": [
+        {
+          "title": "Design Verification Engineer (EDI)",
+          "location": "Edinburgh, Scotland; Newbury, England",
+          "id": "945291b1-7cb5-4dba-bed3-9322b381086a",
+          "url": "https://jobs.eu.lever.co/cirrus/945291b1-7cb5-4dba-bed3-9322b381086a"
+        },
+        {
+          "title": "Senior Formal Verification Engineer (CH-64001149)",
+          "location": "Austin, Texas",
+          "id": "37d8ca48-3156-422f-ad6a-183e8f67d2f0",
+          "url": "https://jobs.eu.lever.co/cirrus/37d8ca48-3156-422f-ad6a-183e8f67d2f0"
+        }
+      ],
+      "descriptionEvidence": "Descriptions are inline. descriptionPlain contains the introduction and summary; lists[].text/content carries responsibilities and qualifications, and additionalPlain contains further conditions. The reader must retain all sections, rather than treating descriptionPlain alone as the full job description.",
+      "robots": "Both https://api.eu.lever.co/robots.txt and https://jobs.eu.lever.co/robots.txt returned User-agent: *, Allow: /, Crawl-delay: 1. requestDelayMs is 1000; URL guards remain enabled.",
+      "country": "US",
+      "headquartersSource": "https://investor.cirrus.com/news-and-events/investor-news/news-details/2026/Cirrus-Logic-Named-to-Fast-Companys-Annual-List-of-the-Worlds-Most-Innovative-Companies-of-2026/default.aspx",
+      "headquartersEvidence": "Official company release identifies headquarters in Austin, Texas.",
+      "tags": [
+        "semiconductor",
+        "mixed-signal",
+        "audio"
+      ],
+      "tagsSource": "https://investor.cirrus.com/news-and-events/investor-news/news-details/2026/Cirrus-Logic-Named-to-Fast-Companys-Annual-List-of-the-Worlds-Most-Innovative-Companies-of-2026/default.aspx",
+      "tagsEvidence": "The company describes its high-precision, low-power analog and mixed-signal processing solutions for audio, sensing and haptics.",
+      "notes": "The integration owner's Lever reader now infers api.eu.lever.co from the official jobs.eu.lever.co base URL and includes description, responsibility/qualification lists, and additional text. Admission requires a passing generated full proof. No shared files were changed by this task."
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "d69121db0c25a9f75959ce17aa94ce87f739d0d5ab2f07b44ce5761157261d33"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cirrus-logic",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 113,
+        "persisted": 113,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 1650,
+        "pages": 2,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1650,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 24,
+              "pacing": 506,
+              "backoff": 0,
+              "response": 869,
+              "body": 212,
+              "browser": 0,
+              "adapterOther": 28,
+              "emit": 10
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 2,
+                "pacingMs": 506,
+                "backoffMs": 0,
+                "responseMs": 869,
+                "bodyMs": 212
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 113,
+    "uniqueIdentities": 113,
+    "uniqueHashes": 113,
+    "samples": [
+      {
+        "externalId": "639a7c66-76c4-4c22-9b9f-43af17595103",
+        "title": "Account Manager",
+        "company": "Cirrus Logic",
+        "location": "Tokyo",
+        "postedAt": "2026-01-30",
+        "canonicalUrl": "https://jobs.eu.lever.co/cirrus/639a7c66-76c4-4c22-9b9f-43af17595103",
+        "applyUrl": "https://jobs.eu.lever.co/cirrus/639a7c66-76c4-4c22-9b9f-43af17595103",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3338
+      },
+      {
+        "externalId": "b8148961-650b-420d-a853-91b7500a1f96",
+        "title": "Principal SoC Architect (ML Accelerators)",
+        "company": "Cirrus Logic",
+        "location": "Austin, Texas",
+        "postedAt": "2026-02-06",
+        "canonicalUrl": "https://jobs.eu.lever.co/cirrus/b8148961-650b-420d-a853-91b7500a1f96",
+        "applyUrl": "https://jobs.eu.lever.co/cirrus/b8148961-650b-420d-a853-91b7500a1f96",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6768
+      },
+      {
+        "externalId": "05f56395-12dd-482b-840d-488f79bb2798",
+        "title": "Validation & Characterization Engineer - Global Operations",
+        "company": "Cirrus Logic",
+        "location": "Austin, Texas",
+        "postedAt": "2026-03-26",
+        "canonicalUrl": "https://jobs.eu.lever.co/cirrus/05f56395-12dd-482b-840d-488f79bb2798",
+        "applyUrl": "https://jobs.eu.lever.co/cirrus/05f56395-12dd-482b-840d-488f79bb2798",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4630
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cirrus-logic",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 429,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 430,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 250,
+              "body": 161,
+              "browser": 0,
+              "adapterOther": 8,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 250,
+                "bodyMs": 161
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

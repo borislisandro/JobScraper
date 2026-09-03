@@ -1,0 +1,13 @@
+{
+  "id": "synopsys",
+  "name": "Synopsys",
+  "baseUrl": "https://careers.synopsys.com",
+  "adapterId": "synopsys",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "careers.synopsys.com"
+  }
+}

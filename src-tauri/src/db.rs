@@ -50,11 +50,58 @@ fn now() -> String {
 pub const SYNC_HEARTBEAT: &str = "sync.heartbeatAt";
 const SYNC_BACKGROUND: &str = "sync.background";
 const HEARTBEAT_FRESH_SECS: i64 = 300;
-// Bump whenever any starter's URL, adapter or settings change. A pack corrected without a new
-// version reaches nobody: install_starter_pack stops at the version check, and every database
-// stamped with the old number keeps the values that did not work. That is exactly how installs
-// ended up reading jobs.cisco.com and www.careers.mediatek.com long after both were fixed here.
-const STARTER_PACK_VERSION: &str = "2026-09-02";
+/// Every employer this app already knows how to read: which adapter reads its board, and the
+/// settings that adapter needs. It lives in `sidecar/company-catalog.json` because the sidecar
+/// tests parse the same file — one list, checked from both sides, rather than a Rust array and a
+/// JavaScript copy of it that drift apart.
+///
+/// A company in here never needs the manual "Add source" form: the address, the adapter and the
+/// advanced settings are all known, and every one of them was verified against the live board.
+/// "Add source" is what remains for the employers this list does not cover.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CatalogCompany {
+    pub id: String,
+    pub name: String,
+    pub country: String,
+    pub tags: Vec<String>,
+    pub adapter_id: String,
+    pub base_url: String,
+    pub config: serde_json::Value,
+    /// Seeded into a fresh database (the twenty-one the pack has always installed). The rest are
+    /// offered in the app and added on request, so a new install does not open on 134 sources.
+    #[serde(default)]
+    pub starter: bool,
+    #[serde(default = "active_kind")]
+    pub kind: String,
+    pub disabled_reason: Option<String>,
+    /// When this entry was last read from the live board, and how many openings it held then.
+    #[serde(default)]
+    pub verified: Option<serde_json::Value>,
+}
+fn active_kind() -> String {
+    "active".into()
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CompanyCatalog {
+    pub version: String,
+    pub companies: Vec<CatalogCompany>,
+}
+static CATALOG: std::sync::LazyLock<CompanyCatalog> = std::sync::LazyLock::new(|| {
+    serde_json::from_str(include_str!("../../sidecar/company-catalog.json"))
+        .expect("sidecar/company-catalog.json is not a readable company catalog")
+});
+pub fn company_catalog() -> &'static CompanyCatalog {
+    &CATALOG
+}
+// Bump the catalog's version whenever any starter's URL, adapter or settings change. A pack
+// corrected without a new version reaches nobody: install_starter_pack stops at the version check,
+// and every database stamped with the old number keeps the values that did not work. That is
+// exactly how installs ended up reading jobs.cisco.com and www.careers.mediatek.com long after
+// both were fixed here.
+fn starter_pack_version() -> &'static str {
+    &CATALOG.version
+}
 /// Conflict snapshots are immutable audit evidence. Old, pre-operational snapshots
 /// deliberately fail closed: they cannot be used to delete or re-key a live row.
 fn dedupe_snapshot_id(snapshot: &str) -> ApiResult<String> {
@@ -549,6 +596,8 @@ pub async fn new_jobs_since(
 #[serde(rename_all = "camelCase")]
 pub struct BackgroundSyncStatus {
     pub enabled: bool,
+    pub issue: Option<String>,
+    pub last_result: Option<u32>,
     pub requested: bool,
     pub debug_build: bool,
 }
@@ -561,8 +610,11 @@ async fn background_sync_status_pool(pool: &SqlitePool) -> ApiResult<BackgroundS
         .is_some_and(|value| value == "true");
     let executable = std::env::current_exe().map_err(|e| e.to_string())?;
     let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    let task = run_scheduler_blocking(move || scheduler.status(SYNC_TASK)).await?;
     Ok(BackgroundSyncStatus {
-        enabled: run_scheduler_blocking(move || scheduler.exists(SYNC_TASK)).await?,
+        enabled: task.enabled,
+        issue: task.issue,
+        last_result: task.last_result,
         requested,
         debug_build: cfg!(debug_assertions),
     })
@@ -659,7 +711,7 @@ pub struct PersistBatchResult {
     pub written: u32,
     pub unchanged: u32,
 }
-const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
+const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company,EXISTS(SELECT 1 FROM application_attempts att WHERE att.application_id=a.id AND att.resolved_at IS NULL) AS pending_confirmation FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
     let url = Url::parse(value).map_err(|_| "A valid HTTP(S) URL is required".to_string())?;
     if !matches!(url.scheme(), "http" | "https") {
@@ -755,7 +807,7 @@ impl Database {
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| e.to_string())?;
-        if installed.as_deref() == Some(STARTER_PACK_VERSION) {
+        if installed.as_deref() == Some(starter_pack_version()) {
             return Ok(());
         }
         // Stable IDs make this dated pack idempotent even when a user renames a
@@ -770,45 +822,27 @@ impl Database {
         // fingerprint. Microchip's board is a Workday tenant on wd5.myworkdaysite.com (its own
         // careers host only 302s to a marketing page), and u-blox's openings come from the Algolia
         // index its job-openings page queries client-side; both were verified live.
-        let starters = [
-            ("00000000-0000-4000-8000-000000000001","Microchip","https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External","workday","wd5.myworkdaysite.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"microchiphr\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000002","Analog Devices","https://analogdevices.wd1.myworkdayjobs.com/","workday","analogdevices.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"analogdevices\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000003","Broadcom","https://broadcom.wd1.myworkdayjobs.com/","workday","broadcom.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External_Career\",\"tenant\":\"broadcom\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000004","Intel","https://intel.wd1.myworkdayjobs.com/","workday","intel.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"intel\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000005","Marvell","https://marvell.wd1.myworkdayjobs.com/","workday","marvell.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"MarvellCareers\",\"tenant\":\"marvell\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000006","STMicroelectronics","https://stmicroelectronics.eightfold.ai/","eightfold","stmicroelectronics.eightfold.ai","active","{\"domain\":\"stmicroelectronics.com\",\"eightfoldApi\":\"legacy\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000007","NVIDIA","https://nvidia.wd5.myworkdayjobs.com/","workday","nvidia.wd5.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"NVIDIAExternalCareerSite\",\"splitFacet\":\"jobFamilyGroup\",\"splitThreshold\":2000,\"tenant\":\"nvidia\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000008","GlobalFoundries","https://careers.gf.com/","eightfold","careers.gf.com","active","{\"domain\":\"globalfoundries.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000009","Micron","https://micron.wd1.myworkdayjobs.com/","workday","micron.wd1.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"External\",\"tenant\":\"micron\"}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000010","Qualcomm","https://careers.qualcomm.com/","eightfold","careers.qualcomm.com","active","{\"domain\":\"qualcomm.com\",\"eightfoldApi\":\"pcsx\",\"maxPages\":500,\"requestDelayMs\":800,\"retryForbidden\":true}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000011","Arm","https://careers.arm.com/search-jobs","arm","careers.arm.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000012","AMD","https://careers.amd.com/","amd","careers.amd.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000013","Cisco","https://careers.cisco.com/global/en/search-results","cisco","careers.cisco.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000014","Apple","https://jobs.apple.com/en-us/search?location=","apple","jobs.apple.com","active","{\"locale\":\"en-us\",\"maxPages\":500,\"requestDelayMs\":250}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000015","MediaTek","https://careers.mediatek.com/en/jobs","mediatek","careers.mediatek.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000016","u-blox","https://www.u-blox.com/en/job-openings","u-blox","","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000017","Google","https://www.google.com/about/careers/applications/jobs/results/","google","www.google.com","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            // SK hynix's listings live on two boards it does not host (skcareers.com and a
-            // Greenhouse board), so no single expectedHost describes this source's traffic.
-            ("00000000-0000-4000-8000-000000000018","SK hynix","https://talent.skhynix.com/hub/en/apply/job","sk-hynix","","active","{\"maxPages\":500}","Starter source is disabled until you review and enable it."),
-            ("00000000-0000-4000-8000-000000000019","Marvell (reference)","https://www.marvell.com/company/careers.html","reference","www.marvell.com","reference","{}","Reference-only source: it is never scraped."),
-            ("00000000-0000-4000-8000-000000000020","NXP","https://nxp.wd3.myworkdayjobs.com/","workday","nxp.wd3.myworkdayjobs.com","active","{\"maxPages\":500,\"site\":\"careers\",\"tenant\":\"nxp\"}","Starter source is disabled until you review and enable it."),
-        ];
-        for (source_id, name, url, adapter, host, kind, extra_config, reason) in starters {
+        let starters: Vec<&CatalogCompany> = company_catalog()
+            .companies
+            .iter()
+            .filter(|company| company.starter)
+            .collect();
+        for company in starters {
+            let (source_id, name, url, adapter, kind) = (
+                company.id.as_str(),
+                company.name.as_str(),
+                company.base_url.as_str(),
+                company.adapter_id.as_str(),
+                company.kind.as_str(),
+            );
+            let reason = company.disabled_reason.as_deref();
             let t = now();
             sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,1,0,?,?)")
     .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(reason).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":STARTER_PACK_VERSION,"adapterVersion":"1.1.0","mode":"direct"});
-            if !host.is_empty() {
-                config["expectedHost"] = serde_json::json!(host);
-            }
-            if let (Some(base), Some(extra)) = (
-                config.as_object_mut(),
-                serde_json::from_str::<serde_json::Value>(extra_config)
-                    .ok()
-                    .and_then(|v| v.as_object().cloned()),
-            ) {
-                base.extend(extra);
+            let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":starter_pack_version(),"adapterVersion":"1.1.0","mode":"direct"});
+            if let (Some(base), Some(extra)) = (config.as_object_mut(), company.config.as_object())
+            {
+                base.extend(extra.clone());
             }
             sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
                 .bind(id()).bind(source_id).bind(config.to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
@@ -1006,7 +1040,7 @@ impl Database {
             }
         }
         sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
-            .bind(STARTER_PACK_VERSION).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            .bind(starter_pack_version()).execute(&self.pool).await.map_err(|e| e.to_string())?;
         Ok(())
     }
     pub async fn persist_worker_job(
@@ -1151,8 +1185,8 @@ impl Database {
             stored_checked
         };
         let description_error = payload.get("descriptionError").and_then(|v| v.as_str());
-        sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,requisition_id,dedupe_fingerprint,title,company,location,location_countries,work_mode,description_text,description_html,detail_url,description_status,description_error,description_checked_at,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,listing_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET external_id=COALESCE(excluded.external_id,jobs.external_id),canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,requisition_id=COALESCE(excluded.requisition_id,jobs.requisition_id),dedupe_fingerprint=excluded.dedupe_fingerprint,title=excluded.title,company=excluded.company,location=excluded.location,location_countries=excluded.location_countries,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,detail_url=COALESCE(excluded.detail_url,jobs.detail_url),description_status=excluded.description_status,description_error=excluded.description_error,description_checked_at=excluded.description_checked_at,posted_at=excluded.posted_at,closing_at=excluded.closing_at,salary_min=excluded.salary_min,salary_max=excluded.salary_max,salary_currency=excluded.salary_currency,salary_period=excluded.salary_period,salary_confidence=excluded.salary_confidence,seniority=excluded.seniority,skills_json=excluded.skills_json,content_hash=excluded.content_hash,listing_hash=COALESCE(excluded.listing_hash,jobs.listing_hash),provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,adapter_version=excluded.adapter_version,updated_at=excluded.updated_at")
-            .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(requisition).bind(&fingerprint).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(crate::locations::stored(&crate::locations::resolve(payload.get("location").and_then(|v|v.as_str()),canonical.as_deref()))).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(description_html).bind(payload.get("detailUrl").and_then(|v|v.as_str())).bind(incoming_status).bind(description_error).bind(checked_at).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(listing_hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut **tx).await.map_err(|e|e.to_string())?;
+        sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,requisition_id,dedupe_fingerprint,first_seen_at,title,company,location,location_countries,work_mode,description_text,description_html,detail_url,description_status,description_error,description_checked_at,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,listing_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET external_id=COALESCE(excluded.external_id,jobs.external_id),canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,requisition_id=COALESCE(excluded.requisition_id,jobs.requisition_id),dedupe_fingerprint=excluded.dedupe_fingerprint,title=excluded.title,company=excluded.company,location=excluded.location,location_countries=excluded.location_countries,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,detail_url=COALESCE(excluded.detail_url,jobs.detail_url),description_status=excluded.description_status,description_error=excluded.description_error,description_checked_at=excluded.description_checked_at,posted_at=excluded.posted_at,closing_at=excluded.closing_at,salary_min=excluded.salary_min,salary_max=excluded.salary_max,salary_currency=excluded.salary_currency,salary_period=excluded.salary_period,salary_confidence=excluded.salary_confidence,seniority=excluded.seniority,skills_json=excluded.skills_json,content_hash=excluded.content_hash,listing_hash=COALESCE(excluded.listing_hash,jobs.listing_hash),provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,adapter_version=excluded.adapter_version,updated_at=excluded.updated_at")
+            .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(requisition).bind(&fingerprint).bind(&t).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(crate::locations::stored(&crate::locations::resolve(payload.get("location").and_then(|v|v.as_str()),canonical.as_deref()))).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(description_html).bind(payload.get("detailUrl").and_then(|v|v.as_str())).bind(incoming_status).bind(description_error).bind(checked_at).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(listing_hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut **tx).await.map_err(|e|e.to_string())?;
         sqlx::query(
             "INSERT OR IGNORE INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,?,?)",
         )
@@ -1367,6 +1401,20 @@ impl Database {
         tx.commit().await.map_err(|e| e.to_string())?;
         Ok(())
     }
+}
+/// The employers this app can already read, for the picker that adds one. Every entry carries the
+/// adapter and the settings that were verified against that board, so adding one asks the user for
+/// nothing and reads no site to work it out.
+#[tauri::command]
+pub async fn list_company_catalog() -> ApiResult<Vec<CatalogCompany>> {
+    // The legacy Marvell bookmark stays in the starter pack for compatibility, but it is not
+    // another supported board and save_source correctly refuses to enable references.
+    Ok(company_catalog()
+        .companies
+        .iter()
+        .filter(|company| company.kind != "reference")
+        .cloned()
+        .collect())
 }
 #[tauri::command]
 pub async fn list_sources(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Source>> {
@@ -1736,6 +1784,28 @@ pub async fn unmerge_duplicate_jobs(
     sqlx::query("UPDATE duplicate_candidates SET status='unmerged',decided_at=? WHERE (left_job_id=? AND right_job_id=?) OR (left_job_id=? AND right_job_id=?)").bind(&t).bind(&canonical_job_id).bind(&merged_job_id).bind(&merged_job_id).bind(&canonical_job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())
 }
+/// Two sources on the same address are not two sources. A listing is re-identified by its
+/// canonical URL across the whole database and a job keeps the source that first stored it, so the
+/// second source re-reads the entire board, updates rows belonging to the first, and reports
+/// nothing saved — every run, forever, with no error to explain it. Comparing the address the way a
+/// browser would (case-insensitive host, a trailing slash meaning nothing) catches the way this
+/// actually happens: the same careers page pasted in twice.
+fn same_board(left: &str, right: &str) -> bool {
+    let normalise = |value: &str| {
+        Url::parse(value)
+            .map(|url| {
+                format!(
+                    "{}://{}{}{}",
+                    url.scheme(),
+                    url.host_str().unwrap_or_default().to_ascii_lowercase(),
+                    url.path().trim_end_matches('/'),
+                    url.query().map(|q| format!("?{q}")).unwrap_or_default()
+                )
+            })
+            .unwrap_or_else(|_| value.trim_end_matches('/').to_ascii_lowercase())
+    };
+    normalise(left) == normalise(right)
+}
 #[tauri::command]
 pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) -> ApiResult<Source> {
     valid_url(&input.base_url, input.allow_private_network)?;
@@ -1743,6 +1813,20 @@ pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) ->
         return Err("Reference sources cannot be enabled for scraping".into());
     }
     let source_id = input.id.unwrap_or_else(id);
+    let followed: Vec<(String, String, String)> =
+        sqlx::query_as("SELECT id,name,base_url FROM sources WHERE deleted_at IS NULL AND id<>?")
+            .bind(&source_id)
+            .fetch_all(&state.db.pool)
+            .await
+            .map_err(|e| e.to_string())?;
+    if let Some((_, name, _)) = followed
+        .iter()
+        .find(|(_, _, url)| same_board(url, &input.base_url))
+    {
+        return Err(format!(
+            "That board is already followed as \"{name}\". Two sources on one address cannot both hold its jobs; edit or delete \"{name}\" instead."
+        ));
+    }
     let t = now();
     let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
     sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,robots_acknowledged_at,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?, ?,?,?, ?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,base_url=excluded.base_url,adapter_id=excluded.adapter_id,enabled=excluded.enabled,kind=excluded.kind,disabled_reason=excluded.disabled_reason,robots_override=excluded.robots_override,robots_acknowledged_at=excluded.robots_acknowledged_at,allow_private_network=excluded.allow_private_network,updated_at=excluded.updated_at")
@@ -1798,6 +1882,12 @@ pub struct JobFilter {
     /// "2 Locations" and a link that named no office. Off, because a country filter that quietly
     /// includes everything unplaceable is the filter people complain about.
     pub include_unknown_locations: bool,
+    /// Also show what has been dismissed. Off by default: "not for me" is a decision, and a list
+    /// that keeps showing what you have already judged is the reason nobody finishes reading it.
+    pub include_dismissed: bool,
+    /// Only listings first seen since this instant. The Jobs page sends the moment it was last
+    /// marked reviewed, so "new" means new to the reader rather than new to the board.
+    pub first_seen_after: Option<String>,
     /// Which of the followed sources to show. Empty means all of them, which is the default.
     /// This is the view, not the collection: whether a source is followed at all is
     /// `sources.enabled`, and narrowing the list must never quietly retire a board.
@@ -1806,7 +1896,7 @@ pub struct JobFilter {
 // The list never renders a description — it is read only when a card is opened, through
 // load_job_description(). Keyword search still matches against the real column in the WHERE clause;
 // only the projection is trimmed, because that is what crosses into the window.
-const JOB_SELECT: &str = "SELECT j.id,j.source_id,j.title,j.company,j.location,j.work_mode,j.canonical_url,j.apply_url,'' AS description_text,j.description_status,j.posted_at,j.salary_min,j.salary_max,j.salary_currency,j.seniority,j.availability,j.created_at,j.updated_at,NULL AS score,NULL AS eligible,NULL AS reasons,(SELECT a.current_stage FROM applications a WHERE a.job_id=j.id ORDER BY a.created_at DESC LIMIT 1) AS application_stage FROM jobs j JOIN sources s ON s.id=j.source_id";
+const JOB_SELECT: &str = "SELECT j.id,j.source_id,j.title,j.company,j.location,j.work_mode,j.canonical_url,j.apply_url,'' AS description_text,j.description_status,j.dismissed_at,j.posted_at,j.salary_min,j.salary_max,j.salary_currency,j.seniority,j.availability,j.created_at,j.updated_at,NULL AS score,NULL AS eligible,NULL AS reasons,(SELECT a.current_stage FROM applications a WHERE a.job_id=j.id ORDER BY a.created_at DESC LIMIT 1) AS application_stage FROM jobs j JOIN sources s ON s.id=j.source_id";
 // Substring matching, not FTS. FTS5 tokenizes on word boundaries and treats punctuation as
 // syntax, so "verification" missed "Verification/Validation" while "C++" raised a syntax error.
 // instr() over lower() is what a user typing into a search box actually expects, and every
@@ -2005,6 +2095,112 @@ async fn job_countries_query(
     counted.sort_by(|a, b| b.jobs.cmp(&a.jobs).then_with(|| a.code.cmp(&b.code)));
     Ok((counted, unplaced))
 }
+/// Where a job added by hand lives. It is a real source so that everything downstream — the list,
+/// the filters, the country resolver, applications — treats a captured job like any other, but it
+/// is never scraped: nothing about a pasted link describes a board to read.
+pub const CAPTURED_SOURCE_ID: &str = "00000000-0000-4000-8000-00000000c0de";
+async fn captured_source(pool: &SqlitePool) -> ApiResult<()> {
+    let t = now();
+    sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Added by hand','about:blank','reference','1.1.0',1,'reference','Jobs you pasted a link to; there is no board here to read.',0,0,?,?)")
+        .bind(CAPTURED_SOURCE_ID)
+        .bind(&t)
+        .bind(&t)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+/// Stores a captured vacancy, after the person pasting the link has had a chance to correct it.
+/// Everything it stores came from that page or from them, so it goes through the same persistence
+/// path as a scraped listing and lands with the same shape.
+#[tauri::command]
+pub async fn save_captured_job(
+    job: serde_json::Value,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<String> {
+    let title = job
+        .get("title")
+        .and_then(|value| value.as_str())
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or("A job needs a title before it can be saved")?;
+    let url = job
+        .get("url")
+        .and_then(|value| value.as_str())
+        .unwrap_or_default();
+    valid_url(url, false)?;
+    captured_source(&state.db.pool).await?;
+    let payload = serde_json::json!({
+        "title": title,
+        "company": job.get("company").and_then(|v| v.as_str()).unwrap_or("").trim(),
+        "location": job.get("location").and_then(|v| v.as_str()),
+        "canonicalUrl": url,
+        "applyUrl": url,
+        "postedAt": job.get("postedAt").and_then(|v| v.as_str()),
+        "closingAt": job.get("closingAt").and_then(|v| v.as_str()),
+        "workMode": job.get("workMode").and_then(|v| v.as_str()),
+        "externalId": job.get("externalId").and_then(|v| v.as_str()).unwrap_or(url),
+        "descriptionText": job.get("descriptionText").and_then(|v| v.as_str()).unwrap_or(""),
+        "descriptionHtml": job.get("descriptionHtml").and_then(|v| v.as_str()).unwrap_or(""),
+        "descriptionStatus": "complete",
+        "skills": [],
+        "adapterVersion": "1.1.0",
+        "provenance": { "adapter": "captured", "sourceUrl": url },
+    });
+    state
+        .db
+        .persist_worker_job(&id(), CAPTURED_SOURCE_ID, &payload)
+        .await?;
+    let stored: String = sqlx::query_scalar("SELECT id FROM jobs WHERE source_id=? AND canonical_url=? ORDER BY updated_at DESC LIMIT 1")
+        .bind(CAPTURED_SOURCE_ID)
+        .bind(url)
+        .fetch_one(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    log(
+        &state.db.pool,
+        "info",
+        Some(CAPTURED_SOURCE_ID),
+        Some("Added by hand"),
+        "capture_job",
+        None,
+        &format!("Saved \"{title}\" from a pasted link."),
+        serde_json::json!({ "url": url }),
+    )
+    .await;
+    Ok(stored)
+}
+/// "Not for me", and its undo. Nothing is deleted: the listing keeps its place in the database, in
+/// search, and in every count — it simply stops appearing in a list whose whole problem is that it
+/// only ever grows.
+#[tauri::command]
+pub async fn set_job_dismissed(
+    job_id: String,
+    dismissed: bool,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    sqlx::query("UPDATE jobs SET dismissed_at=?,updated_at=? WHERE id=?")
+        .bind(dismissed.then(now))
+        .bind(now())
+        .bind(&job_id)
+        .execute(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+/// How many listings have arrived since the reader last said they were done, and when that was.
+/// Counted with the same visibility rules the list uses, so the number and the page agree.
+#[tauri::command]
+pub async fn new_since(since: Option<String>, state: State<'_, Arc<AppState>>) -> ApiResult<i64> {
+    let Some(since) = since.filter(|value| !value.is_empty()) else {
+        return Ok(0);
+    };
+    sqlx::query_scalar("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.enabled=1 AND s.deleted_at IS NULL AND j.availability NOT IN ('archived','closed') AND j.dismissed_at IS NULL AND coalesce(j.first_seen_at,j.created_at)>?")
+        .bind(since)
+        .fetch_one(&state.db.pool)
+        .await
+        .map_err(|e| e.to_string())
+}
 #[tauri::command]
 pub async fn list_jobs(
     filter: Option<JobFilter>,
@@ -2038,6 +2234,21 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
     );
     let (location_sql, location_terms) =
         location_clauses(&filter.countries, filter.include_unknown_locations);
+    let dismissed = if filter.include_dismissed {
+        ""
+    } else {
+        " AND j.dismissed_at IS NULL"
+    };
+    // Bound as a parameter rather than inlined: it comes from a stored setting, which is a string
+    // this process did not write.
+    let (fresh_sql, fresh_bind) = match filter.first_seen_after.as_deref().filter(|v| !v.is_empty())
+    {
+        Some(since) => (
+            " AND coalesce(j.first_seen_at,j.created_at)>?".to_string(),
+            vec![since.to_string()],
+        ),
+        None => (String::new(), Vec::new()),
+    };
     // Posting dates are stored as ISO strings, so text order is date order; the NULL test keeps
     // undated listings at the bottom instead of letting them win the descending sort.
     const JOB_PAGE_SIZE: i64 = 200;
@@ -2087,7 +2298,7 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
     };
     // One WHERE, shared by the count and the rows. They used to be spelled out separately, so a
     // filter added to one silently missed the other and the count disagreed with the list.
-    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}");
+    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}{dismissed}{fresh_sql}");
     let count_sql =
         format!("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id{where_sql}");
     let mut count_query = sqlx::query_scalar::<_, i64>(&count_sql);
@@ -2097,6 +2308,7 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
         .chain(title_terms.iter())
         .chain(keyword_terms.iter())
         .chain(location_terms.iter())
+        .chain(fresh_bind.iter())
     {
         count_query = count_query.bind(bound);
     }
@@ -2112,6 +2324,7 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
         .chain(title_terms.iter())
         .chain(keyword_terms.iter())
         .chain(location_terms.iter())
+        .chain(fresh_bind.iter())
     {
         query = query.bind(bound);
     }
@@ -2476,6 +2689,29 @@ pub async fn create_application(
         .await
         .map_err(|e| e.to_string())
 }
+/// Removes a saved application entirely — not the "Not for me" dismissal, which only hides a
+/// listing and keeps it scraped and searchable. This drops the tracked application itself: its
+/// notes, documents, interview records, reminders and any open apply attempt cascade with it via
+/// foreign keys. The job stays; it simply stops showing a stage once nothing references it.
+#[tauri::command]
+pub async fn delete_application(
+    application_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<()> {
+    delete_application_pool(&state.db.pool, &application_id).await
+}
+async fn delete_application_pool(pool: &SqlitePool, application_id: &str) -> ApiResult<()> {
+    let deleted = sqlx::query("DELETE FROM applications WHERE id=?")
+        .bind(application_id)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .rows_affected();
+    if deleted == 0 {
+        return Err("Application was not found".into());
+    }
+    Ok(())
+}
 #[tauri::command]
 pub async fn transition_application(
     input: StageInput,
@@ -2603,7 +2839,20 @@ pub async fn record_apply_decision(
         let due = ghost_due_from(&t, 14)?;
         sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)").bind(id()).bind(&application_id).bind(due).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
-    if decision != "not_yet" {
+    // "not_yet" leaves the attempt open (resolved_at stays NULL) so it can still be answered
+    // later from the Applications card, but records the resolution so the focus-edge auto-popup
+    // never re-asks it: without this, closing and reopening the app reset the in-memory dedupe
+    // and asked the same question on every single launch until the user picked yes or no.
+    if decision == "not_yet" {
+        sqlx::query(
+            "UPDATE application_attempts SET resolution=? WHERE id=? AND resolved_at IS NULL",
+        )
+        .bind(&decision)
+        .bind(&attempt)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    } else {
         sqlx::query("UPDATE application_attempts SET resolved_at=?,resolution=? WHERE id=? AND resolved_at IS NULL").bind(&t).bind(&decision).bind(&attempt).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
@@ -2803,6 +3052,33 @@ pub async fn open_apply(
         .map_err(|e| e.to_string())?;
     Ok(())
 }
+/// The Applications card's own "Confirm application" button, for an attempt a "not_yet" answer
+/// already silenced from the automatic focus-edge prompt. Looked up by application, not by the
+/// global "next" attempt, and ignores the resolution filter that keeps it out of that prompt.
+#[tauri::command]
+pub async fn confirm_application(
+    application_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Option<ApplyConfirmation>> {
+    attempt_for_application(&state.db.pool, &application_id).await
+}
+async fn attempt_for_application(
+    pool: &SqlitePool,
+    application_id: &str,
+) -> ApiResult<Option<ApplyConfirmation>> {
+    let row = sqlx::query("SELECT id,application_id,job_id,opened_at,original_stage FROM application_attempts WHERE application_id=? AND resolved_at IS NULL ORDER BY opened_at DESC LIMIT 1")
+        .bind(application_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(row.map(|r| ApplyConfirmation {
+        attempt_id: r.get(0),
+        application_id: r.get(1),
+        job_id: r.get(2),
+        opened_at: r.get(3),
+        original_stage: r.get(4),
+    }))
+}
 #[tauri::command]
 pub async fn pending_apply_confirmation(
     app: tauri::AppHandle,
@@ -2816,7 +3092,11 @@ pub async fn pending_apply_confirmation(
 }
 
 async fn next_apply_confirmation(pool: &SqlitePool) -> ApiResult<Option<ApplyConfirmation>> {
-    let row=sqlx::query("SELECT id,application_id,job_id,opened_at,original_stage FROM application_attempts WHERE resolved_at IS NULL ORDER BY opened_at DESC LIMIT 1").fetch_optional(pool).await.map_err(|e|e.to_string())?;
+    // resolution IS NULL means this attempt has never been shown a decision at all. Once "not_yet"
+    // sets resolution without resolving it (see record_apply_decision), it drops out of the
+    // automatic focus-edge prompt for good; the user answers it later from the Applications card
+    // via confirm_application, which looks the attempt up directly and ignores this filter.
+    let row=sqlx::query("SELECT id,application_id,job_id,opened_at,original_stage FROM application_attempts WHERE resolved_at IS NULL AND resolution IS NULL ORDER BY opened_at DESC LIMIT 1").fetch_optional(pool).await.map_err(|e|e.to_string())?;
     let value = row.map(|r| ApplyConfirmation {
         attempt_id: r.get(0),
         application_id: r.get(1),
@@ -2851,6 +3131,153 @@ fn mark_focus_prompt(shown: &mut Option<String>, attempt_id: &str) -> bool {
     } else {
         *shown = Some(attempt_id.to_owned());
         true
+    }
+}
+
+#[cfg(test)]
+mod apply_confirmation_tests {
+    use super::*;
+    use sqlx::sqlite::SqlitePoolOptions;
+
+    async fn migrated_pool() -> SqlitePool {
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect("sqlite::memory:")
+            .await
+            .unwrap();
+        sqlx::migrate!("./migrations").run(&pool).await.unwrap();
+        pool
+    }
+    /// One job and one planned application, ready for an attempt to be opened against it.
+    async fn seed_application(pool: &SqlitePool) {
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','json','1',1,'active',0,0,'t','t')").execute(pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','Engineer','Company','','[]','job-v1','t','1','t','t')").execute(pool).await.unwrap();
+        sqlx::query("INSERT INTO applications(id,job_id,current_stage,created_at,updated_at) VALUES('a','j','planned','t','t')").execute(pool).await.unwrap();
+        sqlx::query("INSERT INTO application_attempts(id,application_id,job_id,opened_at,original_stage) VALUES('att','a','j','t','planned')").execute(pool).await.unwrap();
+    }
+    async fn pending_confirmation(pool: &SqlitePool, application_id: &str) -> bool {
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM application_attempts att WHERE att.application_id=? AND att.resolved_at IS NULL)")
+            .bind(application_id).fetch_one(pool).await.unwrap()
+    }
+
+    // "Not yet" is a snooze, not a dismissal: it must not vanish from the automatic focus-edge
+    // prompt only to also vanish for the user. Before this test existed, `not_yet` never touched
+    // `application_attempts` at all, so the attempt stayed indistinguishable from a brand new one
+    // and the launch prompt asked about it again on every single app open.
+    #[tokio::test]
+    async fn not_yet_silences_the_automatic_prompt_but_stays_answerable() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        assert!(
+            next_apply_confirmation(&pool).await.unwrap().is_some(),
+            "a fresh attempt is asked about automatically"
+        );
+
+        sqlx::query("UPDATE application_attempts SET resolution='not_yet' WHERE id='att' AND resolved_at IS NULL").execute(&pool).await.unwrap();
+
+        assert!(
+            next_apply_confirmation(&pool).await.unwrap().is_none(),
+            "a snoozed attempt must not trigger the launch/focus prompt again"
+        );
+        assert!(
+            pending_confirmation(&pool, "a").await,
+            "the application still shows as needing a decision"
+        );
+        let revisited = attempt_for_application(&pool, "a").await.unwrap();
+        assert_eq!(
+            revisited.map(|value| value.attempt_id),
+            Some("att".to_string()),
+            "the Applications card can still bring the same attempt back up"
+        );
+    }
+
+    #[tokio::test]
+    async fn a_resolved_attempt_leaves_nothing_pending() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        sqlx::query(
+            "UPDATE application_attempts SET resolved_at='t',resolution='no' WHERE id='att'",
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        assert!(next_apply_confirmation(&pool).await.unwrap().is_none());
+        assert!(!pending_confirmation(&pool, "a").await);
+        assert!(
+            attempt_for_application(&pool, "a").await.unwrap().is_none(),
+            "there is nothing left for the card to reopen"
+        );
+    }
+
+    #[tokio::test]
+    async fn confirm_application_ignores_other_applications_open_attempts() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        assert!(attempt_for_application(&pool, "other-application")
+            .await
+            .unwrap()
+            .is_none());
+    }
+
+    // "Remove from Applications" needs to take everything hanging off the application with it —
+    // notes, timeline events, documents, reminders and the open attempt — not leave orphaned rows
+    // an unrelated application could later collide with. The job itself must survive: dismissing
+    // an application is not the same act as dismissing a listing.
+    #[tokio::test]
+    async fn deleting_an_application_cascades_its_own_records_and_spares_the_job() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        sqlx::query(
+            "INSERT INTO notes(id,application_id,body,created_at) VALUES('n','a','Note','t')",
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+        sqlx::query("INSERT INTO interviews(id,application_id,stage,scheduled_at,created_at) VALUES('i','a','screening','t','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO application_documents(id,application_id,kind,filename,content,sha256,created_at) VALUES('d','a','cv','r.pdf',x'00','h','t')").execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES('r','a','ghosted','t','pending','t')").execute(&pool).await.unwrap();
+
+        delete_application_pool(&pool, "a").await.unwrap();
+
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM applications WHERE id='a'")
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+            0
+        );
+        for (table, message) in [
+            ("notes", "note"),
+            ("interviews", "interview"),
+            ("application_documents", "document"),
+            ("reminders", "reminder"),
+            ("application_attempts", "open attempt"),
+        ] {
+            assert_eq!(
+                sqlx::query_scalar::<_, i64>(&format!(
+                    "SELECT count(*) FROM {table} WHERE application_id='a'"
+                ))
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+                0,
+                "{message} should cascade away with the application"
+            );
+        }
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM jobs WHERE id='j'")
+                .fetch_one(&pool)
+                .await
+                .unwrap(),
+            1,
+            "the job listing itself must not be touched"
+        );
+    }
+    #[tokio::test]
+    async fn deleting_an_application_that_does_not_exist_is_an_explicit_error() {
+        let pool = migrated_pool().await;
+        assert!(delete_application_pool(&pool, "missing").await.is_err());
     }
 }
 
@@ -4640,8 +5067,111 @@ mod matching_persistence_tests {
         assert!(config.get("pageSize").is_none(), "{config}");
         // The user's own search term is not collateral damage.
         assert_eq!(config["query"], "verification");
-        assert_eq!(config["starterPackVersion"], STARTER_PACK_VERSION);
+        assert_eq!(config["starterPackVersion"], starter_pack_version());
         std::fs::remove_dir_all(&root).ok();
+    }
+    // A second source on an address already followed cannot ever hold a job: listings are
+    // re-identified by canonical URL across the database, and a job keeps the source that stored it
+    // first. The duplicate reads the whole board on every run and reports nothing saved, with
+    // nothing to say why — so it is refused at the point it would be created.
+    #[tokio::test]
+    async fn a_board_already_followed_cannot_be_added_twice() {
+        assert!(same_board(
+            "https://broadcom.wd1.myworkdayjobs.com/",
+            "https://Broadcom.wd1.myworkdayjobs.com"
+        ));
+        assert!(same_board(
+            "https://careers.arm.com/search-jobs",
+            "https://careers.arm.com/search-jobs/"
+        ));
+        // A filtered view of the same host is a different board's worth of listings, and stays
+        // allowed: it is the only way to follow one slice of a large careers site.
+        assert!(!same_board(
+            "https://careers.arm.com/search-jobs",
+            "https://careers.arm.com/search-jobs/verification?orgIds=33099"
+        ));
+        assert!(!same_board(
+            "https://careers.arm.com/search-jobs",
+            "https://careers.amd.com/search-jobs"
+        ));
+    }
+    // Triage is the whole point of the Jobs page once the list is five figures long: a listing you
+    // have judged has to leave, and what arrived since you last looked has to be findable.
+    #[tokio::test]
+    async fn dismissing_hides_a_listing_without_losing_it_and_new_since_counts_arrivals() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','workday','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for (id, seen) in [
+            ("old", "2026-08-01T00:00:00Z"),
+            ("fresh", "2026-09-02T00:00:00Z"),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,canonical_url,first_seen_at,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s','Engineer','Chip Co',?,?,'','[]',?,'t','1',?,?)")
+                .bind(id).bind(format!("https://x.test/{id}")).bind(seen).bind(id).bind(seen).bind(seen).execute(&pool).await.unwrap();
+        }
+        let ids = |jobs: &[crate::domain::Job]| {
+            let mut out = jobs.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
+            out.sort();
+            out
+        };
+        // Dismissing is a decision, so it leaves the default list.
+        sqlx::query("UPDATE jobs SET dismissed_at='2026-09-02T09:00:00Z' WHERE id='old'")
+            .execute(&pool)
+            .await
+            .unwrap();
+        assert_eq!(
+            ids(&jobs_query(JobFilter::default(), &pool).await.unwrap()),
+            vec!["fresh"]
+        );
+        // But nothing was lost: asking for it brings it back, and it says when it was dismissed.
+        let shown = jobs_query(
+            JobFilter {
+                include_dismissed: true,
+                ..Default::default()
+            },
+            &pool,
+        )
+        .await
+        .unwrap();
+        assert_eq!(ids(&shown), vec!["fresh", "old"]);
+        assert!(shown
+            .iter()
+            .find(|j| j.id == "old")
+            .unwrap()
+            .dismissed_at
+            .is_some());
+        // "New" is measured from when the reader last said they were done, not from the board.
+        let since = |value: &str| JobFilter {
+            first_seen_after: Some(value.to_string()),
+            include_dismissed: true,
+            ..Default::default()
+        };
+        assert_eq!(
+            ids(&jobs_query(since("2026-09-01T00:00:00Z"), &pool)
+                .await
+                .unwrap()),
+            vec!["fresh"]
+        );
+        assert_eq!(
+            ids(&jobs_query(since("2026-07-01T00:00:00Z"), &pool)
+                .await
+                .unwrap()),
+            vec!["fresh", "old"]
+        );
+        // An empty mark means everything, rather than nothing.
+        assert_eq!(
+            jobs_query(
+                JobFilter {
+                    first_seen_after: Some(String::new()),
+                    include_dismissed: true,
+                    ..Default::default()
+                },
+                &pool
+            )
+            .await
+            .unwrap()
+            .len(),
+            2
+        );
     }
     // The picker is built from this, so what it must never do is offer a country the jobs on show
     // are not in — that was the whole complaint about a 250-entry list.
@@ -4846,7 +5376,7 @@ mod matching_persistence_tests {
         std::fs::create_dir_all(&root).unwrap();
         let db = Database::open(root.join("jobscraper.db")).await.unwrap();
         sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
-            .bind(STARTER_PACK_VERSION)
+            .bind(starter_pack_version())
             .execute(&db.pool)
             .await
             .unwrap();
@@ -5136,6 +5666,15 @@ mod matching_persistence_tests {
             .join("..")
             .join("sidecar")
             .join("starter-pack.fixture.json");
+        // Regenerate from the actual installer, so fixture updates never copy its defaults by
+        // hand. Ordinary test runs still fail on drift and never rewrite the checked-in file.
+        if std::env::var("UPDATE_STARTER_PACK_FIXTURE").as_deref() == Ok("1") {
+            std::fs::write(
+                &fixture_path,
+                format!("{}\n", serde_json::to_string_pretty(&actual).unwrap()),
+            )
+            .unwrap();
+        }
         let expected: Vec<serde_json::Value> =
             serde_json::from_str(&std::fs::read_to_string(&fixture_path).unwrap()).unwrap();
         assert_eq!(

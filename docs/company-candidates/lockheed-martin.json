@@ -1,0 +1,15 @@
+{
+  "id": "lockheed-martin",
+  "name": "Lockheed Martin",
+  "baseUrl": "https://lockheedmartin.eightfold.ai/careers",
+  "adapterId": "eightfold",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "domain": "lockheedmartin.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "expectedHost": "lockheedmartin.eightfold.ai"
+  }
+}

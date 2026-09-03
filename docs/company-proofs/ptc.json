@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "name": "PTC",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T14:27:08.096Z",
+  "finishedAt": "2026-09-02T14:27:22.951Z",
+  "source": {
+    "id": "ptc-proof",
+    "name": "PTC",
+    "baseUrl": "https://ptc.wd1.myworkdayjobs.com/PTC",
+    "adapterId": "workday",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "tenant": "ptc",
+      "site": "PTC",
+      "maxPages": 500,
+      "expectedHost": "ptc.wd1.myworkdayjobs.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "7dc2c124fa91e513d67494cbb1a9cecab6d6c41cc9b4692eec0491d6763bf183",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ptc-proof",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 180,
+        "persisted": 180,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 10,
+        "boardTotal": 180,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 8073,
+        "pages": 9,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 8074,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 47,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 7989,
+              "body": 14,
+              "browser": 0,
+              "adapterOther": 19,
+              "emit": 4
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 744,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 9,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 7245,
+                "bodyMs": 10
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 180,
+    "uniqueIdentities": 180,
+    "uniqueHashes": 180,
+    "samples": [
+      {
+        "externalId": "JR112314",
+        "title": "Associate Solutions Consultant",
+        "company": "PTC",
+        "location": "Boston MA USA",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Boston-MA-USA/Senior-Solutions-Consultant--PLM--Mountain-Pacific-_JR112314",
+        "applyUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Boston-MA-USA/Senior-Solutions-Consultant--PLM--Mountain-Pacific-_JR112314",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "JR112449",
+        "title": "Project Manager, Professional Services",
+        "company": "PTC",
+        "location": "Remote USA",
+        "postedAt": "2026-08-04",
+        "canonicalUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Remote-USA/Project-Manager--Professional-Services_JR112449",
+        "applyUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Remote-USA/Project-Manager--Professional-Services_JR112449",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "JR111389",
+        "title": "Strategic Accounts Sales Representative",
+        "company": "PTC",
+        "location": "Seoul Korea",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Seoul-Korea/Strategic-Accounts-Sales-Representative_JR111389",
+        "applyUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Seoul-Korea/Strategic-Accounts-Sales-Representative_JR111389",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ptc-proof",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 5391,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 5392,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 17,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 5352,
+              "body": 17,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 2681,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 2671,
+                "bodyMs": 13
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "JR112314",
+        "title": "Associate Solutions Consultant",
+        "company": "PTC",
+        "location": "Boston, MA, USA",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Boston-MA-USA/Senior-Solutions-Consultant--PLM--Mountain-Pacific-_JR112314",
+        "applyUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Boston-MA-USA/Senior-Solutions-Consultant--PLM--Mountain-Pacific-_JR112314",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6868
+      },
+      {
+        "externalId": "JR112449",
+        "title": "Project Manager, Professional Services",
+        "company": "PTC",
+        "location": "Remote, USA",
+        "postedAt": "2026-08-04",
+        "canonicalUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Remote-USA/Project-Manager--Professional-Services_JR112449",
+        "applyUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Remote-USA/Project-Manager--Professional-Services_JR112449",
+        "descriptionStatus": "complete",
+        "descriptionChars": 9196
+      },
+      {
+        "externalId": "JR111389",
+        "title": "Strategic Accounts Sales Representative",
+        "company": "PTC",
+        "location": "Seoul, Korea",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Seoul-Korea/Strategic-Accounts-Sales-Representative_JR111389",
+        "applyUrl": "https://ptc.wd1.myworkdayjobs.com/PTC/job/Seoul-Korea/Strategic-Accounts-Sales-Representative_JR111389",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3412
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ptc-proof",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 180,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 2,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1086,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1086,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 14,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1058,
+              "body": 8,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 444,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 614,
+                "bodyMs": 4
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

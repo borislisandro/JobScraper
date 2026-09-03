@@ -96,21 +96,29 @@ fn reveal(app: &tauri::AppHandle) {
     }
 }
 pub fn run() {
-    tauri::Builder::default()
-        // Registered first, as the plugin requires: a second launch hands its arguments here and
-        // exits, so clicking the shortcut while the app sits in the tray reopens that window
-        // instead of starting a rival process on the same database. A "--sync" or reminder run is
-        // let through, because those are supposed to run beside a window.
-        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            if args.iter().any(|arg| {
-                arg == "--sync"
-                    || arg == "--deliver-reminder"
-                    || arg == notifications::STARTUP_ARGUMENT
-            }) {
+    // The scheduled background check and reminder delivery are separate processes by design, and
+    // the single-instance plugin ends any second process outright: it hands its arguments over and
+    // calls exit. Filtering inside the callback cannot help, because the callback runs in the
+    // process that stays alive. So a scheduled run never registers the plugin at all — with the
+    // window now living in the tray the app is almost always running, and every four-hourly check
+    // and every reminder would otherwise die the moment it started.
+    let scheduled = std::env::args().any(|arg| arg == "--sync" || arg == "--deliver-reminder");
+    let mut builder = tauri::Builder::default();
+    if !scheduled {
+        // Registered first, as the plugin requires: clicking the shortcut while the app sits in the
+        // tray reopens the window it already has rather than starting a rival process on the same
+        // database. A hidden sign-in launch hands over its arguments and reveals nothing.
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            if args
+                .iter()
+                .any(|arg| arg == notifications::STARTUP_ARGUMENT)
+            {
                 return;
             }
             reveal(app);
-        }))
+        }));
+    }
+    builder
         // The close button hides the window; only the tray's Exit ends the process. A headless run
         // has no window, so this never fires there.
         .on_window_event(|window, event| {
@@ -199,10 +207,15 @@ pub fn run() {
             if headless {
                 startup::spawn_headless(app.handle(), state, local);
             } else {
-                if let Some(window) = app.get_webview_window("main") {
-                    window.show()?;
-                }
                 install_tray(app.handle())?;
+                if !args
+                    .iter()
+                    .any(|arg| arg == notifications::STARTUP_ARGUMENT)
+                {
+                    if let Some(window) = app.get_webview_window("main") {
+                        window.show()?;
+                    }
+                }
                 startup::spawn(app.handle(), state, local);
             }
             Ok(())
@@ -210,6 +223,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             startup::startup_status,
             db::list_sources,
+            db::list_company_catalog,
             db::list_app_logs,
             db::scrape_performance,
             sidecar::job_description,
@@ -232,6 +246,10 @@ pub fn run() {
             db::unmerge_duplicate_jobs,
             db::list_jobs,
             db::job_countries,
+            db::set_job_dismissed,
+            db::new_since,
+            sidecar::capture_job,
+            db::save_captured_job,
             db::set_source_enabled,
             db::list_applications,
             db::application_details,
@@ -245,6 +263,8 @@ pub fn run() {
             db::record_apply_decision,
             db::open_apply,
             db::pending_apply_confirmation,
+            db::confirm_application,
+            db::delete_application,
             db::reconcile_reminders,
             db::list_interviews,
             db::save_interview,

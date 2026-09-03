@@ -1,0 +1,13 @@
+{
+  "id": "l3harris",
+  "name": "L3Harris",
+  "baseUrl": "https://careers.l3harris.com",
+  "adapterId": "l3harris",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "careers.l3harris.com"
+  }
+}

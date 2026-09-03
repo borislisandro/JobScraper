@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "name": "Shield AI",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:03:12.467Z",
+  "finishedAt": "2026-09-02T15:03:14.681Z",
+  "source": {
+    "id": "shield-ai",
+    "name": "Shield AI",
+    "baseUrl": "https://jobs.ashbyhq.com/shield-ai",
+    "adapterId": "ashby",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "token": "shield-ai",
+      "maxPages": 500,
+      "expectedHost": "api.ashbyhq.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "5c9db9c2a75c1e437516b136cb2586357a6a5cf567fbbf158bd844895ea64c0c",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "fc1e54e3966aaf8b8428859c56ca56c3380a1e885f0e385ad35317b9a1a24f5d"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "shield-ai",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 445,
+        "persisted": 445,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 3,
+        "boardTotal": 445,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 1250,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1251,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 14,
+              "pacing": 239,
+              "backoff": 0,
+              "response": 818,
+              "body": 60,
+              "browser": 0,
+              "adapterOther": 70,
+              "emit": 48
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 2,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 472,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 239,
+                "backoffMs": 0,
+                "responseMs": 346,
+                "bodyMs": 56
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 445,
+    "uniqueIdentities": 445,
+    "uniqueHashes": 445,
+    "samples": [
+      {
+        "externalId": "c37a86ed-37bf-4b14-9a09-60bdc9c49ffb",
+        "title": "Mission Systems Software Engineer - BlueSky (R5199)",
+        "company": "Shield AI",
+        "location": "Seattle, Washington",
+        "postedAt": "2026-08-27",
+        "canonicalUrl": "https://jobs.ashbyhq.com/shield-ai/c37a86ed-37bf-4b14-9a09-60bdc9c49ffb",
+        "applyUrl": "https://jobs.ashbyhq.com/shield-ai/c37a86ed-37bf-4b14-9a09-60bdc9c49ffb",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7684
+      },
+      {
+        "externalId": "6d47a056-8e71-4ffc-80d1-2ac8206325f1",
+        "title": "Software Engineer II, Autonomy Behaviors (R5202)",
+        "company": "Shield AI",
+        "location": "Boston, MA",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://jobs.ashbyhq.com/shield-ai/6d47a056-8e71-4ffc-80d1-2ac8206325f1",
+        "applyUrl": "https://jobs.ashbyhq.com/shield-ai/6d47a056-8e71-4ffc-80d1-2ac8206325f1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6422
+      },
+      {
+        "externalId": "2ca49848-af0f-441b-94a0-fd4dfb85d34f",
+        "title": "Reliability Analyst (R5728)",
+        "company": "Shield AI",
+        "location": "Dallas, Texas",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.ashbyhq.com/shield-ai/2ca49848-af0f-441b-94a0-fd4dfb85d34f",
+        "applyUrl": "https://jobs.ashbyhq.com/shield-ai/2ca49848-af0f-441b-94a0-fd4dfb85d34f",
+        "descriptionStatus": "complete",
+        "descriptionChars": 8596
+      }
+    ],
+    "warnings": [
+      {
+        "code": "host_drift",
+        "message": "Responses now come from jobs.ashbyhq.com, not the configured expectedHost api.ashbyhq.com."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "shield-ai",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 445,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 445,
+        "requests": 3,
+        "skipped": 445,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 776,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 777,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 145,
+              "backoff": 0,
+              "response": 454,
+              "body": 139,
+              "browser": 0,
+              "adapterOther": 27,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 2,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 410,
+                "bodyMs": 3
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 145,
+                "backoffMs": 0,
+                "responseMs": 44,
+                "bodyMs": 136
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

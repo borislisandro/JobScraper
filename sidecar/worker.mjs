@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import readline from "node:readline";import {createHash}from "node:crypto";import {existsSync}from "node:fs";import {readFile}from "node:fs/promises";import {lookup} from "node:dns/promises";import net from "node:net";import {performance as clock}from "node:perf_hooks";import {requestFor} from "./adapters.mjs";import {companyAdapters,companyAdapterIds,companyDatesNeedDetail,enrichCompany,scrapeCompany} from "./company-adapters.mjs";
+import readline from "node:readline";import {createHash}from "node:crypto";import {existsSync}from "node:fs";import {readFile}from "node:fs/promises";import {lookup} from "node:dns/promises";import net from "node:net";import {performance as clock}from "node:perf_hooks";import {requestFor,normalizeItem} from "./adapters.mjs";import {companyAdapters,companyAdapterIds,companyDatesNeedDetail,enrichCompany,scrapeCompany} from "./company-adapters.mjs";
 const V=1,R=2,emit=(event,runId,payload={})=>process.stdout.write(`${JSON.stringify({protocolVersion:V,event,runId,payload})}\n`),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const edge=[process.env.ProgramFiles&&`${process.env.ProgramFiles}/Microsoft/Edge/Application/msedge.exe`,process.env["ProgramFiles(x86)"]&&`${process.env["ProgramFiles(x86)"]}/Microsoft/Edge/Application/msedge.exe`].filter(Boolean),privateHost=h=>h==="localhost"||h.endsWith(".localhost")||h.endsWith(".local")||h==="::1";
-export const adapters={"static-css":{version:"1.1.0",capabilities:["direct","css","pagination"]},"static-xpath":{version:"1.1.0",capabilities:["direct","xpath","pagination"]},json:{version:"1.1.0",capabilities:["direct","pagination"]},rss:{version:"1.1.0",capabilities:["direct"]},playwright:{version:"1.1.0",capabilities:["browser","headed","session"]},apple:{version:"1.1.0",capabilities:["direct-json","pagination"]},workday:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},eightfold:{version:"1.1.0",capabilities:["direct-json","cursor","detail","playwright-fallback"]},icims:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},"talentbrew-jibe":{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},phenom:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},"custom-api":{version:"1.1.0",capabilities:[],unsupported:true},reference:{version:"1.1.0",capabilities:[],unsupported:true},
+export const adapters={"static-css":{version:"1.1.0",capabilities:["direct","css","pagination"]},"static-xpath":{version:"1.1.0",capabilities:["direct","xpath","pagination"]},json:{version:"1.1.0",capabilities:["direct","pagination"]},rss:{version:"1.1.0",capabilities:["direct"]},playwright:{version:"1.1.0",capabilities:["browser","headed","session"]},apple:{version:"1.1.0",capabilities:["direct-json","pagination"]},workday:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},eightfold:{version:"1.1.0",capabilities:["direct-json","cursor","detail","playwright-fallback"]},icims:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},"talentbrew-jibe":{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},phenom:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},greenhouse:{version:"1.1.0",capabilities:["direct-json","detail"]},ashby:{version:"1.1.0",capabilities:["direct-json"]},lever:{version:"1.1.0",capabilities:["direct-json","pagination"]},oracle:{version:"1.1.0",capabilities:["direct-json","pagination","detail"]},"custom-api":{version:"1.1.0",capabilities:[],unsupported:true},reference:{version:"1.1.0",capabilities:[],unsupported:true},
  // One adapter per employer whose board no generic ATS adapter reads; see company-adapters.mjs.
- ...Object.fromEntries(companyAdapterIds.map(id=>[id,{version:"1.1.0",capabilities:["direct-company","pagination",...(["arm","u-blox"].includes(id)?["detail"]:[])]}]))};
+ ...Object.fromEntries(companyAdapterIds.map(id=>[id,{version:"1.1.0",capabilities:["direct-company","pagination",...(["rambus","renesas","arista-networks","arm","u-blox","synopsys","l3harris"].includes(id)?["detail"]:[])]}]))};
 export const privateAddress=ip=>{const v=net.isIP(ip);if(!v)return true;if(v===4)return /^(0\.|10\.|127\.|169\.254\.|192\.0\.(0|2)\.|192\.168\.|198\.(18|19|51\.100)\.|203\.0\.113\.|224\.|23\d\.|24\d\.|25[0-5]\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ip);const x=ip.toLowerCase().replace(/^::ffff:/,"");if(net.isIP(x)===4)return privateAddress(x);return x==="::1"||x==="::"||x.startsWith("fe80:")||x.startsWith("fc")||x.startsWith("fd")||x.startsWith("ff");};
 export const makeUrlGuard=(resolver=lookup)=>async(raw,s)=>{const u=new URL(raw);if(!["http:","https:"].includes(u.protocol))throw Error("network_error: only HTTP(S) URLs are allowed");if(s.allowPrivateNetwork)return u;const host=u.hostname.replace(/^\[|\]$/g,"");if(privateHost(host)||(net.isIP(host)&&privateAddress(host)))throw Error("network_error: private network target blocked");let addresses;try{addresses=await resolver(host,{all:true,verbatim:true})}catch{throw Error("network_error: DNS lookup failed")};if(!addresses.length||addresses.some(a=>privateAddress(a.address)))throw Error("network_error: resolved private/reserved address blocked");return u};
 export const allowed=makeUrlGuard();
@@ -28,7 +28,10 @@ export const toLocation=v=>{if(v==null)return null;
  if(Array.isArray(v)){const places=[...new Set(v.map(toLocation).filter(Boolean))];
   if(!places.length)return null;
   return places.length<=MAX_LOCATIONS?places.join(", "):`${places.slice(0,MAX_LOCATIONS).join(", ")} (+${places.length-MAX_LOCATIONS} more)`}
- if(typeof v==="object"){const parts=[v.name,v.displayName,v.city,v.locality,v.state,v.region,v.country,v.countryName].filter(x=>typeof x==="string"&&x.trim());return parts.length?[...new Set(parts.map(p=>p.trim()))].join(", "):null}
+ // schema.org PostalAddress spells these addressLocality/addressRegion/addressCountry. Boards that
+ // publish a JobPosting graph (TEKEVER's JSON Feed among them) hand the address straight through,
+ // and without these names every one of their listings stored no place at all.
+ if(typeof v==="object"){const parts=[v.name,v.displayName,v.city,v.locality,v.addressLocality,v.state,v.region,v.addressRegion,v.country,v.countryName,v.addressCountry,v.address&&toLocation(v.address)].filter(x=>typeof x==="string"&&x.trim());return parts.length?[...new Set(parts.map(p=>p.trim()))].join(", "):null}
  const text=String(v).replace(/\s+/g," ").trim();return text||null};
 // Posting dates are sorted on, so they have to be one comparable format. Boards publish ISO
 // timestamps, localized dates, and relative prose ("Posted 3 days ago", "Posted Today") in equal
@@ -51,7 +54,7 @@ export const toIsoDate=(v,nowMs=Date.now())=>{if(v==null)return null;const raw=S
  //   3. if both survive, the more recent wins, so an age filter keeps a listing it cannot date
  //      confidently rather than silently dropping it as too old.
  const bare=raw.replace(/^posted(\s+on)?\s+/i,"");
- const numeric=/^(\d{1,4})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/.exec(bare);
+ const numeric=/^(\d{1,4})[/.-](\d{1,2})[/.-](\d{2,4})$/.exec(bare);
  if(numeric){
   const parts=numeric.slice(1).map(Number),yearFirst=numeric[1].length===4;
   const year=yearFirst?parts[0]:parts[2]<100?2000+parts[2]:parts[2];
@@ -128,17 +131,22 @@ const keep=(s,item)=>{
 // them by seconds bought nothing and cost hours — Apple has run at 250 ms all along with no
 // complaint from Apple. An HTML listing page is far heavier for a server to render, so it keeps
 // the original spacing. Any source can still override both with requestDelayMs.
-const jsonAdapters=new Set(["apple","workday","eightfold","icims","talentbrew-jibe","phenom","json","rss","amd","mediatek","sk-hynix"]);
-export const paceMs=(adapterId,random=Math.random)=>
- jsonAdapters.has(adapterId)?250+Math.floor(random()*251):jitterMs(random);
-const pace=s=>s.configJson?.testJitterMs??paceMs(s.adapterId,s.configJson?.random||Math.random);
+const jsonAdapters=new Set(["ceva","siemens","renesas","arista-networks","apple","workday","eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","oracle","json","rss","amd","asml","mediatek","sk-hynix"]);
+// A listing page is a search the site runs; a detail page is one static document it already has.
+// Charging both the same 1.5-3s is most of what Arm's read now costs, because its posting dates
+// only exist on those detail pages: 219 of them at listing pace is seven minutes of sleeping.
+export const paceMs=(adapterId,random=Math.random,kind="listing")=>
+ jsonAdapters.has(adapterId)?250+Math.floor(random()*251)
+ :kind==="detail"?500+Math.floor(random()*501)
+ :jitterMs(random);
+const pace=(s,kind)=>s.configJson?.testJitterMs??paceMs(s.adapterId,s.configJson?.random||Math.random,kind);
 const requestSlots=new Map;
 export const requestSlotDelay=(origin,delay,now=Date.now(),slots=requestSlots)=>{const due=Math.max(now,slots.get(origin)??now);slots.set(origin,due+delay);return due-now};
 const cancelled=new Set;
 const cancelledError=runId=>{if(cancelled.has(runId))throw Error("cancelled")};
 async function wait(ms,s){cancelledError(s.__runId);await sleep(ms);cancelledError(s.__runId)}
 async function measuredWait(ms,s,key,kind){if(ms<=0)return;const started=clock.now();try{await wait(ms,s)}finally{const elapsed=add(key,started);metrics.requestsByKind[kind][key==="pacingMs"?"pacingMs":"backoffMs"]+=elapsed}}
-async function waitForRequest(url,s,kind){if(s.configJson?.testNoDelay)return;const origin=new URL(url).origin,delay=s.configJson?.requestDelayMs??pace(s);await measuredWait(requestSlotDelay(origin,delay),s,"pacingMs",kind)}
+async function waitForRequest(url,s,kind){if(s.configJson?.testNoDelay)return;const origin=new URL(url).origin,delay=s.configJson?.requestDelayMs??pace(s,kind);await measuredWait(requestSlotDelay(origin,delay),s,"pacingMs",kind)}
 async function guarded(url,s){const started=clock.now();try{return await allowed(url,s)}finally{add("urlGuardMs",started)}}
 async function retryWait(ms,s,kind){metrics.retries++;await measuredWait(ms,s,"backoffMs",kind)}
 // RFC 9309 robots.txt. Group selection by user-agent, then longest-matching rule wins
@@ -178,7 +186,7 @@ async function get(url,s,redirects=0,request={},skipRobots=false){let last;const
 // a denied source fails before any listing request is issued.
 async function robots(s){if(s.robotsOverride){emit("warning",s.__runId,{code:"robots_override",message:"Saved per-source robots override is active."});return}const u=await guarded(urlFor(s),s);const rules=await robotsPolicy(s,`${u.protocol}//${u.host}`);if(!robotsAllows(rules,`${u.pathname}${u.search}`))throw Error("robots_denied")}
 const path=(v,p)=>p.split(".").filter(Boolean).reduce((x,k)=>x?.[k],v);
-function collection(data,s){const a=s.adapterId,c=a==="workday"?data.jobPostings:a==="eightfold"?data.positions||data.data?.positions:a==="icims"||a==="talentbrew-jibe"?data.jobs||data.searchResults:a==="phenom"?data.jobs||data.data?.jobs:Array.isArray(data)?data:path(data,s.configJson?.itemsPath||"jobs")||data.results;if(!Array.isArray(c))throw Error("parse_error: adapter response has no job array");return c}
+function collection(data,s){const a=s.adapterId,c=a==="workday"?data.jobPostings:a==="eightfold"?data.positions||data.data?.positions:a==="icims"||a==="talentbrew-jibe"?data.jobs||data.searchResults:a==="phenom"?data.jobs||data.data?.jobs:a==="greenhouse"||a==="ashby"?data.jobs:a==="oracle"?data.items?.[0]?.requisitionList:Array.isArray(data)?data:path(data,s.configJson?.itemsPath||"jobs")||data.results;if(!Array.isArray(c))throw Error("parse_error: adapter response has no job array");return c}
 // A generated config names the keys of an arbitrary endpoint explicitly; platform and
 // hand-written configs rely on the aliases below. Mapped values win, and a relative link is
 // resolved against the endpoint that served it.
@@ -318,6 +326,47 @@ async function provenJsonApi(captures,s){
   if(jobs.length>=3&&new Set(jobs.map(j=>j.applyUrl)).size>=3)return{...candidate,jobs}}
  catch{/* the next candidate endpoint is tried */}
  return null}
+// One vacancy, read from its own page. A referral, a recruiter's link or a board nobody has
+// configured cannot become a source — and setting one up for a single opening is the wrong trade —
+// so this reads the page as a job rather than as a board. Schema.org JobPosting is the contract
+// almost every ATS already publishes for Google Jobs, which makes it the one thing worth trusting
+// here; the page's own <title> and og: tags are the fallback when it is absent.
+const firstJobPosting=node=>{
+ if(!node||typeof node!=="object")return null;
+ if(Array.isArray(node)){for(const entry of node){const found=firstJobPosting(entry);if(found)return found}return null}
+ const type=node["@type"];
+ if(type==="JobPosting"||(Array.isArray(type)&&type.includes("JobPosting")))return node;
+ return firstJobPosting(node["@graph"])};
+export function captureFromHtml(html,url){
+ const text=String(html||"");
+ let posting=null;
+ for(const match of text.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)){
+  try{posting=firstJobPosting(JSON.parse(match[1].trim()));if(posting)break}catch{/* one malformed block is not the end of the page */}}
+ const meta=name=>new RegExp(`<meta[^>]+(?:property|name)=["']${name}["'][^>]+content=["']([^"']{1,400})`,"i").exec(text)?.[1];
+ const heading=/<h1[^>]*>([\s\S]{1,200}?)<\/h1>/i.exec(text)?.[1];
+ const strip=value=>decodeEntities(String(value??"").replace(/<[^>]*>/g," ")).replace(/\s+/g," ").trim();
+ const place=value=>{
+  if(!value)return null;
+  const one=Array.isArray(value)?value[0]:value;
+  const address=one?.address||one;
+  return toLocation([address?.addressLocality,address?.addressRegion,address?.addressCountry?.name??address?.addressCountry].filter(Boolean))
+   ??toLocation(one?.name)};
+ const title=strip(posting?.title)||strip(meta("og:title"))||strip(heading)||strip(/<title[^>]*>([^<]{1,200})/i.exec(text)?.[1]);
+ return{
+  title,
+  company:strip(posting?.hiringOrganization?.name)||strip(meta("og:site_name"))||siteName(text)||"",
+  location:place(posting?.jobLocation)||(posting?.jobLocationType==="TELECOMMUTE"?"Remote":null),
+  postedAt:posting?.datePosted??null,
+  closingAt:posting?.validThrough??null,
+  descriptionHtml:typeof posting?.description==="string"?posting.description:"",
+  descriptionText:strip(posting?.description)||strip(meta("og:description")),
+  workMode:posting?.jobLocationType==="TELECOMMUTE"?"remote":null,
+  externalId:strip(posting?.identifier?.value??posting?.identifier)||null,
+  url,
+  // Said plainly, because a page without the standard markup gives a title and little else, and the
+  // person pasting the link is the one who can fix that before it is stored.
+  structured:Boolean(posting),
+ }}
 // Detection needs the rendered DOM for JS-only job boards. browser() returns jobs; this returns
 // markup, so the same inference and parse run on the fetched and the rendered path alike.
 async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{chromium}=await import("playwright-core"),b=await chromium.launch({executablePath:exe,headless:true});try{const p=await b.newPage();await installNavigationGuard(p,s);
@@ -331,7 +380,7 @@ async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe
  const response=await p.goto(url,{waitUntil:"domcontentloaded",timeout:30000});await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});
  const html=await p.content();await Promise.allSettled(bodies);
  return{html,status:response?.status()??0,captures}}finally{await b.close()}}finally{add("browserMs",metricStarted)}}
-async function page(url,s){const r=await get(url,s),cfg=s.configJson||{};if(r.type.includes("json")||["json","workday","eightfold","icims","talentbrew-jibe","phenom"].includes(s.adapterId)||cfg.mode==="json")return{jobs:rows(JSON.parse(r.text),s),next:null};if(r.type.includes("xml")||cfg.mode==="rss"){const{XMLParser}=await import("fast-xml-parser"),x=new XMLParser({ignoreAttributes:false}).parse(r.text),items=x?.rss?.channel?.item||x?.feed?.entry||[];return{jobs:(Array.isArray(items)?items:[items]).map(i=>job({title:i.title,company:s.name,url:typeof i.link==="string"?i.link:i.link?.["@_href"],description:i.description||i.summary,postedAt:i.pubDate||i.updated,externalId:i.guid?.["#text"]||i.guid||i.id},s)),next:null}}if(cfg.itemXPath)return xpathPage(r.text,url,s,cfg);return cssPage(r.text,url,s,cfg)}
+async function page(url,s){const r=await get(url,s),cfg=s.configJson||{};if(r.type.includes("json")||["json","workday","eightfold","icims","talentbrew-jibe","phenom"].includes(s.adapterId)||cfg.mode==="json")return{jobs:rows(JSON.parse(r.text),s),next:null};if(r.type.includes("xml")||cfg.mode==="rss"){const{XMLParser}=await import("fast-xml-parser"),x=new XMLParser({ignoreAttributes:false}).parse(r.text),items=x?.rss?.channel?.item||x?.feed?.entry||[];return{feed:true,jobs:(Array.isArray(items)?items:[items]).map(i=>job({title:i.title,company:s.name,url:typeof i.link==="string"?i.link:i.link?.["@_href"],description:i.description||i.summary,postedAt:i.pubDate||i.updated,externalId:i.guid?.["#text"]||i.guid||i.id},s)),next:null}}if(cfg.itemXPath)return xpathPage(r.text,url,s,cfg);return cssPage(r.text,url,s,cfg)}
 async function requestHeaders(s){const cfg=s.configJson||{},headers={...(cfg.requestHeaders||{})};let cookies=Array.isArray(cfg.sessionCookies)?cfg.sessionCookies:[];if(s.sessionStatePath)try{const state=JSON.parse(await readFile(s.sessionStatePath,"utf8"));cookies=[...cookies,...(state.cookies||[])]}catch{throw Error("auth_required: saved browser session is unreadable")};if(cookies.length)headers.cookie=cookies.map(c=>typeof c==="string"?c:`${c.name}=${c.value}`).join("; ");return headers}
 // Workday returns externalPath relative to the site root, not to the CXS endpoint, so
 // resolving it against response.url silently drops the /wday/cxs/{tenant}/{site} prefix.
@@ -376,9 +425,9 @@ export const platformLocation=(record,path)=>{
 // The Workday detail payload nests everything under jobPostingInfo.
 // Every board publishes how many openings it holds, each under its own name. It is one number on
 // the first page and the cheapest possible answer to "is there anything new here at all?".
-export const boardTotal=data=>{const n=Number(data?.total??data?.count??data?.data?.count??data?.totalCount??data?.totalHits??data?.res?.totalRecords);
+export const boardTotal=data=>{const n=Number(data?.items?.[0]?.TotalJobsCount??data?.total??data?.count??data?.data?.count??data?.totalCount??data?.totalHits??data?.res?.totalRecords??data?.meta?.total);
  return Number.isFinite(n)?n:null};
-const unwrap=(data,adapterId)=>adapterId==="workday"&&data?.jobPostingInfo?data.jobPostingInfo:data;
+const unwrap=(data,adapterId)=>adapterId==="workday"&&data?.jobPostingInfo?data.jobPostingInfo:adapterId==="oracle"&&data?.items?.[0]?data.items[0]:adapterId==="eightfold"&&data?.data&&!Array.isArray(data.data)?data.data:data;
 const appleLocale=s=>s.configJson?.locale||/^\/([a-z]{2}-[a-z]{2})(?:\/|$)/i.exec(new URL(s.baseUrl).pathname)?.[1]?.toLowerCase()||"en-us";
 const appleSlug=value=>String(value||"job").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"job";
 async function appleDirect(s){await robots(s);const cfg=s.configJson||{},locale=appleLocale(s),origin=new URL(s.baseUrl).origin,max=cfg.maxPages||500;s.__requestHeaders=await requestHeaders(s);
@@ -395,15 +444,26 @@ const capped=max=>[`Stopped at the configured ${max}-page limit before the end o
 async function platformDirect(s){
   await robots(s)
   const cfg=s.configJson||{},max=cfg.maxPages||500
-  let state={},out=[],pages=0,complete=true,total=null,discovered=0
+  let state={},out=[],pages=0,complete=true,total=null,discovered=0,unstable=false;const identities=new Set()
   s.__requestHeaders=await requestHeaders(s)
   while(pages<max){
     const request=requestFor(s.adapterId,s.baseUrl,{...cfg,...state})
     const response=await get(request.url,s,0,{...request,metricKind:"listing"})
     const data=JSON.parse(response.text),items=collection(data,s)
-    if(total===null)total=boardTotal(data)
-    for(const item of items){
+    // Ashby publishes the entire board without a count. Only this family can use its array
+    // length as an exact total; a page from another family must never stand in for its board.
+    if(total===null)total=s.adapterId==="ashby"?items.length:boardTotal(data)
+    if(s.adapterId==="eightfold"&&boardTotal(data)!==total)unstable=true
+    for(const raw of items){
       discovered++
+      // Hosted boards (Greenhouse, Ashby, Lever, Oracle) publish their own field names; each one
+      // maps its record onto the generic keys this loop reads, so nothing below is per-vendor.
+      const item=normalizeItem(s.adapterId,raw,cfg,s.baseUrl)
+      if(s.adapterId==="eightfold"){
+        const identity=String(item.id||item.positionUrl||item.canonicalPositionUrl||"")
+        if(!identity||identities.has(identity))unstable=true
+        identities.add(identity)
+      }
       const wd=s.adapterId==="workday"?workdayPaths(item,cfg):{}
       let full=item,detail=wd.detail||item[cfg.detailUrlField||"detailUrl"]
       const listingUrl=item.externalUrl||item.applyUrl||(wd.public?new URL(wd.public,s.baseUrl).toString():null)||item.url||((item.positionUrl||item.canonicalPositionUrl)?new URL(item.positionUrl||item.canonicalPositionUrl,response.url).toString():null)
@@ -421,10 +481,10 @@ async function platformDirect(s){
       const detailUrl=detail?new URL(detail,response.url).toString():null
       if(detailUrl&&cfg.fetchDetail!==false){
         const detailResponse=await get(detailUrl,s,0,{metricKind:"detail"})
-        full={...item,...unwrap(JSON.parse(detailResponse.text),s.adapterId)}
+        full=normalizeItem(s.adapterId,{...raw,...unwrap(JSON.parse(detailResponse.text),s.adapterId)},cfg,s.baseUrl)
       }
       const normalized=job({...full,
-        externalId:full.jobReqId||full.requisitionId||full.id||full.jobId||workdayRequisition(item),
+        externalId:full.externalId||full.jobReqId||full.requisitionId||full.id||full.jobId||workdayRequisition(item),
         title:full.title||full.jobTitle||full.name,
         company:full.company||full.companyName,
         location:platformLocation(full,item.externalPath||wd.public||listingUrl)??platformLocation(item,item.externalPath||lkey),
@@ -441,7 +501,9 @@ async function platformDirect(s){
     if(!state)break
   }
   if(state)complete=false
-  return{jobs:out,discovered,complete,pages,total,totalExact:total!==null,mode:"direct-platform",warnings:pages>=max&&!complete?capped(max):[]}
+  if(s.adapterId==="eightfold"&&(unstable||(total!==null&&discovered!==total)))complete=false
+  return{jobs:out,discovered,complete,pages,total,totalExact:total!==null,mode:"direct-platform",warnings:[...(pages>=max&&!complete?capped(max):[]),
+    ...(unstable?["Eightfold repeated vacancies or changed its total while paging; this read is unfinished and cannot close stored jobs."]:[])]}
 }
 // Company adapters own their own URLs and paging; they get the same guarded fetch (robots,
 // SSRF guard, redirect and retry policy) every other adapter uses, and the same job normalizer.
@@ -469,7 +531,15 @@ async function workdayDirect(s){const cfg=s.configJson||{};if(!cfg.splitFacet)re
   pages+=slice.pages;complete=complete&&slice.complete;
   for(const item of slice.jobs)if(!seen.has(item.externalId)){seen.add(item.externalId);jobs.push(item)}}
  return{jobs,discovered:total,complete,pages,total,totalExact:true,mode:"direct-platform",warnings:[`Workday reported ${total} openings, above its own paging cap, so this source was read as ${values.length} ${facet.descriptor||cfg.splitFacet} slices.`]}}
-async function direct(s){if(s.adapterId==="apple")return appleDirect(s);if(companyAdapters[s.adapterId])return companyDirect(s);if(s.adapterId==="workday")return workdayDirect(s);if(["eightfold","icims","talentbrew-jibe","phenom"].includes(s.adapterId))return platformDirect(s);await robots(s);const c=s.configJson||{};let u=urlFor(s),out=[],pages=0,complete=true,discovered=0;while(u&&pages<(c.maxPages||50)){const x=await page(u,s);for(const found of x.jobs){discovered++;if(keep(s,found))out.push(found)}pages++;if(c.pageParam){const n=new URL(urlFor(s));n.searchParams.set(c.pageParam,String(pages+(c.pageStart||0)));u=x.jobs.length?n.toString():null}else u=x.next}if(u)complete=false;return{jobs:out,discovered,complete,pages,total:complete?discovered:null,totalExact:complete,mode:"direct",warnings:pages>=(c.maxPages||50)&&!complete?capped(c.maxPages||50):[]}}
+async function direct(s){if(s.adapterId==="apple")return appleDirect(s);if(companyAdapters[s.adapterId])return companyDirect(s);if(s.adapterId==="workday")return workdayDirect(s);if(["eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","oracle"].includes(s.adapterId))return platformDirect(s);await robots(s);const c=s.configJson||{};let u=urlFor(s),out=[],pages=0,complete=true,discovered=0,feed=false;while(u&&pages<(c.maxPages||50)){const x=await page(u,s);if(x.feed)feed=true;for(const found of x.jobs){discovered++;if(keep(s,found))out.push(found)}pages++;if(c.pageParam){const n=new URL(urlFor(s));n.searchParams.set(c.pageParam,String(pages+(c.pageStart||0)));u=x.jobs.length?n.toString():null}else u=x.next}if(u)complete=false;
+ // A feed publishes its most recent items, not its publisher's whole board, and it says nothing
+ // about how many were left out: TEKEVER's careers page counts 123 openings and its RSS carries
+ // 100. Reaching the end of the feed therefore is not reaching the end of the board, and treating
+ // it as such would reconcile the 23 it never mentioned to closed. A source that knows its feed is
+ // the entire board can say so with feedIsWholeBoard.
+ const capped_feed=feed&&!c.feedIsWholeBoard;
+ if(capped_feed)complete=false;
+ return{jobs:out,discovered,complete,pages,total:complete?discovered:null,totalExact:complete,mode:"direct",warnings:[...(pages>=(c.maxPages||50)&&!complete?capped(c.maxPages||50):[]),...(capped_feed?["A feed lists recent items rather than a whole board and publishes no total, so this read is treated as unfinished and nothing was marked closed. Set feedIsWholeBoard on this source if its feed is known to carry every opening."]:[])]}}
 const pauses=new Map;const waitForUser=runId=>new Promise((resolve,reject)=>pauses.set(runId,{resolve,reject}));
 export async function installNavigationGuard(page,s){await page.route("**/*",async route=>{const request=route.request();const guarded=["document","frame"].includes(request.resourceType())||request.isNavigationRequest();if(!guarded)return route.continue();try{await allowed(request.url(),s);await route.continue()}catch{await route.abort("blockedbyclient")}});page.on("popup",popup=>installNavigationGuard(popup,s).catch(()=>popup.close().catch(()=>{})))}
 async function browser(s,capture){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{chromium}=await import("playwright-core"),b=await chromium.launch({executablePath:exe,headless:s.headless!==false});try{const ctx=await b.newContext(s.sessionStatePath?{storageState:s.sessionStatePath}:{}),p=await ctx.newPage();await installNavigationGuard(p,s);await p.goto((await allowed(urlFor(s),s)).toString(),{waitUntil:"domcontentloaded",timeout:30000});cancelledError(s.__runId);if(s.headless===false){emit("needs_user_action",s.__runId,{kind:capture?"login_capture":"login_or_captcha",message:"Complete login or CAPTCHA in Edge, then choose Resume."});await waitForUser(s.__runId);cancelledError(s.__runId)}if(capture)return{jobs:[],discovered:0,complete:true,pages:1,capturedStorageStateBase64:Buffer.from(JSON.stringify(await ctx.storageState())).toString("base64")};await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});const markup=await p.content(),cfg=s.configJson?.itemSelector?s.configJson:(await inferSelectors(markup,p.url()))||{},found=(await cssPage(markup,p.url(),s,cfg)).jobs,jobs=found.filter(item=>keep(s,item));
@@ -487,7 +557,9 @@ async function enrichDirect(s){
   try{
    let full;
    if(companyAdapters[s.adapterId])full=await enrichCompany(s.adapterId,item,request);
-    else{const response=await get(item.detailUrl,s,0,{metricKind:"detail"});full={...item,...unwrap(JSON.parse(response.text),s.adapterId)}}
+    // Deferred reads need the same vendor mapping as inline detail reads, otherwise Greenhouse
+    // content and Oracle description fields are discarded when someone opens the stored job.
+    else{const response=await get(item.detailUrl,s,0,{metricKind:"detail"});full=normalizeItem(s.adapterId,{...item,...unwrap(JSON.parse(response.text),s.adapterId)},s.configJson||{},s.baseUrl)}
    const normalized=job({...item,...full,jobId:item.jobId,listingHash:item.listingHash,detailUrl:item.detailUrl,
     // The stored listing row already carries a descriptionText (Arm's job category, u-blox's
     // department) and job() reads descriptionText before description, so the spread above would
@@ -501,7 +573,7 @@ async function enrichDirect(s){
  }
  return{completed,failed}
 }
-export const requiredFor=id=>id==="static-css"?["itemSelector","titleSelector"]:id==="static-xpath"?["itemXPath","titleXPath"]:id==="json"?["itemsPath"]:id==="workday"?["tenant","site"]:id==="eightfold"?["domain"]:[];
+export const requiredFor=id=>id==="static-css"?["itemSelector","titleSelector"]:id==="static-xpath"?["itemXPath","titleXPath"]:id==="json"?["itemsPath"]:id==="workday"?["tenant","site"]:id==="eightfold"?["domain"]:["greenhouse","ashby","lever"].includes(id)?["token"]:id==="oracle"?["apiHost","siteNumber"]:[];
 // Detection signals, verified against live tenants. Workday tenant is the subdomain and
 // the per-tenant site segment is published in that tenant's own robots.txt (Sitemap line,
 // else the first Allow directory) — the same trick that recovered all five live tenants.
@@ -613,7 +685,14 @@ async function run(q){const started=Date.now();metrics=blankMetrics();counters.r
  publish=q.command==="scrape_source"?item=>emit("job",q.runId,item):null;
  // The caller passes the listing hashes it already holds for this source. An empty list is a full
  // read, which is what a preview, a first run and an explicit full refresh all want.
- const s={...(q.source||{}),__runId:q.runId,__known:new Set(Array.isArray(q.known)?q.known:[]),__titleTerms:Array.isArray(q.titleTerms)?q.titleTerms.map(String).filter(Boolean):[],__defaultRequestKind:q.command==="probe_source"?"probe":q.command==="enrich_source"?"detail":"listing"};if(q.command==="scrape_source"&&q.deferDetails&&!companyDatesNeedDetail(s.adapterId))s.configJson={...(s.configJson||{}),fetchDetail:false};const a=adapters[s.adapterId],cfg=s.configJson||{},required=requiredFor(s.adapterId),warnings=required.filter(key=>!(key in cfg)).map(key=>`Missing recommended field: ${key}`);emit("started",q.runId,{command:q.command,adapter:s.adapterId,adapterVersion:a?.version||null,protocolVersion:V});if(q.command==="probe_source"){const d=await timedAdapter(()=>detect(s));emit("completed",q.runId,terminalPayload({...d,adapterVersion:adapters[d.recommendedAdapter]?.version||null,requiredFields:requiredFor(d.recommendedAdapter),warnings:d.notes,mode:"direct",timingMs:Date.now()-started,complete:true}));return}if(!a||a.unsupported||s.kind==="reference")throw Error(s.adapterId==="reference"?"incomplete: reference source cannot be scraped":"incomplete: source needs a verified custom adapter; it remains disabled");if(q.command==="cancel"){emit("cancelled",q.runId,terminalPayload({complete:false}));return}if(q.command==="enrich_source"){const result=await timedAdapter(()=>enrichDirect(s));emit("completed",q.runId,terminalPayload({...result,complete:true,mode:"enrichment",requests:counters.requests,timingMs:Date.now()-started}));return}
+ const s={...(q.source||{}),__runId:q.runId,__known:new Set(Array.isArray(q.known)?q.known:[]),__titleTerms:Array.isArray(q.titleTerms)?q.titleTerms.map(String).filter(Boolean):[],__defaultRequestKind:q.command==="probe_source"?"probe":q.command==="enrich_source"?"detail":"listing"};if(q.command==="scrape_source"&&q.deferDetails&&!companyDatesNeedDetail(s.adapterId))s.configJson={...(s.configJson||{}),fetchDetail:false};const a=adapters[s.adapterId],cfg=s.configJson||{},required=requiredFor(s.adapterId),warnings=required.filter(key=>!(key in cfg)).map(key=>`Missing recommended field: ${key}`);emit("started",q.runId,{command:q.command,adapter:s.adapterId,adapterVersion:a?.version||null,protocolVersion:V});if(q.command==="capture_job"){
+  const target=await guarded(String(q.url||""),s);
+  const response=await get(target.toString(),s,0,{metricKind:"probe"});
+  const captured=captureFromHtml(response.text,response.url);
+  if(!captured.title)throw Error("parse_error: no job title could be read from that page");
+  emit("completed",q.runId,terminalPayload({...captured,complete:true,mode:"capture",requests:counters.requests,timingMs:Date.now()-started}));
+  return}
+ if(q.command==="probe_source"){const d=await timedAdapter(()=>detect(s));emit("completed",q.runId,terminalPayload({...d,adapterVersion:adapters[d.recommendedAdapter]?.version||null,requiredFields:requiredFor(d.recommendedAdapter),warnings:d.notes,mode:"direct",timingMs:Date.now()-started,complete:true}));return}if(!a||a.unsupported||s.kind==="reference")throw Error(s.adapterId==="reference"?"incomplete: reference source cannot be scraped":"incomplete: source needs a verified custom adapter; it remains disabled");if(q.command==="cancel"){emit("cancelled",q.runId,terminalPayload({complete:false}));return}if(q.command==="enrich_source"){const result=await timedAdapter(()=>enrichDirect(s));emit("completed",q.runId,terminalPayload({...result,complete:true,mode:"enrichment",requests:counters.requests,timingMs:Date.now()-started}));return}
  if(q.command==="check_source"){const probe=await timedAdapter(()=>scrape({...s,configJson:{...cfg,maxPages:1,fetchDetail:false,splitFacet:null}}));
   emit("completed",q.runId,terminalPayload({complete:true,mode:"check",boardTotal:probe.totalExact?probe.total??null:null,boardTotalExact:Boolean(probe.totalExact),fresh:probe.jobs.length,
    discovered:probe.discovered??probe.jobs.length+counters.skipped+counters.filtered,requests:counters.requests,skipped:counters.skipped,filtered:counters.filtered,
@@ -636,9 +715,9 @@ async function run(q){const started=Date.now();metrics=blankMetrics();counters.r
  // active until it publishes something again. Showing a stale opening is visible and recoverable;
  // silently deleting a live board is neither. Revisit if a real source sits empty for long.
  const emptyRead=o.complete&&discovered===0;
- emit("completed",q.runId,terminalPayload({complete:o.complete&&!emptyRead,discovered,persisted:q.command==="test_source"?0:o.jobs.length,skipped:counters.skipped,filtered:counters.filtered,requests:counters.requests,boardTotal:o.totalExact?o.total??null:null,boardTotalExact:Boolean(o.totalExact),mode:o.mode||cfg.mode||"direct",warnings:[...warnings,...(o.warnings||[]),...(emptyRead?["This source published no listings at all. That reads as an unfinished run rather than an empty board, so nothing already stored was marked closed."]:[])],timingMs:Date.now()-started,pages:o.pages,...(o.capturedStorageStateBase64?{capturedStorageStateBase64:o.capturedStorageStateBase64}:{})}))}
+ emit("completed",q.runId,terminalPayload({command:q.command,complete:o.complete&&!emptyRead,discovered,persisted:q.command==="test_source"?0:o.jobs.length,skipped:counters.skipped,filtered:counters.filtered,requests:counters.requests,boardTotal:o.totalExact?o.total??null:null,boardTotalExact:Boolean(o.totalExact),mode:o.mode||cfg.mode||"direct",warnings:[...warnings,...(o.warnings||[]),...(emptyRead?["This source published no listings at all. That reads as an unfinished run rather than an empty board, so nothing already stored was marked closed."]:[])],timingMs:Date.now()-started,pages:o.pages,...(o.capturedStorageStateBase64?{capturedStorageStateBase64:o.capturedStorageStateBase64}:{})}))}
 const code=e=>/^(auth_required|captcha_required|robots_denied|rate_limited|browser_incompatible|selector_broken|parse_error|network_error|incomplete|cancelled)/.exec(String(e?.message||e))?.[1]||"parse_error";
-const receive=line=>{let q;try{q=JSON.parse(line);if(q.protocolVersion!==V)throw Error("Unsupported protocol version");if(q.command==="resume"){const pause=pauses.get(q.runId);if(!pause)throw Error("incomplete: no paused scrape");pause.resolve();return}if(q.command==="cancel"){cancelled.add(q.runId);const pause=pauses.get(q.runId);if(pause)pause.reject(Error("cancelled"));return}if(!["probe_source","test_source","scrape_source","check_source","capture_session","enrich_source"].includes(q.command))throw Error("Unknown command");cancelled.delete(q.runId);const progressStarted=Date.now(),progressTimer=setInterval(()=>emit("progress",q.runId,{phase:q.command==="enrich_source"?"enriching":"fetching",requests:counters.requests,elapsedMs:Date.now()-progressStarted}),5000);run(q).then(()=>cancelled.delete(q.runId)).catch(e=>{cancelled.delete(q.runId);const failure=code(e);emit(failure==="cancelled"?"cancelled":"failed",q.runId,terminalPayload({code:failure,message:String(e.message||e),complete:false,needsUserAction:["auth_required","captcha_required"].includes(failure)}))})
+const receive=line=>{let q;try{q=JSON.parse(line);if(q.protocolVersion!==V)throw Error("Unsupported protocol version");if(q.command==="resume"){const pause=pauses.get(q.runId);if(!pause)throw Error("incomplete: no paused scrape");pause.resolve();return}if(q.command==="cancel"){cancelled.add(q.runId);const pause=pauses.get(q.runId);if(pause)pause.reject(Error("cancelled"));return}if(!["probe_source","test_source","scrape_source","check_source","capture_session","capture_job","enrich_source"].includes(q.command))throw Error("Unknown command");cancelled.delete(q.runId);const progressStarted=Date.now(),progressTimer=setInterval(()=>emit("progress",q.runId,{phase:q.command==="enrich_source"?"enriching":"fetching",requests:counters.requests,elapsedMs:Date.now()-progressStarted}),5000);run(q).then(()=>cancelled.delete(q.runId)).catch(e=>{cancelled.delete(q.runId);const failure=code(e);emit(failure==="cancelled"?"cancelled":"failed",q.runId,terminalPayload({code:failure,message:String(e.message||e),complete:false,needsUserAction:["auth_required","captcha_required"].includes(failure)}))})
    // One run per process. Releasing stdin once it ends lets the event loop drain and the process
    // exit on its own; while it ran, stdin had to stay open to receive resume/cancel. Without this
    // a finished worker lingers forever waiting for input that will never come.

@@ -1,0 +1,42 @@
+{
+  "id": "sipearl",
+  "name": "SiPearl",
+  "baseUrl": "https://careers.sipearl.com/fr/jobs.json?per_page=100",
+  "adapterId": "json",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.sipearl.com",
+    "fieldMap": {
+      "title": "title",
+      "url": "url",
+      "externalId": "id",
+      "postedAt": "date_published",
+      "description": "content_html",
+      "location": "_jobposting.jobLocation.0.address"
+    }
+  },
+  "onboardingEvidence": {
+    "observedAt": "2026-09-02",
+    "officialCareersUrl": "https://careers.sipearl.com/",
+    "provenanceUrl": "https://sipearl.com/",
+    "boardUrl": "https://careers.sipearl.com/fr/jobs",
+    "publishedTotal": 19,
+    "countEvidence": "The French board publishes 19 offres; the French JSON endpoint returns 19 items and page 2 is empty. The English board publishes only 14 jobs, omitting French-only postings.",
+    "pagination": "GET /fr/jobs.json?per_page=100&page=N, one-based pages, until an empty items array. Descriptions are inline in content_html.",
+    "identityEvidence": "Senior verification engineer / team lead lists Valbonne, Maisons-Laffitte, Massy, Castelldefels and Bologna. Senior CPU Package Designer lists Grenoble, Massy and Maisons-Laffitte. The board describes SiPearl's Rhea CPU programme.",
+    "locationMappingNote": "The existing generic mapping preserves the first published address. Additional locations remain available in the source's _jobposting.jobLocation array.",
+    "country": "FR",
+    "countrySource": "https://sipearl.com/terms-conditions-privacy-sipearl",
+    "countryEvidence": "The official legal notice gives headquarters at 38/44 rue Jean Mermoz, 78600 Maisons-Laffitte, France.",
+    "tags": ["semiconductor", "cpu", "hpc"],
+    "tagsSource": "https://sipearl.com/european-processor",
+    "robotsUrl": "https://careers.sipearl.com/robots.txt",
+    "robotsEvidence": "User-Agent * disallows /app/, /messages/, /messenger/, /facebook/tab/ and /jobs/internal/; public jobs and JSON paths are not disallowed. Override remains enabled as requested."
+  }
+}

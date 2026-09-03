@@ -1,0 +1,60 @@
+TEKEVER CAREERS - ADAPTER REQUIREMENT (JSON FEED DISCOVERED)
+
+Employer: TEKEVER
+Official Careers Page: https://careers.tekever.com
+Careers Board: https://careers.tekever.com/jobs
+Platform: Teamtailor (with JSON Feed endpoint)
+
+DISCOVERED JSON FEED ENDPOINT:
+- URL: https://careers.tekever.com/jobs.json
+- Format: JSON Feed 1.1 (https://jsonfeed.org/)
+- Status: 200 OK, fully functional
+
+JSON FEED STRUCTURE:
+Response contains:
+- version: "https://jsonfeed.org/version/1.1"
+- title: "Tekever"
+- home_page_url: "https://careers.tekever.com/jobs"
+- feed_url: "https://careers.tekever.com/jobs.json"
+- next_url: pagination URL for next page
+- items: array of job objects
+
+PAGINATION:
+- First page: /jobs.json (returns 100 items)
+- Subsequent pages: /jobs.json?page=2, /jobs.json?page=3, etc.
+- Page size: 100 items per page
+- Total jobs discovered: 123 (Page 1: 100 items, Page 2: 23 items)
+
+ITEM STRUCTURE:
+Each job item contains:
+{
+  "id": "UUID (e.g., aca11e1e-3035-4807-8bb8-9785a0a1d89d)",
+  "title": "Job title",
+  "url": "https://careers.tekever.com/jobs/[id]-[slug]",
+  "date_published": "ISO 8601 timestamp",
+  "content_html": "Full HTML job description"
+}
+
+KEY FINDINGS:
+1. JSON Feed is a standard, well-documented format with clear pagination
+2. All required data (title, description, URL, publication date) is present in the feed
+3. No authentication required
+4. No rate limiting observed
+5. Full job descriptions in content_html field
+
+ADAPTER REQUIREMENTS:
+A JSON Feed adapter for Teamtailor (or generic JSON Feed adapter) would need to:
+1. Recognize JSON Feed format by checking version field
+2. Fetch initial URL: /jobs.json
+3. Parse items array for each page
+4. Implement pagination using next_url or page parameter
+5. Determine total job count from pages (traverse until empty next_url)
+6. Map JSON Feed fields to generic job schema:
+   - id → externalId
+   - title → title
+   - url → url (full job page)
+   - date_published → postedAt
+   - content_html → description/descriptionHtml
+7. No detail page fetch needed (description in listing)
+
+This is a standard JSON Feed format with no special authentication or rate limiting, making it ideal for a generic or Teamtailor-specific adapter. The Teamtailor platform appears to publish all career sites via JSON Feed at /jobs.json.

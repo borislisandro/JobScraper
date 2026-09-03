@@ -1,0 +1,14 @@
+{
+  "id": "relativity-space",
+  "name": "Relativity Space",
+  "baseUrl": "https://www.relativityspace.com/careers",
+  "adapterId": "greenhouse",
+  "kind": "active",
+  "robotsOverride": true,
+  "configJson": {
+    "token": "relativity",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+  },
+  "allowPrivateNetwork": false
+}

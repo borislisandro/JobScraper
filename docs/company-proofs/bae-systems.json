@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "name": "BAE Systems",
+  "level": "full",
+  "ok": false,
+  "startedAt": "2026-09-02T15:37:05.382Z",
+  "finishedAt": "2026-09-02T15:40:36.640Z",
+  "source": {
+    "id": "bae-systems",
+    "name": "BAE Systems",
+    "baseUrl": "https://jobs.baesystems.com",
+    "adapterId": "bae-systems",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.baesystems.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "5ed3890ba86e58d67c70a3d5e489b11f1861d0ce42527c85ba26fe67a09ce015"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "bae-systems",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 1855,
+        "persisted": 1440,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 93,
+        "boardTotal": 1855,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 211164,
+        "pages": 93,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 211162,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 194,
+              "pacing": 86137,
+              "backoff": 0,
+              "response": 124414,
+              "body": 299,
+              "browser": 0,
+              "adapterOther": 100,
+              "emit": 18
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 93,
+                "pacingMs": 86137,
+                "backoffMs": 0,
+                "responseMs": 124414,
+                "bodyMs": 299
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 1440,
+    "uniqueIdentities": 1440,
+    "uniqueHashes": 1440,
+    "samples": [
+      {
+        "externalId": "125121BR",
+        "title": "Welder II ($29.80)",
+        "company": "BAE Systems",
+        "location": "Anniston, Alabama, United States",
+        "postedAt": "2026-07-21",
+        "canonicalUrl": "https://jobs.baesystems.com/global/en/job/BAE1US125121BREXTERNAL/welder-ii-29-80",
+        "applyUrl": "https://jobs.baesystems.com/global/en/job/BAE1US125121BREXTERNAL/welder-ii-29-80",
+        "descriptionStatus": "complete",
+        "descriptionChars": 316
+      },
+      {
+        "externalId": "127568BR",
+        "title": "FAST Labs Senior Principal II Engineer - Electrical Digital Lead",
+        "company": "BAE Systems",
+        "location": "Merrimack, New Hampshire, United States",
+        "postedAt": "2026-08-30",
+        "canonicalUrl": "https://jobs.baesystems.com/global/en/job/BAE1US127568BREXTERNAL/fast-labs-senior-principal-ii-engineer-electrical-digital-lead",
+        "applyUrl": "https://jobs.baesystems.com/global/en/job/BAE1US127568BREXTERNAL/fast-labs-senior-principal-ii-engineer-electrical-digital-lead",
+        "descriptionStatus": "complete",
+        "descriptionChars": 347
+      },
+      {
+        "externalId": "129518BR",
+        "title": "ISSO/AFSO",
+        "company": "BAE Systems",
+        "location": "Mojave, California, United States",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.baesystems.com/global/en/job/BAE1US129518BREXTERNAL/isso-afso",
+        "applyUrl": "https://jobs.baesystems.com/global/en/job/BAE1US129518BREXTERNAL/isso-afso",
+        "descriptionStatus": "complete",
+        "descriptionChars": 372
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": null,
+  "errors": [
+    "Cold read did not emit every discovered row; inspect duplicates or filtered records"
+  ]
+}

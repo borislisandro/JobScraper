@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "name": "CEVA",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T16:08:57.470Z",
+  "finishedAt": "2026-09-02T16:08:58.693Z",
+  "source": {
+    "id": "ceva",
+    "name": "CEVA",
+    "baseUrl": "https://www.ceva-ip.com",
+    "adapterId": "ceva",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "www.comeet.co"
+    },
+    "discovery": {
+      "status": "needs-adapter",
+      "officialCareersUrl": "https://www.ceva-ip.com/career/",
+      "boardUrl": "https://www.ceva-ip.com/career/",
+      "provenance": "The official careers page links Israel, Europe, APAC, France and USA lists. Official position pages embed COMEET.init with company-uid 76.005 and the public careers token used above; no guessed employer token was used.",
+      "provenanceDetailUrl": "https://www.ceva-ip.com/career/position/5E.173/",
+      "country": "US",
+      "countrySource": "https://www.ceva-ip.com/career/",
+      "countryEvidence": "The official careers page identifies Rockville, Maryland, USA as Headquarters.",
+      "tags": [
+        "semiconductor",
+        "ip",
+        "dsp"
+      ],
+      "tagsSource": "https://www.ceva-ip.com/career/",
+      "method": "GET",
+      "requestHeaders": {
+        "accept": "application/json"
+      },
+      "responseEvidence": "HTTP 200 JSON array. Row keys include uid, name, location, url_active_page, position_url, details, categories, is_internal. All 37 rows are public, with two details sections each.",
+      "pagination": "One unpaginated array, 37 rows. Independently reconciled UID-for-UID with the five official regional pages: 20 Israel, 6 Europe, 2 APAC, 5 France, 3 USA, plus the same general-application entry repeated across regions. No numeric total is displayed on the official careers homepage.",
+      "observedJobs": 37,
+      "countCaveat": "36 specific roles plus one general-application entry (AF.02C). Two Customer Solutions Engineer locations have distinct UIDs but share url_active_page; preserve the full UID and location when normalizing identity.",
+      "detailEndpointExample": "https://www.comeet.co/careers-api/2.0/company/76.005/positions/F9.66B?token=67526BE6752D332D33026BE135F033A8&details=true",
+      "detailEvidence": "HTTP 200. details=true is required for the details array; observed Description and Requirements contain 1822 and 1023 HTML characters for F9.66B. Join all sections in order, including requirements. The listing endpoint already includes these sections when details=true.",
+      "identitySamples": [
+        {
+          "title": "Formal verification engineer",
+          "location": "Ra'anana, Israel (IL)"
+        },
+        {
+          "title": "Digital Design Engineer",
+          "location": "Sophia Antipolis, France"
+        },
+        {
+          "title": "Wireless Chip Architect",
+          "location": "California, United States"
+        }
+      ],
+      "robotsUrls": [
+        "https://www.ceva-ip.com/robots.txt",
+        "https://www.comeet.co/robots.txt"
+      ],
+      "robotsEvidence": "Both HTTP 200. Ceva disallows wp-admin except admin-ajax, feeds and tracking/search URLs. Comeet disallows administrative/content/tracking paths; careers-api is not disallowed.",
+      "adapterGap": "This diagnostic generic JSON candidate preserves all rows but cannot concatenate details[].value. Its deferred position_url also omits details=true. Add a Comeet normalizer that joins ordered sections inline or appends details=true for deferred reads; preserve full uid. Do not admit a proof that retains only Description and drops Requirements."
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ceva",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 37,
+        "persisted": 37,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 37,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 903,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 903,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 67,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 646,
+              "body": 179,
+              "browser": 0,
+              "adapterOther": 8,
+              "emit": 2
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 646,
+                "bodyMs": 179
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 37,
+    "uniqueIdentities": 37,
+    "uniqueHashes": 37,
+    "samples": [
+      {
+        "externalId": "F9.66B",
+        "title": "AI Embedded Engineer",
+        "company": "CEVA",
+        "location": "Ra'anana, Israel (IL)",
+        "postedAt": null,
+        "canonicalUrl": "https://www.ceva-ip.com/career/position/F9.66B/",
+        "applyUrl": "https://www.ceva-ip.com/career/position/F9.66B/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2566
+      },
+      {
+        "externalId": "23.C6C-C6.30A",
+        "title": "Customer Solutions Engineer",
+        "company": "CEVA",
+        "location": "Gyeonggi-do, Korea",
+        "postedAt": null,
+        "canonicalUrl": "https://www.ceva-ip.com/career/position/23.C6C/",
+        "applyUrl": "https://www.ceva-ip.com/career/position/23.C6C/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2306
+      },
+      {
+        "externalId": "EE.B64",
+        "title": "Wireless Chip Architect",
+        "company": "CEVA",
+        "location": "California, United States",
+        "postedAt": null,
+        "canonicalUrl": "https://www.ceva-ip.com/career/position/EE.B64/",
+        "applyUrl": "https://www.ceva-ip.com/career/position/EE.B64/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3923
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ceva",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 37,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 37,
+        "requests": 1,
+        "skipped": 37,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 126,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 127,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 95,
+              "body": 13,
+              "browser": 0,
+              "adapterOther": 8,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 95,
+                "bodyMs": 13
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

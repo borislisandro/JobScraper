@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "name": "Stoke Space",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:27:43.104Z",
+  "finishedAt": "2026-09-02T15:27:46.097Z",
+  "source": {
+    "id": "stoke-space",
+    "name": "Stoke Space",
+    "baseUrl": "https://www.stokespace.com/careers/current-openings/",
+    "adapterId": "greenhouse",
+    "kind": "active",
+    "robotsOverride": true,
+    "configJson": {
+      "token": "stokespacetechnologies",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "413f78f7ff9f268bfb31f090dca99eb0ce171974b6e8aac7cef4afc6daf8a7db",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "2c250acf46aa1fcfa9488ca2697787949222a0b2dbf792e9065d14d361483742"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "stoke-space",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 62,
+        "persisted": 62,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 62,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 230,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 231,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 13,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 205,
+              "body": 4,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 205,
+                "bodyMs": 4
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 62,
+    "uniqueIdentities": 62,
+    "uniqueHashes": 62,
+    "samples": [
+      {
+        "externalId": "6014923004",
+        "title": "Additive Technician",
+        "company": "Stoke Space",
+        "location": "Kent, Washington",
+        "postedAt": "2026-06-05",
+        "canonicalUrl": "https://stokespace.com/careers/current-openings?gh_jid=6014923004",
+        "applyUrl": "https://stokespace.com/careers/current-openings?gh_jid=6014923004",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "5984878004",
+        "title": "Principal EMI/EMC Engineer",
+        "company": "Stoke Space",
+        "location": "Kent, Washington",
+        "postedAt": "2026-04-29",
+        "canonicalUrl": "https://stokespace.com/careers/current-openings?gh_jid=5984878004",
+        "applyUrl": "https://stokespace.com/careers/current-openings?gh_jid=5984878004",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "6176777004",
+        "title": "Vehicle Software Engineer – Rust Controls",
+        "company": "Stoke Space",
+        "location": "Kent, Washington",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://stokespace.com/careers/current-openings?gh_jid=6176777004",
+        "applyUrl": "https://stokespace.com/careers/current-openings?gh_jid=6176777004",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "stoke-space",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 2220,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2220,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 285,
+              "backoff": 0,
+              "response": 1914,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 285,
+                "backoffMs": 0,
+                "responseMs": 1914,
+                "bodyMs": 6
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "6014923004",
+        "title": "Additive Technician",
+        "company": "Stoke Space",
+        "location": "Kent, Washington",
+        "postedAt": "2026-06-05",
+        "canonicalUrl": "https://stokespace.com/careers/current-openings?gh_jid=6014923004",
+        "applyUrl": "https://stokespace.com/careers/current-openings?gh_jid=6014923004",
+        "descriptionStatus": "complete",
+        "descriptionChars": 8361
+      },
+      {
+        "externalId": "5984878004",
+        "title": "Principal EMI/EMC Engineer",
+        "company": "Stoke Space",
+        "location": "Kent, Washington",
+        "postedAt": "2026-04-29",
+        "canonicalUrl": "https://stokespace.com/careers/current-openings?gh_jid=5984878004",
+        "applyUrl": "https://stokespace.com/careers/current-openings?gh_jid=5984878004",
+        "descriptionStatus": "complete",
+        "descriptionChars": 8875
+      },
+      {
+        "externalId": "6176777004",
+        "title": "Vehicle Software Engineer – Rust Controls",
+        "company": "Stoke Space",
+        "location": "Kent, Washington",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://stokespace.com/careers/current-openings?gh_jid=6176777004",
+        "applyUrl": "https://stokespace.com/careers/current-openings?gh_jid=6176777004",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6523
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "stoke-space",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 62,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 62,
+        "requests": 1,
+        "skipped": 62,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 232,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 232,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 215,
+              "body": 4,
+              "browser": 0,
+              "adapterOther": 3,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 215,
+                "bodyMs": 4
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

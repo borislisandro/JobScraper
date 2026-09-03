@@ -9,7 +9,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "microchiphr"
     },
     "name": "Microchip"
@@ -24,7 +24,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "analogdevices"
     },
     "name": "Analog Devices"
@@ -39,7 +39,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External_Career",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "broadcom"
     },
     "name": "Broadcom"
@@ -54,7 +54,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "intel"
     },
     "name": "Intel"
@@ -69,7 +69,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "MarvellCareers",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "marvell"
     },
     "name": "Marvell"
@@ -87,7 +87,7 @@
       "requestDelayMs": 800,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "STMicroelectronics"
   },
@@ -103,7 +103,7 @@
       "site": "NVIDIAExternalCareerSite",
       "splitFacet": "jobFamilyGroup",
       "splitThreshold": 2000,
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "nvidia"
     },
     "name": "NVIDIA"
@@ -121,7 +121,7 @@
       "requestDelayMs": 800,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "GlobalFoundries"
   },
@@ -135,7 +135,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "micron"
     },
     "name": "Micron"
@@ -153,7 +153,7 @@
       "requestDelayMs": 800,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "Qualcomm"
   },
@@ -166,7 +166,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "Arm"
   },
@@ -179,7 +179,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "AMD"
   },
@@ -192,7 +192,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "Cisco"
   },
@@ -207,7 +207,7 @@
       "mode": "direct",
       "requestDelayMs": 250,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "Apple"
   },
@@ -220,7 +220,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "MediaTek"
   },
@@ -232,7 +232,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "u-blox"
   },
@@ -245,7 +245,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "Google"
   },
@@ -257,7 +257,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "SK hynix"
   },
@@ -269,7 +269,7 @@
       "expectedHost": "www.marvell.com",
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02"
+      "starterPackVersion": "2026-09-02.3"
     },
     "name": "Marvell (reference)"
   },
@@ -283,9 +283,26 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "careers",
-      "starterPackVersion": "2026-09-02",
+      "starterPackVersion": "2026-09-02.3",
       "tenant": "nxp"
     },
     "name": "NXP"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://jobs.ericsson.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "ericsson.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "jobs.ericsson.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-09-02.3"
+    },
+    "name": "Ericsson"
   }
 ]

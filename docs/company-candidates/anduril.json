@@ -1,0 +1,14 @@
+{
+  "id": "anduril",
+  "name": "Anduril",
+  "baseUrl": "https://job-boards.greenhouse.io/andurilindustries",
+  "adapterId": "greenhouse",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "token": "andurilindustries",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+  }
+}

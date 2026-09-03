@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 1,
+  "name": "Arista Networks",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T16:02:11.040Z",
+  "finishedAt": "2026-09-02T16:02:17.580Z",
+  "source": {
+    "id": "arista-networks",
+    "name": "Arista Networks",
+    "baseUrl": "https://www.arista.com/en/careers",
+    "adapterId": "arista-networks",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "api.smartrecruiters.com"
+    },
+    "onboardingEvidence": {
+      "officialCareersUrl": "https://www.arista.com/en/careers",
+      "provenance": "On 2026-09-02 the official careers page embedded static.smartrecruiters.com/job-widget/1.8.5/script/smart_widget.js and called widget with company_code AristaNetworks, jobAdType PUBLIC, and api_url https://www.smartrecruiters.com. The token was read from official markup, not guessed.",
+      "platform": "SmartRecruiters",
+      "token": "AristaNetworks",
+      "publishedTotal": 234,
+      "listingEndpoint": "https://api.smartrecruiters.com/v1/companies/AristaNetworks/postings?limit=100&offset=0",
+      "listingEvidence": "Anonymous GET with Accept: application/json returned offset, limit, totalFound, content. Offsets 0, 100 and 200 returned 100, 100 and 34 rows, each with totalFound 234. All 234 IDs were unique.",
+      "identitySamples": [
+        {
+          "title": "Senior Hardware Design Engineer, High Speed Networking",
+          "location": "Nashua, NH, United States",
+          "id": "744000146260068"
+        },
+        {
+          "title": "Senior Hardware Design Engineer, Ethernet Switching",
+          "location": "Roseville, CA, United States",
+          "id": "744000136348879"
+        },
+        {
+          "title": "Hardware Design Engineer, Ethernet Switching",
+          "location": "Bengaluru, KA, India",
+          "id": "744000135166119"
+        }
+      ],
+      "detailEndpoint": "https://api.smartrecruiters.com/v1/companies/AristaNetworks/postings/744000146260068",
+      "detailEvidence": "Public GET returned active posting and jobAd.sections with companyDescription, jobDescription, qualifications and additionalInformation. The description discusses high-speed networking/Ethernet PCBs and the qualification section specifies 100G/200G PAM4 switching.",
+      "robots": "https://api.smartrecruiters.com/robots.txt: User-agent LinkedInBot allows /v1/companies/; User-agent * disallows /. robotsOverride remains true; normal pacing and URL guards remain enabled.",
+      "country": "US",
+      "headquartersSource": "https://www.arista.com/en/company/quick-facts",
+      "headquartersEvidence": "Official Quick Facts identifies Santa Clara, California as headquarters.",
+      "tags": [
+        "networking",
+        "hardware"
+      ],
+      "tagsSource": "https://www.arista.com/en/company",
+      "notes": "Uses the shared SmartRecruiters reader owned by the integration agent. Admission requires a passing generated full worker proof; no catalog or tracker changes were made here."
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "d69121db0c25a9f75959ce17aa94ce87f739d0d5ab2f07b44ce5761157261d33"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arista-networks",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 234,
+        "persisted": 234,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 3,
+        "boardTotal": 234,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 4296,
+        "pages": 3,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 4297,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 3788,
+              "backoff": 0,
+              "response": 471,
+              "body": 12,
+              "browser": 0,
+              "adapterOther": 11,
+              "emit": 3
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 3,
+                "pacingMs": 3788,
+                "backoffMs": 0,
+                "responseMs": 471,
+                "bodyMs": 12
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 234,
+    "uniqueIdentities": 234,
+    "uniqueHashes": 234,
+    "samples": [
+      {
+        "externalId": "744000147014524",
+        "title": "Network Systems Engineer (Pre-Sales) - Cloud Networking",
+        "company": "Arista Networks",
+        "location": "Warsaw, Masovian Voivodeship, PL",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000147014524",
+        "applyUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000147014524",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000133887679",
+        "title": "Major Account Manager - Japan",
+        "company": "Arista Networks",
+        "location": "Tokyo, Tokyo, JP",
+        "postedAt": "2026-06-24",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000133887679",
+        "applyUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000133887679",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "743999993629460",
+        "title": "Network Engineer in Solution Test",
+        "company": "Arista Networks",
+        "location": "Nashua, NH, US",
+        "postedAt": "2024-06-12",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/AristaNetworks/743999993629460",
+        "applyUrl": "https://jobs.smartrecruiters.com/AristaNetworks/743999993629460",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arista-networks",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1699,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1699,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 826,
+              "backoff": 0,
+              "response": 559,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 295,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 826,
+                "backoffMs": 0,
+                "responseMs": 559,
+                "bodyMs": 6
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "744000147014524",
+        "title": "Network Systems Engineer (Pre-Sales) - Cloud Networking",
+        "company": "Arista Networks",
+        "location": "Warsaw, Masovian Voivodeship, PL",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000147014524",
+        "applyUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000147014524",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4515
+      },
+      {
+        "externalId": "744000133887679",
+        "title": "Major Account Manager - Japan",
+        "company": "Arista Networks",
+        "location": "Tokyo, Tokyo, JP",
+        "postedAt": "2026-06-24",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000133887679",
+        "applyUrl": "https://jobs.smartrecruiters.com/AristaNetworks/744000133887679",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4017
+      },
+      {
+        "externalId": "743999993629460",
+        "title": "Network Engineer in Solution Test",
+        "company": "Arista Networks",
+        "location": "Nashua, NH, US",
+        "postedAt": "2024-06-12",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/AristaNetworks/743999993629460",
+        "applyUrl": "https://jobs.smartrecruiters.com/AristaNetworks/743999993629460",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4204
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arista-networks",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 234,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 218,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 219,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 195,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 195,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

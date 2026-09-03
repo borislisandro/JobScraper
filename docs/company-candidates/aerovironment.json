@@ -1,0 +1,15 @@
+{
+  "id": "aerovironment",
+  "name": "AeroVironment",
+  "baseUrl": "https://avav.wd1.myworkdayjobs.com/AVAV",
+  "adapterId": "workday",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "tenant": "avav",
+    "site": "AVAV",
+    "maxPages": 500,
+    "expectedHost": "avav.wd1.myworkdayjobs.com"
+  }
+}

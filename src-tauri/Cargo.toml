@@ -42,4 +42,4 @@ keyring = "3"
 # UserDefinedEmbeddingModel reads only our bundled files. Keep only ORT's build
 # runtime provisioner; omit FastEmbed's hf-hub/model download features.
 windows-sys = { version = "0.61", features = ["Win32_Storage_FileSystem"] }
-windows = { version = "0.61", features = ["Win32_System_Com", "Win32_System_Ole", "Win32_System_TaskScheduler", "Win32_System_Variant"] }
+windows = { version = "0.61", features = ["Win32_Security_Authorization", "Win32_System_Threading", "Win32_System_Registry", "Win32_System_Com", "Win32_System_Ole", "Win32_System_TaskScheduler", "Win32_System_Variant"] }

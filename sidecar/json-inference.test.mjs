@@ -88,3 +88,38 @@ test("a JS-only board is detected from the endpoint its page fetches",{skip:edge
   assert.match(final.payload.finalUrl,/\/api\/search/);
   assert.equal(final.payload.sampleJobs.length,3)}
  finally{await new Promise(r=>site.close(r))}});
+
+// A referral or a recruiter's link is one opening on a board nobody configured, and configuring a
+// whole source for a single job is the wrong trade. Schema.org JobPosting is what almost every ATS
+// already publishes for Google Jobs, so it is the one thing worth trusting on an unknown page.
+test("one vacancy can be read from its own page",async()=>{
+ const {captureFromHtml}=await import("./worker.mjs");
+ const posting={"@context":"https://schema.org","@type":"JobPosting",title:"Verification Engineer",
+  datePosted:"2026-08-21",validThrough:"2026-10-01",hiringOrganization:{name:"Critical Software"},
+  jobLocation:{"@type":"Place",address:{addressLocality:"Coimbra",addressCountry:"Portugal"}},
+  description:"<p>UVM and SystemVerilog</p>"};
+ const page=`<html><head><title>Careers</title><script type="application/ld+json">${JSON.stringify(posting)}</script></head><body></body></html>`;
+ const read=captureFromHtml(page,"https://criticalsoftware.test/jobs/9");
+ assert.equal(read.title,"Verification Engineer");
+ assert.equal(read.company,"Critical Software");
+ assert.equal(read.location,"Coimbra, Portugal");
+ assert.equal(read.postedAt,"2026-08-21");
+ assert.equal(read.closingAt,"2026-10-01");
+ assert.equal(read.descriptionText,"UVM and SystemVerilog");
+ assert.equal(read.structured,true);
+ // Graphs and arrays are both normal ways to ship it.
+ const graph=`<script type="application/ld+json">${JSON.stringify({"@graph":[{"@type":"WebPage"},posting]})}</script>`;
+ assert.equal(captureFromHtml(graph,"https://x.test/1").title,"Verification Engineer");
+ // A page with no markup still yields something, and says it is not to be trusted — the person who
+ // pasted the link is the one who can fix it before it is stored.
+ const bare=captureFromHtml('<html><head><title>Staff Engineer | Foo</title><meta property="og:site_name" content="Foo"></head></html>',"https://foo.test/2");
+ assert.equal(bare.structured,false);
+ assert.equal(bare.title,"Staff Engineer | Foo");
+ assert.equal(bare.company,"Foo");
+ // A malformed block does not take the page down with it.
+ const broken=`<script type="application/ld+json">{ not json </script><script type="application/ld+json">${JSON.stringify(posting)}</script>`;
+ assert.equal(captureFromHtml(broken,"https://x.test/3").title,"Verification Engineer");
+ // Remote-only postings say so in a field of their own.
+ const remote=captureFromHtml(`<script type="application/ld+json">${JSON.stringify({...posting,jobLocation:undefined,jobLocationType:"TELECOMMUTE"})}</script>`,"https://x.test/4");
+ assert.equal(remote.workMode,"remote");
+ assert.equal(remote.location,"Remote")});

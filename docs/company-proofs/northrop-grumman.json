@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "name": "Northrop Grumman",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:17:39.458Z",
+  "finishedAt": "2026-09-02T15:23:25.758Z",
+  "source": {
+    "id": "northrop-grumman",
+    "name": "Northrop Grumman",
+    "baseUrl": "https://jobs.northropgrumman.com/careers",
+    "adapterId": "eightfold",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "domain": "ngc.com",
+      "eightfoldApi": "pcsx",
+      "retryForbidden": true,
+      "requestDelayMs": 900,
+      "maxPages": 500,
+      "expectedHost": "jobs.northropgrumman.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "413f78f7ff9f268bfb31f090dca99eb0ce171974b6e8aac7cef4afc6daf8a7db",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "2c250acf46aa1fcfa9488ca2697787949222a0b2dbf792e9065d14d361483742"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "northrop-grumman",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 3701,
+        "persisted": 3701,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 371,
+        "boardTotal": 3701,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 343444,
+        "pages": 371,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 343444,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 438,
+              "pacing": 95433,
+              "backoff": 0,
+              "response": 246936,
+              "body": 352,
+              "browser": 0,
+              "adapterOther": 232,
+              "emit": 51
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 371,
+                "pacingMs": 95433,
+                "backoffMs": 0,
+                "responseMs": 246936,
+                "bodyMs": 352
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 3701,
+    "uniqueIdentities": 3701,
+    "uniqueHashes": 3701,
+    "samples": [
+      {
+        "externalId": "1340072303669",
+        "title": "Dimension Control Technician 3/4",
+        "company": "Northrop Grumman",
+        "location": "United States-Utah-Clearfield, United States-Utah-Layton, Clearfield, UT, US, Layton, UT, US",
+        "postedAt": "2026-07-22",
+        "canonicalUrl": "https://jobs.northropgrumman.com/careers/job/1340072303669",
+        "applyUrl": "https://jobs.northropgrumman.com/careers/job/1340072303669",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "1340070999895",
+        "title": "Aeronautical Engineer - 4",
+        "company": "Northrop Grumman",
+        "location": "United States-Utah-Corinne, Corinne, UT, US",
+        "postedAt": "2026-05-18",
+        "canonicalUrl": "https://jobs.northropgrumman.com/careers/job/1340070999895",
+        "applyUrl": "https://jobs.northropgrumman.com/careers/job/1340070999895",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "1340074135578",
+        "title": "Systems Engineer – EO/IR",
+        "company": "Northrop Grumman",
+        "location": "United States-Virginia-Dulles, Dulles, VA, US",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.northropgrumman.com/careers/job/1340074135578",
+        "applyUrl": "https://jobs.northropgrumman.com/careers/job/1340074135578",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "northrop-grumman",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 2159,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2159,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 14,
+              "pacing": 974,
+              "backoff": 0,
+              "response": 1160,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 974,
+                "backoffMs": 0,
+                "responseMs": 1160,
+                "bodyMs": 6
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "1340072303669",
+        "title": "Dimension Control Technician 3/4",
+        "company": "Northrop Grumman",
+        "location": "United States-Utah-Clearfield",
+        "postedAt": "2026-07-22",
+        "canonicalUrl": "https://jobs.northropgrumman.com/careers/job/1340072303669",
+        "applyUrl": "https://jobs.northropgrumman.com/careers/job/1340072303669",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7420
+      },
+      {
+        "externalId": "1340070999895",
+        "title": "Aeronautical Engineer - 4",
+        "company": "Northrop Grumman",
+        "location": "United States-Utah-Corinne",
+        "postedAt": "2026-05-18",
+        "canonicalUrl": "https://jobs.northropgrumman.com/careers/job/1340070999895",
+        "applyUrl": "https://jobs.northropgrumman.com/careers/job/1340070999895",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6982
+      },
+      {
+        "externalId": "1340074135578",
+        "title": "Systems Engineer – EO/IR",
+        "company": "Northrop Grumman",
+        "location": "United States-Virginia-Dulles",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.northropgrumman.com/careers/job/1340074135578",
+        "applyUrl": "https://jobs.northropgrumman.com/careers/job/1340074135578",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7195
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "northrop-grumman",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 3701,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 10,
+        "requests": 1,
+        "skipped": 10,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 401,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 402,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 385,
+              "body": 4,
+              "browser": 0,
+              "adapterOther": 3,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 385,
+                "bodyMs": 4
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

@@ -3,7 +3,11 @@ let server,base;const seen=[];
 before(async()=>{server=createServer(async(req,res)=>{let body="";for await(const part of req)body+=part;seen.push({url:req.url,method:req.method,cookie:req.headers.cookie,body});const parsed=new URL(req.url,"http://local"),adapter=parsed.pathname.split("/")[1];if(req.url.startsWith("/detail/"))return res.setHeader("content-type","application/json").end(JSON.stringify({description:"detail text",applyUrl:"https://apply.example.test/job"}));const query=parsed.searchParams,page=adapter==="workday"?JSON.parse(body||"{}").offset:Number(query.get("page")||0),item={id:`${adapter}-1`,jobReqId:`${adapter}-1`,title:`${adapter} engineer`,company:"Fixture",detailUrl:`/detail/${adapter}`,...(adapter==="workday"?{compensation:{min:120000,max:150000,currency:"USD"}}:adapter==="eightfold"?{salaryMin:90000,salaryMax:110000,salaryCurrency:"USD",seniority:"senior"}:{})};const first=adapter==="eightfold"?!query.get("cursor"):["icims","talentbrew-jibe"].includes(adapter)?page===1:page===0;const list=first?[item]:[];const payload=adapter==="workday"?{total:1,facets:[{facetParameter:"locations",values:[{id:"pt"}]}],jobPostings:list}:adapter==="eightfold"?{positions:list,nextCursor:first?"next":null}:adapter==="phenom"?{jobs:list}:{jobs:list};res.setHeader("content-type","application/json").end(JSON.stringify(payload))});await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));base=`http://127.0.0.1:${server.address().port}`});after(()=>new Promise(resolve=>server.close(resolve)));
 function execute(input){return new Promise((resolve,reject)=>{const child=spawn(process.execPath,["sidecar/worker.mjs"],{cwd:process.cwd()}),lines=[];child.stdout.on("data",data=>lines.push(...String(data).trim().split("\n").filter(Boolean)));child.on("error",reject);child.on("close",code=>code?reject(Error(`worker ${code}`)):resolve(lines.map(JSON.parse)));child.stdin.end(JSON.stringify(input)+"\n")})}
 function run(adapter,config){return execute({protocolVersion:1,command:"scrape_source",runId:adapter,source:{name:"Fixture",baseUrl:base,adapterId:adapter,kind:"active",allowPrivateNetwork:true,robotsOverride:true,configJson:{testNoDelay:true,maxPages:3,pageSize:1,listingPath:`/${adapter}`,query:"rf",sessionCookies:[{name:"session",value:"allowed"}],...config}}})}
-test("platform requests execute listing, paging, detail, and cookie contracts",async()=>{for(const adapter of["workday","eightfold","icims","talentbrew-jibe","phenom"]){seen.length=0;const events=await run(adapter,adapter==="workday"?{listingPath:"/workday",tenant:"fixture"}:{}),final=events.at(-1);assert.equal(final.event,"completed",JSON.stringify(events));assert.equal(final.payload.mode,"direct-platform");assert.equal(events.filter(e=>e.event==="job").length,1);const jobPayload=events.find(e=>e.event==="job").payload;if(adapter==="workday"){assert.equal(jobPayload.salaryMin,120000);assert.equal(jobPayload.salaryMax,150000);assert.equal(jobPayload.salaryCurrency,"USD");assert.equal(jobPayload.salaryConfidence,"structured")}else if(adapter==="eightfold"){assert.equal(jobPayload.salaryMin,90000);assert.equal(jobPayload.salaryMax,110000);assert.equal(jobPayload.seniority,"senior")}else{assert.equal(jobPayload.salaryMin,null);assert.equal(jobPayload.salaryMax,null);assert.equal(jobPayload.salaryConfidence,null)}assert.ok(seen.some(x=>x.url===`/detail/${adapter}`&&x.cookie==="session=allowed"));assert.ok(seen.filter(x=>x.url.startsWith(`/${adapter}`)).length>=2);if(adapter==="workday"){const first=seen.find(x=>x.url==="/workday");assert.equal(first.method,"POST");assert.deepEqual(JSON.parse(first.body),{appliedFacets:{},limit:1,offset:0,searchText:"rf"})}else assert.equal(seen.find(x=>x.url.startsWith(`/${adapter}`)).method,"GET")}});
+test("platform requests execute listing, paging, detail, and cookie contracts",async()=>{for(const adapter of["workday","eightfold","icims","talentbrew-jibe","phenom"]){seen.length=0;const events=await run(adapter,adapter==="workday"?{listingPath:"/workday",tenant:"fixture"}:{}),final=events.at(-1);assert.equal(final.event,"completed",JSON.stringify(events));assert.equal(final.payload.mode,"direct-platform");assert.equal(events.filter(e=>e.event==="job").length,1);const jobPayload=events.find(e=>e.event==="job").payload;if(adapter==="workday"){assert.equal(jobPayload.salaryMin,120000);assert.equal(jobPayload.salaryMax,150000);assert.equal(jobPayload.salaryCurrency,"USD");assert.equal(jobPayload.salaryConfidence,"structured")}else if(adapter==="eightfold"){assert.equal(jobPayload.salaryMin,90000);assert.equal(jobPayload.salaryMax,110000);assert.equal(jobPayload.seniority,"senior")}else{assert.equal(jobPayload.salaryMin,null);assert.equal(jobPayload.salaryMax,null);assert.equal(jobPayload.salaryConfidence,null)}assert.ok(seen.some(x=>x.url===`/detail/${adapter}`&&x.cookie==="session=allowed"));assert.ok(seen.filter(x=>x.url.startsWith(`/${adapter}`)).length>=(adapter==="workday"?1:2),`${adapter}: listing requests`);
+  // Workday is the exception: the fixture publishes total 1 and serves 1 row, so the traversal is
+  // already over. Asking for the page after the end is what PTC answers with page one again, so
+  // not issuing that request is the point of the total-based stop rather than an accident.
+  if(adapter==="workday")assert.equal(seen.filter(x=>x.url.startsWith("/workday")).length,1);if(adapter==="workday"){const first=seen.find(x=>x.url==="/workday");assert.equal(first.method,"POST");assert.deepEqual(JSON.parse(first.body),{appliedFacets:{},limit:1,offset:0,searchText:"rf"})}else assert.equal(seen.find(x=>x.url.startsWith(`/${adapter}`)).method,"GET")}});
 test("Workday listing reads defer detail enrichment until one job is requested",async()=>{
  seen.length=0;const source={id:"s",name:"Fixture",baseUrl:base,adapterId:"workday",kind:"active",allowPrivateNetwork:true,robotsOverride:true,configJson:{testNoDelay:true,maxPages:1,pageSize:1,listingPath:"/workday",tenant:"fixture",site:"External"}};
  const listingEvents=await execute({protocolVersion:1,command:"scrape_source",runId:"listing",deferDetails:true,source});
@@ -83,6 +87,49 @@ function require_hash(){
   const {listingHash}=hashModule;
   return listingHash("/detail/workday","workday engineer","");
 }
+
+// Hosted APIs cannot be redirected with listingPath. Replace only the transport in a child
+// process: the real worker still parses the protocol, enforces robots and normalizes each row.
+function hostedRun(adapter,config,routes,extra={}){
+ const preload=`const routes=${JSON.stringify(routes)};globalThis.fetch=async raw=>{const url=String(raw);if(url.endsWith('/robots.txt'))return new Response(routes[url]??'User-agent: *\\nAllow: /\\n');if(!(url in routes))throw Error('Unexpected fixture request: '+url);return new Response(JSON.stringify(routes[url]),{headers:{'content-type':'application/json'}})};`;
+ return new Promise((resolve,reject)=>{const child=spawn(process.execPath,["--import",`data:text/javascript,${encodeURIComponent(preload)}`,"sidecar/worker.mjs"]);let stdout="",stderr="";
+  child.stdout.on("data",data=>stdout+=data);child.stderr.on("data",data=>stderr+=data);child.on("error",reject);child.on("close",code=>code?reject(Error(stderr)):resolve(stdout.trim().split("\n").map(JSON.parse)));
+  const {enrichmentJobs,...options}=extra;
+  child.stdin.end(JSON.stringify({protocolVersion:1,command:"scrape_source",runId:"hosted",source:{name:"Fixture",adapterId:adapter,baseUrl:"https://careers.example.test/site/",kind:"active",allowPrivateNetwork:true,robotsOverride:false,enrichmentJobs,configJson:{testNoDelay:true,token:"fixture",maxPages:2,...config}},...options})+"\n")});
+}
+test("Ashby whole-board totals include known and filtered jobs, with empty reads still unfinished",async()=>{
+ const url="https://api.ashbyhq.com/posting-api/job-board/fixture",jobs=[{id:"1",title:"Engineer",jobUrl:"https://jobs.example.test/1",location:"Lisbon",descriptionPlain:"Build chips."},{id:"2",title:"Designer",jobUrl:"https://jobs.example.test/2",location:"Porto"}];
+ const first=await hostedRun("ashby",{},{[url]:{jobs}}),stored=first.find(event=>event.event==="job")?.payload;
+ assert.equal(first.at(-1).event,"completed",JSON.stringify(first.at(-1)));assert.equal(stored.descriptionText,"Build chips.");
+ const warm=await hostedRun("ashby",{},{[url]:{jobs}},{known:[stored.listingHash],titleTerms:["Engineer"]});
+ assert.equal(warm.at(-1).payload.boardTotal,2);assert.equal(warm.at(-1).payload.boardTotalExact,true);assert.equal(warm.at(-1).payload.complete,true);
+ assert.equal(warm.some(event=>event.event==="job"),false);assert.ok(warm.some(event=>event.event==="seen_batch"));
+ const empty=await hostedRun("ashby",{},{[url]:{jobs:[]}});assert.equal(empty.at(-1).payload.boardTotal,0);assert.equal(empty.at(-1).payload.complete,false);
+ const denied=await hostedRun("ashby",{},{[url]:{jobs},"https://api.ashbyhq.com/robots.txt":"User-agent: *\nDisallow: /\n"});assert.equal(denied.at(-1).payload.code,"robots_denied");
+});
+test("Lever pages without inventing an exact total from one page",async()=>{
+ const item={id:"lever-1",text:"Engineer",hostedUrl:"https://jobs.example.test/1",createdAt:1788307200000,categories:{location:"Toronto"},descriptionPlain:"Build tools."};
+ const routes={"https://api.lever.co/v0/postings/fixture?mode=json&limit=1&skip=0":[item],"https://api.lever.co/v0/postings/fixture?mode=json&limit=1&skip=1":[]};
+ const events=await hostedRun("lever",{pageSize:1},routes),job=events.find(event=>event.event==="job")?.payload;
+ assert.equal(events.at(-1).event,"completed",JSON.stringify(events.at(-1)));assert.equal(job.title,"Engineer");assert.equal(job.externalId,"lever-1");assert.equal(job.location,"Toronto");
+ assert.equal(events.at(-1).payload.pages,2);assert.equal(events.at(-1).payload.boardTotalExact,false);assert.equal(events.at(-1).payload.complete,true);
+ const partial=await hostedRun("lever",{pageSize:1,maxPages:1},routes);assert.equal(partial.at(-1).payload.complete,false);assert.equal(partial.at(-1).payload.boardTotalExact,false);
+});
+test("Greenhouse and Oracle keep IDs and normalize inline and deferred descriptions",async()=>{
+ const cases=[{adapter:"greenhouse",config:{},listing:"https://boards-api.greenhouse.io/v1/boards/fixture/jobs",detail:"https://boards-api.greenhouse.io/v1/boards/fixture/jobs/7",
+  rows:{meta:{total:1},jobs:[{id:7,title:"Engineer",absolute_url:"https://jobs.example.test/7",location:{name:"Berlin"}}]},body:{id:7,title:"Engineer",absolute_url:"https://jobs.example.test/7",content:"<p>Design chips.</p>"}},
+ {adapter:"oracle",config:{apiHost:"pod.example.test",siteNumber:"CX",pageSize:200},listing:"https://pod.example.test/hcmRestApi/resources/latest/recruitingCEJobRequisitions?onlyData=true&expand=requisitionList.secondaryLocations&finder=findReqs;siteNumber=CX,limit=200,offset=0,sortBy=POSTING_DATES_DESC",
+  detail:"https://pod.example.test/hcmRestApi/resources/latest/recruitingCEJobRequisitionDetails?onlyData=true&expand=all&finder=ById;Id=%227%22,siteNumber=CX",
+  rows:{items:[{TotalJobsCount:1,requisitionList:[{Id:"7",Title:"Engineer",PrimaryLocation:"Paris"}]}]},body:{items:[{Id:"7",Title:"Engineer",ExternalDescriptionStr:"<p>Design chips.</p>"}]}}];
+ for(const fixture of cases){const routes={[fixture.listing]:fixture.rows,[fixture.detail]:fixture.body};
+  const listed=await hostedRun(fixture.adapter,fixture.config,routes,{deferDetails:true}),job=listed.find(event=>event.event==="job")?.payload;
+  assert.equal(listed.at(-1).event,"completed",JSON.stringify(listed.at(-1)));assert.equal(job.externalId,"7",fixture.adapter);assert.equal(job.descriptionStatus,"pending");
+  assert.equal(listed.at(-1).payload.boardTotal,1);assert.equal(listed.at(-1).payload.boardTotalExact,true);
+  const detail=await hostedRun(fixture.adapter,fixture.config,routes,{command:"enrich_source",enrichmentJobs:[{...job,jobId:"stored"}]}),enriched=detail.find(event=>event.event==="enriched_job")?.payload;
+  assert.equal(enriched?.jobId,"stored",JSON.stringify(detail));assert.equal(enriched.descriptionText,"Design chips.",fixture.adapter);
+  const inline=await hostedRun(fixture.adapter,fixture.config,routes);assert.equal(inline.find(event=>event.event==="job")?.payload.descriptionText,"Design chips.",fixture.adapter);
+ }
+});
 
 // Workday publishes the posting date as prose that changes every day ("Posted 5 Days Ago" becomes
 // "Posted 6 Days Ago" tomorrow) while the vacancy itself is untouched. When that string was part
@@ -180,3 +227,57 @@ test("a multi-office posting stores places, not a count",()=>{
  // Every listed place survives, de-duplicated, with a long list trimmed and the rest counted.
  assert.equal(toLocation(["Austin","Austin","Munich"]),"Austin, Munich");
  assert.equal(toLocation(["a","b","c","d","e","f","g","h"]),"a, b, c, d, e, f (+2 more)")});
+
+test("Eightfold PCSX defers real detail payloads and refuses repeated or drifting pagination",async()=>{
+ let mode="normal";const requested=[];
+ const fixture=createServer((req,res)=>{
+  const url=new URL(req.url,"http://fixture");requested.push(url.pathname);
+  res.setHeader("content-type","application/json");
+  if(url.pathname==="/api/pcsx/position_details")return res.end(JSON.stringify({data:{id:37,name:"Process Engineer",jobDescription:"<p>Develop deposition equipment.</p>"}}));
+  const start=Number(url.searchParams.get("start"));
+  res.end(JSON.stringify({data:{count:mode==="normal"?1:mode==="drifting"&&start?3:2,
+   positions:start>1?[]:[{id:mode==="drifting"?37+start:37,name:"Process Engineer",positionUrl:`/careers/job/${mode==="drifting"?37+start:37}`,locations:["Phoenix"]}]}}));
+ });
+ await new Promise(resolve=>fixture.listen(0,"127.0.0.1",resolve));
+ try{
+  const baseUrl=`http://127.0.0.1:${fixture.address().port}`;
+  const source={name:"Fixture",baseUrl,adapterId:"eightfold",kind:"active",allowPrivateNetwork:true,robotsOverride:true,configJson:{domain:"fixture.com",eightfoldApi:"pcsx",testNoDelay:true,maxPages:5}};
+  const events=await execute({protocolVersion:1,command:"scrape_source",runId:"pcsx",source,deferDetails:true});
+  const listing=events.find(event=>event.event==="job").payload;
+  assert.equal(events.at(-1).payload.complete,true);assert.equal(listing.descriptionStatus,"pending");
+  assert.match(listing.detailUrl,/position_details\?position_id=37&domain=fixture.com/);
+  assert.ok(!requested.includes("/api/pcsx/position_details"));
+  const details=await execute({protocolVersion:1,command:"enrich_source",runId:"pcsx-detail",source:{...source,enrichmentJobs:[{...listing,jobId:"stored"}]}});
+  const detail=details.find(event=>event.event==="enriched_job").payload;
+  assert.equal(detail.jobId,"stored");assert.equal(detail.externalId,"37");assert.equal(detail.descriptionStatus,"complete");
+  assert.equal(detail.descriptionText,"Develop deposition equipment.");assert.equal(detail.listingHash,listing.listingHash);
+  for(mode of["repeated","drifting"]){
+   const partial=await execute({protocolVersion:1,command:"scrape_source",runId:mode,source,deferDetails:true});
+   assert.equal(partial.at(-1).payload.complete,false,mode);
+   assert.match(partial.at(-1).payload.warnings.join(" "),/unfinished/,mode);
+  }
+ }finally{await new Promise(resolve=>fixture.close(resolve))}
+});
+
+// TEKEVER's careers page counts 123 openings; its RSS feed carries the most recent 100. Reaching
+// the end of that feed used to be reported as a complete board, which would have reconciled the 23
+// it never mentioned to closed. A feed states no total, so it cannot certify a whole board.
+test("a feed read is not a complete board unless the source says its feed is the whole board",async()=>{
+ const item=n=>`<item><title>Engineer ${n}</title><link>https://example.test/jobs/${n}</link><guid>${n}</guid><description>Work.</description></item>`;
+ const board=createServer((req,res)=>res.setHeader("content-type","application/rss+xml")
+  .end(`<?xml version="1.0"?><rss version="2.0"><channel><title>Feed</title>${[1,2,3].map(item).join("")}</channel></rss>`));
+ await new Promise(resolve=>board.listen(0,"127.0.0.1",resolve));
+ const host=`http://127.0.0.1:${board.address().port}/jobs.rss`;
+ const read=configJson=>execute({protocolVersion:1,command:"scrape_source",runId:"feed",
+  source:{name:"Fixture",baseUrl:host,adapterId:"rss",kind:"active",allowPrivateNetwork:true,robotsOverride:true,
+   configJson:{testNoDelay:true,...configJson}}});
+ try{
+  const capped=(await read({})).at(-1).payload;
+  assert.equal(capped.complete,false,"the end of a feed is not the end of a board");
+  assert.equal(capped.boardTotalExact,false);
+  assert.match(capped.warnings.join(" "),/feed lists recent items/);
+  const declared=(await read({feedIsWholeBoard:true})).at(-1).payload;
+  assert.equal(declared.complete,true,"a source may declare that its feed carries every opening");
+  assert.equal(declared.discovered,3);
+ }finally{await new Promise(resolve=>board.close(resolve))}
+});

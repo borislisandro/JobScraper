@@ -1,0 +1,3802 @@
+{
+ "version": "2026-09-02.3",
+ "companies": [
+  {
+   "id": "00000000-0000-4000-8000-000000000001",
+   "name": "Microchip",
+   "adapterId": "workday",
+   "baseUrl": "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "External",
+    "tenant": "microchiphr",
+    "expectedHost": "wd5.myworkdaysite.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000002",
+   "name": "Analog Devices",
+   "adapterId": "workday",
+   "baseUrl": "https://analogdevices.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "External",
+    "tenant": "analogdevices",
+    "expectedHost": "analogdevices.wd1.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000003",
+   "name": "Broadcom",
+   "adapterId": "workday",
+   "baseUrl": "https://broadcom.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "External_Career",
+    "tenant": "broadcom",
+    "expectedHost": "broadcom.wd1.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000004",
+   "name": "Intel",
+   "adapterId": "workday",
+   "baseUrl": "https://intel.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "External",
+    "tenant": "intel",
+    "expectedHost": "intel.wd1.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000005",
+   "name": "Marvell",
+   "adapterId": "workday",
+   "baseUrl": "https://marvell.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "MarvellCareers",
+    "tenant": "marvell",
+    "expectedHost": "marvell.wd1.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000006",
+   "name": "STMicroelectronics",
+   "adapterId": "eightfold",
+   "baseUrl": "https://stmicroelectronics.eightfold.ai/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "stmicroelectronics.com",
+    "eightfoldApi": "legacy",
+    "maxPages": 500,
+    "requestDelayMs": 400,
+    "retryForbidden": true,
+    "expectedHost": "stmicroelectronics.eightfold.ai"
+   },
+   "starter": true,
+   "country": "CH",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000007",
+   "name": "NVIDIA",
+   "adapterId": "workday",
+   "baseUrl": "https://nvidia.wd5.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "NVIDIAExternalCareerSite",
+    "splitFacet": "jobFamilyGroup",
+    "splitThreshold": 2000,
+    "tenant": "nvidia",
+    "expectedHost": "nvidia.wd5.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "ai-hardware"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000008",
+   "name": "GlobalFoundries",
+   "adapterId": "eightfold",
+   "baseUrl": "https://careers.gf.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "globalfoundries.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "requestDelayMs": 400,
+    "retryForbidden": true,
+    "expectedHost": "careers.gf.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor-foundry"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000009",
+   "name": "Micron",
+   "adapterId": "workday",
+   "baseUrl": "https://micron.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "External",
+    "tenant": "micron",
+    "expectedHost": "micron.wd1.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000010",
+   "name": "Qualcomm",
+   "adapterId": "eightfold",
+   "baseUrl": "https://careers.qualcomm.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "qualcomm.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "requestDelayMs": 400,
+    "retryForbidden": true,
+    "expectedHost": "careers.qualcomm.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000011",
+   "name": "Arm",
+   "adapterId": "arm",
+   "baseUrl": "https://careers.arm.com/search-jobs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers.arm.com"
+   },
+   "starter": true,
+   "country": "GB",
+   "tags": [
+    "semiconductor-ip"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000012",
+   "name": "AMD",
+   "adapterId": "amd",
+   "baseUrl": "https://careers.amd.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers.amd.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000013",
+   "name": "Cisco",
+   "adapterId": "cisco",
+   "baseUrl": "https://careers.cisco.com/global/en/search-results",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers.cisco.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "big-tech",
+    "networking"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000014",
+   "name": "Apple",
+   "adapterId": "apple",
+   "baseUrl": "https://jobs.apple.com/en-us/search?location=",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "locale": "en-us",
+    "maxPages": 500,
+    "requestDelayMs": 250,
+    "expectedHost": "jobs.apple.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "big-tech"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000015",
+   "name": "MediaTek",
+   "adapterId": "mediatek",
+   "baseUrl": "https://careers.mediatek.com/en/jobs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers.mediatek.com"
+   },
+   "starter": true,
+   "country": "TW",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000016",
+   "name": "u-blox",
+   "adapterId": "u-blox",
+   "baseUrl": "https://www.u-blox.com/en/job-openings",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500
+   },
+   "starter": true,
+   "country": "CH",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000017",
+   "name": "Google",
+   "adapterId": "google",
+   "baseUrl": "https://www.google.com/about/careers/applications/jobs/results/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "www.google.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "big-tech"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000018",
+   "name": "SK hynix",
+   "adapterId": "sk-hynix",
+   "baseUrl": "https://talent.skhynix.com/hub/en/apply/job",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500
+   },
+   "starter": true,
+   "country": "KR",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000019",
+   "name": "Marvell (reference)",
+   "adapterId": "reference",
+   "baseUrl": "https://www.marvell.com/company/careers.html",
+   "kind": "reference",
+   "disabledReason": "Reference-only source: it is never scraped.",
+   "config": {
+    "expectedHost": "www.marvell.com"
+   },
+   "starter": true,
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000020",
+   "name": "NXP",
+   "adapterId": "workday",
+   "baseUrl": "https://nxp.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "careers",
+    "tenant": "nxp",
+    "expectedHost": "nxp.wd3.myworkdayjobs.com"
+   },
+   "starter": true,
+   "country": "NL",
+   "tags": [
+    "semiconductor"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000021",
+   "name": "Ericsson",
+   "adapterId": "eightfold",
+   "baseUrl": "https://jobs.ericsson.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "ericsson.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "requestDelayMs": 400,
+    "retryForbidden": true,
+    "expectedHost": "jobs.ericsson.com"
+   },
+   "starter": true,
+   "country": "SE",
+   "tags": [
+    "telecom"
+   ]
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000022",
+   "name": "Lattice Semiconductor",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://latticesemi.wd5.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "latticesemi",
+    "site": "latticesemiconductorscareers",
+    "maxPages": 500,
+    "expectedHost": "latticesemi.wd5.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 120
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000023",
+   "name": "Silicon Labs",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://silabs.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "silabs",
+    "site": "SiliconLabsCareers",
+    "maxPages": 500,
+    "expectedHost": "silabs.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 73
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000024",
+   "name": "Monolithic Power Systems",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://monolithicpower.wd12.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "monolithicpower",
+    "site": "MPS_Careers",
+    "maxPages": 500,
+    "expectedHost": "monolithicpower.wd12.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 254
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000025",
+   "name": "Semtech",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://semtech.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "semtech",
+    "site": "SemtechCareers",
+    "maxPages": 500,
+    "expectedHost": "semtech.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 104
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000026",
+   "name": "Allegro MicroSystems",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://allegromicro.wd5.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "allegromicro",
+    "site": "AllegroCareers",
+    "maxPages": 500,
+    "expectedHost": "allegromicro.wd5.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 65
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000027",
+   "name": "SiFive",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "semiconductor-ip"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://sifive.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "sifive",
+    "site": "sifivecareers",
+    "maxPages": 500,
+    "expectedHost": "sifive.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 105
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000028",
+   "name": "KLA",
+   "country": "US",
+   "tags": [
+    "semiconductor-equipment"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://kla.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "kla",
+    "site": "Search",
+    "maxPages": 500,
+    "expectedHost": "kla.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 961
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000029",
+   "name": "Entegris",
+   "country": "US",
+   "tags": [
+    "semiconductor-materials"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://entegris.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "entegris",
+    "site": "EntegrisCareers",
+    "maxPages": 500,
+    "expectedHost": "entegris.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 504
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000030",
+   "name": "Nexperia",
+   "country": "NL",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://nexperia.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "nexperia",
+    "site": "careers",
+    "maxPages": 500,
+    "expectedHost": "nexperia.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 236
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000031",
+   "name": "Infineon",
+   "country": "DE",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "eightfold",
+   "baseUrl": "https://jobs.infineon.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "infineon.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "requestDelayMs": 400,
+    "retryForbidden": true,
+    "expectedHost": "jobs.infineon.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 1353
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000032",
+   "name": "Lam Research",
+   "country": "US",
+   "tags": [
+    "semiconductor-equipment"
+   ],
+   "adapterId": "eightfold",
+   "baseUrl": "https://careers.lamresearch.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "lamresearch.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "requestDelayMs": 400,
+    "retryForbidden": true,
+    "expectedHost": "careers.lamresearch.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 1363
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000033",
+   "name": "Texas Instruments",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "oracle",
+   "baseUrl": "https://careers.ti.com/en/sites/CX",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "apiHost": "edbz.fa.us2.oraclecloud.com",
+    "siteNumber": "CX",
+    "pageSize": 200,
+    "maxPages": 500,
+    "expectedHost": "edbz.fa.us2.oraclecloud.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 613
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000034",
+   "name": "Tenstorrent",
+   "country": "CA",
+   "tags": [
+    "semiconductor",
+    "ai-hardware"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/tenstorrent",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "tenstorrent",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 130
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000035",
+   "name": "Lightmatter",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "ai-hardware"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/lightmatter",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "lightmatter",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 68
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000036",
+   "name": "SambaNova Systems",
+   "country": "US",
+   "tags": [
+    "ai-hardware"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/sambanovasystems",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "sambanovasystems",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 58
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000037",
+   "name": "indie Semiconductor",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/indiesemiconductor",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "indiesemiconductor",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 24
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000038",
+   "name": "Astera Labs",
+   "country": "US",
+   "tags": [
+    "semiconductor"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/asteralabs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "asteralabs",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 156
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000039",
+   "name": "Cerebras Systems",
+   "country": "US",
+   "tags": [
+    "ai-hardware"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/cerebras",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "cerebras",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 108
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000040",
+   "name": "d-Matrix",
+   "country": "US",
+   "tags": [
+    "ai-hardware"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/d-Matrix",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "d-Matrix",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 39
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000041",
+   "name": "Salesforce",
+   "country": "US",
+   "tags": [
+    "big-tech",
+    "software"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://salesforce.wd12.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "salesforce",
+    "site": "External_Career_Site",
+    "maxPages": 500,
+    "expectedHost": "salesforce.wd12.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 1487
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000042",
+   "name": "Oracle",
+   "country": "US",
+   "tags": [
+    "big-tech",
+    "software"
+   ],
+   "adapterId": "oracle",
+   "baseUrl": "https://careers.oracle.com/en/sites/jobsearch",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "apiHost": "eeho.fa.us2.oraclecloud.com",
+    "siteNumber": "CX_45001",
+    "pageSize": 200,
+    "maxPages": 500,
+    "expectedHost": "eeho.fa.us2.oraclecloud.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 2234
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000043",
+   "name": "Dell Technologies",
+   "country": "US",
+   "tags": [
+    "big-tech",
+    "hardware"
+   ],
+   "adapterId": "oracle",
+   "baseUrl": "https://enterpriseplatform.dell.com/hcmUI/CandidateExperience/en/sites/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "apiHost": "enterpriseplatform.dell.com",
+    "siteNumber": "CX_1001",
+    "pageSize": 200,
+    "maxPages": 500,
+    "expectedHost": "enterpriseplatform.dell.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 426
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000044",
+   "name": "Nokia",
+   "country": "FI",
+   "tags": [
+    "big-tech",
+    "telecom"
+   ],
+   "adapterId": "oracle",
+   "baseUrl": "https://jobs.nokia.com/en/sites/CX_1",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "apiHost": "fa-evmr-saasfaprod1.fa.ocs.oraclecloud.com",
+    "siteNumber": "CX_1",
+    "pageSize": 200,
+    "maxPages": 500,
+    "expectedHost": "fa-evmr-saasfaprod1.fa.ocs.oraclecloud.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 592
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000045",
+   "name": "Zalando",
+   "country": "DE",
+   "tags": [
+    "software",
+    "e-commerce"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://zalando.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "zalando",
+    "site": "ZalandoSiteWD",
+    "maxPages": 500,
+    "expectedHost": "zalando.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 164
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000046",
+   "name": "Spotify",
+   "country": "SE",
+   "tags": [
+    "software",
+    "media"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/spotify",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "spotify",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 75
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000047",
+   "name": "Stripe",
+   "country": "US",
+   "tags": [
+    "software",
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/stripe",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "stripe",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 592
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000048",
+   "name": "Databricks",
+   "country": "US",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/databricks",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "databricks",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 860
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000049",
+   "name": "Figma",
+   "country": "US",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/figma",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "figma",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 161
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000050",
+   "name": "Anthropic",
+   "country": "US",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/anthropic",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "anthropic",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 577
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000051",
+   "name": "Cloudflare",
+   "country": "US",
+   "tags": [
+    "software",
+    "infrastructure"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/cloudflare",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "cloudflare",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 323
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000052",
+   "name": "Datadog",
+   "country": "US",
+   "tags": [
+    "software",
+    "observability"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/datadog",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "datadog",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 441
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000053",
+   "name": "MongoDB",
+   "country": "US",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/mongodb",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "mongodb",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 398
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000054",
+   "name": "Elastic",
+   "country": "NL",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/elastic",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "elastic",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 350
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000055",
+   "name": "GitLab",
+   "country": "US",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/gitlab",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "gitlab",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 220
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000056",
+   "name": "Vercel",
+   "country": "US",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/vercel",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "vercel",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 87
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000057",
+   "name": "Grafana Labs",
+   "country": "US",
+   "tags": [
+    "software",
+    "observability"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/grafanalabs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "grafanalabs",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 134
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000058",
+   "name": "Fivetran",
+   "country": "US",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/fivetran",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "fivetran",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 232
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000059",
+   "name": "Sigma Computing",
+   "country": "US",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/sigmacomputing",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "sigmacomputing",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 70
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000060",
+   "name": "Postman",
+   "country": "US",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/postman",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "postman",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 66
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000061",
+   "name": "Airtable",
+   "country": "US",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/airtable",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "airtable",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 16
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000062",
+   "name": "Asana",
+   "country": "US",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/asana",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "asana",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 118
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000063",
+   "name": "Twilio",
+   "country": "US",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/twilio",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "twilio",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 136
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000064",
+   "name": "Okta",
+   "country": "US",
+   "tags": [
+    "software",
+    "security"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/okta",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "okta",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 338
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000065",
+   "name": "Scale AI",
+   "country": "US",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/scaleai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "scaleai",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 211
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000066",
+   "name": "OpenAI",
+   "country": "US",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/openai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "openai",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 770
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000067",
+   "name": "Notion",
+   "country": "US",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/notion",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "notion",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 134
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000068",
+   "name": "Linear",
+   "country": "US",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/linear",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "linear",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 28
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000069",
+   "name": "Ramp",
+   "country": "US",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/ramp",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "ramp",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 138
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000070",
+   "name": "Supabase",
+   "country": "US",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/supabase",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "supabase",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 59
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000071",
+   "name": "Sierra",
+   "country": "US",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/sierra",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "sierra",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 211
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000072",
+   "name": "Confluent",
+   "country": "US",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/confluent",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "confluent",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 23
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000073",
+   "name": "Redis",
+   "country": "US",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/redis",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "redis",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 18
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000074",
+   "name": "Zapier",
+   "country": "US",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/zapier",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "zapier",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 7
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000075",
+   "name": "Sentry",
+   "country": "US",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/sentry",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "sentry",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 40
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000076",
+   "name": "Perplexity",
+   "country": "US",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/perplexity",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "perplexity",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 100
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000077",
+   "name": "Discord",
+   "country": "US",
+   "tags": [
+    "software",
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/discord",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "discord",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 51
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000078",
+   "name": "Reddit",
+   "country": "US",
+   "tags": [
+    "software",
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/reddit",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "reddit",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 154
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000079",
+   "name": "Pinterest",
+   "country": "US",
+   "tags": [
+    "software",
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/pinterest",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "pinterest",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 204
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000080",
+   "name": "Robinhood",
+   "country": "US",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/robinhood",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "robinhood",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 131
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000081",
+   "name": "Coinbase",
+   "country": "US",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/coinbase",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "coinbase",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 188
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000082",
+   "name": "Block",
+   "country": "US",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/block",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "block",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 196
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000083",
+   "name": "Affirm",
+   "country": "US",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/affirm",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "affirm",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 197
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000084",
+   "name": "Instacart",
+   "country": "US",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/instacart",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "instacart",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 112
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000085",
+   "name": "Lyft",
+   "country": "US",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/lyft",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "lyft",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 169
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000086",
+   "name": "Airbnb",
+   "country": "US",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/airbnb",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "airbnb",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 169
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000087",
+   "name": "Roblox",
+   "country": "US",
+   "tags": [
+    "gaming"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/roblox",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "roblox",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 225
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000088",
+   "name": "Epic Games",
+   "country": "US",
+   "tags": [
+    "gaming"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/epicgames",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "epicgames",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 167
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000089",
+   "name": "Riot Games",
+   "country": "US",
+   "tags": [
+    "gaming"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/riotgames",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "riotgames",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 166
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000090",
+   "name": "Faire",
+   "country": "US",
+   "tags": [
+    "e-commerce"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/faire",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "faire",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 63
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000091",
+   "name": "Adyen",
+   "country": "NL",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/adyen",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "adyen",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 223
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000092",
+   "name": "Celonis",
+   "country": "DE",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/celonis",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "celonis",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 277
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000093",
+   "name": "Doctolib",
+   "country": "FR",
+   "tags": [
+    "software",
+    "health-tech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/doctolib",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "doctolib",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 126
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000094",
+   "name": "JetBrains",
+   "country": "CZ",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/jetbrains",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "jetbrains",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 74
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000095",
+   "name": "Wayve",
+   "country": "GB",
+   "tags": [
+    "ai",
+    "automotive"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/wayve",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "wayve",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 156
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000096",
+   "name": "Graphcore",
+   "country": "GB",
+   "tags": [
+    "ai-hardware",
+    "semiconductor"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/graphcore",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "graphcore",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 186
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000097",
+   "name": "Monzo",
+   "country": "GB",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/monzo",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "monzo",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 65
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000098",
+   "name": "N26",
+   "country": "DE",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/n26",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "n26",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 66
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000099",
+   "name": "Wolt",
+   "country": "FI",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/wolt",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "wolt",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 254
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000100",
+   "name": "GetYourGuide",
+   "country": "DE",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/getyourguide",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "getyourguide",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 54
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000101",
+   "name": "HelloFresh",
+   "country": "DE",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/hellofresh",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "hellofresh",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 423
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000102",
+   "name": "SumUp",
+   "country": "GB",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/sumup",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "sumup",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 407
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000103",
+   "name": "Trade Republic",
+   "country": "DE",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/traderepublicbank",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "traderepublicbank",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 46
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000104",
+   "name": "Solaris",
+   "country": "DE",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/solarisbank",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "solarisbank",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 26
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000105",
+   "name": "Helsing",
+   "country": "DE",
+   "tags": [
+    "ai",
+    "defence"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/helsing",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "helsing",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 145
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000106",
+   "name": "Isar Aerospace",
+   "country": "DE",
+   "tags": [
+    "space"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/isaraerospace",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "isaraerospace",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 96
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000107",
+   "name": "Dataiku",
+   "country": "FR",
+   "tags": [
+    "software",
+    "data"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/dataiku",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "dataiku",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 24
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000108",
+   "name": "Scandit",
+   "country": "CH",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/scandit",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "scandit",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 9
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000109",
+   "name": "Veriff",
+   "country": "EE",
+   "tags": [
+    "software",
+    "identity"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/veriff",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "veriff",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 11
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000110",
+   "name": "DeepL",
+   "country": "DE",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/DeepL",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "DeepL",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 66
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000111",
+   "name": "Mistral AI",
+   "country": "FR",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/mistral.ai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "mistral.ai",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 171
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000112",
+   "name": "Miro",
+   "country": "NL",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/miro",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "miro",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 37
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000113",
+   "name": "Deliveroo",
+   "country": "GB",
+   "tags": [
+    "consumer"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/deliveroo",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "deliveroo",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 189
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000114",
+   "name": "ElevenLabs",
+   "country": "GB",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/elevenlabs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "elevenlabs",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 251
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000115",
+   "name": "Synthesia",
+   "country": "GB",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/synthesia",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "synthesia",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 59
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000116",
+   "name": "Alan",
+   "country": "FR",
+   "tags": [
+    "health-tech",
+    "insurtech"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/alan",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "alan",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 102
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000117",
+   "name": "Owkin",
+   "country": "FR",
+   "tags": [
+    "ai",
+    "health-tech"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/owkin",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "owkin",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 4
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000118",
+   "name": "Glia",
+   "country": "EE",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/glia",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "glia",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 23
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000119",
+   "name": "Ledger",
+   "country": "FR",
+   "tags": [
+    "fintech",
+    "hardware"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/ledger",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "ledger",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 8
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000120",
+   "name": "Qonto",
+   "country": "FR",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/qonto",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "qonto",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 47
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000121",
+   "name": "Sonar",
+   "country": "CH",
+   "tags": [
+    "software",
+    "developer-tools"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/sonarsource",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "sonarsource",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 100
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000122",
+   "name": "Pipedrive",
+   "country": "EE",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/pipedrive",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "pipedrive",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 16
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000123",
+   "name": "Swile",
+   "country": "FR",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/swile",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "swile",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 23
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000124",
+   "name": "Pigment",
+   "country": "FR",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/pigment",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "pigment",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 100
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000125",
+   "name": "Clio",
+   "country": "CA",
+   "tags": [
+    "software",
+    "legal-tech"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://clio.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "clio",
+    "site": "ClioCareerSite",
+    "maxPages": 500,
+    "expectedHost": "clio.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 139
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000126",
+   "name": "BlackBerry",
+   "country": "CA",
+   "tags": [
+    "software",
+    "security"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://bb.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "bb",
+    "site": "BlackBerry",
+    "maxPages": 500,
+    "expectedHost": "bb.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 34
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000127",
+   "name": "Cohere",
+   "country": "CA",
+   "tags": [
+    "ai"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/cohere",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "cohere",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 139
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000128",
+   "name": "1Password",
+   "country": "CA",
+   "tags": [
+    "software",
+    "security"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/1password",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "1password",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 63
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000129",
+   "name": "Wealthsimple",
+   "country": "CA",
+   "tags": [
+    "fintech"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/wealthsimple",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "wealthsimple",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 42
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000130",
+   "name": "Benevity",
+   "country": "CA",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/benevity",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "benevity",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 15
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000131",
+   "name": "Thinkific",
+   "country": "CA",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/thinkific",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "thinkific",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 2
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000132",
+   "name": "Hootsuite",
+   "country": "CA",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/hootsuite",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "hootsuite",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 27
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000133",
+   "name": "Dialpad",
+   "country": "CA",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/dialpad",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "dialpad",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 87
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000134",
+   "name": "Later",
+   "country": "CA",
+   "tags": [
+    "software"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/later",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "later",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 40
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000135",
+   "name": "ASML",
+   "country": "NL",
+   "tags": [
+    "semiconductor",
+    "equipment"
+   ],
+   "adapterId": "asml",
+   "baseUrl": "https://www.asml.com/en/careers/find-your-job",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 591,
+    "level": "full",
+    "evidence": "docs/company-proofs/asml.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000136",
+   "name": "Tokyo Electron",
+   "country": "JP",
+   "tags": [
+    "semiconductor",
+    "equipment"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://tel.wd3.myworkdayjobs.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "tel",
+    "site": "TEL-Careers",
+    "maxPages": 500,
+    "expectedHost": "tel.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 25,
+    "level": "full",
+    "evidence": "docs/company-proofs/tokyo-electron.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000137",
+   "name": "Onto Innovation",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "equipment",
+    "metrology"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://onto.wd1.myworkdayjobs.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "onto",
+    "site": "ONTO_Careers",
+    "maxPages": 500,
+    "expectedHost": "onto.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 186,
+    "level": "full",
+    "evidence": "docs/company-proofs/onto-innovation.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000138",
+   "name": "PTC",
+   "country": "US",
+   "tags": [
+    "eda",
+    "software",
+    "plm"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://ptc.wd1.myworkdayjobs.com/PTC",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "ptc",
+    "site": "PTC",
+    "maxPages": 500,
+    "expectedHost": "ptc.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 180,
+    "level": "full",
+    "evidence": "docs/company-proofs/ptc.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000139",
+   "name": "Kulicke & Soffa",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "equipment",
+    "packaging"
+   ],
+   "adapterId": "oracle",
+   "baseUrl": "https://careers.kns.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "apiHost": "etyy.fa.ap2.oraclecloud.com",
+    "siteNumber": "CX_1",
+    "maxPages": 500,
+    "expectedHost": "etyy.fa.ap2.oraclecloud.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 62,
+    "level": "full",
+    "evidence": "docs/company-proofs/kulicke-soffa.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000013a",
+   "name": "ASM International",
+   "country": "NL",
+   "tags": [
+    "semiconductor",
+    "equipment",
+    "deposition"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.eu.greenhouse.io/asm",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "asm",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 444,
+    "level": "full",
+    "evidence": "docs/company-proofs/asm-international.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000013b",
+   "name": "Cadence",
+   "country": "US",
+   "tags": [
+    "eda",
+    "semiconductor",
+    "software"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://cadence.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "cadence",
+    "site": "External_Careers",
+    "maxPages": 500,
+    "expectedHost": "cadence.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 562,
+    "level": "full",
+    "evidence": "docs/company-proofs/cadence.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000013c",
+   "name": "Synopsys",
+   "country": "US",
+   "tags": [
+    "eda",
+    "semiconductor",
+    "verification"
+   ],
+   "adapterId": "synopsys",
+   "baseUrl": "https://careers.synopsys.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers.synopsys.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 391,
+    "level": "full",
+    "evidence": "docs/company-proofs/synopsys.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000013d",
+   "name": "Shield AI",
+   "country": "US",
+   "tags": [
+    "defense",
+    "autonomy",
+    "ai-hardware"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/shield-ai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "shield-ai",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 445,
+    "level": "full",
+    "evidence": "docs/company-proofs/shield-ai.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000013e",
+   "name": "Anduril",
+   "country": "US",
+   "tags": [
+    "defense",
+    "autonomy",
+    "hardware"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/andurilindustries",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "andurilindustries",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 2202,
+    "level": "full",
+    "evidence": "docs/company-proofs/anduril.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000013f",
+   "name": "Lockheed Martin",
+   "country": "US",
+   "tags": [
+    "defense",
+    "aerospace",
+    "embedded"
+   ],
+   "adapterId": "eightfold",
+   "baseUrl": "https://lockheedmartin.eightfold.ai/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "lockheedmartin.com",
+    "eightfoldApi": "pcsx",
+    "maxPages": 500,
+    "expectedHost": "lockheedmartin.eightfold.ai"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 3060,
+    "level": "full",
+    "evidence": "docs/company-proofs/lockheed-martin.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000140",
+   "name": "AeroVironment",
+   "country": "US",
+   "tags": [
+    "defense",
+    "uav",
+    "embedded"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://avav.wd1.myworkdayjobs.com/AVAV",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "avav",
+    "site": "AVAV",
+    "maxPages": 500,
+    "expectedHost": "avav.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 351,
+    "level": "full",
+    "evidence": "docs/company-proofs/aerovironment.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000141",
+   "name": "Northrop Grumman",
+   "country": "US",
+   "tags": [
+    "defense",
+    "aerospace",
+    "embedded"
+   ],
+   "adapterId": "eightfold",
+   "baseUrl": "https://jobs.northropgrumman.com/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "domain": "ngc.com",
+    "eightfoldApi": "pcsx",
+    "retryForbidden": true,
+    "requestDelayMs": 900,
+    "maxPages": 500,
+    "expectedHost": "jobs.northropgrumman.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 3701,
+    "level": "full",
+    "evidence": "docs/company-proofs/northrop-grumman.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000142",
+   "name": "Rocket Lab",
+   "country": "NZ",
+   "tags": [
+    "space",
+    "launch",
+    "hardware"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://rocketlabcorp.com/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "rocketlab",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 445,
+    "level": "full",
+    "evidence": "docs/company-proofs/rocket-lab.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000143",
+   "name": "Stoke Space",
+   "country": "US",
+   "tags": [
+    "space",
+    "launch",
+    "hardware"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://www.stokespace.com/careers/current-openings/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "stokespacetechnologies",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 62,
+    "level": "full",
+    "evidence": "docs/company-proofs/stoke-space.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000144",
+   "name": "Relativity Space",
+   "country": "US",
+   "tags": [
+    "space",
+    "launch",
+    "manufacturing"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://www.relativityspace.com/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "relativity",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 341,
+    "level": "full",
+    "evidence": "docs/company-proofs/relativity-space.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000145",
+   "name": "Sierra Space",
+   "country": "US",
+   "tags": [
+    "space",
+    "spacecraft",
+    "hardware"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://sierraspace.wd1.myworkdayjobs.com/Sierra_Space_External_Career_Site",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "sierraspace",
+    "site": "Sierra_Space_External_Career_Site",
+    "maxPages": 500,
+    "expectedHost": "sierraspace.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 164,
+    "level": "full",
+    "evidence": "docs/company-proofs/sierra-space.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000146",
+   "name": "L3Harris",
+   "country": "US",
+   "tags": [
+    "defense",
+    "aerospace",
+    "embedded"
+   ],
+   "adapterId": "l3harris",
+   "baseUrl": "https://careers.l3harris.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers.l3harris.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 1924,
+    "level": "full",
+    "evidence": "docs/company-proofs/l3harris.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000147",
+   "name": "TEKEVER",
+   "country": "PT",
+   "tags": [
+    "defense",
+    "uav",
+    "embedded"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.tekever.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.tekever.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 123,
+    "level": "full",
+    "evidence": "docs/company-proofs/tekever.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000148",
+   "name": "Imagination Technologies",
+   "country": "GB",
+   "tags": [
+    "gpu",
+    "ip",
+    "verification"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.pageuppeople.com/774/cw/en/listing",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "urlTemplate": "https://careers.pageuppeople.com/774/cw/en/jobs.json",
+    "itemsPath": "",
+    "maxPages": 500,
+    "expectedHost": "careers.pageuppeople.com",
+    "fieldMap": {
+     "externalId": "Id",
+     "title": "Title",
+     "url": "ApplyUrl",
+     "location": "Locations",
+     "description": "Overview",
+     "postedAt": "OpeningDateUtc"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 14,
+    "level": "full",
+    "evidence": "docs/company-proofs/imagination-technologies.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000149",
+   "name": "SiPearl",
+   "country": "FR",
+   "tags": [
+    "semiconductor",
+    "hpc",
+    "asic"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.sipearl.com/fr/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.sipearl.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 19,
+    "level": "full",
+    "evidence": "docs/company-proofs/sipearl.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000014a",
+   "name": "Axelera AI",
+   "country": "NL",
+   "tags": [
+    "ai-hardware",
+    "asic",
+    "verification"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/axelera",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "axelera",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 9,
+    "level": "full",
+    "evidence": "docs/company-proofs/axelera-ai.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000014b",
+   "name": "Etched",
+   "country": "US",
+   "tags": [
+    "ai-hardware",
+    "asic",
+    "verification"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/etched",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "etched",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 108,
+    "level": "full",
+    "evidence": "docs/company-proofs/etched.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000014c",
+   "name": "Nordic Semiconductor",
+   "country": "NO",
+   "tags": [
+    "semiconductor",
+    "wireless",
+    "asic"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.nordicsemi.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.nordicsemi.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 15,
+    "level": "full",
+    "evidence": "docs/company-proofs/nordic-semiconductor.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000014d",
+   "name": "Cirrus Logic",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "mixed-signal",
+    "asic"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.eu.lever.co/cirrus",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "cirrus",
+    "maxPages": 500,
+    "requestDelayMs": 1000,
+    "expectedHost": "api.eu.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 113,
+    "level": "full",
+    "evidence": "docs/company-proofs/cirrus-logic.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000014e",
+   "name": "Renesas",
+   "country": "JP",
+   "tags": [
+    "semiconductor",
+    "mcu",
+    "asic"
+   ],
+   "adapterId": "renesas",
+   "baseUrl": "https://jobs.renesas.com/jobs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.renesas.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 898,
+    "level": "full",
+    "evidence": "docs/company-proofs/renesas.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000014f",
+   "name": "Arista Networks",
+   "country": "US",
+   "tags": [
+    "networking",
+    "asic",
+    "switch-silicon"
+   ],
+   "adapterId": "arista-networks",
+   "baseUrl": "https://www.arista.com/en/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "api.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 234,
+    "level": "full",
+    "evidence": "docs/company-proofs/arista-networks.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000150",
+   "name": "Ciena",
+   "country": "US",
+   "tags": [
+    "networking",
+    "optical",
+    "dsp-asic"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://ciena.wd5.myworkdayjobs.com/Careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "ciena",
+    "site": "Careers",
+    "maxPages": 500,
+    "expectedHost": "ciena.wd5.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 142,
+    "level": "full",
+    "evidence": "docs/company-proofs/ciena.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000151",
+   "name": "Siemens",
+   "country": "DE",
+   "tags": [
+    "eda",
+    "verification",
+    "semiconductor"
+   ],
+   "adapterId": "siemens",
+   "baseUrl": "https://jobs.sw.siemens.com/jobs/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.sw.siemens.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 753,
+    "level": "full",
+    "evidence": "docs/company-proofs/siemens.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000152",
+   "name": "Rambus",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "memory"
+   ],
+   "adapterId": "rambus",
+   "baseUrl": "https://careers-rambus.icims.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "careers-rambus.icims.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 64,
+    "level": "full",
+    "evidence": "docs/company-proofs/rambus.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000153",
+   "name": "CEVA",
+   "country": "US",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "dsp"
+   ],
+   "adapterId": "ceva",
+   "baseUrl": "https://www.ceva-ip.com",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "www.comeet.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-09-02",
+    "jobs": 37,
+    "level": "full",
+    "evidence": "docs/company-proofs/ceva.json"
+   }
+  }
+ ]
+}

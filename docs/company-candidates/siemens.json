@@ -1,0 +1,22 @@
+{
+  "id": "siemens",
+  "name": "Siemens",
+  "baseUrl": "https://jobs.sw.siemens.com/jobs/",
+  "adapterId": "siemens",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {"maxPages": 500, "expectedHost": "jobs.sw.siemens.com"},
+  "onboardingEvidence": {
+    "officialCareersUrl": "https://jobs.sw.siemens.com/",
+    "scope": "The entire unfiltered Siemens Digital Industries Software board, including Siemens EDA and Mendix; not the entire Siemens conglomerate.",
+    "provenance": "The official Software careers home links /jobs/ and its EDA business board. Its browser requests GET https://prod-search-api.jobsyn.org/api/v1/solr/search?page=1&num_items=10 with X-Origin: jobs.sw.siemens.com.",
+    "publishedTotal": 753,
+    "countEvidence": "The same search response used by the official UI publishes pagination.total 753, page_size 10, total_pages 76 and has_more_pages. No keyword, location or business filter is applied.",
+    "identityEvidence": "Software Engineer(VIP), Taipei, requisition 520661; Senior Product Engineer, Calibre DesignEnhancer, Yerevan, requisition 520007; Senior Product Validation Engineer, Aprisa, Noida. Descriptions identify Siemens EDA.",
+    "globalPortalCaveat": "Avature global SearchJobs accepts folderOffset (not jobOffset) but offsets above 2000 return no results despite a Next link at 2000. That capped global portal was not certified. The Software board is an independently published official board with its own complete count.",
+    "descriptionEvidence": "Full descriptions are inline in search jobs[].description. The official detail page also reads microsites.dejobs.org/jobs-sw-siemens-com/data/<GUID>.json.",
+    "country": "DE",
+    "tags": ["eda", "verification", "semiconductor"]
+  }
+}

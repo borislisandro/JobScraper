@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "name": "Rocket Lab",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:27:23.732Z",
+  "finishedAt": "2026-09-02T15:27:30.127Z",
+  "source": {
+    "id": "rocket-lab",
+    "name": "Rocket Lab",
+    "baseUrl": "https://rocketlabcorp.com/careers",
+    "adapterId": "greenhouse",
+    "kind": "active",
+    "robotsOverride": true,
+    "configJson": {
+      "token": "rocketlab",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "413f78f7ff9f268bfb31f090dca99eb0ce171974b6e8aac7cef4afc6daf8a7db",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "2c250acf46aa1fcfa9488ca2697787949222a0b2dbf792e9065d14d361483742"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "rocket-lab",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 445,
+        "persisted": 445,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 445,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 290,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 289,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 36,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 213,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 22,
+              "emit": 7
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 213,
+                "bodyMs": 11
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 445,
+    "uniqueIdentities": 445,
+    "uniqueHashes": 445,
+    "samples": [
+      {
+        "externalId": "7814229003",
+        "title": "Additive Manufacturing Engineer I/II",
+        "company": "Rocket Lab Corporation",
+        "location": "Long Beach, CA",
+        "postedAt": "2026-07-23",
+        "canonicalUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7814229003",
+        "applyUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7814229003",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "7930338003",
+        "title": "Senior CNC Machinist - D Shift",
+        "company": "Rocket Lab Corporation",
+        "location": "Long Beach, CA",
+        "postedAt": "2026-08-21",
+        "canonicalUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930338003",
+        "applyUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930338003",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "7930330003",
+        "title": "Welder III - B Shift",
+        "company": "Rocket Lab Corporation",
+        "location": "Long Beach, CA",
+        "postedAt": "2026-08-21",
+        "canonicalUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930330003",
+        "applyUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930330003",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "rocket-lab",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 5569,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 5569,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 142,
+              "backoff": 0,
+              "response": 5404,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 142,
+                "backoffMs": 0,
+                "responseMs": 5404,
+                "bodyMs": 6
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "7814229003",
+        "title": "Additive Manufacturing Engineer I/II",
+        "company": "Rocket Lab Corporation",
+        "location": "Long Beach, CA",
+        "postedAt": "2026-07-23",
+        "canonicalUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7814229003",
+        "applyUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7814229003",
+        "descriptionStatus": "complete",
+        "descriptionChars": 11022
+      },
+      {
+        "externalId": "7930338003",
+        "title": "Senior CNC Machinist - D Shift",
+        "company": "Rocket Lab Corporation",
+        "location": "Long Beach, CA",
+        "postedAt": "2026-08-21",
+        "canonicalUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930338003",
+        "applyUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930338003",
+        "descriptionStatus": "complete",
+        "descriptionChars": 10188
+      },
+      {
+        "externalId": "7930330003",
+        "title": "Welder III - B Shift",
+        "company": "Rocket Lab Corporation",
+        "location": "Long Beach, CA",
+        "postedAt": "2026-08-21",
+        "canonicalUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930330003",
+        "applyUrl": "https://job-boards.greenhouse.io/rocketlab/jobs/7930330003",
+        "descriptionStatus": "complete",
+        "descriptionChars": 10121
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "rocket-lab",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 445,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 445,
+        "requests": 1,
+        "skipped": 445,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 252,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 253,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 221,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 10,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 221,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

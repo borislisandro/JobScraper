@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "name": "Renesas",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:54:19.505Z",
+  "finishedAt": "2026-09-02T15:54:37.771Z",
+  "source": {
+    "id": "renesas",
+    "name": "Renesas",
+    "baseUrl": "https://jobs.renesas.com/jobs",
+    "adapterId": "renesas",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.renesas.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "d178b17f14dee1d471afe1affd53fad163b6d429e195b45550133c4dba5e2c5c"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "renesas",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 898,
+        "persisted": 898,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 9,
+        "boardTotal": 898,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 15959,
+        "pages": 9,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 15959,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 43,
+              "pacing": 14471,
+              "backoff": 0,
+              "response": 1368,
+              "body": 29,
+              "browser": 0,
+              "adapterOther": 32,
+              "emit": 15
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 9,
+                "pacingMs": 14471,
+                "backoffMs": 0,
+                "responseMs": 1368,
+                "bodyMs": 29
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 898,
+    "uniqueIdentities": 898,
+    "uniqueHashes": 898,
+    "samples": [
+      {
+        "externalId": "744000147007437",
+        "title": "Senior Account Manager – OEM Sales",
+        "company": "Renesas Electronics",
+        "location": "San Jose, CALIFORNIA, US",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000147007437",
+        "applyUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000147007437",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000140248662",
+        "title": "Senior Manager Analog Engineering",
+        "company": "Renesas Electronics",
+        "location": "San Jose, CALIFORNIA, US",
+        "postedAt": "2026-07-28",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000140248662",
+        "applyUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000140248662",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000046050815",
+        "title": "Principal Engineer",
+        "company": "Renesas Electronics",
+        "location": "Noida, IN",
+        "postedAt": "2025-03-05",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000046050815",
+        "applyUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000046050815",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.renesas.com."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "renesas",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1751,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1751,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 841,
+              "backoff": 0,
+              "response": 587,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 304,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 841,
+                "backoffMs": 0,
+                "responseMs": 587,
+                "bodyMs": 6
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "744000147007437",
+        "title": "Senior Account Manager – OEM Sales",
+        "company": "Renesas Electronics",
+        "location": "San Jose, CALIFORNIA, US",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000147007437",
+        "applyUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000147007437",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4684
+      },
+      {
+        "externalId": "744000140248662",
+        "title": "Senior Manager Analog Engineering",
+        "company": "Renesas Electronics",
+        "location": "San Jose, CALIFORNIA, US",
+        "postedAt": "2026-07-28",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000140248662",
+        "applyUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000140248662",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4746
+      },
+      {
+        "externalId": "744000046050815",
+        "title": "Principal Engineer",
+        "company": "Renesas Electronics",
+        "location": "Noida, IN",
+        "postedAt": "2025-03-05",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000046050815",
+        "applyUrl": "https://jobs.smartrecruiters.com/RenesasElectronics/744000046050815",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6490
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.renesas.com."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "renesas",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 898,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 226,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 226,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 203,
+              "body": 8,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 203,
+                "bodyMs": 8
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

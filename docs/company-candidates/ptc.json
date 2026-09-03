@@ -1,0 +1,15 @@
+{
+  "id": "ptc-proof",
+  "name": "PTC",
+  "baseUrl": "https://ptc.wd1.myworkdayjobs.com/PTC",
+  "adapterId": "workday",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "tenant": "ptc",
+    "site": "PTC",
+    "maxPages": 500,
+    "expectedHost": "ptc.wd1.myworkdayjobs.com"
+  }
+}

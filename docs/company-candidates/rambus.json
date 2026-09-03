@@ -1,0 +1,54 @@
+{
+  "id": "rambus",
+  "name": "Rambus",
+  "baseUrl": "https://careers-rambus.icims.com",
+  "adapterId": "rambus",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "careers-rambus.icims.com"
+  },
+  "discovery": {
+    "status": "needs-adapter",
+    "officialCareersUrl": "https://www.rambus.com/careers/",
+    "provenance": "The official Explore Careers link targets https://careers-rambus.icims.com/jobs/ and redirects to this board.",
+    "country": "US",
+    "countrySource": "https://www.rambus.com/locations/",
+    "countryEvidence": "Corporate Headquarters: San Jose, California, USA.",
+    "tags": [
+      "semiconductor",
+      "ip",
+      "memory"
+    ],
+    "tagsSource": "https://www.rambus.com/careers/",
+    "listingEndpoint": "https://careers-rambus.icims.com/jobs/search?in_iframe=1",
+    "method": "GET",
+    "requestHeaders": {
+      "accept": "text/html"
+    },
+    "responseEvidence": "HTTP 200 HTML, not JSON. Cards: .iCIMS_JobCardItem; title: .title h3; URL: .title a; location: .header.left span:not(.sr-only).",
+    "pagination": "Follow link[rel=next]. pr is zero-based; observed pages pr=0,1,2,3 contain 20,20,20,4 distinct jobs. The board publishes Page N of 4, not a numeric vacancy total; 64 is the independently enumerated count.",
+    "observedJobs": 64,
+    "detailEndpointExample": "https://careers-rambus.icims.com/jobs/23046/mts-verification-engineering/job?in_iframe=1",
+    "detailEvidence": "HTTP 200; application/ld+json JobPosting includes full description, datePosted, jobLocation, hiringOrganization. First/middle/last descriptions contain 3947/5523/5511 HTML characters. Listing descriptions are truncated and cannot substitute for details.",
+    "identitySamples": [
+      {
+        "title": "MTS Verification Engineering",
+        "location": "IN-KA-Bangalore"
+      },
+      {
+        "title": "Principal Quality Assurance Engineer",
+        "location": "TW-Taipei"
+      },
+      {
+        "title": "SPE Signal Integrity Engineer",
+        "location": "US-GA-Johns Creek | US-CA-San Jose | US-San Jose | IN-Bangalore | Seoul"
+      }
+    ],
+    "robotsUrl": "https://careers-rambus.icims.com/robots.txt",
+    "robotsEvidence": "HTTP 200. Disallows referral, login, candidate, reminder and connect paths; listings and public job details are not disallowed.",
+    "adapterGap": "Existing icims reader JSON-parses the HTML search response and uses page/pageSize rather than pr. Needs HTML pagination plus deferred schema.org detail extraction. Do not admit this candidate until a full proof passes."
+  }
+}

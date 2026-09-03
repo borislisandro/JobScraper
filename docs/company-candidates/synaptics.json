@@ -1,0 +1,40 @@
+{
+  "id": "synaptics",
+  "name": "Synaptics",
+  "baseUrl": "https://careers.synaptics.com/search/jobs",
+  "adapterId": "static-css",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "itemSelector": ".jobs-section__item",
+    "titleSelector": "h2 a",
+    "urlSelector": "h2 a",
+    "locationSelector": ".large-4.columns",
+    "dateSelector": "time[datetime]",
+    "nextSelector": ".jobs-section__paginate-view-more",
+    "maxPages": 500,
+    "expectedHost": "careers.synaptics.com"
+  },
+  "onboardingEvidence": {
+    "status": "needs-adapter",
+    "officialCareersUrl": "https://www.synaptics.com/careers",
+    "provenance": "The official careers page links directly to this board. Browser inspection on 2026-09-02 showed 13 total jobs and all 13 listing cards.",
+    "platform": "Talemetry careersites (ttcportals), with Jobvite application widget",
+    "publishedTotal": 13,
+    "identitySamples": [
+      {"title": "Staff Test Product Engineer", "location": "Hsinchu County, Zhubei City, Taiwan", "url": "https://careers.synaptics.com/jobs/18196074-staff-test-product-engineer"},
+      {"title": "Hardware Engineer, ATE", "location": "Irvine, CA, United States", "url": "https://careers.synaptics.com/jobs/17976014-hardware-engineer-ate"}
+    ],
+    "listingEvidence": "GET /search/jobs renders HTML with .jobs-section__item cards. The live frontend advertises GET /search/jobs.json in CareerSite.Path.configure; direct requests returned 403, so no JSON response schema is claimed. The HTML next link is /search/jobs?page=2; actual multi-page behavior remains unproven because this board currently has only 13 rows.",
+    "detailEvidence": "The public job page contains the full Synaptics description, including ASIC new-product introduction and production test responsibilities. No JobPosting JSON-LD was present. Generic static-css does not fetch these separate descriptions.",
+    "transportEvidence": "Direct Node fetches of the listing, JSON path, page 2, job detail and robots.txt returned HTTP 403 with a Cloudflare Just a moment challenge. The same HTML listing and detail were readable in the normal browser; this is not a claim that the board is inaccessible.",
+    "robots": "https://careers.synaptics.com/robots.txt returned HTTP 403; directives could not be read.",
+    "country": "US",
+    "headquartersSource": "https://www.synaptics.com/contact",
+    "headquartersEvidence": "The official contact page identifies headquarters at 1109 McKay Dr., San Jose, California, USA.",
+    "tags": ["semiconductor", "embedded", "mixed-signal"],
+    "tagsSource": "https://www.synaptics.com/careers",
+    "notes": "Diagnostic candidate only, not ready for admission. A shared reader must provide reliable listing transport, published-total reconciliation, terminal pagination, and deferred HTML descriptions before full proof can pass. No shared code was changed."
+  }
+}

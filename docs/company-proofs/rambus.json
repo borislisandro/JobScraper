@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "name": "Rambus",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T16:07:33.427Z",
+  "finishedAt": "2026-09-02T16:08:32.502Z",
+  "source": {
+    "id": "rambus",
+    "name": "Rambus",
+    "baseUrl": "https://careers-rambus.icims.com",
+    "adapterId": "rambus",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "careers-rambus.icims.com"
+    },
+    "discovery": {
+      "status": "needs-adapter",
+      "officialCareersUrl": "https://www.rambus.com/careers/",
+      "provenance": "The official Explore Careers link targets https://careers-rambus.icims.com/jobs/ and redirects to this board.",
+      "country": "US",
+      "countrySource": "https://www.rambus.com/locations/",
+      "countryEvidence": "Corporate Headquarters: San Jose, California, USA.",
+      "tags": [
+        "semiconductor",
+        "ip",
+        "memory"
+      ],
+      "tagsSource": "https://www.rambus.com/careers/",
+      "listingEndpoint": "https://careers-rambus.icims.com/jobs/search?in_iframe=1",
+      "method": "GET",
+      "requestHeaders": {
+        "accept": "text/html"
+      },
+      "responseEvidence": "HTTP 200 HTML, not JSON. Cards: .iCIMS_JobCardItem; title: .title h3; URL: .title a; location: .header.left span:not(.sr-only).",
+      "pagination": "Follow link[rel=next]. pr is zero-based; observed pages pr=0,1,2,3 contain 20,20,20,4 distinct jobs. The board publishes Page N of 4, not a numeric vacancy total; 64 is the independently enumerated count.",
+      "observedJobs": 64,
+      "detailEndpointExample": "https://careers-rambus.icims.com/jobs/23046/mts-verification-engineering/job?in_iframe=1",
+      "detailEvidence": "HTTP 200; application/ld+json JobPosting includes full description, datePosted, jobLocation, hiringOrganization. First/middle/last descriptions contain 3947/5523/5511 HTML characters. Listing descriptions are truncated and cannot substitute for details.",
+      "identitySamples": [
+        {
+          "title": "MTS Verification Engineering",
+          "location": "IN-KA-Bangalore"
+        },
+        {
+          "title": "Principal Quality Assurance Engineer",
+          "location": "TW-Taipei"
+        },
+        {
+          "title": "SPE Signal Integrity Engineer",
+          "location": "US-GA-Johns Creek | US-CA-San Jose | US-San Jose | IN-Bangalore | Seoul"
+        }
+      ],
+      "robotsUrl": "https://careers-rambus.icims.com/robots.txt",
+      "robotsEvidence": "HTTP 200. Disallows referral, login, candidate, reminder and connect paths; listings and public job details are not disallowed.",
+      "adapterGap": "Existing icims reader JSON-parses the HTML search response and uses page/pageSize rather than pr. Needs HTML pagination plus deferred schema.org detail extraction. Do not admit this candidate until a full proof passes."
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "rambus",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 64,
+        "persisted": 64,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 68,
+        "boardTotal": 64,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 57820,
+        "pages": 4,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 57820,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 156,
+              "pacing": 23358,
+              "backoff": 0,
+              "response": 30223,
+              "body": 3403,
+              "browser": 0,
+              "adapterOther": 674,
+              "emit": 5
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 4,
+                "pacingMs": 4615,
+                "backoffMs": 0,
+                "responseMs": 2160,
+                "bodyMs": 272
+              },
+              "detail": {
+                "count": 64,
+                "pacingMs": 18743,
+                "backoffMs": 0,
+                "responseMs": 28063,
+                "bodyMs": 3131
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 64,
+    "uniqueIdentities": 64,
+    "uniqueHashes": 64,
+    "samples": [
+      {
+        "externalId": "23046",
+        "title": "MTS Verification Engineering",
+        "company": "Rambus",
+        "location": "Bangalore, KA, IN",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://careers-rambus.icims.com/jobs/23046/mts-verification-engineering/job?in_iframe=1",
+        "applyUrl": "https://careers-rambus.icims.com/jobs/23046/mts-verification-engineering/job?in_iframe=1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3592
+      },
+      {
+        "externalId": "22981",
+        "title": "Principal Quality Assurance Engineer",
+        "company": "Rambus",
+        "location": "Taipei, UNAVAILABLE, TW",
+        "postedAt": "2026-07-14",
+        "canonicalUrl": "https://careers-rambus.icims.com/jobs/22981/principal-quality-assurance-engineer/job?in_iframe=1",
+        "applyUrl": "https://careers-rambus.icims.com/jobs/22981/principal-quality-assurance-engineer/job?in_iframe=1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4509
+      },
+      {
+        "externalId": "21307",
+        "title": "SPE Signal Integrity Engineer",
+        "company": "Rambus",
+        "location": "Johns Creek, GA, US, San Jose, CA, US, San Jose, UNAVAILABLE, US, Bangalore, UNAVAILABLE, IN, UNAVAILABLE, Seoul",
+        "postedAt": "2026-08-31",
+        "canonicalUrl": "https://careers-rambus.icims.com/jobs/21307/spe-signal-integrity-engineer/job?in_iframe=1",
+        "applyUrl": "https://careers-rambus.icims.com/jobs/21307/spe-signal-integrity-engineer/job?in_iframe=1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5039
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "rambus",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 1,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1062,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1062,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 634,
+              "body": 77,
+              "browser": 0,
+              "adapterOther": 340,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 634,
+                "bodyMs": 77
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

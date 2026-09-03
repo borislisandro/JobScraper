@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "name": "Kulicke & Soffa",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T14:41:37.167Z",
+  "finishedAt": "2026-09-02T14:41:54.610Z",
+  "source": {
+    "id": "kulicke-soffa",
+    "name": "Kulicke & Soffa",
+    "baseUrl": "https://careers.kns.com",
+    "adapterId": "oracle",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "apiHost": "etyy.fa.ap2.oraclecloud.com",
+      "siteNumber": "CX_1",
+      "maxPages": 500,
+      "expectedHost": "etyy.fa.ap2.oraclecloud.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "7dc2c124fa91e513d67494cbb1a9cecab6d6c41cc9b4692eec0491d6763bf183",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "kulicke-soffa",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 62,
+        "persisted": 62,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 6,
+        "boardTotal": 62,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 6475,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 6475,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 54,
+              "pacing": 247,
+              "backoff": 1501,
+              "response": 4652,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 8,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 5,
+                "pacingMs": 0,
+                "backoffMs": 1501,
+                "responseMs": 2793,
+                "bodyMs": 3
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 247,
+                "backoffMs": 0,
+                "responseMs": 1859,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 2,
+            "redirects": 1
+          }
+        }
+      }
+    },
+    "jobs": 62,
+    "uniqueIdentities": 62,
+    "uniqueHashes": 62,
+    "samples": [
+      {
+        "externalId": "11655",
+        "title": "Production Worker III, Caps Front Line",
+        "company": "Kulicke & Soffa",
+        "location": "Suzhou, Jiangsu, China",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://careers.kns.com/job/11655",
+        "applyUrl": "https://careers.kns.com/job/11655",
+        "descriptionStatus": "pending",
+        "descriptionChars": 21
+      },
+      {
+        "externalId": "11573",
+        "title": "Senior Engineer I, Procurement",
+        "company": "Kulicke & Soffa",
+        "location": "Fort Washington, PA, United States",
+        "postedAt": "2026-07-27",
+        "canonicalUrl": "https://careers.kns.com/job/11573",
+        "applyUrl": "https://careers.kns.com/job/11573",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "11109",
+        "title": "Senior Engineer II, AS Mechanical",
+        "company": "Kulicke & Soffa",
+        "location": "Fort Washington, PA, United States",
+        "postedAt": "2025-12-16",
+        "canonicalUrl": "https://careers.kns.com/job/11109",
+        "applyUrl": "https://careers.kns.com/job/11109",
+        "descriptionStatus": "pending",
+        "descriptionChars": 54
+      }
+    ],
+    "warnings": [
+      {
+        "code": "host_drift",
+        "message": "Responses now come from careers.kns.com, not the configured expectedHost etyy.fa.ap2.oraclecloud.com."
+      },
+      {
+        "code": "robots_unparseable",
+        "message": "robots.txt at https://careers.kns.com returned text/html;charset=utf-8; continuing with no published policy."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "kulicke-soffa",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 8,
+        "timingMs": 5016,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 5017,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 19,
+              "pacing": 465,
+              "backoff": 1518,
+              "response": 3003,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 5,
+                "pacingMs": 0,
+                "backoffMs": 1518,
+                "responseMs": 1599,
+                "bodyMs": 1
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 465,
+                "backoffMs": 0,
+                "responseMs": 1404,
+                "bodyMs": 4
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 2,
+            "redirects": 1
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "11655",
+        "title": "Production Worker III, Caps Front Line",
+        "company": "Kulicke & Soffa",
+        "location": "Suzhou, Jiangsu, China",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://careers.kns.com/job/11655",
+        "applyUrl": "https://careers.kns.com/job/11655",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1061
+      },
+      {
+        "externalId": "11573",
+        "title": "Senior Engineer I, Procurement",
+        "company": "Kulicke & Soffa",
+        "location": "Fort Washington, PA, United States",
+        "postedAt": "2026-07-27",
+        "canonicalUrl": "https://careers.kns.com/job/11573",
+        "applyUrl": "https://careers.kns.com/job/11573",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3849
+      },
+      {
+        "externalId": "11109",
+        "title": "Senior Engineer II, AS Mechanical",
+        "company": "Kulicke & Soffa",
+        "location": "Fort Washington, PA, United States",
+        "postedAt": "2025-12-16",
+        "canonicalUrl": "https://careers.kns.com/job/11109",
+        "applyUrl": "https://careers.kns.com/job/11109",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3274
+      }
+    ],
+    "warnings": [
+      {
+        "code": "host_drift",
+        "message": "Responses now come from careers.kns.com, not the configured expectedHost etyy.fa.ap2.oraclecloud.com."
+      },
+      {
+        "code": "robots_unparseable",
+        "message": "robots.txt at https://careers.kns.com returned text/html;charset=utf-8; continuing with no published policy."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "kulicke-soffa",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 62,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 62,
+        "requests": 6,
+        "skipped": 62,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 5691,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 5690,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 20,
+              "pacing": 302,
+              "backoff": 1514,
+              "response": 3823,
+              "body": 26,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 5,
+                "pacingMs": 0,
+                "backoffMs": 1514,
+                "responseMs": 2158,
+                "bodyMs": 2
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 302,
+                "backoffMs": 0,
+                "responseMs": 1666,
+                "bodyMs": 24
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 2,
+            "redirects": 1
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

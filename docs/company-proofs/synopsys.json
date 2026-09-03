@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "name": "Synopsys",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T14:56:23.219Z",
+  "finishedAt": "2026-09-02T14:57:43.312Z",
+  "source": {
+    "id": "synopsys",
+    "name": "Synopsys",
+    "baseUrl": "https://careers.synopsys.com",
+    "adapterId": "synopsys",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "careers.synopsys.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "5c9db9c2a75c1e437516b136cb2586357a6a5cf567fbbf158bd844895ea64c0c",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "fc1e54e3966aaf8b8428859c56ca56c3380a1e885f0e385ad35317b9a1a24f5d"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "synopsys",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 391,
+        "persisted": 391,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 28,
+        "boardTotal": 391,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 71584,
+        "pages": 27,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 71584,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 317,
+              "pacing": 37816,
+              "backoff": 0,
+              "response": 29590,
+              "body": 2043,
+              "browser": 0,
+              "adapterOther": 1812,
+              "emit": 6
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 126,
+                "bodyMs": 3
+              },
+              "listing": {
+                "count": 27,
+                "pacingMs": 37816,
+                "backoffMs": 0,
+                "responseMs": 29463,
+                "bodyMs": 2039
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 391,
+    "uniqueIdentities": 391,
+    "uniqueHashes": 391,
+    "samples": [
+      {
+        "externalId": "100063255168",
+        "title": "Applications Engineering, Staff Engineer",
+        "company": "Synopsys",
+        "location": "Tokyo, Japan",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://careers.synopsys.com/job/tokyo/applications-engineering-staff-engineer/44408/100063255168",
+        "applyUrl": "https://careers.synopsys.com/job/tokyo/applications-engineering-staff-engineer/44408/100063255168",
+        "descriptionStatus": "pending",
+        "descriptionChars": 21
+      },
+      {
+        "externalId": "95872535808",
+        "title": "Principal, Strategy & Corporate Development",
+        "company": "Synopsys",
+        "location": "Sunnyvale, California",
+        "postedAt": "2026-08-09",
+        "canonicalUrl": "https://careers.synopsys.com/job/sunnyvale/principal-strategy-and-corporate-development/44408/95872535808",
+        "applyUrl": "https://careers.synopsys.com/job/sunnyvale/principal-strategy-and-corporate-development/44408/95872535808",
+        "descriptionStatus": "pending",
+        "descriptionChars": 41
+      },
+      {
+        "externalId": "91117302576",
+        "title": "ASIC Physical Design, Principal Engineer in Tan Binh district,HCMC or Da Nang",
+        "company": "Synopsys",
+        "location": "Ho Chi Minh City, Vietnam",
+        "postedAt": "2026-01-25",
+        "canonicalUrl": "https://careers.synopsys.com/job/ho-chi-minh-city/asic-physical-design-principal-engineer-in-tan-binh-district-hcmc-or-da-nang/44408/91117302576",
+        "applyUrl": "https://careers.synopsys.com/job/ho-chi-minh-city/asic-physical-design-principal-engineer-in-tan-binh-district-hcmc-or-da-nang/44408/91117302576",
+        "descriptionStatus": "pending",
+        "descriptionChars": 21
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "synopsys",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 5240,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 5241,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 13,
+              "pacing": 2785,
+              "backoff": 0,
+              "response": 2013,
+              "body": 18,
+              "browser": 0,
+              "adapterOther": 411,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 141,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 2785,
+                "backoffMs": 0,
+                "responseMs": 1872,
+                "bodyMs": 14
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "18451",
+        "title": "Applications Engineering, Staff Engineer",
+        "company": "Synopsys",
+        "location": "Tokyo, Japan",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://careers.synopsys.com/job/tokyo/applications-engineering-staff-engineer/44408/100063255168",
+        "applyUrl": "https://careers.synopsys.com/job/tokyo/applications-engineering-staff-engineer/44408/100063255168",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7279
+      },
+      {
+        "externalId": "17577",
+        "title": "Principal, Strategy & Corporate Development",
+        "company": "Synopsys",
+        "location": "Sunnyvale, California, United States",
+        "postedAt": "2026-08-09",
+        "canonicalUrl": "https://careers.synopsys.com/job/sunnyvale/principal-strategy-and-corporate-development/44408/95872535808",
+        "applyUrl": "https://careers.synopsys.com/job/sunnyvale/principal-strategy-and-corporate-development/44408/95872535808",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3684
+      },
+      {
+        "externalId": "14772",
+        "title": "ASIC Physical Design, Principal Engineer in Tan Binh district,HCMC or Da Nang",
+        "company": "Synopsys",
+        "location": "Ho Chi Minh City, Vietnam",
+        "postedAt": "2026-01-25",
+        "canonicalUrl": "https://careers.synopsys.com/job/ho-chi-minh-city/asic-physical-design-principal-engineer-in-tan-binh-district-hcmc-or-da-nang/44408/91117302576",
+        "applyUrl": "https://careers.synopsys.com/job/ho-chi-minh-city/asic-physical-design-principal-engineer-in-tan-binh-district-hcmc-or-da-nang/44408/91117302576",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4037
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "synopsys",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 391,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 15,
+        "requests": 2,
+        "skipped": 15,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 2925,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2925,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 2284,
+              "backoff": 0,
+              "response": 185,
+              "body": 45,
+              "browser": 0,
+              "adapterOther": 401,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 142,
+                "bodyMs": 3
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 2284,
+                "backoffMs": 0,
+                "responseMs": 43,
+                "bodyMs": 42
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

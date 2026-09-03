@@ -1,0 +1,53 @@
+KRATOS DEFENSE & SECURITY SOLUTIONS CAREERS - NEEDS ADAPTER REPORT
+
+Employer: Kratos Defense & Security Solutions
+Official Careers Page: https://www.kratosdefense.com/careers
+Careers Board: https://kratosdefense.submit4jobs.com/
+Platform: Submit4Jobs (unknown recruitment platform)
+
+ENDPOINT DETAILS:
+- Main careers page: https://www.kratosdefense.com/careers
+- Main careers with open roles: https://www.kratosdefense.com/careers/open-roles/
+- Job board (embedded iframe): https://kratosdefense.submit4jobs.com/
+- Response Format: HTML with iframe embedding
+- Content-Type: text/html
+
+OBSERVABLE STRUCTURE:
+Kratos Defense embeds a Submit4Jobs job board within their main careers page. The board is hosted at kratosdefense.submit4jobs.com and appears to be loaded as an embedded iframe on the main website. The submit4jobs.com platform is a proprietary recruitment solution not matching any documented adapters (not Greenhouse, Ashby, Lever, Workday, etc.).
+
+SUBMIT4JOBS PLATFORM:
+- Host: kratosdefense.submit4jobs.com
+- The platform appears to be a custom or white-label recruitment solution
+- Potential API endpoints return 404 for standard paths (/api/jobs, /jobs.json)
+- The /jobs path returns 403 Forbidden, suggesting access control
+
+PAGINATION:
+Unable to determine pagination structure without direct access to the board API or JavaScript sources.
+
+DESCRIPTION LOCATION:
+Job descriptions are likely embedded in the job listings or available via detail page fetch from the submit4jobs platform.
+
+RESPONSE STRUCTURE:
+The submit4jobs platform returns HTML with embedded job listings. The exact structure of job cards and pagination mechanism would need to be reverse-engineered from the frontend or by analyzing network requests during page interaction.
+
+ADAPTER REQUIREMENTS:
+A Submit4Jobs adapter would require:
+1. Reverse-engineering the platform's API endpoints or parsing the JavaScript bundle to discover API calls
+2. Understanding the authentication/session requirements (if any)
+3. Identifying the correct endpoint format for listing jobs for this tenant (kratosdefense)
+4. Determining pagination mechanism (cursors, page numbers, offsets, etc.)
+5. Extracting job identifiers and constructing detail URLs
+6. Parsing HTML or JSON responses to extract:
+   - Job title, ID, location
+   - Description (from listing or detail endpoint)
+   - Department/team
+   - Posted date
+   - Application URL
+7. Implementing traversal logic to fetch all available jobs
+
+The submit4jobs.com platform is not documented in current adapters. This would require either:
+- Documentation and reverse-engineering of the submit4jobs API
+- Implementing screen scraping against the HTML frontend
+- Analyzing network requests from the browser to identify actual API calls
+
+Without direct documentation or access to submit4jobs' API, this adapter would be more complex than standard platforms.

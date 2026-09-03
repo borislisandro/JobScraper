@@ -1,0 +1,52 @@
+{
+  "id": "imagination-technologies",
+  "name": "Imagination Technologies",
+  "baseUrl": "https://careers.pageuppeople.com/774/cw/en/listing",
+  "adapterId": "json",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "urlTemplate": "https://careers.pageuppeople.com/774/cw/en/jobs.json",
+    "itemsPath": "",
+    "maxPages": 500,
+    "expectedHost": "careers.pageuppeople.com",
+    "fieldMap": {
+      "externalId": "Id",
+      "title": "Title",
+      "url": "ApplyUrl",
+      "location": "Locations",
+      "description": "Overview",
+      "postedAt": "OpeningDateUtc"
+    }
+  },
+  "discovery": {
+    "officialCareersUrl": "https://www.imaginationtech.com/careers/",
+    "officialVacanciesUrl": "https://www.imaginationtech.com/careers/vacancies/",
+    "provenance": "The official vacancies page loads its own pageup.js, which declares https://careers.pageuppeople.com/, tenant 774, channel cw, language en. The PageUp v3 widget fetches jobs.json and performs UI pagination on the returned complete array.",
+    "provenanceScriptUrl": "https://www.imaginationtech.com/wp-content/themes/imgtec/js/src/pageup.js?ver=3635351202",
+    "widgetScriptUrl": "https://careers.static.pageuppeople.com/Widgets/v3.js?ver=3910698365",
+    "country": "GB",
+    "countrySource": "https://www.imaginationtech.com/privacy/",
+    "countryEvidence": "The official privacy page identifies the registered office and headquarters in Kings Langley, Hertfordshire, England.",
+    "tags": ["semiconductor", "ip", "gpu"],
+    "tagsSource": "https://www.imaginationtech.com/careers/",
+    "listingEndpoint": "https://careers.pageuppeople.com/774/cw/en/jobs.json",
+    "method": "GET",
+    "requestHeaders": {},
+    "responseEvidence": "HTTP 200, text/javascript containing a plain JSON array when callback is omitted. Fields include Id, Title, Overview, ApplyUrl, Locations, OpeningDateUtc. Overview includes full responsibilities, requirements and company information, not the truncated Summary.",
+    "pagination": "No network pagination: the official widget loads the entire array and slices it locally into pages. All 14 unique IDs match the hosted HTML board. searchfilter.json publishes JobSystemTypes.JOB=14 and Brands totals 11+3=14. WorkTypes overlap (14 experienced plus one early-career classification); do not sum those facets into 15 jobs.",
+    "publishedCountSource": "https://careers.pageuppeople.com/774/cw/en/searchfilter.json",
+    "observedJobs": 14,
+    "detailEndpointExample": "https://careers.pageuppeople.com/774/cw/en/job/502836/principal-gpu-hw-verification-engineer",
+    "detailEvidence": "First, middle and last public detail pages returned HTTP 200 and include the same role and requirements sections carried by Overview. Their Overview HTML lengths are 4923, 4483 and 4788 characters. Full descriptions are inline; deferred requests are unnecessary.",
+    "identitySamples": [
+      {"title": "Principal Datapath Design Engineer", "location": "Kings Langley UK"},
+      {"title": "Principal GPU HW Verification Engineer", "location": "Kings Langley UK, Bristol UK"},
+      {"title": "Experienced UVM Verification Engineer", "location": "Kings Langley UK, Bristol UK"}
+    ],
+    "robotsUrl": "https://careers.pageuppeople.com/robots.txt",
+    "robotsEvidence": "HTTP 200. Disallows administrative, staging, test and internal ci channels; the public cw channel is not disallowed.",
+    "caveats": "The hosted template says Internal Vacancies, but cw is exactly the public official site's channel and is anonymously readable. OpeningDateUtc uses /Date(milliseconds)/, unsupported by the current generic date normalizer, so postedAt remains null. ApplyUrl is the vendor-published application URL."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "northrop-grumman",
+  "name": "Northrop Grumman",
+  "baseUrl": "https://jobs.northropgrumman.com/careers",
+  "adapterId": "eightfold",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "domain": "ngc.com",
+    "eightfoldApi": "pcsx",
+    "retryForbidden": true,
+    "requestDelayMs": 900,
+    "maxPages": 500,
+    "expectedHost": "jobs.northropgrumman.com"
+  }
+}

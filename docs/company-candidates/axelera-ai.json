@@ -1,0 +1,31 @@
+{
+  "id": "axelera-ai",
+  "name": "Axelera AI",
+  "baseUrl": "https://jobs.ashbyhq.com/axelera",
+  "adapterId": "ashby",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "token": "axelera",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+  },
+  "onboardingEvidence": {
+    "observedAt": "2026-09-02",
+    "officialCareersUrl": "https://axelera.ai/careers",
+    "boardUrl": "https://jobs.ashbyhq.com/axelera",
+    "provenanceEvidence": "The official careers page links eight specific vacancies under jobs.ashbyhq.com/axelera, including 07605701-fef5-47d3-aef3-2897e59fee20 and 76a02d45-2560-4d08-8289-02c8f7efb24e. The unfiltered hosted board also includes UKESF.",
+    "publishedTotal": 9,
+    "countEvidence": "The hosted board's window.__appData.jobBoard.jobPostings contains nine published postings, with the same nine identities as the posting API. No separate scalar total was exposed; this is the complete published array count, not a count inferred from source.company.",
+    "listingEndpoint": "https://api.ashbyhq.com/posting-api/job-board/axelera",
+    "pagination": "GET with Accept: application/json; top-level keys jobs and apiVersion. The public posting endpoint returns the full board in one response, with all nine isListed values true. Descriptions are inline in descriptionPlain/descriptionHtml.",
+    "identityEvidence": "Director - Silicon Logical Design: Hybrid/Remote - Europe (incl. UK). Director - Silicon Product & Test Engineering: Bristol (on-site). Finance Manager: Eindhoven (hybrid). Their IDs match the employer's own careers links.",
+    "country": "NL",
+    "countrySource": "https://axelera.ai/careers",
+    "countryEvidence": "The official careers page explicitly identifies headquarters at High Tech Campus, Eindhoven, and gives the Netherlands address.",
+    "tags": ["semiconductor", "ai", "accelerator"],
+    "tagsSource": "https://axelera.ai/our-story",
+    "robotsEvidence": "https://jobs.ashbyhq.com/robots.txt returns 200 and disallows /meeting/, /b/ and /api/. https://api.ashbyhq.com/robots.txt returns 401 Unauthorized, while the public posting API returns 200. Override remains enabled."
+  }
+}

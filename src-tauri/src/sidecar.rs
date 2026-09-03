@@ -24,6 +24,10 @@ pub struct SidecarManager {
     workers: Mutex<HashMap<String, RunningWorker>>,
     batches: Mutex<HashMap<String, ScrapeBatch>>,
     domains: Mutex<HashSet<String>>,
+    /// Runs this process killed on purpose. A cancelled worker is killed where it stands, so it
+    /// never gets to say it was cancelled, and its non-zero exit is indistinguishable from a crash
+    /// unless we remember that we were the ones who ended it.
+    cancelled: Mutex<HashSet<String>>,
 }
 struct RunningWorker {
     pid: u32,
@@ -192,6 +196,11 @@ impl SidecarManager {
                 .collect(),
         )
     }
+    /// True once, for a run this process cancelled: the answer is taken out of the set so a later
+    /// run reusing the id — or a second read of the same one — cannot inherit it.
+    pub fn was_cancelled(&self, id: &str) -> bool {
+        self.cancelled.lock().unwrap().remove(id)
+    }
     fn kill_if_still_active(&self, pids: &[u32]) {
         let active: HashSet<u32> = self
             .workers
@@ -217,6 +226,7 @@ impl SidecarManager {
         if let Some(worker) = self.workers.lock().unwrap().get(id) {
             let _ = worker.control.send("cancel".into());
         }
+        self.cancelled.lock().unwrap().insert(id.to_string());
         if let Some(pid) = self
             .workers
             .lock()
@@ -249,6 +259,9 @@ pub struct WorkerRequest {
     pub command: String,
     pub run_id: String,
     pub source: serde_json::Value,
+    /// The single vacancy to read, for "capture_job". Every other command works from the source.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
     /// Listing hashes already stored for this source. The worker skips the detail page of any
     /// listing whose hash it recognises, which is the difference between a Workday tenant taking
     /// half an hour and taking half a minute. Empty means read everything.
@@ -510,6 +523,10 @@ async fn run(
     };
     let request = WorkerRequest {
         protocol_version: 1,
+        url: source
+            .get("captureUrl")
+            .and_then(|value| value.as_str())
+            .map(str::to_owned),
         command: command.into(),
         run_id: run_id.clone(),
         source,
@@ -855,6 +872,24 @@ async fn run(
                 .map_err(|e| e.to_string())?;
         }
     }
+    // A worker killed by a cancel exits non-zero without having emitted anything, which read as
+    // "Scraper worker exited with exit code: 1" in the activity log — an error, in red, for doing
+    // exactly what was asked of it.
+    let cancelled_here = state.sidecars.was_cancelled(&run_id);
+    if cancelled_here && !status.success() {
+        crate::db::log(
+            &state.db.pool,
+            "info",
+            opt(&source_id),
+            opt(&source_name),
+            command,
+            Some("cancelled"),
+            "Cancelled before the read finished.",
+            serde_json::json!({}),
+        )
+        .await;
+        return Err("cancelled".into());
+    }
     if !status.success()
         && !events
             .iter()
@@ -1082,6 +1117,37 @@ pub async fn test_source(
         state.inner().clone(),
         "test_source",
         source,
+        None,
+        false,
+    )
+    .await
+}
+/// Reads one vacancy from its own page. A referral or a recruiter's link is a single opening on a
+/// board nobody has configured, and configuring a whole source for one job is the wrong trade —
+/// so this reads the page as a job. Nothing is stored yet: what comes back is a draft the person
+/// pasting the link can correct before saving, because a page without the standard markup gives a
+/// title and little else.
+#[tauri::command]
+pub async fn capture_job(
+    url: String,
+    app: tauri::AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<Vec<WorkerEvent>> {
+    run(
+        app,
+        state.inner().clone(),
+        "capture_job",
+        serde_json::json!({
+            "name": "Captured link",
+            "baseUrl": url,
+            "captureUrl": url,
+            "adapterId": "static-css",
+            "kind": "active",
+            // A link someone chose to paste is a page they want read; the board's crawl policy is
+            // about crawling it, not about opening one vacancy a person is already looking at.
+            "robotsOverride": true,
+            "configJson": { "maxPages": 1 }
+        }),
         None,
         false,
     )

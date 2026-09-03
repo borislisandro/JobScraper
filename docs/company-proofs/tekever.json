@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "name": "TEKEVER",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:39:04.280Z",
+  "finishedAt": "2026-09-02T15:39:05.730Z",
+  "source": {
+    "id": "tekever",
+    "name": "TEKEVER",
+    "baseUrl": "https://careers.tekever.com/jobs.json?per_page=100",
+    "adapterId": "json",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "itemsPath": "items",
+      "pageParam": "page",
+      "pageStart": 1,
+      "maxPages": 500,
+      "expectedHost": "careers.tekever.com",
+      "fieldMap": {
+        "title": "title",
+        "url": "url",
+        "externalId": "id",
+        "postedAt": "date_published",
+        "description": "content_html",
+        "location": "_jobposting.jobLocation.0.address"
+      }
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "5ed3890ba86e58d67c70a3d5e489b11f1861d0ce42527c85ba26fe67a09ce015"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "tekever",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 123,
+        "persisted": 123,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 3,
+        "boardTotal": 123,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 951,
+        "pages": 3,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 950,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 89,
+              "pacing": 325,
+              "backoff": 0,
+              "response": 280,
+              "body": 227,
+              "browser": 0,
+              "adapterOther": 21,
+              "emit": 8
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 3,
+                "pacingMs": 325,
+                "backoffMs": 0,
+                "responseMs": 280,
+                "bodyMs": 227
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 123,
+    "uniqueIdentities": 123,
+    "uniqueHashes": 123,
+    "samples": [
+      {
+        "externalId": "aca11e1e-3035-4807-8bb8-9785a0a1d89d",
+        "title": "Senior Manufacturing Engineer - UAS Assembly, Integration & Test",
+        "company": "TEKEVER",
+        "location": "Swindon, UK, GB",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://careers.tekever.com/jobs/8309756-senior-manufacturing-engineer-uas-assembly-integration-test",
+        "applyUrl": "https://careers.tekever.com/jobs/8309756-senior-manufacturing-engineer-uas-assembly-integration-test",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5411
+      },
+      {
+        "externalId": "d1d7b30b-0cc5-43d3-abb2-ad416dfdc86b",
+        "title": "Ingénieur de recherche en navigation / Navigation Research Engineer",
+        "company": "TEKEVER",
+        "location": "Toulouse, FR",
+        "postedAt": "2026-06-01",
+        "canonicalUrl": "https://careers.tekever.com/jobs/7830300-ingenieur-de-recherche-en-navigation-navigation-research-engineer",
+        "applyUrl": "https://careers.tekever.com/jobs/7830300-ingenieur-de-recherche-en-navigation-navigation-research-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5856
+      },
+      {
+        "externalId": "179a8d03-9b3f-4f62-8145-cb65c9324939",
+        "title": "Data & ML Platform Engineer",
+        "company": "TEKEVER",
+        "location": "Bristol, UK, GB",
+        "postedAt": "2025-05-06",
+        "canonicalUrl": "https://careers.tekever.com/jobs/5893764-data-ml-platform-engineer",
+        "applyUrl": "https://careers.tekever.com/jobs/5893764-data-ml-platform-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6369
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "tekever",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 325,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 325,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 140,
+              "body": 157,
+              "browser": 0,
+              "adapterOther": 19,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 140,
+                "bodyMs": 157
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

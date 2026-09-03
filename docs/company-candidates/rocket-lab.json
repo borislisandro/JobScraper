@@ -1,0 +1,14 @@
+{
+  "id": "rocket-lab",
+  "name": "Rocket Lab",
+  "baseUrl": "https://rocketlabcorp.com/careers",
+  "adapterId": "greenhouse",
+  "kind": "active",
+  "robotsOverride": true,
+  "configJson": {
+    "token": "rocketlab",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+  },
+  "allowPrivateNetwork": false
+}

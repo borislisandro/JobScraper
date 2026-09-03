@@ -1,0 +1,14 @@
+{
+  "id": "shield-ai",
+  "name": "Shield AI",
+  "baseUrl": "https://jobs.ashbyhq.com/shield-ai",
+  "adapterId": "ashby",
+  "kind": "active",
+  "robotsOverride": false,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "token": "shield-ai",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+  }
+}

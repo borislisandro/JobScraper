@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "name": "Anduril",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:10:05.827Z",
+  "finishedAt": "2026-09-02T15:10:30.024Z",
+  "source": {
+    "id": "anduril",
+    "name": "Anduril",
+    "baseUrl": "https://job-boards.greenhouse.io/andurilindustries",
+    "adapterId": "greenhouse",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "token": "andurilindustries",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "5c9db9c2a75c1e437516b136cb2586357a6a5cf567fbbf158bd844895ea64c0c",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "fc1e54e3966aaf8b8428859c56ca56c3380a1e885f0e385ad35317b9a1a24f5d"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "anduril",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 2202,
+        "persisted": 2202,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 2202,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 22492,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 22492,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 22334,
+              "body": 33,
+              "browser": 0,
+              "adapterOther": 82,
+              "emit": 30
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 22334,
+                "bodyMs": 33
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 2202,
+    "uniqueIdentities": 2202,
+    "uniqueHashes": 2202,
+    "samples": [
+      {
+        "externalId": "4802172007",
+        "title": "2026 Early Career Electrical Engineer",
+        "company": "Anduril Industries",
+        "location": "Costa Mesa, California, United States; Fort Collins, Colorado, United States",
+        "postedAt": "2025-08-11",
+        "canonicalUrl": "https://boards.greenhouse.io/andurilindustries/jobs/4802172007?gh_jid=4802172007",
+        "applyUrl": "https://boards.greenhouse.io/andurilindustries/jobs/4802172007?gh_jid=4802172007",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "5055823007",
+        "title": "Senior Electrical Engineer, BMS",
+        "company": "Anduril Industries",
+        "location": "Costa Mesa, California, United States",
+        "postedAt": "2026-06-03",
+        "canonicalUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5055823007?gh_jid=5055823007",
+        "applyUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5055823007?gh_jid=5055823007",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "5030898007",
+        "title": "Welder",
+        "company": "Anduril Industries",
+        "location": "Santa Ana, California, United States",
+        "postedAt": "2026-06-30",
+        "canonicalUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5030898007?gh_jid=5030898007",
+        "applyUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5030898007?gh_jid=5030898007",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "anduril",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1118,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1118,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 45,
+              "pacing": 366,
+              "backoff": 0,
+              "response": 695,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 366,
+                "backoffMs": 0,
+                "responseMs": 695,
+                "bodyMs": 7
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "4802172007",
+        "title": "2026 Early Career Electrical Engineer",
+        "company": "Anduril Industries",
+        "location": "Costa Mesa, California, United States; Fort Collins, Colorado, United States",
+        "postedAt": "2025-08-11",
+        "canonicalUrl": "https://boards.greenhouse.io/andurilindustries/jobs/4802172007?gh_jid=4802172007",
+        "applyUrl": "https://boards.greenhouse.io/andurilindustries/jobs/4802172007?gh_jid=4802172007",
+        "descriptionStatus": "complete",
+        "descriptionChars": 8825
+      },
+      {
+        "externalId": "5055823007",
+        "title": "Senior Electrical Engineer, BMS",
+        "company": "Anduril Industries",
+        "location": "Costa Mesa, California, United States",
+        "postedAt": "2026-06-03",
+        "canonicalUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5055823007?gh_jid=5055823007",
+        "applyUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5055823007?gh_jid=5055823007",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7965
+      },
+      {
+        "externalId": "5030898007",
+        "title": "Welder",
+        "company": "Anduril Industries",
+        "location": "Santa Ana, California, United States",
+        "postedAt": "2026-06-30",
+        "canonicalUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5030898007?gh_jid=5030898007",
+        "applyUrl": "https://boards.greenhouse.io/andurilindustries/jobs/5030898007?gh_jid=5030898007",
+        "descriptionStatus": "complete",
+        "descriptionChars": 13336
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "anduril",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 2202,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 2202,
+        "requests": 1,
+        "skipped": 2202,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 305,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 305,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 228,
+              "body": 31,
+              "browser": 0,
+              "adapterOther": 34,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 228,
+                "bodyMs": 31
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

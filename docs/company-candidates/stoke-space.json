@@ -1,0 +1,14 @@
+{
+  "id": "stoke-space",
+  "name": "Stoke Space",
+  "baseUrl": "https://www.stokespace.com/careers/current-openings/",
+  "adapterId": "greenhouse",
+  "kind": "active",
+  "robotsOverride": true,
+  "configJson": {
+    "token": "stokespacetechnologies",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+  },
+  "allowPrivateNetwork": false
+}

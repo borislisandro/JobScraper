@@ -1,0 +1,15 @@
+{
+  "id": "kulicke-soffa",
+  "name": "Kulicke & Soffa",
+  "baseUrl": "https://careers.kns.com",
+  "adapterId": "oracle",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "apiHost": "etyy.fa.ap2.oraclecloud.com",
+    "siteNumber": "CX_1",
+    "maxPages": 500,
+    "expectedHost": "etyy.fa.ap2.oraclecloud.com"
+  }
+}

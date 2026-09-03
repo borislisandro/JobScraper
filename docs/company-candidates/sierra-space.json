@@ -1,0 +1,15 @@
+{
+  "id": "sierra-space",
+  "name": "Sierra Space",
+  "baseUrl": "https://sierraspace.wd1.myworkdayjobs.com/Sierra_Space_External_Career_Site",
+  "adapterId": "workday",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "tenant": "sierraspace",
+    "site": "Sierra_Space_External_Career_Site",
+    "maxPages": 500,
+    "expectedHost": "sierraspace.wd1.myworkdayjobs.com"
+  }
+}

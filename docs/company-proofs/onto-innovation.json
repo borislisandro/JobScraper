@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "name": "Onto Innovation",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T13:25:19.302Z",
+  "finishedAt": "2026-09-02T13:25:27.010Z",
+  "source": {
+    "id": "00000000-0000-4000-8000-000000000137",
+    "name": "Onto Innovation",
+    "baseUrl": "https://onto.wd1.myworkdayjobs.com",
+    "adapterId": "workday",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "tenant": "onto",
+      "site": "ONTO_Careers",
+      "maxPages": 500,
+      "expectedHost": "onto.wd1.myworkdayjobs.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "7dc2c124fa91e513d67494cbb1a9cecab6d6c41cc9b4692eec0491d6763bf183",
+    "adapters.mjs": "e863fd05bfef2939ee3964c69991e2a019fd0f38667324fb97653a12b3182322",
+    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "00000000-0000-4000-8000-000000000137",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 186,
+        "persisted": 186,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 11,
+        "boardTotal": 186,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 4689,
+        "pages": 10,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 4689,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 40,
+              "pacing": 169,
+              "backoff": 0,
+              "response": 4443,
+              "body": 13,
+              "browser": 0,
+              "adapterOther": 19,
+              "emit": 4
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 564,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 10,
+                "pacingMs": 169,
+                "backoffMs": 0,
+                "responseMs": 3879,
+                "bodyMs": 10
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 186,
+    "uniqueIdentities": 186,
+    "uniqueHashes": 186,
+    "samples": [
+      {
+        "externalId": "R-5759",
+        "title": "Senior Software Engineer",
+        "company": "Onto Innovation",
+        "location": "Milpitas CA",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Software-Engineer_R-5759",
+        "applyUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Software-Engineer_R-5759",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "R-6167",
+        "title": "Staff Applications Engineer",
+        "company": "Onto Innovation",
+        "location": "Hsinchu Taiwan",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Hsinchu-Taiwan/Staff-Applications-Engineer_R-6167",
+        "applyUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Hsinchu-Taiwan/Staff-Applications-Engineer_R-6167",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "R-4586",
+        "title": "Senior Manufacturing Engineer",
+        "company": "Onto Innovation",
+        "location": "Milpitas CA",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Manufacturing-Engineer_R-4586",
+        "applyUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Manufacturing-Engineer_R-4586",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "00000000-0000-4000-8000-000000000137",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 1839,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1839,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 40,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1762,
+              "body": 32,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 402,
+                "bodyMs": 6
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1360,
+                "bodyMs": 26
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "R-5759",
+        "title": "Senior Software Engineer",
+        "company": "Onto Innovation",
+        "location": "Milpitas-CA",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Software-Engineer_R-5759",
+        "applyUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Software-Engineer_R-5759",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3855
+      },
+      {
+        "externalId": "R-6167",
+        "title": "Staff Applications Engineer",
+        "company": "Onto Innovation",
+        "location": "Hsinchu-Taiwan",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Hsinchu-Taiwan/Staff-Applications-Engineer_R-6167",
+        "applyUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Hsinchu-Taiwan/Staff-Applications-Engineer_R-6167",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5372
+      },
+      {
+        "externalId": "R-4586",
+        "title": "Senior Manufacturing Engineer",
+        "company": "Onto Innovation",
+        "location": "Milpitas-CA",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Manufacturing-Engineer_R-4586",
+        "applyUrl": "https://onto.wd1.myworkdayjobs.com/ONTO_Careers/job/Milpitas-CA/Senior-Manufacturing-Engineer_R-4586",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6005
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "00000000-0000-4000-8000-000000000137",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 186,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 2,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 880,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 881,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 858,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 4,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 454,
+                "bodyMs": 6
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 403,
+                "bodyMs": 1
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "name": "Applied Materials",
+  "level": "full",
+  "ok": false,
+  "startedAt": "2026-09-02T13:16:26.420Z",
+  "finishedAt": "2026-09-02T13:19:07.947Z",
+  "source": {
+    "id": "applied-materials-proof",
+    "name": "Applied Materials",
+    "baseUrl": "https://careers.appliedmaterials.com/careers",
+    "adapterId": "eightfold",
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "domain": "appliedmaterials.com",
+      "eightfoldApi": "pcsx",
+      "maxPages": 500,
+      "requestDelayMs": 800
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "7a1cff69cb4d1e3079268e3592a5ad3fe70be10bd5cfad4664f9df84751566de",
+    "adapters.mjs": "02fa8e893d73d747138eadccba4633647a7b25b7a549e77d873a4f75363786f2",
+    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "applied-materials-proof",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 1942,
+        "persisted": 1797,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 196,
+        "boardTotal": 1942,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 160153,
+        "pages": 195,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 160151,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 234,
+              "pacing": 34067,
+              "backoff": 0,
+              "response": 125443,
+              "body": 252,
+              "browser": 0,
+              "adapterOther": 128,
+              "emit": 27
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 318,
+                "bodyMs": 4
+              },
+              "listing": {
+                "count": 195,
+                "pacingMs": 34067,
+                "backoffMs": 0,
+                "responseMs": 125125,
+                "bodyMs": 248
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 1797,
+    "uniqueIdentities": 1797,
+    "uniqueHashes": 1797,
+    "samples": [
+      {
+        "externalId": "790316412310",
+        "title": "FEP(Epitaxy/RTP) Customer Engineer",
+        "company": "Applied Materials",
+        "location": "Hwaseong-Castle,KOR, Hwaseong-si, Gyeonggi-do, KR",
+        "postedAt": "2026-06-19",
+        "canonicalUrl": "https://careers.appliedmaterials.com/careers/job/790316412310",
+        "applyUrl": "https://careers.appliedmaterials.com/careers/job/790316412310",
+        "descriptionStatus": "complete",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "790317658940",
+        "title": "Customer Engineer  - Northern Ireland (C1)",
+        "company": "Applied Materials",
+        "location": "England-Berkshire,GBR, England,GB",
+        "postedAt": "2026-08-11",
+        "canonicalUrl": "https://careers.appliedmaterials.com/careers/job/790317658940",
+        "applyUrl": "https://careers.appliedmaterials.com/careers/job/790317658940",
+        "descriptionStatus": "complete",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "790318317832",
+        "title": "Process Support Engineer - Kumamoto, Japan",
+        "company": "Applied Materials",
+        "location": "Kumamoto,JPN, Kumamoto, Kumamoto, JP",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://careers.appliedmaterials.com/careers/job/790318317832",
+        "applyUrl": "https://careers.appliedmaterials.com/careers/job/790318317832",
+        "descriptionStatus": "complete",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "applied-materials-proof",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 1942,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 10,
+        "requests": 2,
+        "skipped": 10,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1173,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1173,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 455,
+              "backoff": 0,
+              "response": 699,
+              "body": 4,
+              "browser": 0,
+              "adapterOther": 3,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 349,
+                "bodyMs": 3
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 455,
+                "backoffMs": 0,
+                "responseMs": 350,
+                "bodyMs": 1
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": [
+    "An inline description is empty"
+  ]
+}

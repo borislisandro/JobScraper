@@ -1,0 +1,52 @@
+VEECO CAREERS - NEEDS ADAPTER REPORT
+
+Employer: Veeco
+Official Careers Page: https://www.veeco.com/careers
+Careers Board: https://careers.veeco.com/
+Platform: SuccessFactors (SAP SuccessFactors Career Portal)
+
+ENDPOINT DETAILS:
+- Search Page: https://careers.veeco.com/search/
+- Search Parameters: GET query with query string parameters (q, locationsearch, optionsFacetsDD_location, optionsFacetsDD_department, createNewAlert)
+- Method: GET (form-based search parameters)
+- Response Format: HTML with embedded job data (server-side rendering)
+- Content-Type: text/html; charset=UTF-8
+
+PAGINATION:
+SuccessFactors uses a form-based pagination model with query parameters. The search results are paginated via the query parameters, with jobs rendered server-side into HTML tables/lists. The total job count is typically embedded in the page HTML.
+
+DESCRIPTION LOCATION:
+Job descriptions are not embedded in the search listing rows. Descriptions must be fetched from individual job detail pages. The job detail page pattern is: https://careers.veeco.com/job/[job-id] or similar per-job URL constructed from the search results data.
+
+ROBOTS.TXT ANALYSIS:
+https://careers.veeco.com/robots.txt allows:
+- /search/ path (job search is crawlable)
+- /job/ paths (job detail pages are crawlable)
+
+Disallowed paths (do not touch):
+- /applybutton/ (application submission)
+- /talentcommunity/ (authenticated areas)
+- /services/ (backend services)
+- /preapply/, /unsubscribe/, /reset/ (form handlers)
+
+RESPONSE STRUCTURE:
+The search page returns HTML with job listings in a table format. Each row contains:
+- Job title
+- Location(s)
+- Department/Category
+- Posted date (if available)
+- Link to full job posting
+
+The HTML is server-side rendered using a custom SuccessFactors career site builder template. No JSON API endpoint exists; all data must be parsed from HTML responses.
+
+ADAPTER REQUIREMENTS:
+A SuccessFactors adapter would need to:
+1. Parse the search form HTML to extract hidden parameters and CSRF tokens
+2. Submit parameterized GET/POST requests to traverse job listings
+3. Parse HTML tables to extract job metadata (title, location, ID, dates)
+4. Extract job IDs from page URLs to construct detail page requests
+5. Parse detail page HTML to extract full descriptions
+6. Track pagination via query parameters or next-page detection in HTML
+7. Report total job count extracted from page HTML
+
+This is a screen-scraping implementation due to lack of modern JSON API on the public career site.

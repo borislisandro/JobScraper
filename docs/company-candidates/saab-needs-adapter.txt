@@ -1,0 +1,45 @@
+SAAB CAREERS - NEEDS ADAPTER REPORT
+
+Employer: Saab
+Official Careers Page: https://www.saab.com/career/job-opportunities
+Board: https://www.saab.com/career/job-opportunities (in-house)
+Platform: Custom in-house career platform (WordPress/custom CMS)
+
+ENDPOINT DETAILS:
+- Jobs listing page: https://www.saab.com/career/job-opportunities
+- Response Format: HTML with server-side rendering
+- Content-Type: text/html
+
+OBSERVABLE STRUCTURE:
+Saab operates its own in-house careers platform hosted on their main website. Jobs are published as individual pages under /career/job-opportunities/{job-slug}. The platform appears to be built on custom CMS or WordPress with no external recruitment platform integration.
+
+PAGINATION:
+The job listing page uses server-side pagination or lazy loading via JavaScript. Total job count is not immediately visible in the initial page load.
+
+DESCRIPTION LOCATION:
+Full job descriptions are available on individual job detail pages accessible via links on the listing page. Each job has a unique URL like /career/job-opportunities/[position-title-slug].
+
+RESPONSE STRUCTURE:
+The jobs listing page (https://www.saab.com/career/job-opportunities) contains HTML with job cards/links. Each job card includes:
+- Job title
+- Job description excerpt or link to full description
+- Department/area
+- Link to detail page
+
+ADAPTER REQUIREMENTS:
+A Saab adapter would need to:
+1. Parse the jobs listing page HTML to extract job titles and URLs
+2. Identify pagination controls and traverse all pages
+3. Extract the total job count from the page structure
+4. For each job, follow the detail page link
+5. Parse the detail page HTML to extract:
+   - Full job title and description
+   - Department/team
+   - Location(s)
+   - Job type/level
+   - Required qualifications
+   - Application deadline (if present)
+6. Extract job IDs or unique identifiers for each position
+7. Handle any JavaScript-based content loading if pagination uses AJAX
+
+This is a custom HTML scraping implementation against Saab's in-house career site with no external platform or API.

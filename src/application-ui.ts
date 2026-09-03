@@ -1,3 +1,16 @@
+// What a stored file is. Every attachment used to be filed as "cover_letter" whatever it was, and
+// the document list then displayed that label, so a CV read as a cover letter. The values are what
+// goes in the database; the labels are what a person reads.
+export const DOCUMENT_TYPES=[
+ {value:"cv",label:"CV / résumé"},
+ {value:"cover_letter",label:"Cover letter"},
+ {value:"portfolio",label:"Portfolio"},
+ {value:"transcript",label:"Transcript"},
+ {value:"reference",label:"Reference"},
+ {value:"other",label:"Other"},
+] as const;
+export const documentTypeLabel=(value?:string)=>
+ DOCUMENT_TYPES.find(type=>type.value===value)?.label??(value?value.replaceAll("_"," "):"Other");
 export const applicationStages=["planned","applied","screening","interviewing","offer","accepted","rejected","withdrawn"] as const;
 // One vocabulary everywhere. "planned" is what the database calls a job the user pressed Save on,
 // and calling it "Planned" on the board while the Jobs page says "Saved" made them look like two

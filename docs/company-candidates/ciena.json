@@ -1,0 +1,35 @@
+{
+  "id": "ciena",
+  "name": "Ciena",
+  "baseUrl": "https://ciena.wd5.myworkdayjobs.com/Careers",
+  "adapterId": "workday",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "tenant": "ciena",
+    "site": "Careers",
+    "maxPages": 500,
+    "expectedHost": "ciena.wd5.myworkdayjobs.com"
+  },
+  "onboardingEvidence": {
+    "officialCareersUrl": "https://www.ciena.com/careers",
+    "provenance": "On 2026-09-02 the official page's Explore jobs link led to https://ciena.wd5.myworkdayjobs.com/Careers. Both https://www.ciena.com/about/careers and https://careers.ciena.com/ redirected to the corporate careers page in live web browsing. The current official board is Workday, not Phenom.",
+    "publishedTotal": 142,
+    "listingEndpoint": "https://ciena.wd5.myworkdayjobs.com/wday/cxs/ciena/Careers/jobs",
+    "listingEvidence": "Anonymous POST with Accept and Content-Type application/json and body {appliedFacets:{},limit:20,offset:0,searchText:''} returned total 142 and 20 jobPostings. No facets or title filters are configured.",
+    "identitySamples": [
+      {"title": "Routing and Switching Product Line Manager", "id": "R031594", "location": "3 Locations", "path": "/job/Atlanta/Routing-and-Switching-Product-Line-Manager_R031594"},
+      {"title": "QA Engineering Intern", "location": "UK- Edinburgh - 19A Canning St", "descriptionEvidence": "The Workday detail identifies Ciena's high-speed connectivity business and its network innovation history."}
+    ],
+    "detailEvidence": "GET /wday/cxs/ciena/Careers plus each listing externalPath returns jobPostingInfo containing title, location, additionalLocations when present, and jobDescription. The observed QA Engineering Intern detail contained 5121 HTML characters.",
+    "robots": "https://ciena.wd5.myworkdayjobs.com/robots.txt publishes the /Careers/siteMap.xml sitemap, allows /Careers/, and disallows /refreshFacet/.",
+    "country": "US",
+    "headquartersSource": "https://www.ciena.com/contact-us",
+    "headquartersEvidence": "Corporate HQ: 7035 Ridge Road, Hanover, Maryland 21076, United States.",
+    "tags": ["networking", "optical", "semiconductor"],
+    "tagsSource": "https://www.ciena.com/careers/functions",
+    "tagsEvidence": "Official careers functions page describes engineering and optical networking work and links Life as an ASIC engineer at Ciena: silicon, software, and optical systems.",
+    "notes": "Admission requires the generated full cold/deferred/warm proof. This task makes no catalog or tracker edits."
+  }
+}

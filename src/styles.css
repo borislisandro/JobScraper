@@ -228,9 +228,13 @@ label.inline:has(:checked){border-color:var(--n800);color:var(--fg)}
 .source-head,.source-row{display:grid;
  /* The switch column is sized for a 13px checkbox, not for its heading, so "Last read" keeps
     the width the sentence actually needs. */
- grid-template-columns:minmax(240px,2.4fr) 88px 88px minmax(0,1.35fr) 34px 176px;
+ grid-template-columns:minmax(240px,2.4fr) 88px 88px minmax(76px,1.35fr) 34px 176px;
  align-items:center;gap:20px;padding:12px 0}
 .source-head{padding:14px 0 9px;border-bottom:1px solid var(--rule)}
+/* A heading that wraps grows into its neighbour: "Last read" broke over two lines as the window
+   narrowed and came to rest against "On", which sits in a 28px column beside it. Headings stay on
+   one line, and the column keeps room for the longest of them. */
+.source-head span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .source-head .num{text-align:right}
 .source-head span:last-child{text-align:right}
 .source-row{border-top:1px solid var(--rule)}
@@ -389,7 +393,7 @@ details.fold pre{margin:14px 0 0;font-family:var(--mono);font-size:11.5px;line-h
  .sources-layout{grid-template-columns:1fr}
  .runlog{position:absolute;right:0;bottom:0;left:0;height:46%;background:var(--drawer);
   border-top:1px solid var(--rule-strong);box-shadow:var(--shadow-md);z-index:6}
- .source-head,.source-row{grid-template-columns:minmax(0,1.7fr) 68px minmax(0,1.7fr) 28px 152px;gap:12px}
+ .source-head,.source-row{grid-template-columns:minmax(0,1.7fr) 68px minmax(76px,1.7fr) 28px 152px;gap:14px}
  /* Two short lines beat one truncated sentence: the read time and its result both stay readable. */
  .source-health{align-items:flex-start}
  .source-health span{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.4}
@@ -439,6 +443,17 @@ dialog header h2,dialog header h3{margin:0;font-size:15px;font-weight:500}
 dialog header p{margin:0}
 .dialog-body{flex:1;overflow-y:auto;padding:22px 26px;display:grid;gap:22px;align-content:start;grid-auto-rows:min-content}
 .dialog-body>button{justify-self:start}
+.company-picker>.sheet{width:700px;height:82vh}
+.company-picker header{justify-content:space-between}
+.company-picker .dialog-body{gap:16px}
+.company-picker footer{justify-content:space-between;font-size:12px;gap:16px;padding-top:14px;border-top:1px solid var(--rule)}
+.company-picker footer>button{flex-shrink:0}
+.company-picker output{color:var(--n400)}
+.company-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:13px 0;border-top:1px solid var(--rule)}
+.company-row>div{display:grid;gap:4px;min-width:0}
+.company-row strong{font-size:14px;font-weight:500}
+.company-row small{color:var(--n500);font-size:12px}
+.company-row>button{flex-shrink:0;min-width:68px}
 dialog footer{display:flex;gap:20px;align-items:center;justify-content:flex-end;padding:0 26px 20px;flex-shrink:0}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .field-grid .wide{grid-column:span 2}
@@ -483,3 +498,18 @@ main.splash p{margin:0;font-size:13px;color:var(--n500)}
  .nav-right .count{display:none}
  .reader .top{align-items:flex-start}.reader .nav-pair{flex-wrap:wrap;justify-content:flex-end}
 }
+
+/* Saved views sit under the filter controls: one button applies, the × beside it forgets. */
+.saved-views{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;flex-basis:100%}
+.saved-view{display:inline-flex;align-items:center;gap:5px;font-size:12.5px}
+.saved-view button{color:var(--n300);border-bottom:1px solid rgba(244,244,244,.25);padding-bottom:2px}
+.saved-view button:hover{color:var(--fg)}
+.saved-view .drop{border:0;color:var(--n600);padding:0 2px}
+.saved-view .drop:hover{color:var(--n200)}
+.saved-views input{width:170px}
+
+/* What arrived since you last read the list, and the way to reset that mark. */
+.new-since{display:flex;gap:16px;align-items:center;padding:0 0 10px}
+.new-since .on{color:var(--fg);border-bottom:1px solid var(--accent)}
+.row-actions .quiet{color:var(--n500)}
+.row-actions .quiet:hover{color:var(--n200)}

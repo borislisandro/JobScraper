@@ -1,0 +1,44 @@
+{
+  "id": "xmos",
+  "name": "XMOS",
+  "baseUrl": "https://www.xmos.com/workatxmos",
+  "adapterId": "playwright",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "www.xmos.com",
+    "itemSelector": "#vacancies article",
+    "titleSelector": ".uagb-post__title a",
+    "urlSelector": ".uagb-post__title a"
+  },
+  "discovery": {
+    "status": "needs-adapter",
+    "officialCareersUrl": "https://www.xmos.com/workatxmos",
+    "boardUrl": "https://www.xmos.com/vacancies/",
+    "provenance": "The official XMOS navigation links Work at XMOS. Its Vacancies section and the public Vacancies category archive both show Senior AI Compiler Engineer and link the same public detail page. All three pages were read successfully in the browser.",
+    "country": "GB",
+    "countrySource": "https://www.xmos.com/origins",
+    "countryEvidence": "The official About XMOS page labels Bristol, United Kingdom as Headquarters.",
+    "tags": ["semiconductor", "embedded", "dsp"],
+    "tagsSource": "https://www.xmos.com/origins",
+    "observedJobs": 1,
+    "countEvidence": "One specific vacancy appears in both the careers section and the category archive, with no next-page links. The careers grid has data-total=1, but that is not assumed to be an exact job count: its embedded configuration limits display to three posts and disables pagination. No independent API total was retrieved.",
+    "listingEvidence": "Browser HTML: #vacancies article with .uagb-post__title a. Archive: article.category-vacancies. Full descriptions are not present on listing cards.",
+    "wordpressProvenance": "The official page's script id af7f44e7 configures categories=61, postType=post, taxonomyType=category. The job page publishes an alternate JSON link to /wp-json/wp/v2/posts/332226.",
+    "listingEndpointLead": "https://www.xmos.com/wp-json/wp/v2/posts?categories=61&per_page=100&page=1",
+    "listingEndpointResult": "GET returned HTTP 406 text/html containing /_fec_sbu/fec_wrapper.js and /_fec_sbu/hxk_fec_16b50213.js, not job JSON. Public careers, archive and REST detail paths also returned the same challenge to plain fetch. A browser-style user-agent did not resolve direct access. These are transport observations, not a blocked-board verdict.",
+    "ajaxEndpointLead": "https://www.xmos.com/wp-admin/admin-ajax.php",
+    "ajaxEvidence": "The public uagb-post-js-js script names the read-only POST action uagb_post_pagination_grid with nonce, page_number and JSON attr fields. A form-encoded listing probe returned HTTP 403 challenge HTML, not JSON; no successful API contract is claimed.",
+    "detailEndpointExample": "https://www.xmos.com/senior-ai-compiler-engineer/",
+    "detailEvidence": "Browser-visible article .entry-content contains 4782 text characters, including responsibilities, required/preferred qualifications and XMOS XCORE/GenSoC context. First paragraph supplies Bristol/UK location. article:published_time is 2026-06-09T17:15:15. No JobPosting JSON-LD was present.",
+    "detailJsonLead": "https://www.xmos.com/wp-json/wp/v2/posts/332226",
+    "identitySamples": [
+      {"title": "Senior AI Compiler Engineer", "location": "Ideally Bristol or based in UK", "evidence": "The role develops LLVM/Clang/LLD and MLIR toolchains for XMOS XCORE and a new multicore RISC-V processor."}
+    ],
+    "robotsUrl": "https://www.xmos.com/robots.txt",
+    "robotsEvidence": "HTTP 200. Disallows wp-admin, developer, xchat, account-login and search; explicitly allows wp-admin/admin-ajax.php. Public careers and vacancy paths are not disallowed.",
+    "adapterGap": "The generic browser reader cannot certify full-board completeness or fetch full detail pages; its warm check uses direct transport. Needs a browser-capable WordPress board/detail reader, or a proven public JSON transport with category-total pagination. The three-post homepage widget must never be treated as an uncapped board. This is a diagnostic candidate, not ready for admission."
+  }
+}

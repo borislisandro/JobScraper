@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "name": "SiPearl",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T15:56:20.614Z",
+  "finishedAt": "2026-09-02T15:56:21.644Z",
+  "source": {
+    "id": "sipearl",
+    "name": "SiPearl",
+    "baseUrl": "https://careers.sipearl.com/fr/jobs.json?per_page=100",
+    "adapterId": "json",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "itemsPath": "items",
+      "pageParam": "page",
+      "pageStart": 1,
+      "maxPages": 500,
+      "expectedHost": "careers.sipearl.com",
+      "fieldMap": {
+        "title": "title",
+        "url": "url",
+        "externalId": "id",
+        "postedAt": "date_published",
+        "description": "content_html",
+        "location": "_jobposting.jobLocation.0.address"
+      }
+    },
+    "onboardingEvidence": {
+      "observedAt": "2026-09-02",
+      "officialCareersUrl": "https://careers.sipearl.com/",
+      "provenanceUrl": "https://sipearl.com/",
+      "boardUrl": "https://careers.sipearl.com/fr/jobs",
+      "publishedTotal": 19,
+      "countEvidence": "The French board publishes 19 offres; the French JSON endpoint returns 19 items and page 2 is empty. The English board publishes only 14 jobs, omitting French-only postings.",
+      "pagination": "GET /fr/jobs.json?per_page=100&page=N, one-based pages, until an empty items array. Descriptions are inline in content_html.",
+      "identityEvidence": "Senior verification engineer / team lead lists Valbonne, Maisons-Laffitte, Massy, Castelldefels and Bologna. Senior CPU Package Designer lists Grenoble, Massy and Maisons-Laffitte. The board describes SiPearl's Rhea CPU programme.",
+      "locationMappingNote": "The existing generic mapping preserves the first published address. Additional locations remain available in the source's _jobposting.jobLocation array.",
+      "country": "FR",
+      "countrySource": "https://sipearl.com/terms-conditions-privacy-sipearl",
+      "countryEvidence": "The official legal notice gives headquarters at 38/44 rue Jean Mermoz, 78600 Maisons-Laffitte, France.",
+      "tags": [
+        "semiconductor",
+        "cpu",
+        "hpc"
+      ],
+      "tagsSource": "https://sipearl.com/european-processor",
+      "robotsUrl": "https://careers.sipearl.com/robots.txt",
+      "robotsEvidence": "User-Agent * disallows /app/, /messages/, /messenger/, /facebook/tab/ and /jobs/internal/; public jobs and JSON paths are not disallowed. Override remains enabled as requested."
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
+    "company-adapters.mjs": "d178b17f14dee1d471afe1affd53fad163b6d429e195b45550133c4dba5e2c5c"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "sipearl",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 19,
+        "persisted": 19,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": 19,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 517,
+        "pages": 2,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 517,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 28,
+              "pacing": 119,
+              "backoff": 0,
+              "response": 224,
+              "body": 136,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 2
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 2,
+                "pacingMs": 119,
+                "backoffMs": 0,
+                "responseMs": 224,
+                "bodyMs": 136
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 19,
+    "uniqueIdentities": 19,
+    "uniqueHashes": 19,
+    "samples": [
+      {
+        "externalId": "02701159-0898-4356-a46c-5839d3e83df4",
+        "title": "[Stage / Alternance] Fundraising Analyst",
+        "company": "SiPearl",
+        "location": "Maisons-Laffitte, Ile-de-France, FR",
+        "postedAt": "2026-08-25",
+        "canonicalUrl": "https://careers.sipearl.com/fr/jobs/8268947-stage-alternance-fundraising-analyst",
+        "applyUrl": "https://careers.sipearl.com/fr/jobs/8268947-stage-alternance-fundraising-analyst",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4740
+      },
+      {
+        "externalId": "30b96681-27e9-4032-9388-03c1d2d98c08",
+        "title": "[Permanent position] Linux Kernel Engineer",
+        "company": "SiPearl",
+        "location": "Maisons-Laffitte, Ile-de-France, FR",
+        "postedAt": "2023-08-28",
+        "canonicalUrl": "https://careers.sipearl.com/fr/jobs/3097686-permanent-position-linux-kernel-engineer",
+        "applyUrl": "https://careers.sipearl.com/fr/jobs/3097686-permanent-position-linux-kernel-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4550
+      },
+      {
+        "externalId": "5af3fe08-982b-4b86-b44c-443ae0430cb9",
+        "title": "[Permanent position] DfT team leader",
+        "company": "SiPearl",
+        "location": "Bologna, IT",
+        "postedAt": "2023-08-28",
+        "canonicalUrl": "https://careers.sipearl.com/fr/jobs/3097560-permanent-position-dft-team-leader",
+        "applyUrl": "https://careers.sipearl.com/fr/jobs/3097560-permanent-position-dft-team-leader",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4016
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "sipearl",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 19,
+        "requests": 1,
+        "skipped": 19,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 328,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 329,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 172,
+              "body": 140,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 172,
+                "bodyMs": 140
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

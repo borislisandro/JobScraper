@@ -29,7 +29,8 @@ It is not an auto-apply bot. JobScraper opens the original vacancy in your brows
 
 ### Manage sources
 
-- Add a source by pasting its careers-page URL.
+- Browse 134 supported companies by name, home country, or sector and add their prepared settings in one click.
+- Add other sources manually by pasting a careers-page URL.
 - Detect known ATS platforms, public JSON endpoints, feeds, repeated HTML listings, and supported employer-specific boards.
 - Render JavaScript-only pages through Microsoft Edge when a direct HTTP read is insufficient.
 - Test a source before relying on it and inspect normalized preview rows.
@@ -60,9 +61,19 @@ It is not an auto-apply bot. JobScraper opens the original vacancy in your brows
 - Close the window to the system tray and reopen the existing single instance from the tray or shortcut.
 - Delete stored listings while preserving sources, settings, and jobs linked to applications.
 
+### Windows startup permissions
+
+JobScraper runs as your normal Windows user. Sign-in launch starts in the notification area; background checks and reminders also use least-privileged scheduled tasks. Do not enable **Run this program as an administrator** in the executable's compatibility settings: Windows cannot display a UAC prompt during a scheduled launch.
+
+Older administrator-created tasks may reject changes from a normal account. Close JobScraper, open PowerShell as administrator, and run `repair-startup.ps1` from the installation folder (or `scripts/repair-startup.ps1` in this repository). This one-time repair backs up task definitions, permissions, and compatibility settings under `%LOCALAPPDATA%\JobScraper\startup-repair-*`, grants the task's user management rights, and removes only this executable's `RUNASADMIN` flag. Other compatibility flags and disabled tasks are preserved. If using a different administrator account, pass the original account's SID with `-UserSid` and its installed executable with `-Executable`.
+
+Reopen JobScraper normally afterward. Settings reports disabled, outdated, or failed startup tasks instead of treating task existence as proof of a successful launch. Developer builds do not automatically rewrite installed sign-in tasks.
+
 ## Currently supported websites
 
-The bundled starter pack contains 19 live-configured employer sources. The installer asks whether to enable them; they remain editable from the Sources page either way.
+The company catalog contains 134 supported employers, with their adapter and advanced settings in `sidecar/company-catalog.json`. Browse companies on the Sources page to add or enable one without choosing an adapter. Its home country describes the company, not the locations of all its jobs.
+
+Fresh installs still receive only the existing 21 starter entries (20 readable boards and one legacy reference bookmark). Catalog updates preserve whether a starter is enabled or deleted. The installer asks whether to enable starters; they remain editable from the Sources page either way.
 
 | Employer | Careers site | Adapter |
 | --- | --- | --- |
@@ -80,15 +91,19 @@ The bundled starter pack contains 19 live-configured employer sources. The insta
 | Apple | `jobs.apple.com` | Apple search API |
 | Arm | `careers.arm.com` | Dedicated employer adapter |
 | AMD | `careers.amd.com` | Dedicated employer adapter |
+| ASML | `asml.com/en/careers/find-your-job` | Sitecore search API with inline descriptions |
 | Cisco | `careers.cisco.com` | Dedicated employer adapter |
 | Google | `google.com/about/careers` | Dedicated employer adapter |
 | MediaTek | `careers.mediatek.com` | Dedicated employer adapter |
 | u-blox | `u-blox.com/en/job-openings` | Algolia listing API plus vacancy details |
 | SK hynix | `talent.skhynix.com` | Combined SK Careers and SK hynix America Greenhouse feeds |
+| Ericsson | `jobs.ericsson.com` | Eightfold PCSX API |
 
 The starter pack also contains a reference-only Marvell careers URL. Reference sources are never scraped.
 
 Career sites change without notice. "Supported" means the repository contains a dedicated or verified configuration and automated fixture coverage; it does not guarantee that a third-party site will never change, rate-limit, block, or require authentication.
+
+The [company expansion plan](docs/company-expansion-plan.md) tracks all 269 requested engineering candidates in priority order, with per-company status and saved live evidence. New expansion entries must pass a full scrape, unique identity and count checks, representative descriptions, and a warm change check before catalog admission. Reproduce proof with `node scripts/verify-company-catalog.mjs --full "ASML" --report docs/company-proofs/asml.json`.
 
 ## Reusable adapter coverage
 
@@ -98,6 +113,10 @@ JobScraper is not limited to the starter pack. The source detector and advanced 
 | --- | --- |
 | Workday | Direct CXS JSON API, pagination, details, large-board splitting, and optional browser fallback |
 | Eightfold | Current PCSX and legacy APIs, offset or cursor pagination, details, and saved sessions |
+| Greenhouse | Whole-board JSON API and deferred job descriptions |
+| Ashby | Whole-board JSON API with descriptions and an exact board count |
+| Lever | Paged postings API with descriptions |
+| Oracle Recruiting | Pod and site configuration, paged listings, and deferred descriptions |
 | iCIMS | Storefront detection, paged JSON configuration, and details |
 | TalentBrew / Jibe / Radancy | Configurable paged listing API and details |
 | Phenom | Configurable paged listing API and details |
@@ -108,6 +127,10 @@ JobScraper is not limited to the starter pack. The source detector and advanced 
 | Authenticated boards | Per-source browser-session capture and encrypted session reuse |
 
 Adding a URL is intentionally optimistic but verified: automatic setup saves a working adapter only after a probe produces recognizable listing rows. Unsupported pages are reported instead of being silently accepted as an empty source.
+
+Catalog contract tests check every readable entry against its adapter. To repeat live checks through the actual worker, run `node scripts/verify-company-catalog.mjs` (all supported boards) or append exact company names to check a subset. This opt-in command enforces robots.txt, network guards and pacing, writes one JSON result per company, and never stores jobs. A first-page check proves the current board response; it does not claim a full traversal or benchmark.
+
+When starter settings change, bump the catalog version and regenerate its contract fixture in PowerShell with `$env:UPDATE_STARTER_PACK_FIXTURE='1'; cargo test --manifest-path src-tauri/Cargo.toml starter_pack_matches_the_checked_in_adapter_contract_fixture; Remove-Item Env:UPDATE_STARTER_PACK_FIXTURE`. Ordinary test runs compare the fixture without rewriting it.
 
 ## Technology stack
 

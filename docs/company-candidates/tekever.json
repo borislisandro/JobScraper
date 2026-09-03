@@ -1,0 +1,24 @@
+{
+  "id": "tekever",
+  "name": "TEKEVER",
+  "baseUrl": "https://careers.tekever.com/jobs.json?per_page=100",
+  "adapterId": "json",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.tekever.com",
+    "fieldMap": {
+      "title": "title",
+      "url": "url",
+      "externalId": "id",
+      "postedAt": "date_published",
+      "description": "content_html",
+      "location": "_jobposting.jobLocation.0.address"
+    }
+  }
+}

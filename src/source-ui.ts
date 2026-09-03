@@ -1,4 +1,14 @@
-import type { ScrapeAllResult, SourceCheck, WorkerEvent } from "./api";
+import type { CatalogCompany, ScrapeAllResult, Source, SourceCheck, WorkerEvent } from "./api";
+
+// Mirror save_source's same_board comparison. An existing disabled starter can be enabled in
+// place, while renamed sources still count as added. The backend remains the duplicate guard.
+export function catalogSource(company: CatalogCompany, sources: Source[]) {
+  const board = (value: string) => {
+    try { const url = new URL(value); return `${url.protocol}//${url.hostname}${url.pathname.replace(/\/+$/, "")}${url.search}`; }
+    catch { return value.replace(/\/+$/, "").toLowerCase(); }
+  };
+  return sources.find(source => board(source.baseUrl) === board(company.baseUrl));
+}
 
 export const browserCapableAdapters = new Set([
   "playwright", "workday", "eightfold", "icims", "talentbrew-jibe", "phenom",
@@ -74,7 +84,10 @@ export function describeLogEvent(event: WorkerEvent) {
     if (payload.capturedStorageStateBase64) return timed("Session saved");
     if (payload.mode === "enrichment") return timed(`Descriptions done · ${number("persisted")} saved · ${number("failed")} failed · ${number("requests")} requests`);
     if (!("discovered" in payload)) return timed("Done");
-    const parts = [`${number("discovered")} found`, `${number("persisted")} saved`];
+    // A preview stores nothing on purpose, so reporting "0 saved" for one reads as a board that
+    // returned nothing rather than a test that did exactly what it was asked to.
+    const parts = [`${number("discovered")} found`,
+      payload.command === "test_source" ? "preview only, nothing stored" : `${number("persisted")} saved`];
     if (Number(payload.filtered)) parts.push(`${number("filtered")} filtered`);
     if (Number(payload.skipped)) parts.push(`${number("skipped")} unchanged`);
     parts.push(`${number("requests")} requests`);

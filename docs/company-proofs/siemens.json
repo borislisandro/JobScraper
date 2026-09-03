@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "name": "Siemens",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-09-02T16:00:35.148Z",
+  "finishedAt": "2026-09-02T16:03:28.773Z",
+  "source": {
+    "id": "siemens",
+    "name": "Siemens",
+    "baseUrl": "https://jobs.sw.siemens.com/jobs/",
+    "adapterId": "siemens",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.sw.siemens.com"
+    },
+    "onboardingEvidence": {
+      "officialCareersUrl": "https://jobs.sw.siemens.com/",
+      "scope": "The entire unfiltered Siemens Digital Industries Software board, including Siemens EDA and Mendix; not the entire Siemens conglomerate.",
+      "provenance": "The official Software careers home links /jobs/ and its EDA business board. Its browser requests GET https://prod-search-api.jobsyn.org/api/v1/solr/search?page=1&num_items=10 with X-Origin: jobs.sw.siemens.com.",
+      "publishedTotal": 753,
+      "countEvidence": "The same search response used by the official UI publishes pagination.total 753, page_size 10, total_pages 76 and has_more_pages. No keyword, location or business filter is applied.",
+      "identityEvidence": "Software Engineer(VIP), Taipei, requisition 520661; Senior Product Engineer, Calibre DesignEnhancer, Yerevan, requisition 520007; Senior Product Validation Engineer, Aprisa, Noida. Descriptions identify Siemens EDA.",
+      "globalPortalCaveat": "Avature global SearchJobs accepts folderOffset (not jobOffset) but offsets above 2000 return no results despite a Next link at 2000. That capped global portal was not certified. The Software board is an independently published official board with its own complete count.",
+      "descriptionEvidence": "Full descriptions are inline in search jobs[].description. The official detail page also reads microsites.dejobs.org/jobs-sw-siemens-com/data/<GUID>.json.",
+      "country": "DE",
+      "tags": [
+        "eda",
+        "verification",
+        "semiconductor"
+      ]
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "d69121db0c25a9f75959ce17aa94ce87f739d0d5ab2f07b44ce5761157261d33"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "siemens",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 753,
+        "persisted": 753,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 76,
+        "boardTotal": 753,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 172689,
+        "pages": 76,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 172688,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 214,
+              "pacing": 130411,
+              "backoff": 0,
+              "response": 37192,
+              "body": 4640,
+              "browser": 0,
+              "adapterOther": 166,
+              "emit": 65
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 76,
+                "pacingMs": 130411,
+                "backoffMs": 0,
+                "responseMs": 37192,
+                "bodyMs": 4640
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 753,
+    "uniqueIdentities": 753,
+    "uniqueHashes": 753,
+    "samples": [
+      {
+        "externalId": "53F35CCCE258496BBD4B09860AAB476B",
+        "title": "Social Media Specialist",
+        "company": "Siemens",
+        "location": "Wilsonville, OR",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://jobs.sw.siemens.com/wilsonville-or/social-media-specialist/53F35CCCE258496BBD4B09860AAB476B/job/",
+        "applyUrl": "https://jobs.sw.siemens.com/wilsonville-or/social-media-specialist/53F35CCCE258496BBD4B09860AAB476B/job/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4076
+      },
+      {
+        "externalId": "638F29ADE9D24858B71149CF1C8FAA2E",
+        "title": "EDM Library & Design Solution Architect",
+        "company": "Siemens",
+        "location": "Livonia, MI",
+        "postedAt": "2026-07-28",
+        "canonicalUrl": "https://jobs.sw.siemens.com/livonia-mi/edm-library-design-solution-architect/638F29ADE9D24858B71149CF1C8FAA2E/job/",
+        "applyUrl": "https://jobs.sw.siemens.com/livonia-mi/edm-library-design-solution-architect/638F29ADE9D24858B71149CF1C8FAA2E/job/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4153
+      },
+      {
+        "externalId": "8E6E00B64FE9475292EBF715618FE941",
+        "title": "Partner Sales Executive (Tokyo, Japan)",
+        "company": "Siemens",
+        "location": "Virtual, USA",
+        "postedAt": "2026-04-24",
+        "canonicalUrl": "https://jobs.sw.siemens.com/virtual-usa/partner-sales-executive-tokyo-japan/8E6E00B64FE9475292EBF715618FE941/job/",
+        "applyUrl": "https://jobs.sw.siemens.com/virtual-usa/partner-sales-executive-tokyo-japan/8E6E00B64FE9475292EBF715618FE941/job/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4763
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from prod-search-api.jobsyn.org, not the configured expectedHost jobs.sw.siemens.com."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "siemens",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 753,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 10,
+        "requests": 1,
+        "skipped": 10,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 735,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 736,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 13,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 496,
+              "body": 220,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 496,
+                "bodyMs": 220
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

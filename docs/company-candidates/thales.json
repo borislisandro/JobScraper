@@ -1,0 +1,13 @@
+{
+  "id": "thales",
+  "name": "Thales",
+  "baseUrl": "https://careers.thalesgroup.com",
+  "adapterId": "thales",
+  "kind": "active",
+  "robotsOverride": true,
+  "allowPrivateNetwork": false,
+  "configJson": {
+    "maxPages": 500,
+    "expectedHost": "careers.thalesgroup.com"
+  }
+}

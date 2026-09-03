@@ -12,6 +12,5 @@ export default mergeConfig(
     server: { port: 1420, strictPort: true, host: "127.0.0.1", watch: { ignored: ["**/src-tauri/**"] } },
     envPrefix: ["VITE_", "TAURI_"]
   }),
-  defineVitestConfig({ test: { include: ["src/**/*.test.ts"] } })
+  defineVitestConfig({ test: { include: ["src/**/*.test.{ts,tsx}"] } })
 );
-
