@@ -1,0 +1,2959 @@
+{
+  "scope": "All readable catalog entries; at most one listing page and ten emitted sample jobs per entry. A passing preview is not a full coverage proof.",
+  "count": 164,
+  "passed": 164,
+  "results": [
+    {
+      "name": "Broadcom",
+      "adapter": "workday",
+      "url": "https://broadcom.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:23.095Z",
+      "finishedAt": "2026-09-05T20:45:23.989Z",
+      "sampleJobs": 10,
+      "boardTotal": 372,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Microchip",
+      "adapter": "workday",
+      "url": "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:23.070Z",
+      "finishedAt": "2026-09-05T20:45:24.376Z",
+      "sampleJobs": 10,
+      "boardTotal": 503,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Analog Devices",
+      "adapter": "workday",
+      "url": "https://analogdevices.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:23.087Z",
+      "finishedAt": "2026-09-05T20:45:24.435Z",
+      "sampleJobs": 10,
+      "boardTotal": 836,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "STMicroelectronics",
+      "adapter": "eightfold",
+      "url": "https://stmicroelectronics.eightfold.ai/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:24.940Z",
+      "finishedAt": "2026-09-05T20:45:25.479Z",
+      "sampleJobs": 10,
+      "boardTotal": 505,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Intel",
+      "adapter": "workday",
+      "url": "https://intel.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:24.493Z",
+      "finishedAt": "2026-09-05T20:45:25.909Z",
+      "sampleJobs": 10,
+      "boardTotal": 600,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Marvell",
+      "adapter": "workday",
+      "url": "https://marvell.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:24.879Z",
+      "finishedAt": "2026-09-05T20:45:26.004Z",
+      "sampleJobs": 10,
+      "boardTotal": 140,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "GlobalFoundries",
+      "adapter": "eightfold",
+      "url": "https://careers.gf.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:26.419Z",
+      "finishedAt": "2026-09-05T20:45:27.034Z",
+      "sampleJobs": 10,
+      "boardTotal": 531,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Micron",
+      "adapter": "workday",
+      "url": "https://micron.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:26.510Z",
+      "finishedAt": "2026-09-05T20:45:27.336Z",
+      "sampleJobs": 10,
+      "boardTotal": 2845,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "NVIDIA",
+      "adapter": "workday",
+      "url": "https://nvidia.wd5.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:25.981Z",
+      "finishedAt": "2026-09-05T20:45:27.783Z",
+      "sampleJobs": 10,
+      "boardTotal": 2000,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Qualcomm",
+      "adapter": "eightfold",
+      "url": "https://careers.qualcomm.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:27.550Z",
+      "finishedAt": "2026-09-05T20:45:28.180Z",
+      "sampleJobs": 10,
+      "boardTotal": 1957,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Cisco",
+      "adapter": "cisco",
+      "url": "https://careers.cisco.com/global/en/search-results",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:28.686Z",
+      "finishedAt": "2026-09-05T20:45:29.261Z",
+      "sampleJobs": 10,
+      "boardTotal": 1274,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "AMD",
+      "adapter": "amd",
+      "url": "https://careers.amd.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:28.288Z",
+      "finishedAt": "2026-09-05T20:45:29.624Z",
+      "sampleJobs": 10,
+      "boardTotal": 1169,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Arm",
+      "adapter": "arm",
+      "url": "https://careers.arm.com/search-jobs",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:27.844Z",
+      "finishedAt": "2026-09-05T20:45:29.671Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "u-blox",
+      "adapter": "u-blox",
+      "url": "https://www.u-blox.com/en/job-openings",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:30.179Z",
+      "finishedAt": "2026-09-05T20:45:30.606Z",
+      "sampleJobs": 10,
+      "boardTotal": 28,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Apple",
+      "adapter": "apple",
+      "url": "https://jobs.apple.com/en-us/search?location=",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:29.763Z",
+      "finishedAt": "2026-09-05T20:45:30.728Z",
+      "sampleJobs": 10,
+      "boardTotal": 6124,
+      "complete": false,
+      "requests": 2,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Google",
+      "adapter": "google",
+      "url": "https://www.google.com/about/careers/applications/jobs/results/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:31.121Z",
+      "finishedAt": "2026-09-05T20:45:32.828Z",
+      "sampleJobs": 10,
+      "boardTotal": 3431,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "SK hynix",
+      "adapter": "sk-hynix",
+      "url": "https://talent.skhynix.com/hub/en/apply/job",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:31.243Z",
+      "finishedAt": "2026-09-05T20:45:33.292Z",
+      "sampleJobs": 10,
+      "boardTotal": 49,
+      "complete": true,
+      "requests": 2,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "MediaTek",
+      "adapter": "mediatek",
+      "url": "https://careers.mediatek.com/en/jobs",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:30.132Z",
+      "finishedAt": "2026-09-05T20:45:34.107Z",
+      "sampleJobs": 10,
+      "boardTotal": 617,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "NXP",
+      "adapter": "workday",
+      "url": "https://nxp.wd3.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:33.343Z",
+      "finishedAt": "2026-09-05T20:45:34.305Z",
+      "sampleJobs": 10,
+      "boardTotal": 760,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Ericsson",
+      "adapter": "eightfold",
+      "url": "https://jobs.ericsson.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:33.808Z",
+      "finishedAt": "2026-09-05T20:45:34.440Z",
+      "sampleJobs": 10,
+      "boardTotal": 466,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Lattice Semiconductor",
+      "adapter": "workday",
+      "url": "https://latticesemi.wd5.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:34.611Z",
+      "finishedAt": "2026-09-05T20:45:35.703Z",
+      "sampleJobs": 10,
+      "boardTotal": 126,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Silicon Labs",
+      "adapter": "workday",
+      "url": "https://silabs.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:34.811Z",
+      "finishedAt": "2026-09-05T20:45:35.848Z",
+      "sampleJobs": 10,
+      "boardTotal": 75,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Monolithic Power Systems",
+      "adapter": "workday",
+      "url": "https://monolithicpower.wd12.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:34.947Z",
+      "finishedAt": "2026-09-05T20:45:35.917Z",
+      "sampleJobs": 10,
+      "boardTotal": 250,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Semtech",
+      "adapter": "workday",
+      "url": "https://semtech.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:36.207Z",
+      "finishedAt": "2026-09-05T20:45:37.269Z",
+      "sampleJobs": 10,
+      "boardTotal": 105,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Allegro MicroSystems",
+      "adapter": "workday",
+      "url": "https://allegromicro.wd5.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:36.360Z",
+      "finishedAt": "2026-09-05T20:45:37.519Z",
+      "sampleJobs": 10,
+      "boardTotal": 71,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "SiFive",
+      "adapter": "workday",
+      "url": "https://sifive.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:36.421Z",
+      "finishedAt": "2026-09-05T20:45:37.552Z",
+      "sampleJobs": 10,
+      "boardTotal": 116,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Nexperia",
+      "adapter": "workday",
+      "url": "https://nexperia.wd3.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:38.068Z",
+      "finishedAt": "2026-09-05T20:45:38.868Z",
+      "sampleJobs": 10,
+      "boardTotal": 236,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Entegris",
+      "adapter": "workday",
+      "url": "https://entegris.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:38.022Z",
+      "finishedAt": "2026-09-05T20:45:39.149Z",
+      "sampleJobs": 10,
+      "boardTotal": 501,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "KLA",
+      "adapter": "workday",
+      "url": "https://kla.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:37.774Z",
+      "finishedAt": "2026-09-05T20:45:39.253Z",
+      "sampleJobs": 10,
+      "boardTotal": 974,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Infineon",
+      "adapter": "eightfold",
+      "url": "https://jobs.infineon.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:39.376Z",
+      "finishedAt": "2026-09-05T20:45:39.889Z",
+      "sampleJobs": 10,
+      "boardTotal": 1345,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Lam Research",
+      "adapter": "eightfold",
+      "url": "https://careers.lamresearch.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:39.652Z",
+      "finishedAt": "2026-09-05T20:45:40.629Z",
+      "sampleJobs": 10,
+      "boardTotal": 1373,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Tenstorrent",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/tenstorrent",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:40.392Z",
+      "finishedAt": "2026-09-05T20:45:40.787Z",
+      "sampleJobs": 10,
+      "boardTotal": 127,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Lightmatter",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/lightmatter",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:41.297Z",
+      "finishedAt": "2026-09-05T20:45:41.672Z",
+      "sampleJobs": 10,
+      "boardTotal": 63,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Cerebras Systems",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/cerebras",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:41.145Z",
+      "finishedAt": "2026-09-05T20:45:41.794Z",
+      "sampleJobs": 10,
+      "boardTotal": 110,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "SambaNova Systems",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/sambanovasystems",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:42.182Z",
+      "finishedAt": "2026-09-05T20:45:42.538Z",
+      "sampleJobs": 10,
+      "boardTotal": 57,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "d-Matrix",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/d-Matrix",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:42.305Z",
+      "finishedAt": "2026-09-05T20:45:42.750Z",
+      "sampleJobs": 10,
+      "boardTotal": 39,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Texas Instruments",
+      "adapter": "oracle",
+      "url": "https://careers.ti.com/en/sites/CX",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:39.761Z",
+      "finishedAt": "2026-09-05T20:45:42.853Z",
+      "sampleJobs": 10,
+      "boardTotal": 649,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "indie Semiconductor",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/indiesemiconductor",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:43.042Z",
+      "finishedAt": "2026-09-05T20:45:43.405Z",
+      "sampleJobs": 10,
+      "boardTotal": 17,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "OpenAI",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/openai",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:43.258Z",
+      "finishedAt": "2026-09-05T20:45:43.871Z",
+      "sampleJobs": 10,
+      "boardTotal": 779,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Astera Labs",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/asteralabs",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:43.909Z",
+      "finishedAt": "2026-09-05T20:45:44.253Z",
+      "sampleJobs": 10,
+      "boardTotal": 156,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Salesforce",
+      "adapter": "workday",
+      "url": "https://salesforce.wd12.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:43.367Z",
+      "finishedAt": "2026-09-05T20:45:44.608Z",
+      "sampleJobs": 10,
+      "boardTotal": 1453,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Notion",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/notion",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:44.384Z",
+      "finishedAt": "2026-09-05T20:45:44.826Z",
+      "sampleJobs": 10,
+      "boardTotal": 133,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Stripe",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/stripe",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:44.769Z",
+      "finishedAt": "2026-09-05T20:45:45.140Z",
+      "sampleJobs": 10,
+      "boardTotal": 615,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Linear",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/linear",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:45.342Z",
+      "finishedAt": "2026-09-05T20:45:45.721Z",
+      "sampleJobs": 10,
+      "boardTotal": 29,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Databricks",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/databricks",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:45.651Z",
+      "finishedAt": "2026-09-05T20:45:46.041Z",
+      "sampleJobs": 10,
+      "boardTotal": 869,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Ramp",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/ramp",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:46.238Z",
+      "finishedAt": "2026-09-05T20:45:46.600Z",
+      "sampleJobs": 10,
+      "boardTotal": 142,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Figma",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/figma",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:46.545Z",
+      "finishedAt": "2026-09-05T20:45:46.915Z",
+      "sampleJobs": 10,
+      "boardTotal": 157,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Supabase",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/supabase",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:47.118Z",
+      "finishedAt": "2026-09-05T20:45:47.525Z",
+      "sampleJobs": 10,
+      "boardTotal": 60,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Anthropic",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/anthropic",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:47.427Z",
+      "finishedAt": "2026-09-05T20:45:47.819Z",
+      "sampleJobs": 10,
+      "boardTotal": 594,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Sierra",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/sierra",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:48.043Z",
+      "finishedAt": "2026-09-05T20:45:48.509Z",
+      "sampleJobs": 10,
+      "boardTotal": 207,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Cloudflare",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/cloudflare",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:48.326Z",
+      "finishedAt": "2026-09-05T20:45:48.730Z",
+      "sampleJobs": 10,
+      "boardTotal": 331,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Confluent",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/confluent",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:49.019Z",
+      "finishedAt": "2026-09-05T20:45:49.399Z",
+      "sampleJobs": 10,
+      "boardTotal": 22,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Datadog",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/datadog",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:49.235Z",
+      "finishedAt": "2026-09-05T20:45:49.697Z",
+      "sampleJobs": 10,
+      "boardTotal": 441,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Oracle",
+      "adapter": "oracle",
+      "url": "https://careers.oracle.com/en/sites/jobsearch",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:45.114Z",
+      "finishedAt": "2026-09-05T20:45:49.809Z",
+      "sampleJobs": 10,
+      "boardTotal": 2277,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Redis",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/redis",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:49.914Z",
+      "finishedAt": "2026-09-05T20:45:50.323Z",
+      "sampleJobs": 10,
+      "boardTotal": 21,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "MongoDB",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/mongodb",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:50.207Z",
+      "finishedAt": "2026-09-05T20:45:50.623Z",
+      "sampleJobs": 10,
+      "boardTotal": 415,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Zapier",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/zapier",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:50.842Z",
+      "finishedAt": "2026-09-05T20:45:51.242Z",
+      "sampleJobs": 7,
+      "boardTotal": 7,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Elastic",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/elastic",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:51.136Z",
+      "finishedAt": "2026-09-05T20:45:51.507Z",
+      "sampleJobs": 10,
+      "boardTotal": 365,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Sentry",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/sentry",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:51.752Z",
+      "finishedAt": "2026-09-05T20:45:52.169Z",
+      "sampleJobs": 10,
+      "boardTotal": 41,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "GitLab",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/gitlab",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:52.023Z",
+      "finishedAt": "2026-09-05T20:45:52.391Z",
+      "sampleJobs": 10,
+      "boardTotal": 229,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Perplexity",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/perplexity",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:52.674Z",
+      "finishedAt": "2026-09-05T20:45:53.070Z",
+      "sampleJobs": 10,
+      "boardTotal": 112,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Vercel",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/vercel",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:52.905Z",
+      "finishedAt": "2026-09-05T20:45:53.267Z",
+      "sampleJobs": 10,
+      "boardTotal": 86,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Dell Technologies",
+      "adapter": "oracle",
+      "url": "https://enterpriseplatform.dell.com/hcmUI/CandidateExperience/en/sites/careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:50.315Z",
+      "finishedAt": "2026-09-05T20:45:53.660Z",
+      "sampleJobs": 10,
+      "boardTotal": 442,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "DeepL",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/DeepL",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:53.587Z",
+      "finishedAt": "2026-09-05T20:45:53.992Z",
+      "sampleJobs": 10,
+      "boardTotal": 65,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Grafana Labs",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/grafanalabs",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:53.773Z",
+      "finishedAt": "2026-09-05T20:45:54.133Z",
+      "sampleJobs": 10,
+      "boardTotal": 131,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Mistral AI",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/mistral.ai",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:54.509Z",
+      "finishedAt": "2026-09-05T20:45:54.957Z",
+      "sampleJobs": 10,
+      "boardTotal": 178,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Fivetran",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/fivetran",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:54.650Z",
+      "finishedAt": "2026-09-05T20:45:55.018Z",
+      "sampleJobs": 10,
+      "boardTotal": 211,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Miro",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/miro",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:55.469Z",
+      "finishedAt": "2026-09-05T20:45:55.833Z",
+      "sampleJobs": 10,
+      "boardTotal": 38,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Sigma Computing",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/sigmacomputing",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:55.531Z",
+      "finishedAt": "2026-09-05T20:45:55.896Z",
+      "sampleJobs": 10,
+      "boardTotal": 67,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Postman",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/postman",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:56.407Z",
+      "finishedAt": "2026-09-05T20:45:56.788Z",
+      "sampleJobs": 10,
+      "boardTotal": 63,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Deliveroo",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/deliveroo",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:56.347Z",
+      "finishedAt": "2026-09-05T20:45:56.901Z",
+      "sampleJobs": 10,
+      "boardTotal": 209,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Nokia",
+      "adapter": "oracle",
+      "url": "https://jobs.nokia.com/en/sites/CX_1",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:54.173Z",
+      "finishedAt": "2026-09-05T20:45:57.269Z",
+      "sampleJobs": 10,
+      "boardTotal": 617,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Airtable",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/airtable",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:57.307Z",
+      "finishedAt": "2026-09-05T20:45:57.668Z",
+      "sampleJobs": 10,
+      "boardTotal": 16,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "ElevenLabs",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/elevenlabs",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:57.414Z",
+      "finishedAt": "2026-09-05T20:45:57.852Z",
+      "sampleJobs": 10,
+      "boardTotal": 252,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Zalando",
+      "adapter": "workday",
+      "url": "https://zalando.wd3.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:57.781Z",
+      "finishedAt": "2026-09-05T20:45:58.327Z",
+      "sampleJobs": 10,
+      "boardTotal": 162,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Asana",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/asana",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:58.179Z",
+      "finishedAt": "2026-09-05T20:45:58.548Z",
+      "sampleJobs": 10,
+      "boardTotal": 115,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Synthesia",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/synthesia",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:58.363Z",
+      "finishedAt": "2026-09-05T20:45:58.751Z",
+      "sampleJobs": 10,
+      "boardTotal": 58,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Twilio",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/twilio",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:59.056Z",
+      "finishedAt": "2026-09-05T20:45:59.425Z",
+      "sampleJobs": 10,
+      "boardTotal": 147,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Alan",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/alan",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:59.256Z",
+      "finishedAt": "2026-09-05T20:45:59.669Z",
+      "sampleJobs": 10,
+      "boardTotal": 111,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Okta",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/okta",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:59.936Z",
+      "finishedAt": "2026-09-05T20:46:00.306Z",
+      "sampleJobs": 10,
+      "boardTotal": 314,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Owkin",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/owkin",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:00.181Z",
+      "finishedAt": "2026-09-05T20:46:00.578Z",
+      "sampleJobs": 4,
+      "boardTotal": 4,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Spotify",
+      "adapter": "lever",
+      "url": "https://jobs.lever.co/spotify",
+      "ok": true,
+      "startedAt": "2026-09-05T20:45:58.841Z",
+      "finishedAt": "2026-09-05T20:46:00.988Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Scale AI",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/scaleai",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:00.815Z",
+      "finishedAt": "2026-09-05T20:46:01.181Z",
+      "sampleJobs": 10,
+      "boardTotal": 215,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Glia",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/glia",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:01.094Z",
+      "finishedAt": "2026-09-05T20:46:01.464Z",
+      "sampleJobs": 10,
+      "boardTotal": 23,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Discord",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/discord",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:01.689Z",
+      "finishedAt": "2026-09-05T20:46:02.060Z",
+      "sampleJobs": 10,
+      "boardTotal": 48,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Ledger",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/ledger",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:01.981Z",
+      "finishedAt": "2026-09-05T20:46:02.254Z",
+      "sampleJobs": 8,
+      "boardTotal": 8,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Reddit",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/reddit",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:02.567Z",
+      "finishedAt": "2026-09-05T20:46:02.927Z",
+      "sampleJobs": 10,
+      "boardTotal": 148,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Qonto",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/qonto",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:02.767Z",
+      "finishedAt": "2026-09-05T20:46:03.222Z",
+      "sampleJobs": 10,
+      "boardTotal": 47,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Pinterest",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/pinterest",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:03.432Z",
+      "finishedAt": "2026-09-05T20:46:03.812Z",
+      "sampleJobs": 10,
+      "boardTotal": 189,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Sonar",
+      "adapter": "lever",
+      "url": "https://jobs.lever.co/sonarsource",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:01.492Z",
+      "finishedAt": "2026-09-05T20:46:03.983Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Cohere",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/cohere",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:03.743Z",
+      "finishedAt": "2026-09-05T20:46:04.175Z",
+      "sampleJobs": 10,
+      "boardTotal": 143,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Robinhood",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/robinhood",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:04.328Z",
+      "finishedAt": "2026-09-05T20:46:04.699Z",
+      "sampleJobs": 10,
+      "boardTotal": 128,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "1Password",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/1password",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:04.693Z",
+      "finishedAt": "2026-09-05T20:46:05.098Z",
+      "sampleJobs": 10,
+      "boardTotal": 62,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Coinbase",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/coinbase",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:05.217Z",
+      "finishedAt": "2026-09-05T20:46:05.609Z",
+      "sampleJobs": 10,
+      "boardTotal": 192,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Wealthsimple",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/wealthsimple",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:05.603Z",
+      "finishedAt": "2026-09-05T20:46:06.036Z",
+      "sampleJobs": 10,
+      "boardTotal": 48,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Pipedrive",
+      "adapter": "lever",
+      "url": "https://jobs.lever.co/pipedrive",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:04.494Z",
+      "finishedAt": "2026-09-05T20:46:06.194Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Block",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/block",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:06.123Z",
+      "finishedAt": "2026-09-05T20:46:06.496Z",
+      "sampleJobs": 10,
+      "boardTotal": 203,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Benevity",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/benevity",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:06.553Z",
+      "finishedAt": "2026-09-05T20:46:06.972Z",
+      "sampleJobs": 10,
+      "boardTotal": 13,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Affirm",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/affirm",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:07.007Z",
+      "finishedAt": "2026-09-05T20:46:07.372Z",
+      "sampleJobs": 10,
+      "boardTotal": 205,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Thinkific",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/thinkific",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:07.485Z",
+      "finishedAt": "2026-09-05T20:46:07.884Z",
+      "sampleJobs": 1,
+      "boardTotal": 1,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Instacart",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/instacart",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:07.877Z",
+      "finishedAt": "2026-09-05T20:46:08.227Z",
+      "sampleJobs": 10,
+      "boardTotal": 112,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Swile",
+      "adapter": "lever",
+      "url": "https://jobs.lever.co/swile",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:06.703Z",
+      "finishedAt": "2026-09-05T20:46:08.397Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Lyft",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/lyft",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:08.743Z",
+      "finishedAt": "2026-09-05T20:46:09.117Z",
+      "sampleJobs": 10,
+      "boardTotal": 168,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Shield AI",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/shield-ai",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:08.389Z",
+      "finishedAt": "2026-09-05T20:46:09.168Z",
+      "sampleJobs": 10,
+      "boardTotal": 443,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Airbnb",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/airbnb",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:09.636Z",
+      "finishedAt": "2026-09-05T20:46:10.007Z",
+      "sampleJobs": 10,
+      "boardTotal": 169,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Axelera AI",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/axelera",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:09.683Z",
+      "finishedAt": "2026-09-05T20:46:10.072Z",
+      "sampleJobs": 10,
+      "boardTotal": 10,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Roblox",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/roblox",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:10.522Z",
+      "finishedAt": "2026-09-05T20:46:10.899Z",
+      "sampleJobs": 10,
+      "boardTotal": 230,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Etched",
+      "adapter": "ashby",
+      "url": "https://jobs.ashbyhq.com/etched",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:10.584Z",
+      "finishedAt": "2026-09-05T20:46:10.977Z",
+      "sampleJobs": 10,
+      "boardTotal": 105,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Pigment",
+      "adapter": "lever",
+      "url": "https://jobs.lever.co/pigment",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:08.913Z",
+      "finishedAt": "2026-09-05T20:46:11.020Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Epic Games",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/epicgames",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:11.412Z",
+      "finishedAt": "2026-09-05T20:46:11.806Z",
+      "sampleJobs": 10,
+      "boardTotal": 164,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Clio",
+      "adapter": "workday",
+      "url": "https://clio.wd3.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:11.486Z",
+      "finishedAt": "2026-09-05T20:46:12.072Z",
+      "sampleJobs": 10,
+      "boardTotal": 132,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Cirrus Logic",
+      "adapter": "lever",
+      "url": "https://jobs.eu.lever.co/cirrus",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:11.534Z",
+      "finishedAt": "2026-09-05T20:46:12.195Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Riot Games",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/riotgames",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:12.328Z",
+      "finishedAt": "2026-09-05T20:46:12.695Z",
+      "sampleJobs": 10,
+      "boardTotal": 163,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "ASML",
+      "adapter": "asml",
+      "url": "https://www.asml.com/en/careers/find-your-job",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:12.702Z",
+      "finishedAt": "2026-09-05T20:46:13.178Z",
+      "sampleJobs": 10,
+      "boardTotal": 596,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "BlackBerry",
+      "adapter": "workday",
+      "url": "https://bb.wd3.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:12.592Z",
+      "finishedAt": "2026-09-05T20:46:13.463Z",
+      "sampleJobs": 10,
+      "boardTotal": 32,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Faire",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/faire",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:13.224Z",
+      "finishedAt": "2026-09-05T20:46:13.582Z",
+      "sampleJobs": 10,
+      "boardTotal": 60,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Adyen",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/adyen",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:14.089Z",
+      "finishedAt": "2026-09-05T20:46:14.451Z",
+      "sampleJobs": 10,
+      "boardTotal": 231,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Tokyo Electron",
+      "adapter": "workday",
+      "url": "https://tel.wd3.myworkdayjobs.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:13.689Z",
+      "finishedAt": "2026-09-05T20:46:14.609Z",
+      "sampleJobs": 10,
+      "boardTotal": 24,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Onto Innovation",
+      "adapter": "workday",
+      "url": "https://onto.wd1.myworkdayjobs.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:13.981Z",
+      "finishedAt": "2026-09-05T20:46:14.882Z",
+      "sampleJobs": 10,
+      "boardTotal": 193,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Celonis",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/celonis",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:14.964Z",
+      "finishedAt": "2026-09-05T20:46:15.357Z",
+      "sampleJobs": 10,
+      "boardTotal": 274,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Doctolib",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/doctolib",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:15.877Z",
+      "finishedAt": "2026-09-05T20:46:16.241Z",
+      "sampleJobs": 10,
+      "boardTotal": 129,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "PTC",
+      "adapter": "workday",
+      "url": "https://ptc.wd1.myworkdayjobs.com/PTC",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:15.121Z",
+      "finishedAt": "2026-09-05T20:46:16.269Z",
+      "sampleJobs": 10,
+      "boardTotal": 172,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "JetBrains",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/jetbrains",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:16.753Z",
+      "finishedAt": "2026-09-05T20:46:17.117Z",
+      "sampleJobs": 10,
+      "boardTotal": 72,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Wayve",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/wayve",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:17.626Z",
+      "finishedAt": "2026-09-05T20:46:17.992Z",
+      "sampleJobs": 10,
+      "boardTotal": 166,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Cadence",
+      "adapter": "workday",
+      "url": "https://cadence.wd1.myworkdayjobs.com/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:16.783Z",
+      "finishedAt": "2026-09-05T20:46:18.030Z",
+      "sampleJobs": 10,
+      "boardTotal": 578,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Kulicke & Soffa",
+      "adapter": "oracle",
+      "url": "https://careers.kns.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:15.397Z",
+      "finishedAt": "2026-09-05T20:46:18.340Z",
+      "sampleJobs": 10,
+      "boardTotal": 65,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Graphcore",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/graphcore",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:18.504Z",
+      "finishedAt": "2026-09-05T20:46:19.023Z",
+      "sampleJobs": 10,
+      "boardTotal": 191,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Synopsys",
+      "adapter": "synopsys",
+      "url": "https://careers.synopsys.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:18.551Z",
+      "finishedAt": "2026-09-05T20:46:19.320Z",
+      "sampleJobs": 10,
+      "boardTotal": 418,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Lockheed Martin",
+      "adapter": "eightfold",
+      "url": "https://lockheedmartin.eightfold.ai/careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:18.859Z",
+      "finishedAt": "2026-09-05T20:46:19.884Z",
+      "sampleJobs": 10,
+      "boardTotal": 3530,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Monzo",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/monzo",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:19.537Z",
+      "finishedAt": "2026-09-05T20:46:19.915Z",
+      "sampleJobs": 10,
+      "boardTotal": 66,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "N26",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/n26",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:20.426Z",
+      "finishedAt": "2026-09-05T20:46:20.809Z",
+      "sampleJobs": 10,
+      "boardTotal": 62,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "AeroVironment",
+      "adapter": "workday",
+      "url": "https://avav.wd1.myworkdayjobs.com/AVAV",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:19.828Z",
+      "finishedAt": "2026-09-05T20:46:21.080Z",
+      "sampleJobs": 10,
+      "boardTotal": 345,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Northrop Grumman",
+      "adapter": "eightfold",
+      "url": "https://jobs.northropgrumman.com/careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:20.396Z",
+      "finishedAt": "2026-09-05T20:46:21.338Z",
+      "sampleJobs": 10,
+      "boardTotal": 3828,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Wolt",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/wolt",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:21.327Z",
+      "finishedAt": "2026-09-05T20:46:21.755Z",
+      "sampleJobs": 10,
+      "boardTotal": 242,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Sierra Space",
+      "adapter": "workday",
+      "url": "https://sierraspace.wd1.myworkdayjobs.com/Sierra_Space_External_Career_Site",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:21.592Z",
+      "finishedAt": "2026-09-05T20:46:22.454Z",
+      "sampleJobs": 10,
+      "boardTotal": 166,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "GetYourGuide",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/getyourguide",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:22.262Z",
+      "finishedAt": "2026-09-05T20:46:22.676Z",
+      "sampleJobs": 10,
+      "boardTotal": 56,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "HelloFresh",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/hellofresh",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:23.198Z",
+      "finishedAt": "2026-09-05T20:46:23.576Z",
+      "sampleJobs": 10,
+      "boardTotal": 451,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "TEKEVER",
+      "adapter": "json",
+      "url": "https://careers.tekever.com/jobs.json?per_page=100",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:22.968Z",
+      "finishedAt": "2026-09-05T20:46:24.028Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "SumUp",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/sumup",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:24.092Z",
+      "finishedAt": "2026-09-05T20:46:24.489Z",
+      "sampleJobs": 10,
+      "boardTotal": 409,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Trade Republic",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/traderepublicbank",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:25.013Z",
+      "finishedAt": "2026-09-05T20:46:25.391Z",
+      "sampleJobs": 10,
+      "boardTotal": 46,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Imagination Technologies",
+      "adapter": "json",
+      "url": "https://careers.pageuppeople.com/774/cw/en/listing",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:24.539Z",
+      "finishedAt": "2026-09-05T20:46:25.491Z",
+      "sampleJobs": 10,
+      "boardTotal": 13,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Solaris",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/solarisbank",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:25.909Z",
+      "finishedAt": "2026-09-05T20:46:26.334Z",
+      "sampleJobs": 10,
+      "boardTotal": 26,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "SiPearl",
+      "adapter": "json",
+      "url": "https://careers.sipearl.com/fr/jobs.json?per_page=100",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:26.016Z",
+      "finishedAt": "2026-09-05T20:46:26.365Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "L3Harris",
+      "adapter": "l3harris",
+      "url": "https://careers.l3harris.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:21.856Z",
+      "finishedAt": "2026-09-05T20:46:26.624Z",
+      "sampleJobs": 10,
+      "boardTotal": 1923,
+      "complete": false,
+      "requests": 2,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Helsing",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/helsing",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:26.847Z",
+      "finishedAt": "2026-09-05T20:46:27.269Z",
+      "sampleJobs": 10,
+      "boardTotal": 138,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Nordic Semiconductor",
+      "adapter": "json",
+      "url": "https://careers.nordicsemi.com/jobs.json?per_page=100",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:26.878Z",
+      "finishedAt": "2026-09-05T20:46:27.366Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Renesas",
+      "adapter": "renesas",
+      "url": "https://jobs.renesas.com/jobs",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:27.141Z",
+      "finishedAt": "2026-09-05T20:46:27.560Z",
+      "sampleJobs": 10,
+      "boardTotal": 899,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Isar Aerospace",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/isaraerospace",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:27.784Z",
+      "finishedAt": "2026-09-05T20:46:28.212Z",
+      "sampleJobs": 10,
+      "boardTotal": 97,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Arista Networks",
+      "adapter": "arista-networks",
+      "url": "https://www.arista.com/en/careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:27.875Z",
+      "finishedAt": "2026-09-05T20:46:28.269Z",
+      "sampleJobs": 10,
+      "boardTotal": 240,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Dataiku",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/dataiku",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:28.735Z",
+      "finishedAt": "2026-09-05T20:46:29.132Z",
+      "sampleJobs": 10,
+      "boardTotal": 24,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Ciena",
+      "adapter": "workday",
+      "url": "https://ciena.wd5.myworkdayjobs.com/Careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:28.076Z",
+      "finishedAt": "2026-09-05T20:46:29.327Z",
+      "sampleJobs": 10,
+      "boardTotal": 138,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Siemens",
+      "adapter": "siemens",
+      "url": "https://jobs.sw.siemens.com/jobs/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:28.781Z",
+      "finishedAt": "2026-09-05T20:46:29.725Z",
+      "sampleJobs": 10,
+      "boardTotal": 800,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Scandit",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/scandit",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:29.642Z",
+      "finishedAt": "2026-09-05T20:46:30.057Z",
+      "sampleJobs": 10,
+      "boardTotal": 10,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Veriff",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/veriff",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:30.581Z",
+      "finishedAt": "2026-09-05T20:46:30.967Z",
+      "sampleJobs": 10,
+      "boardTotal": 10,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Rambus",
+      "adapter": "rambus",
+      "url": "https://careers-rambus.icims.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:29.843Z",
+      "finishedAt": "2026-09-05T20:46:31.102Z",
+      "sampleJobs": 10,
+      "boardTotal": null,
+      "complete": false,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "CEVA",
+      "adapter": "ceva",
+      "url": "https://www.ceva-ip.com",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:30.242Z",
+      "finishedAt": "2026-09-05T20:46:31.201Z",
+      "sampleJobs": 10,
+      "boardTotal": 35,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Hootsuite",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/hootsuite",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:31.477Z",
+      "finishedAt": "2026-09-05T20:46:31.862Z",
+      "sampleJobs": 10,
+      "boardTotal": 24,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Dialpad",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/dialpad",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:32.383Z",
+      "finishedAt": "2026-09-05T20:46:32.781Z",
+      "sampleJobs": 10,
+      "boardTotal": 84,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Later",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/later",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:33.294Z",
+      "finishedAt": "2026-09-05T20:46:33.681Z",
+      "sampleJobs": 10,
+      "boardTotal": 39,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "ASM International",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.eu.greenhouse.io/asm",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:34.205Z",
+      "finishedAt": "2026-09-05T20:46:34.646Z",
+      "sampleJobs": 10,
+      "boardTotal": 447,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Anduril",
+      "adapter": "greenhouse",
+      "url": "https://job-boards.greenhouse.io/andurilindustries",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:35.170Z",
+      "finishedAt": "2026-09-05T20:46:35.746Z",
+      "sampleJobs": 10,
+      "boardTotal": 2212,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Rocket Lab",
+      "adapter": "greenhouse",
+      "url": "https://rocketlabcorp.com/careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:36.262Z",
+      "finishedAt": "2026-09-05T20:46:36.730Z",
+      "sampleJobs": 10,
+      "boardTotal": 458,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Stoke Space",
+      "adapter": "greenhouse",
+      "url": "https://www.stokespace.com/careers/current-openings/",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:37.258Z",
+      "finishedAt": "2026-09-05T20:46:37.648Z",
+      "sampleJobs": 10,
+      "boardTotal": 69,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    },
+    {
+      "name": "Relativity Space",
+      "adapter": "greenhouse",
+      "url": "https://www.relativityspace.com/careers",
+      "ok": true,
+      "startedAt": "2026-09-05T20:46:38.163Z",
+      "finishedAt": "2026-09-05T20:46:38.635Z",
+      "sampleJobs": 10,
+      "boardTotal": 344,
+      "complete": true,
+      "requests": 1,
+      "errors": [],
+      "codeHashes": {
+        "worker.mjs": "d016d004df9429753478ac5026e4d14cf9a26e79d0cf16af872915eb3cce201a",
+        "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+        "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7"
+      }
+    }
+  ]
+}

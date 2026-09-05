@@ -12,7 +12,7 @@ if (-not $PreflightOnly) {
   & (Join-Path $PSScriptRoot 'package-sidecar.ps1') -NodePath $NodePath -PnpmPath $PnpmPath
 }
 $sidecar = Join-Path $repo 'src-tauri\sidecar'
-foreach ($path in @('node.exe','worker.mjs','adapters.mjs','company-adapters.mjs','node_modules\playwright-core\package.json','node_modules\cheerio\package.json','node_modules\fast-xml-parser\package.json','node_modules\xpath\package.json','node_modules\@xmldom\xmldom\package.json')) {
+foreach ($path in @('node.exe','worker.mjs','adapters.mjs','company-adapters.mjs','request-policy.mjs','browser-proxy.mjs','node_modules\playwright-core\package.json','node_modules\cheerio\package.json','node_modules\fast-xml-parser\package.json','node_modules\xpath\package.json','node_modules\@xmldom\xmldom\package.json')) {
   if (-not (Test-Path -LiteralPath (Join-Path $sidecar $path) -PathType Leaf)) { throw "Missing packaged sidecar resource: $path" }
 }
 $nodeVersion = & (Join-Path $sidecar 'node.exe') --version

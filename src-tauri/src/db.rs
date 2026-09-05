@@ -1127,7 +1127,7 @@ impl Database {
         // company, same city — are two openings, so the title/company/location fingerprint only
         // re-identifies a row from the SAME source whose URL or generated id changed under it.
         let stable_identity = external.is_some() || canonical.is_some() || requisition.is_some();
-        let existing:Option<(String,Option<String>,Option<String>,String,Option<String>,String,Option<String>)>=sqlx::query_as("SELECT id,content_hash,listing_hash,description_text,description_html,description_status,description_checked_at FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=?) OR (?=0 AND source_id=? AND dedupe_fingerprint=?) ORDER BY created_at LIMIT 1").bind(source_id).bind(external).bind(canonical.as_deref()).bind(canonical.as_deref()).bind(requisition).bind(requisition).bind(stable_identity).bind(source_id).bind(&fingerprint).fetch_optional(&mut **tx).await.map_err(|e|e.to_string())?;
+        let existing:Option<(String,Option<String>,Option<String>,String,Option<String>,String,Option<String>)>=sqlx::query_as("SELECT id,content_hash,listing_hash,description_text,description_html,description_status,description_checked_at FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=? AND lower(trim(company))=lower(?)) OR (?=0 AND source_id=? AND dedupe_fingerprint=?) ORDER BY created_at LIMIT 1").bind(source_id).bind(external).bind(canonical.as_deref()).bind(canonical.as_deref()).bind(requisition).bind(requisition).bind(company).bind(stable_identity).bind(source_id).bind(&fingerprint).fetch_optional(&mut **tx).await.map_err(|e|e.to_string())?;
         let incoming_status = payload
             .get("descriptionStatus")
             .and_then(|value| value.as_str())
@@ -1250,9 +1250,11 @@ impl Database {
     pub async fn pending_enrichment_job(
         &self,
         job_id: &str,
+        refresh: bool,
     ) -> ApiResult<Option<(String, serde_json::Value)>> {
-        let row = sqlx::query("SELECT source_id,id,external_id,canonical_url,apply_url,title,company,location,work_mode,posted_at,listing_hash,detail_url FROM jobs WHERE id=? AND availability<>'archived' AND detail_url IS NOT NULL AND listing_hash IS NOT NULL AND description_status IN ('pending','failed')")
+        let row = sqlx::query("SELECT source_id,id,external_id,canonical_url,apply_url,title,company,location,work_mode,posted_at,listing_hash,detail_url FROM jobs WHERE id=? AND availability<>'archived' AND detail_url IS NOT NULL AND listing_hash IS NOT NULL AND (? OR description_status IN ('pending','failed') OR description_checked_at IS NULL OR julianday(description_checked_at) IS NULL OR julianday(description_checked_at)<=julianday('now','-7 days'))")
             .bind(job_id)
+            .bind(refresh)
             .fetch_optional(&self.pool)
             .await
             .map_err(|e| e.to_string())?;
@@ -2256,7 +2258,7 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
     let order = if filter.sort == "posted" {
         "ORDER BY j.posted_at IS NULL,j.posted_at DESC,j.updated_at DESC,j.id"
     } else {
-        "ORDER BY j.updated_at DESC,j.id"
+        "ORDER BY coalesce(j.first_seen_at,j.created_at) DESC,j.id"
     };
     let saved = if filter.saved_only {
         " AND EXISTS(SELECT 1 FROM applications a WHERE a.job_id=j.id)"
@@ -5239,6 +5241,25 @@ mod matching_persistence_tests {
             .unwrap();
         assert_eq!(spent, 1, "a skip is spendable");
     }
+    #[tokio::test]
+    async fn recent_jobs_sort_by_discovery_even_after_old_jobs_are_refreshed() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
+        for (id, first_seen, created, updated) in [
+            ("old", Some("2026-01-01"), "2026-01-01", "2026-09-05"),
+            ("new", Some("2026-09-04"), "2026-09-04", "2026-09-04"),
+            ("legacy", None, "2026-08-01", "2026-09-06"),
+        ] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at,first_seen_at) VALUES(?,'s','Engineer','Company','','[]',?,'t','1',?,?,?)")
+                .bind(id).bind(id).bind(created).bind(updated).bind(first_seen).execute(&pool).await.unwrap();
+        }
+        let jobs = jobs_query(JobFilter::default(), &pool).await.unwrap();
+        assert_eq!(
+            jobs.iter().map(|job| job.id.as_str()).collect::<Vec<_>>(),
+            vec!["new", "legacy", "old"]
+        );
+    }
+
     // The Jobs page is the whole app now, so its list must be literal: only selected sources,
     // every typed word present in the title, newest posting first, saved jobs marked as such.
     #[tokio::test]
@@ -5857,6 +5878,46 @@ mod matching_persistence_tests {
     }
 
     #[tokio::test]
+    async fn requisition_numbers_only_merge_within_the_same_company() {
+        let root = std::env::temp_dir().join(format!("jobscraper-identity-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        for company in ["Alpha", "Beta"] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,created_at,updated_at) VALUES(?,?,?,'json','1','t','t')").bind(company).bind(company).bind(format!("https://{company}.test")).execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES(?,?,'scrape','running','t')").bind(company).bind(company).execute(&db.pool).await.unwrap();
+            let job = serde_json::json!({"title":"Engineer","company":company,"requisitionId":"1234","canonicalUrl":format!("https://{company}.test/job/1234"),"descriptionText":"Original"});
+            db.persist_worker_job(company, company, &job).await.unwrap();
+        }
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM jobs")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            2
+        );
+        let changed = serde_json::json!({"title":"Updated engineer","company":"Alpha","requisitionId":"1234","canonicalUrl":"https://Alpha.test/new/1234","descriptionText":"Updated"});
+        db.persist_worker_job("Alpha", "Alpha", &changed)
+            .await
+            .unwrap();
+        assert_eq!(
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM jobs")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap(),
+            2
+        );
+        assert_eq!(
+            sqlx::query_scalar::<_, String>(
+                "SELECT description_text FROM jobs WHERE company='Beta'"
+            )
+            .fetch_one(&db.pool)
+            .await
+            .unwrap(),
+            "Original"
+        );
+    }
+
+    #[tokio::test]
     async fn enrichment_selects_one_job_and_rejects_a_stale_listing_response() {
         let root = std::env::temp_dir().join(format!("jobscraper-enrich-{}", Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
@@ -5869,7 +5930,11 @@ mod matching_persistence_tests {
             .fetch_one(&db.pool)
             .await
             .unwrap();
-        let (source_id, pending) = db.pending_enrichment_job(&job_id).await.unwrap().unwrap();
+        let (source_id, pending) = db
+            .pending_enrichment_job(&job_id, false)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(source_id, "s");
         assert_eq!(pending["jobId"], job_id);
         let stale = serde_json::json!({"jobId":job_id,"title":"Engineer","company":"S","descriptionText":"stale","listingHash":"listing-old"});
@@ -5883,6 +5948,36 @@ mod matching_persistence_tests {
                 .await
                 .unwrap();
         assert_eq!(row, ("complete".into(), "Full description".into()));
+        assert!(db
+            .pending_enrichment_job(&job_id, false)
+            .await
+            .unwrap()
+            .is_none());
+        assert!(db
+            .pending_enrichment_job(&job_id, true)
+            .await
+            .unwrap()
+            .is_some());
+        sqlx::query("UPDATE jobs SET description_checked_at=datetime('now','-8 days') WHERE id=?")
+            .bind(&job_id)
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        assert!(db
+            .pending_enrichment_job(&job_id, false)
+            .await
+            .unwrap()
+            .is_some());
+        let failure = serde_json::json!({"jobId":job_id,"listingHash":"listing-1","message":"Publisher unavailable"});
+        assert_eq!(
+            db.record_enrichment_failures("s", &[failure])
+                .await
+                .unwrap(),
+            1
+        );
+        let cached = load_job_description(&db.pool, &job_id).await.unwrap();
+        assert_eq!(cached.text, "Full description");
+        assert_eq!(cached.status, "failed");
     }
 
     // Sighting rows were never pruned, so a full update added one per job per run forever. The

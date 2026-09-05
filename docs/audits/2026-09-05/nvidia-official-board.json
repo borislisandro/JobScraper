@@ -1,0 +1,33 @@
+{
+  "observedAt": "2026-09-05T21:01:17.418Z",
+  "url": "https://jobs.nvidia.com/api/pcsx/search?domain=nvidia.com&start=0&query=&location=",
+  "httpStatus": 200,
+  "scope": "First page only; a full identity comparison was interrupted by HTTP 429.",
+  "publishedTotal": 2685,
+  "sample": [
+    {
+      "requisition": "JR2019269",
+      "title": "GPU Architect",
+      "locations": [
+        "India, Bengaluru"
+      ],
+      "url": "https://jobs.nvidia.com/careers/job/893395478665"
+    },
+    {
+      "requisition": "JR2024823",
+      "title": "Accelerated Compute Systems Performance Architect Intern - 2027",
+      "locations": [
+        "China, Shanghai"
+      ],
+      "url": "https://jobs.nvidia.com/careers/job/893397574406"
+    },
+    {
+      "requisition": "JR2025040",
+      "title": "Infrastructure Tool Development Intern - 2027",
+      "locations": [
+        "China, Shanghai"
+      ],
+      "url": "https://jobs.nvidia.com/careers/job/893397574424"
+    }
+  ]
+}

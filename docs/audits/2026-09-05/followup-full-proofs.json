@@ -1,0 +1,969 @@
+[
+  {
+    "schemaVersion": 1,
+    "name": "Intel",
+    "level": "full",
+    "ok": true,
+    "startedAt": "2026-09-05T21:31:00.484Z",
+    "finishedAt": "2026-09-05T21:31:27.257Z",
+    "source": {
+      "id": "00000000-0000-4000-8000-000000000004",
+      "name": "Intel",
+      "baseUrl": "https://intel.wd1.myworkdayjobs.com/",
+      "adapterId": "workday",
+      "kind": "active",
+      "robotsOverride": true,
+      "allowPrivateNetwork": false,
+      "configJson": {
+        "maxPages": 500,
+        "site": "External",
+        "tenant": "intel",
+        "expectedHost": "intel.wd1.myworkdayjobs.com"
+      }
+    },
+    "codeHashes": {
+      "worker.mjs": "1bde77394bcf0b608effba385c00f516167a18c94eff67ef0b1ca0d246b0a43b",
+      "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+      "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+      "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+      "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+    },
+    "listing": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-000000000004",
+        "payload": {
+          "command": "scrape_source",
+          "complete": true,
+          "discovered": 600,
+          "persisted": 600,
+          "skipped": 0,
+          "filtered": 0,
+          "requests": 30,
+          "boardTotal": 600,
+          "boardTotalExact": true,
+          "mode": "direct-platform",
+          "warnings": [],
+          "timingMs": 23767,
+          "pages": 30,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 23767,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 157,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 23197,
+                "body": 352,
+                "browser": 0,
+                "adapterOther": 49,
+                "emit": 11
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 30,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 23197,
+                  "bodyMs": 352
+                },
+                "detail": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      },
+      "jobs": 600,
+      "uniqueIdentities": 600,
+      "uniqueHashes": 600,
+      "samples": [
+        {
+          "externalId": "JR0286800",
+          "title": "Database Administrator PL/SQL Developer",
+          "company": "Intel",
+          "location": "US Arizona Phoenix (+1 more)",
+          "postedAt": "2026-09-03",
+          "canonicalUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-Arizona-Phoenix/Database-Administrator-PL-SQL-Developer_JR0286800",
+          "applyUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-Arizona-Phoenix/Database-Administrator-PL-SQL-Developer_JR0286800",
+          "descriptionStatus": "pending",
+          "descriptionChars": 0
+        },
+        {
+          "externalId": "JR0285463-1",
+          "title": "Module Equipment Technician",
+          "company": "Intel",
+          "location": "Malaysia Kulim",
+          "postedAt": "2026-08-17",
+          "canonicalUrl": "https://intel.wd1.myworkdayjobs.com/External/job/Malaysia-Kulim/Module-Equipment-Technician_JR0285463-1",
+          "applyUrl": "https://intel.wd1.myworkdayjobs.com/External/job/Malaysia-Kulim/Module-Equipment-Technician_JR0285463-1",
+          "descriptionStatus": "pending",
+          "descriptionChars": 0
+        },
+        {
+          "externalId": "JR0278355",
+          "title": "Lead Analog SerDes Architect/Design Engineer",
+          "company": "Intel",
+          "location": "US California Santa Clara",
+          "postedAt": "2026-08-06",
+          "canonicalUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-California-Santa-Clara/Lead-Analog-SerDes-Architect-Design-Engineer_JR0278355",
+          "applyUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-California-Santa-Clara/Lead-Analog-SerDes-Architect-Design-Engineer_JR0278355",
+          "descriptionStatus": "pending",
+          "descriptionChars": 0
+        }
+      ],
+      "warnings": [
+        {
+          "code": "robots_override",
+          "message": "Saved per-source robots override is active."
+        }
+      ]
+    },
+    "details": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-000000000004",
+        "payload": {
+          "completed": 3,
+          "failed": 0,
+          "complete": true,
+          "mode": "enrichment",
+          "requests": 3,
+          "timingMs": 1428,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 1428,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 15,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 1390,
+                "body": 15,
+                "browser": 0,
+                "adapterOther": 7,
+                "emit": 0
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "detail": {
+                  "count": 3,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 1390,
+                  "bodyMs": 15
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      },
+      "samples": [
+        {
+          "externalId": "JR0286800",
+          "title": "Database Administrator PL/SQL Developer",
+          "company": "Intel",
+          "location": "US, Arizona, Phoenix",
+          "postedAt": "2026-09-03",
+          "canonicalUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-Arizona-Phoenix/Database-Administrator-PL-SQL-Developer_JR0286800",
+          "applyUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-Arizona-Phoenix/Database-Administrator-PL-SQL-Developer_JR0286800",
+          "descriptionStatus": "complete",
+          "descriptionChars": 7852
+        },
+        {
+          "externalId": "JR0285463-1",
+          "title": "Module Equipment Technician",
+          "company": "Intel",
+          "location": "Malaysia, Kulim",
+          "postedAt": "2026-08-17",
+          "canonicalUrl": "https://intel.wd1.myworkdayjobs.com/External/job/Malaysia-Kulim/Module-Equipment-Technician_JR0285463-1",
+          "applyUrl": "https://intel.wd1.myworkdayjobs.com/External/job/Malaysia-Kulim/Module-Equipment-Technician_JR0285463-1",
+          "descriptionStatus": "complete",
+          "descriptionChars": 2309
+        },
+        {
+          "externalId": "JR0278355",
+          "title": "Lead Analog SerDes Architect/Design Engineer",
+          "company": "Intel",
+          "location": "US, California, Santa Clara",
+          "postedAt": "2026-08-06",
+          "canonicalUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-California-Santa-Clara/Lead-Analog-SerDes-Architect-Design-Engineer_JR0278355",
+          "applyUrl": "https://intel.wd1.myworkdayjobs.com/External/job/US-California-Santa-Clara/Lead-Analog-SerDes-Architect-Design-Engineer_JR0278355",
+          "descriptionStatus": "complete",
+          "descriptionChars": 5220
+        }
+      ],
+      "warnings": [
+        {
+          "code": "robots_override",
+          "message": "Saved per-source robots override is active."
+        }
+      ]
+    },
+    "warm": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-000000000004",
+        "payload": {
+          "complete": true,
+          "mode": "check",
+          "boardTotal": 600,
+          "boardTotalExact": true,
+          "fresh": 0,
+          "discovered": 20,
+          "requests": 1,
+          "skipped": 20,
+          "filtered": 0,
+          "warnings": [],
+          "timingMs": 1148,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 1149,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 10,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 1128,
+                "body": 5,
+                "browser": 0,
+                "adapterOther": 5,
+                "emit": 0
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 1,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 1128,
+                  "bodyMs": 5
+                },
+                "detail": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "schemaVersion": 1,
+    "name": "SiFive",
+    "level": "full",
+    "ok": true,
+    "startedAt": "2026-09-05T21:31:27.672Z",
+    "finishedAt": "2026-09-05T21:31:34.230Z",
+    "source": {
+      "id": "00000000-0000-4000-8000-000000000027",
+      "name": "SiFive",
+      "baseUrl": "https://sifive.wd1.myworkdayjobs.com/",
+      "adapterId": "workday",
+      "kind": "active",
+      "robotsOverride": true,
+      "allowPrivateNetwork": false,
+      "configJson": {
+        "tenant": "sifive",
+        "site": "sifivecareers",
+        "maxPages": 500,
+        "expectedHost": "sifive.wd1.myworkdayjobs.com"
+      }
+    },
+    "codeHashes": {
+      "worker.mjs": "1bde77394bcf0b608effba385c00f516167a18c94eff67ef0b1ca0d246b0a43b",
+      "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+      "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+      "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+      "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+    },
+    "listing": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-000000000027",
+        "payload": {
+          "command": "scrape_source",
+          "complete": true,
+          "discovered": 116,
+          "persisted": 116,
+          "skipped": 0,
+          "filtered": 0,
+          "requests": 6,
+          "boardTotal": 116,
+          "boardTotalExact": true,
+          "mode": "direct-platform",
+          "warnings": [],
+          "timingMs": 3601,
+          "pages": 6,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 3601,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 39,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 3537,
+                "body": 9,
+                "browser": 0,
+                "adapterOther": 13,
+                "emit": 2
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 6,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 3537,
+                  "bodyMs": 9
+                },
+                "detail": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      },
+      "jobs": 116,
+      "uniqueIdentities": 116,
+      "uniqueHashes": 116,
+      "samples": [
+        {
+          "externalId": "R-101410",
+          "title": "Senior Customer Release Engineer",
+          "company": "SiFive",
+          "location": "Bengaluru Karnataka India",
+          "postedAt": null,
+          "canonicalUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Bengaluru-Karnataka-India/Senior-Customer-Release-Engineer_R-101410",
+          "applyUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Bengaluru-Karnataka-India/Senior-Customer-Release-Engineer_R-101410",
+          "descriptionStatus": "pending",
+          "descriptionChars": 0
+        },
+        {
+          "externalId": "R-101140",
+          "title": "Datacenter System Software Architect",
+          "company": "SiFive",
+          "location": "Santa Clara CA (+49 more)",
+          "postedAt": null,
+          "canonicalUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-CA/Datacenter-System-Software-Architect_R-101140",
+          "applyUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-CA/Datacenter-System-Software-Architect_R-101140",
+          "descriptionStatus": "pending",
+          "descriptionChars": 0
+        },
+        {
+          "externalId": "R-101142",
+          "title": "Strategic Sales Director",
+          "company": "SiFive",
+          "location": "Santa Clara California United States",
+          "postedAt": null,
+          "canonicalUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-California-United-States/Strategic-Sales-Director_R-101142",
+          "applyUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-California-United-States/Strategic-Sales-Director_R-101142",
+          "descriptionStatus": "pending",
+          "descriptionChars": 0
+        }
+      ],
+      "warnings": [
+        {
+          "code": "robots_override",
+          "message": "Saved per-source robots override is active."
+        }
+      ]
+    },
+    "details": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-000000000027",
+        "payload": {
+          "completed": 3,
+          "failed": 0,
+          "complete": true,
+          "mode": "enrichment",
+          "requests": 3,
+          "timingMs": 1692,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 1691,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 19,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 1643,
+                "body": 22,
+                "browser": 0,
+                "adapterOther": 6,
+                "emit": 0
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "detail": {
+                  "count": 3,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 1643,
+                  "bodyMs": 22
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      },
+      "samples": [
+        {
+          "externalId": "R-101410",
+          "title": "Senior Customer Release Engineer",
+          "company": "SiFive",
+          "location": "Bengaluru, Karnataka, India",
+          "postedAt": "2026-08-06",
+          "canonicalUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Bengaluru-Karnataka-India/Senior-Customer-Release-Engineer_R-101410",
+          "applyUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Bengaluru-Karnataka-India/Senior-Customer-Release-Engineer_R-101410",
+          "descriptionStatus": "complete",
+          "descriptionChars": 3921
+        },
+        {
+          "externalId": "R-101140",
+          "title": "Datacenter System Software Architect",
+          "company": "SiFive",
+          "location": "Santa Clara, CA",
+          "postedAt": "2026-08-06",
+          "canonicalUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-CA/Datacenter-System-Software-Architect_R-101140",
+          "applyUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-CA/Datacenter-System-Software-Architect_R-101140",
+          "descriptionStatus": "complete",
+          "descriptionChars": 7316
+        },
+        {
+          "externalId": "R-101142",
+          "title": "Strategic Sales Director",
+          "company": "SiFive",
+          "location": "Santa Clara, California, United States",
+          "postedAt": "2026-08-06",
+          "canonicalUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-California-United-States/Strategic-Sales-Director_R-101142",
+          "applyUrl": "https://sifive.wd1.myworkdayjobs.com/sifivecareers/job/Santa-Clara-California-United-States/Strategic-Sales-Director_R-101142",
+          "descriptionStatus": "complete",
+          "descriptionChars": 3820
+        }
+      ],
+      "warnings": [
+        {
+          "code": "robots_override",
+          "message": "Saved per-source robots override is active."
+        }
+      ]
+    },
+    "warm": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-000000000027",
+        "payload": {
+          "complete": true,
+          "mode": "check",
+          "boardTotal": 116,
+          "boardTotalExact": true,
+          "fresh": 0,
+          "discovered": 20,
+          "requests": 1,
+          "skipped": 20,
+          "filtered": 0,
+          "warnings": [],
+          "timingMs": 850,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 850,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 10,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 831,
+                "body": 4,
+                "browser": 0,
+                "adapterOther": 5,
+                "emit": 0
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 1,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 831,
+                  "bodyMs": 4
+                },
+                "detail": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "schemaVersion": 1,
+    "name": "Axelera AI",
+    "level": "full",
+    "ok": true,
+    "startedAt": "2026-09-05T21:31:34.641Z",
+    "finishedAt": "2026-09-05T21:31:35.260Z",
+    "source": {
+      "id": "00000000-0000-4000-8000-00000000014a",
+      "name": "Axelera AI",
+      "baseUrl": "https://jobs.ashbyhq.com/axelera",
+      "adapterId": "ashby",
+      "kind": "active",
+      "robotsOverride": true,
+      "allowPrivateNetwork": false,
+      "configJson": {
+        "token": "axelera",
+        "maxPages": 500,
+        "expectedHost": "api.ashbyhq.com"
+      }
+    },
+    "codeHashes": {
+      "worker.mjs": "1bde77394bcf0b608effba385c00f516167a18c94eff67ef0b1ca0d246b0a43b",
+      "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+      "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+      "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+      "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+    },
+    "listing": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-00000000014a",
+        "payload": {
+          "command": "scrape_source",
+          "complete": true,
+          "discovered": 10,
+          "persisted": 10,
+          "skipped": 0,
+          "filtered": 0,
+          "requests": 1,
+          "boardTotal": 10,
+          "boardTotalExact": true,
+          "mode": "direct-platform",
+          "warnings": [],
+          "timingMs": 235,
+          "pages": 1,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 235,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 26,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 189,
+                "body": 8,
+                "browser": 0,
+                "adapterOther": 9,
+                "emit": 2
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 1,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 189,
+                  "bodyMs": 8
+                },
+                "detail": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      },
+      "jobs": 10,
+      "uniqueIdentities": 10,
+      "uniqueHashes": 10,
+      "samples": [
+        {
+          "externalId": "eab3ca32-1b9e-4425-8162-1eeebd7a260b",
+          "title": "(Senior) Field Application Engineer - India",
+          "company": "Axelera AI",
+          "location": "Bengaluru (on-site), Chennai (on-site), Hyderabad (on-site), India (remote), Mumbai (on-site), Pune (on-site)",
+          "postedAt": "2026-09-03",
+          "canonicalUrl": "https://jobs.ashbyhq.com/axelera/eab3ca32-1b9e-4425-8162-1eeebd7a260b",
+          "applyUrl": "https://jobs.ashbyhq.com/axelera/eab3ca32-1b9e-4425-8162-1eeebd7a260b",
+          "descriptionStatus": "complete",
+          "descriptionChars": 4455
+        },
+        {
+          "externalId": "b8d96401-e843-4a36-8a4d-57ebcbcc87cd",
+          "title": "Advanced Packaging & Power Delivery Senior Engineer",
+          "company": "Axelera AI",
+          "location": "Albania (remote), Amsterdam (hybrid), Athens (on-site), Austria (remote), Belgium (remote), Bristol (on-site), Bulgaria (remote), Croatia (remote), Czechia (remote), Denmark (remote), EU (remote), Eindhoven (hybrid), England (remote), Estonia (remote), Finland (remote), Florence (on-site), France (remote), Germany (remote), Greece (remote), Hungary (remote), Hybrid/Remote - Europe (incl. UK), Ireland (remote), Italy (remote), Latvia (remote), Leuven (on-site), Lithuania (remote), Luxembourg (remote), Milan (on-site), Moldova (remote), Netherlands (hybrid), Northern Ireland (remote), Norway (remote), Paris (on-site), Poland (remote), Portugal (remote), Romania (remote), Scotland (remote), Serbia (remote), Slovakia (remote), Slovenia (remote), Spain (remote), Sweden (remote), Switzerland (remote), UK (remote), Ukraine (remote), Wales (remote), Zurich (on-site)",
+          "postedAt": "2026-06-17",
+          "canonicalUrl": "https://jobs.ashbyhq.com/axelera/b8d96401-e843-4a36-8a4d-57ebcbcc87cd",
+          "applyUrl": "https://jobs.ashbyhq.com/axelera/b8d96401-e843-4a36-8a4d-57ebcbcc87cd",
+          "descriptionStatus": "complete",
+          "descriptionChars": 5068
+        },
+        {
+          "externalId": "7f6172b1-76d9-4289-9e79-b935ef753d33",
+          "title": "UK Electronics Skills Foundation (UKESF)",
+          "company": "Axelera AI",
+          "location": "UK (remote)",
+          "postedAt": "2026-09-01",
+          "canonicalUrl": "https://jobs.ashbyhq.com/axelera/7f6172b1-76d9-4289-9e79-b935ef753d33",
+          "applyUrl": "https://jobs.ashbyhq.com/axelera/7f6172b1-76d9-4289-9e79-b935ef753d33",
+          "descriptionStatus": "complete",
+          "descriptionChars": 232
+        }
+      ],
+      "warnings": [
+        {
+          "code": "robots_override",
+          "message": "Saved per-source robots override is active."
+        }
+      ]
+    },
+    "details": null,
+    "warm": {
+      "terminal": {
+        "protocolVersion": 1,
+        "event": "completed",
+        "runId": "00000000-0000-4000-8000-00000000014a",
+        "payload": {
+          "complete": true,
+          "mode": "check",
+          "boardTotal": 10,
+          "boardTotalExact": true,
+          "fresh": 0,
+          "discovered": 10,
+          "requests": 1,
+          "skipped": 10,
+          "filtered": 0,
+          "warnings": [],
+          "timingMs": 102,
+          "performance": {
+            "version": 1,
+            "worker": {
+              "totalMs": 102,
+              "bucketsMs": {
+                "setup": 1,
+                "urlGuard": 9,
+                "pacing": 0,
+                "backoff": 0,
+                "response": 80,
+                "body": 8,
+                "browser": 0,
+                "adapterOther": 5,
+                "emit": 0
+              },
+              "requestsByKind": {
+                "robots": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "listing": {
+                  "count": 1,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 80,
+                  "bodyMs": 8
+                },
+                "detail": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "token": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "probe": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                },
+                "other": {
+                  "count": 0,
+                  "pacingMs": 0,
+                  "backoffMs": 0,
+                  "responseMs": 0,
+                  "bodyMs": 0
+                }
+              },
+              "retries": 0,
+              "redirects": 0
+            }
+          }
+        }
+      }
+    },
+    "errors": []
+  }
+]

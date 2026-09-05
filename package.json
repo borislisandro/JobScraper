@@ -18,7 +18,7 @@
     "package:installer": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\build-app.ps1 -Mode Installer",
     "package:portable": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\build-app.ps1 -Mode Portable",
     "package:all": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\build-app.ps1 -Mode All",
-    "test": "vitest run --passWithNoTests && node --test sidecar/worker.protocol.test.mjs sidecar/adapters.test.mjs sidecar/security.test.mjs sidecar/platform.execution.test.mjs sidecar/apple.execution.test.mjs sidecar/starter-pack.contract.test.mjs sidecar/json-inference.test.mjs sidecar/selectors.test.mjs sidecar/company-adapters.test.mjs sidecar/performance.execution.test.mjs"
+    "test": "vitest run --passWithNoTests && node --test sidecar/worker.protocol.test.mjs sidecar/adapters.test.mjs sidecar/security.test.mjs sidecar/platform.execution.test.mjs sidecar/apple.execution.test.mjs sidecar/starter-pack.contract.test.mjs sidecar/json-inference.test.mjs sidecar/selectors.test.mjs sidecar/company-adapters.test.mjs sidecar/performance.execution.test.mjs sidecar/scrape-audit.test.mjs sidecar/browser-proxy.test.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

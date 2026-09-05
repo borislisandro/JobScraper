@@ -2,6 +2,39 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
+import {cookieHeader,scopedHeaders} from "./request-policy.mjs";
+import {runWorker} from "../scripts/worker-proof.mjs";
+
+test("session cookies retain host, path, expiry, secure and legacy origin scope",()=>{
+ const cookies=[{name:"host",value:"1",domain:"careers.example.com",path:"/jobs"},
+  {name:"shared",value:"2",domain:".example.com",secure:true,expires:200},
+  {name:"expired",value:"3",domain:".example.com",expires:99},
+  {name:"session",value:"4",domain:".example.com",expires:-1},
+  {name:"legacy",value:"5"},"raw=6"];
+ const get=url=>cookieHeader(cookies,url,"https://careers.example.com",100);
+ assert.equal(get("https://careers.example.com/jobs/1"),"host=1; shared=2; session=4; legacy=5; raw=6");
+ assert.equal(get("https://careers.example.com/jobsevil"),"shared=2; session=4; legacy=5; raw=6");
+ assert.equal(get("https://api.example.com/jobs"),"shared=2; session=4");
+ assert.equal(get("http://api.example.com/jobs"),"session=4");
+ assert.equal(get("https://evil-example.com/jobs"),"");
+ assert.equal(get("https://example.com.evil.test/jobs"),"");
+ assert.deepEqual(scopedHeaders({Authorization:"secret","X-Api-Key":"secret",Cookie:"x=1",Accept:"application/json"},"https://other.test","https://example.com"),{accept:"application/json"});
+});
+
+test("direct requests keep same-origin sessions but strip credentials on cross-origin redirects",async()=>{
+ const received=[];
+ const target=createServer((req,res)=>{received.push(req.headers);res.setHeader("content-type","application/json").end(JSON.stringify({total:1,jobPostings:[{jobReqId:"1",title:"Engineer"}]}))});
+ await new Promise(resolve=>target.listen(0,"127.0.0.1",resolve));
+ const origin=createServer((req,res)=>{received.push(req.headers);res.writeHead(302,{location:`http://127.0.0.1:${target.address().port}/jobs`}).end()});
+ await new Promise(resolve=>origin.listen(0,"127.0.0.1",resolve));
+ try{
+  const result=await runWorker({id:"scope",name:"Fixture",baseUrl:`http://127.0.0.1:${origin.address().port}`,adapterId:"workday",kind:"active",robotsOverride:true,allowPrivateNetwork:true,
+   configJson:{listingPath:"/jobs",testNoDelay:true,sessionCookies:[{name:"session",value:"fixture"}],requestHeaders:{Authorization:"fixture","X-Api-Key":"fixture"}}},"scrape_source",{deferDetails:true});
+  assert.equal(result.terminal.event,"completed");
+  assert.equal(received[0].cookie,"session=fixture");assert.equal(received[0].authorization,"fixture");
+  assert.equal(received[1].cookie,undefined);assert.equal(received[1].authorization,undefined);assert.equal(received[1]["x-api-key"],undefined);
+ }finally{await Promise.all([new Promise(r=>origin.close(r)),new Promise(r=>target.close(r))])}
+});
 import { jitterMs, makeUrlGuard, parseRobots, privateAddress, requestSlotDelay, requiredFor, retryAfterMs, robotsAllows, workdaySite, workdayTenant } from "./worker.mjs";
 
 test("jitter and Retry-After stay bounded and deterministic",()=>{
@@ -12,7 +45,7 @@ test("jitter and Retry-After stay bounded and deterministic",()=>{
   assert.equal(retryAfterMs("999",0),30000);
 });
 test("resolver guard rejects private IPv4, IPv6, mapped IPv6 and DNS rebinding",async()=>{
-  for(const address of ["127.0.0.1","10.0.0.1","169.254.1.1","192.0.2.1","::1","fe80::1","fc00::1","::ffff:127.0.0.1"])assert.equal(privateAddress(address),true,address);
+  for(const address of ["127.0.0.1","10.0.0.1","169.254.1.1","192.0.2.1","::1","fe80::1","fc00::1","::ffff:127.0.0.1","::ffff:7f00:1","fe90::1","100.64.0.1"])assert.equal(privateAddress(address),true,address);
   const guard=makeUrlGuard(async host=>host==="safe.test"?[{address:"8.8.8.8"}]:[{address:"127.0.0.1"}]);
   await assert.rejects(()=>guard("https://rebound.test/",{}),/resolved private/);
   await assert.rejects(()=>guard("file:///tmp/x",{}),/HTTP/);

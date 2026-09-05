@@ -8,25 +8,17 @@
 //   node scripts/benchmark-scrape.mjs --json       machine-readable results as well
 import { DatabaseSync } from "node:sqlite";
 import { createServer } from "node:http";
-import { spawn } from "node:child_process";
+import { runWorker } from "./worker-proof.mjs";
 import { join } from "node:path";
 
 const argv = new Set(process.argv.slice(2));
 const LANES = 5, FIXTURE_RUNS = 7, WARM_SOURCES = ["AMD", "Intel", "Arm"];
 const dbPath = join(process.env.LOCALAPPDATA ?? "", "JobScraper-dev", "jobscraper.db");
 
-function worker(input) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["sidecar/worker.mjs"], { cwd: process.cwd() });
-    const lines = [];
-    child.stdout.on("data", data => lines.push(...String(data).trim().split("\n").filter(Boolean)));
-    child.on("error", reject);
-    child.on("close", () => {
-      const events = lines.map(line => { try { return JSON.parse(line) } catch { return null } }).filter(Boolean);
-      resolve(events.at(-1) ?? { event: "failed", payload: { message: "no worker output" } });
-    });
-    child.stdin.end(JSON.stringify({ protocolVersion: 1, ...input }) + "\n");
-  });
+async function worker({source,command,...extra}) {
+  const result = await runWorker(source, command, extra);
+  if (result.error) return {event: "failed", payload: {message: result.error}};
+  return result.terminal;
 }
 const median = values => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -41,7 +33,7 @@ const requestSummary = terminal => Object.entries(terminal.payload?.performance?
   .filter(([, kind]) => kind.count > 0).map(([kind, value]) => `${kind} ${value.count}`).join(" + ") || "none";
 const row = (label, action, terminal) => ({
   label, action,
-  outcome: terminal.event === "completed" ? "ok" : (terminal.payload?.code ?? terminal.event),
+  outcome: terminal.event === "completed" ? (terminal.payload?.complete === false ? "partial" : "ok") : (terminal.payload?.code ?? terminal.event),
   totalMs: terminal.payload?.performance?.worker?.totalMs ?? 0,
   setupMs: buckets(terminal).setup ?? 0,
   slowest: `${slowest(terminal)[0]} ${slowest(terminal)[1]}ms`,
@@ -56,6 +48,10 @@ async function fixtureRuns() {
   const server = createServer(async (req, res) => {
     let body = ""; for await (const part of req) body += part;
     if (req.url === "/robots.txt") return res.setHeader("content-type", "text/plain").end("User-agent: *\nAllow: /\n");
+    if (req.url === "/missing") return res.writeHead(404).end("missing");
+    if (req.url === "/repeat") return res.setHeader("content-type", "application/json").end(JSON.stringify({
+      total: 500, jobPostings: [{jobReqId: "repeated", title: "Engineer", externalPath: "/job/Engineer_repeated"}],
+    }));
     if (req.url.startsWith("/detail/")) return res.setHeader("content-type", "application/json").end(JSON.stringify({ description: "detail text" }));
     const { limit = 20, offset = 0 } = JSON.parse(body || "{}");
     const postings = Array.from({ length: 100 }, (_, index) => index).slice(offset, offset + limit)
@@ -73,6 +69,9 @@ async function fixtureRuns() {
     ["fixture cold (100 jobs, details)", { command: "scrape_source", source }],
     ["fixture listings only", { command: "scrape_source", deferDetails: true, source }],
     ["fixture check", { command: "check_source", source }],
+    ["fixture permanent 404", {command: "scrape_source", source: {...source, configJson: {...source.configJson, listingPath: "/missing"}}}],
+    ["fixture repeating page", {command: "scrape_source", deferDetails: true,
+      source: {...source, configJson: {...source.configJson, listingPath: "/repeat", pageSize: 1, maxPages: 500}}}],
   ];
   const results = [];
   for (const [label, input] of cases) {

@@ -1,0 +1,13 @@
+{
+  "mode": "Read-only aggregate inspection; no database migrations or changes applied",
+  "database": "JobScraper-dev",
+  "counts": {
+    "sources": 22,
+    "jobs": 14556,
+    "scrape_runs": 515
+  },
+  "pendingDescriptions": 5962,
+  "undated": 1508,
+  "unplaced": 8,
+  "caveat": "Stored counts include historical, filtered and potentially closed records. They are not directly comparable with a current unfiltered employer total."
+}

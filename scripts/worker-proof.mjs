@@ -6,7 +6,7 @@ import {readFile}from "node:fs/promises";
 import {fileURLToPath}from "node:url";
 import {createHash}from "node:crypto";
 export function runWorker(source,command,extra={},timeoutMs=600_000){return new Promise((resolve,reject)=>{
- const child=spawn(process.execPath,[fileURLToPath(new URL("../sidecar/worker.mjs",import.meta.url))],{stdio:["pipe","pipe","pipe"]});
+ const child=spawn(process.execPath,["--max-http-header-size=65536",fileURLToPath(new URL("../sidecar/worker.mjs",import.meta.url))],{stdio:["pipe","pipe","pipe"]});
  const jobs=[],enrichedJobs=[],warnings=[];let terminal,stderr="",protocolError=null;
  const timer=setTimeout(()=>{protocolError="worker timed out";child.kill()},timeoutMs);
  createInterface({input:child.stdout}).on("line",line=>{try{const event=JSON.parse(line);if(event.protocolVersion!==1)throw Error("Unexpected protocol version");
@@ -27,6 +27,7 @@ export async function proveSource(source,{full=false,timeoutMs=600_000}={}){
  // stricter run than the app actually performs. The URL guard and normal pacing stay required —
  // those are the SSRF defence and the politeness the boards actually feel.
  if(source.allowPrivateNetwork||source.configJson?.testNoDelay||source.configJson?.testJitterMs!==undefined)throw Error("Proof requires URL guards and normal pacing");
+ const codeHashes={};for(const path of["worker.mjs","adapters.mjs","company-adapters.mjs","request-policy.mjs","browser-proxy.mjs"])codeHashes[path]=createHash("sha256").update(await readFile(new URL(`../sidecar/${path}`,import.meta.url))).digest("hex");
  const startedAt=new Date().toISOString(),cold=await runWorker(source,full?"scrape_source":"test_source",full?{known:[],deferDetails:true}:{},timeoutMs);
  const payload=cold.terminal?.payload||{},jobs=cold.jobs,errors=[];
  if(cold.error||cold.terminal?.event!=="completed")errors.push(cold.error||payload.message||"Worker did not complete");
@@ -51,7 +52,6 @@ export async function proveSource(source,{full=false,timeoutMs=600_000}={}){
   if(result.error||result.terminal?.event!=="completed")errors.push("Warm check did not complete");
   else if(result.terminal.payload.fresh!==0)errors.push("Warm check found unseen listings; inspect board movement or unstable identities");
  }
- const codeHashes={};for(const path of["worker.mjs","adapters.mjs","company-adapters.mjs"])codeHashes[path]=createHash("sha256").update(await readFile(new URL(`../sidecar/${path}`,import.meta.url))).digest("hex");
  return{schemaVersion:1,name:source.name,level:full?"full":"preview",ok:errors.length===0,startedAt,finishedAt:new Date().toISOString(),source,codeHashes,
   listing:{terminal:cold.terminal,jobs:jobs.length,uniqueIdentities:new Set(identities).size,uniqueHashes:new Set(hashes).size,samples:selected.map(sample),warnings:cold.warnings,error:cold.error},details,warm,errors};
 }

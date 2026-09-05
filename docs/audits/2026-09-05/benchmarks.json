@@ -1,0 +1,143 @@
+{
+  "method": "Seven runs per case, median worker elapsed time; local fixtures with pacing disabled. No end-to-end desktop speedup is inferred.",
+  "pairedFailureCases": [
+    {
+      "case": "/missing",
+      "version": "before",
+      "runs": 7,
+      "medianMs": 1585,
+      "requests": 3,
+      "retries": 2,
+      "outcome": "failed",
+      "complete": false
+    },
+    {
+      "case": "/missing",
+      "version": "after",
+      "runs": 7,
+      "medianMs": 40,
+      "requests": 1,
+      "retries": 0,
+      "outcome": "failed",
+      "complete": false
+    },
+    {
+      "case": "/repeat",
+      "version": "before",
+      "runs": 7,
+      "medianMs": 6968,
+      "requests": 500,
+      "retries": 0,
+      "outcome": "completed",
+      "complete": true
+    },
+    {
+      "case": "/repeat",
+      "version": "after",
+      "runs": 7,
+      "medianMs": 49,
+      "requests": 2,
+      "retries": 0,
+      "outcome": "completed",
+      "complete": false
+    }
+  ],
+  "normalBefore": {
+    "fixtures": [
+      {
+        "label": "fixture cold (100 jobs, details)",
+        "action": "scrape",
+        "outcome": "ok",
+        "totalMs": 1480,
+        "setupMs": 1,
+        "slowest": "response 1436ms",
+        "requests": "robots 1 + listing 5 + detail 100",
+        "pages": 5,
+        "jobs": 100
+      },
+      {
+        "label": "fixture listings only",
+        "action": "scrape",
+        "outcome": "ok",
+        "totalMs": 114,
+        "setupMs": 1,
+        "slowest": "response 93ms",
+        "requests": "robots 1 + listing 5",
+        "pages": 5,
+        "jobs": 100
+      },
+      {
+        "label": "fixture check",
+        "action": "check",
+        "outcome": "ok",
+        "totalMs": 62,
+        "setupMs": 1,
+        "slowest": "response 53ms",
+        "requests": "robots 1 + listing 1",
+        "pages": 0,
+        "jobs": 20
+      }
+    ],
+    "live": []
+  },
+  "finalFixtures": {
+    "fixtures": [
+      {
+        "label": "fixture cold (100 jobs, details)",
+        "action": "scrape",
+        "outcome": "ok",
+        "totalMs": 1468,
+        "setupMs": 1,
+        "slowest": "response 1428ms",
+        "requests": "robots 1 + listing 5 + detail 100",
+        "pages": 5,
+        "jobs": 100
+      },
+      {
+        "label": "fixture listings only",
+        "action": "scrape",
+        "outcome": "ok",
+        "totalMs": 97,
+        "setupMs": 1,
+        "slowest": "response 80ms",
+        "requests": "robots 1 + listing 5",
+        "pages": 5,
+        "jobs": 100
+      },
+      {
+        "label": "fixture check",
+        "action": "check",
+        "outcome": "ok",
+        "totalMs": 53,
+        "setupMs": 1,
+        "slowest": "response 45ms",
+        "requests": "robots 1 + listing 1",
+        "pages": 0,
+        "jobs": 20
+      },
+      {
+        "label": "fixture permanent 404",
+        "action": "scrape",
+        "outcome": "network_error",
+        "totalMs": 52,
+        "setupMs": 1,
+        "slowest": "response 47ms",
+        "requests": "robots 1 + listing 1",
+        "pages": 0,
+        "jobs": 0
+      },
+      {
+        "label": "fixture repeating page",
+        "action": "scrape",
+        "outcome": "partial",
+        "totalMs": 63,
+        "setupMs": 1,
+        "slowest": "response 56ms",
+        "requests": "robots 1 + listing 2",
+        "pages": 2,
+        "jobs": 2
+      }
+    ],
+    "live": []
+  }
+}

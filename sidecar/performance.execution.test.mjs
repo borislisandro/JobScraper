@@ -101,7 +101,10 @@ test("waiting on the site, reading its body, pacing and retry backoff land in se
   const { bucketsMs, requestsByKind, retries } = final.payload.performance.worker;
   assert.equal(retries, 1, "the 503 was retried once");
   assert.ok(bucketsMs.backoff >= 400, `the retry wait is backoff, not response time: ${bucketsMs.backoff}`);
-  assert.ok(bucketsMs.pacing >= 60, `the deliberate delay is pacing: ${bucketsMs.pacing}`);
+  // Pacing is the remaining time until the next slot. Slow responses and CPU load
+  // can consume that slot entirely, so a minimum sleep is not an invariant.
+  const pacingByKind = Object.values(requestsByKind).reduce((sum, kind) => sum + kind.pacingMs, 0);
+  assert.ok(Math.abs(bucketsMs.pacing - pacingByKind) <= 2, "pacing is attributed to request kinds, allowing rounding");
   assert.ok(bucketsMs.response > 0, "waiting for response headers is measured");
   // A private-network fixture resolves without DNS, so the guard rounds to 0ms here; what this
   // asserts is that the bucket exists and never absorbs the network time next to it.

@@ -218,7 +218,7 @@ test("a multi-office posting stores places, not a count",()=>{
  assert.deepEqual(
   platformLocation({location:"Sibiu",additionalLocations:["Caen","Bucharest"],locationsText:"3 Locations"},"/job/Sibiu/x_R-1"),
   ["Sibiu","Caen","Bucharest"]);
- assert.equal(toLocation(platformLocation({location:"Sibiu",additionalLocations:["Caen"]},"/job/Sibiu/x_R-1")),"Sibiu, Caen");
+ assert.equal(toLocation(platformLocation({location:"Sibiu",additionalLocations:["Caen"]},"/job/Sibiu/x_R-1")),"Caen, Sibiu");
  // Listing-only read: the count is all the row carries, so the city comes from its own URL and the
  // remaining offices are counted rather than lost.
  assert.equal(platformLocation({locationsText:"2 Locations"},"/job/Sibiu/Crypto_R-1"),"Sibiu (+1 more)");
@@ -226,7 +226,7 @@ test("a multi-office posting stores places, not a count",()=>{
  assert.equal(platformLocation({locationsText:"2 Locations"},"/careers/opening/5"),"2 Locations");
  // Every listed place survives, de-duplicated, with a long list trimmed and the rest counted.
  assert.equal(toLocation(["Austin","Austin","Munich"]),"Austin, Munich");
- assert.equal(toLocation(["a","b","c","d","e","f","g","h"]),"a, b, c, d, e, f (+2 more)")});
+ assert.equal(toLocation(["a","b","c","d","e","f","g","h"]),"a, b, c, d, e, f, g, h")});
 
 test("Eightfold PCSX defers real detail payloads and refuses repeated or drifting pagination",async()=>{
  let mode="normal";const requested=[];

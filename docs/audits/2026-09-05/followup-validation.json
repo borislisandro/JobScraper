@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-09-05T21:45:31.077Z",
+  "tests": {
+    "frontend": 53,
+    "scraper": 115,
+    "rust": 108,
+    "rustIgnored": 1,
+    "totalPassed": 276
+  },
+  "checks": [
+    {
+      "command": "pnpm test",
+      "result": "passed: 53 frontend and 114 scraper tests before final identity fix"
+    },
+    {
+      "command": "node --test sidecar/scrape-audit.test.mjs sidecar/platform.execution.test.mjs",
+      "result": "23 passed after final identity fix; includes one additional test, taking distinct scraper tests to 115"
+    },
+    {
+      "command": "cargo test --manifest-path src-tauri/Cargo.toml --lib",
+      "result": "108 passed, 1 ignored"
+    },
+    {
+      "command": "pnpm build",
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "result": "passed; zero warnings/errors"
+    },
+    {
+      "command": "cargo fmt --manifest-path src-tauri/Cargo.toml --check",
+      "result": "passed"
+    }
+  ],
+  "limitations": [
+    "No installer build or native desktop smoke test",
+    "No production database backfill",
+    "Public browser smoke and synthetic session tests; real authenticated employer sessions not exercised"
+  ],
+  "codeHashes": {
+    "sidecar/worker.mjs": "318ab3511b786df19abe92cf2374bc1ac8a4e0c6c2e73f1a57ef50f1e2e1c494",
+    "sidecar/adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "sidecar/company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+    "sidecar/request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "sidecar/browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f",
+    "src-tauri/src/sidecar.rs": "8a1e9fb182278e07115a134be6bbd406931a15e18bef9b05b67a2acd81da751e",
+    "src-tauri/src/db.rs": "58a9d1297f371ef65e30e78d89d36fe735d34cf7c64a97f15fc35950d4c9d3d1",
+    "src/main.tsx": "367eaca922a387de376b40408416752a6617f41df8576a1c2a9134e3217e2ef9",
+    "src/api.ts": "839392552416a3382111f9ece0be7b92fb55eebafcb98b3e84f00f7452c0d563"
+  }
+}

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import readline from "node:readline";import {createHash}from "node:crypto";import {existsSync}from "node:fs";import {readFile}from "node:fs/promises";import {lookup} from "node:dns/promises";import net from "node:net";import {performance as clock}from "node:perf_hooks";import {requestFor,normalizeItem} from "./adapters.mjs";import {companyAdapters,companyAdapterIds,companyDatesNeedDetail,enrichCompany,scrapeCompany} from "./company-adapters.mjs";
+import readline from "node:readline";import {createHash}from "node:crypto";import {existsSync}from "node:fs";import {readFile}from "node:fs/promises";import {performance as clock}from "node:perf_hooks";import {requestFor,normalizeItem} from "./adapters.mjs";import {companyAdapters,companyAdapterIds,companyDatesNeedDetail,enrichCompany,scrapeCompany} from "./company-adapters.mjs";
+import {cookieHeader,scopedHeaders,allowed} from "./request-policy.mjs";
+import {createBrowserProxy} from "./browser-proxy.mjs";
 const V=1,R=2,emit=(event,runId,payload={})=>process.stdout.write(`${JSON.stringify({protocolVersion:V,event,runId,payload})}\n`),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const edge=[process.env.ProgramFiles&&`${process.env.ProgramFiles}/Microsoft/Edge/Application/msedge.exe`,process.env["ProgramFiles(x86)"]&&`${process.env["ProgramFiles(x86)"]}/Microsoft/Edge/Application/msedge.exe`].filter(Boolean),privateHost=h=>h==="localhost"||h.endsWith(".localhost")||h.endsWith(".local")||h==="::1";
+const edge=[process.env.ProgramFiles&&`${process.env.ProgramFiles}/Microsoft/Edge/Application/msedge.exe`,process.env["ProgramFiles(x86)"]&&`${process.env["ProgramFiles(x86)"]}/Microsoft/Edge/Application/msedge.exe`].filter(Boolean);
 export const adapters={"static-css":{version:"1.1.0",capabilities:["direct","css","pagination"]},"static-xpath":{version:"1.1.0",capabilities:["direct","xpath","pagination"]},json:{version:"1.1.0",capabilities:["direct","pagination"]},rss:{version:"1.1.0",capabilities:["direct"]},playwright:{version:"1.1.0",capabilities:["browser","headed","session"]},apple:{version:"1.1.0",capabilities:["direct-json","pagination"]},workday:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},eightfold:{version:"1.1.0",capabilities:["direct-json","cursor","detail","playwright-fallback"]},icims:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},"talentbrew-jibe":{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},phenom:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},greenhouse:{version:"1.1.0",capabilities:["direct-json","detail"]},ashby:{version:"1.1.0",capabilities:["direct-json"]},lever:{version:"1.1.0",capabilities:["direct-json","pagination"]},oracle:{version:"1.1.0",capabilities:["direct-json","pagination","detail"]},"custom-api":{version:"1.1.0",capabilities:[],unsupported:true},reference:{version:"1.1.0",capabilities:[],unsupported:true},
  // One adapter per employer whose board no generic ATS adapter reads; see company-adapters.mjs.
  ...Object.fromEntries(companyAdapterIds.map(id=>[id,{version:"1.1.0",capabilities:["direct-company","pagination",...(["rambus","renesas","arista-networks","arm","u-blox","synopsys","l3harris"].includes(id)?["detail"]:[])]}]))};
-export const privateAddress=ip=>{const v=net.isIP(ip);if(!v)return true;if(v===4)return /^(0\.|10\.|127\.|169\.254\.|192\.0\.(0|2)\.|192\.168\.|198\.(18|19|51\.100)\.|203\.0\.113\.|224\.|23\d\.|24\d\.|25[0-5]\.|172\.(1[6-9]|2\d|3[01])\.)/.test(ip);const x=ip.toLowerCase().replace(/^::ffff:/,"");if(net.isIP(x)===4)return privateAddress(x);return x==="::1"||x==="::"||x.startsWith("fe80:")||x.startsWith("fc")||x.startsWith("fd")||x.startsWith("ff");};
-export const makeUrlGuard=(resolver=lookup)=>async(raw,s)=>{const u=new URL(raw);if(!["http:","https:"].includes(u.protocol))throw Error("network_error: only HTTP(S) URLs are allowed");if(s.allowPrivateNetwork)return u;const host=u.hostname.replace(/^\[|\]$/g,"");if(privateHost(host)||(net.isIP(host)&&privateAddress(host)))throw Error("network_error: private network target blocked");let addresses;try{addresses=await resolver(host,{all:true,verbatim:true})}catch{throw Error("network_error: DNS lookup failed")};if(!addresses.length||addresses.some(a=>privateAddress(a.address)))throw Error("network_error: resolved private/reserved address blocked");return u};
-export const allowed=makeUrlGuard();
+export {privateAddress,makeUrlGuard,allowed} from "./request-policy.mjs";
 export const retryAfterMs=(header,nowMs=Date.now(),cap=30_000)=>{if(!header)return 0;const seconds=Number(header);const raw=Number.isFinite(seconds)?Math.ceil(seconds*1000):Math.max(0,Date.parse(header)-nowMs);return Math.min(cap,Math.max(0,raw||0))};
 export const jitterMs=(random=Math.random)=>1500+Math.floor(random()*1501);
 const urlFor=s=>String(s.configJson?.urlTemplate||s.baseUrl).replaceAll("{query}",encodeURIComponent(s.configJson?.query||"")).replaceAll("%QUERY%",encodeURIComponent(s.configJson?.query||""));
@@ -16,18 +16,21 @@ const num=v=>{const n=Number(v);return v!=null&&v!==""&&Number.isFinite(n)?n:nul
 // stripping tags alone leaves them raw. Numeric refs plus the handful of named entities
 // job descriptions actually use — no full HTML5 entity table needed for prose text.
 const namedEntities={amp:"&",lt:"<",gt:">",quot:'"',apos:"'",nbsp:" ",rsquo:"’",lsquo:"‘",rdquo:"”",ldquo:"“",mdash:"—",ndash:"–",hellip:"…"};
-export const decodeEntities=s=>s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi,(m,e)=>e[0]==="#"?String.fromCodePoint(parseInt(e.slice(1).replace(/^x/i,""),e[1].toLowerCase()==="x"?16:10)):namedEntities[e.toLowerCase()]??m);
+export const decodeEntities=s=>s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi,(m,e)=>{
+ if(e[0]!=="#")return namedEntities[e.toLowerCase()]??m;
+ const point=parseInt(e.slice(1).replace(/^x/i,""),e[1].toLowerCase()==="x"?16:10);
+ return Number.isInteger(point)&&point>0&&point<=0x10ffff&&!(point>=0xd800&&point<=0xdfff)?String.fromCodePoint(point):"\ufffd";
+});
 // Locations arrive as a string on some boards, an object on others ({name}, {city,state}) and an
 // array on the rest. Anything that was not a string used to reach the database as a JSON object
 // and get dropped on the floor, so every such source stored "Unknown".
 // A posting open in several offices used to store only the first of them, so filtering by any of
-// the others could never find it. Every place is kept, de-duplicated, and a long list is trimmed
-// to a readable head with the remainder counted.
-const MAX_LOCATIONS=6;
+// the others could never find it. Keep every place; stable ordering also prevents needless
+// re-reads when a publisher only rearranges its location array.
 export const toLocation=v=>{if(v==null)return null;
  if(Array.isArray(v)){const places=[...new Set(v.map(toLocation).filter(Boolean))];
   if(!places.length)return null;
-  return places.length<=MAX_LOCATIONS?places.join(", "):`${places.slice(0,MAX_LOCATIONS).join(", ")} (+${places.length-MAX_LOCATIONS} more)`}
+  return places.sort().join(", ")}
  // schema.org PostalAddress spells these addressLocality/addressRegion/addressCountry. Boards that
  // publish a JobPosting graph (TEKEVER's JSON Feed among them) hand the address straight through,
  // and without these names every one of their listings stored no place at all.
@@ -37,12 +40,12 @@ export const toLocation=v=>{if(v==null)return null;
 // timestamps, localized dates, and relative prose ("Posted 3 days ago", "Posted Today") in equal
 // measure; whatever cannot be resolved to a real day is stored as nothing rather than as noise.
 export const toIsoDate=(v,nowMs=Date.now())=>{if(v==null)return null;const raw=String(v).replace(/\s+/g," ").trim();if(!raw)return null;
- const iso=/^(\d{4}-\d{2}-\d{2})/.exec(raw);if(iso)return iso[1];
+ const iso=/^(\d{4}-\d{2}-\d{2})/.exec(raw);if(iso){const date=new Date(`${iso[1]}T00:00:00Z`);return !Number.isNaN(date.getTime())&&date.toISOString().slice(0,10)===iso[1]?iso[1]:null}
  const day=86_400_000,units={minute:0,hour:0,day,week:7*day,month:30*day,year:365*day};
  if(/\b(today|just posted|new)\b/i.test(raw))return new Date(nowMs).toISOString().slice(0,10);
  if(/\byesterday\b/i.test(raw))return new Date(nowMs-day).toISOString().slice(0,10);
  const ago=/(\d+)\s*\+?\s*(minute|hour|day|week|month|year)s?\s*(ago|old)/i.exec(raw);
- if(ago)return new Date(nowMs-Number(ago[1])*units[ago[2].toLowerCase()]).toISOString().slice(0,10);
+ if(ago){const date=new Date(nowMs-Number(ago[1])*units[ago[2].toLowerCase()]);return Number.isNaN(date.getTime())?null:date.toISOString().slice(0,10)}
  const epoch=/^\d{10}$|^\d{13}$/.exec(raw);
  if(epoch)return new Date(Number(raw)*(raw.length===10?1000:1)).toISOString().slice(0,10);
  // Numeric dates are read here rather than by Date.parse, which always assumes month-first: a
@@ -101,7 +104,7 @@ const terminalPayload=payload=>({...payload,performance:workerPerformance()});
 // whose date moved is the same posting, and a real content change is still caught by contentHash
 // once the description has been read.
 export const listingHash=(key,title,location)=>createHash("sha256")
- .update([key,title,location].map(v=>String(v??"").trim()).join("\u0000")).digest("hex");
+ .update([key,title,toLocation(location)].map(v=>String(v??"").trim()).join("\u0000")).digest("hex");
 const isKnown=(s,hash)=>Boolean(s.__known&&s.__known.has(hash));
 const titlePasses=(s,title)=>!s.__titleTerms?.length||s.__titleTerms.some(term=>String(title||"").toLowerCase().includes(term));
 const seenHashes=new Set;
@@ -176,11 +179,11 @@ async function robotsPolicy(s,origin){const key=`${s.__runId}|${origin}`;if(robo
   else if(/HTTP 5\d\d/.test(m))throw Error("robots_denied: robots.txt unreachable (server error); refusing to crawl",{cause:e});
   else throw e}
  robotsCache.set(key,rules);return rules}
-async function get(url,s,redirects=0,request={},skipRobots=false){let last;const kind=kindFor(s,request),kindMetrics=metrics.requestsByKind[kind];for(let i=0;i<=R;i++)try{cancelledError(s.__runId);const safe=await guarded(url,s);if(!skipRobots&&!s.robotsOverride){const rules=await robotsPolicy(s,`${safe.protocol}//${safe.host}`);if(!robotsAllows(rules,`${safe.pathname}${safe.search}`))throw Error("robots_denied")}await waitForRequest(safe,s,kind);counters.requests++;kindMetrics.count++;const headers={"user-agent":"JobScraper/1.0 local personal use",...(s.__requestHeaders||{}),...(request.headers||{})},fetchStarted=clock.now();let r;try{r=await fetch(safe,{redirect:"manual",method:request.method||"GET",headers,body:request.rawBody!==undefined?request.rawBody:request.body===undefined?undefined:JSON.stringify(request.body),signal:AbortSignal.timeout(30000)})}finally{const elapsed=add("responseMs",fetchStarted);kindMetrics.responseMs+=elapsed}if([301,302,303,307,308].includes(r.status)){metrics.redirects++;if(redirects>=10)throw Error("network_error: too many redirects");const next=r.headers.get("location");if(!next)throw Error("network_error: redirect missing location");return get(new URL(next,safe).toString(),s,redirects+1,[307,308].includes(r.status)?request:{headers:request.headers,metricKind:kind},skipRobots)}
+async function get(url,s,redirects=0,request={},skipRobots=false){let last;const kind=kindFor(s,request),kindMetrics=metrics.requestsByKind[kind];for(let i=0;i<=R;i++)try{cancelledError(s.__runId);const safe=await guarded(url,s);if(!skipRobots&&!s.robotsOverride){const rules=await robotsPolicy(s,`${safe.protocol}//${safe.host}`);if(!robotsAllows(rules,`${safe.pathname}${safe.search}`))throw Error("robots_denied")}await waitForRequest(safe,s,kind);counters.requests++;kindMetrics.count++;const headers={"user-agent":"JobScraper/1.0 local personal use",...scopedHeaders(await requestHeaders(s),safe,s.baseUrl),...scopedHeaders(request.headers,safe,request.headerOrigin||safe)};const cookies=cookieHeader(s.__sessionCookies||[],safe,s.baseUrl);if(cookies&&!headers.cookie)headers.cookie=cookies;const fetchStarted=clock.now();let r;try{r=await fetch(safe,{redirect:"manual",method:request.method||"GET",headers,body:request.rawBody!==undefined?request.rawBody:request.body===undefined?undefined:JSON.stringify(request.body),signal:AbortSignal.timeout(30000)})}finally{const elapsed=add("responseMs",fetchStarted);kindMetrics.responseMs+=elapsed}if([301,302,303,307,308].includes(r.status)){metrics.redirects++;if(redirects>=10)throw Error("network_error: too many redirects");const next=r.headers.get("location");if(!next)throw Error("network_error: redirect missing location");await r.body?.cancel();return get(new URL(next,safe).toString(),s,redirects+1,{...([307,308].includes(r.status)?request:{headers:request.headers,metricKind:kind}),headerOrigin:request.headerOrigin||safe.origin},skipRobots)}
  // Eightfold answers a burst with 403 rather than 429, so for sources that declare it a throttle
  // signal a 403 is retried with backoff before it is reported as an authentication wall.
  if(r.status===403&&s.configJson?.retryForbidden&&i<R){await retryWait(2000*(i+1),s,kind);continue}
- if([401,403].includes(r.status))throw Error("auth_required");if(r.status===429){if(i===R)throw Error(`rate_limited retry-after=${r.headers.get("retry-after")||"unknown"}`);await retryWait(retryAfterMs(r.headers.get("retry-after"),Date.now(),30_000)||500*(i+1),s,kind);continue}if(!r.ok){if(r.status>=500&&i<R){await retryWait(500*(i+1),s,kind);continue}throw Error(`network_error HTTP ${r.status}`)}checkHostDrift(safe,s);const bodyStarted=clock.now();let text;try{text=await r.text()}finally{const elapsed=add("bodyMs",bodyStarted);kindMetrics.bodyMs+=elapsed}return{text,type:r.headers.get("content-type")||"",url:safe.toString(),headers:r.headers}}catch(e){last=e;if(/^(auth_required|rate_limited|robots_denied|cancelled)/.test(String(e.message||e))||i===R)throw e;await retryWait(500*(i+1),s,kind)}throw last}
+ if([401,403].includes(r.status))throw Error("auth_required");if(r.status===429){if(i===R)throw Error(`rate_limited retry-after=${r.headers.get("retry-after")||"unknown"}`);await retryWait(retryAfterMs(r.headers.get("retry-after"),Date.now(),30_000)||500*(i+1),s,kind);continue}if(!r.ok){if(r.status>=500&&i<R){await retryWait(500*(i+1),s,kind);continue}throw Object.assign(Error(`network_error HTTP ${r.status}`),{noRetry:r.status>=400&&r.status<500&&r.status!==408})}checkHostDrift(safe,s);const bodyStarted=clock.now();let text;try{text=await r.text()}finally{const elapsed=add("bodyMs",bodyStarted);kindMetrics.bodyMs+=elapsed}return{text,type:r.headers.get("content-type")||"",url:safe.toString(),headers:r.headers}}catch(e){last=e;if(e.noRetry||/^(auth_required|rate_limited|robots_denied|cancelled)/.test(String(e.message||e))||i===R)throw e;await retryWait(500*(i+1),s,kind)}throw last}
 // Every fetched URL is now checked inside get(), including pagination and detail pages,
 // which the base-URL-only check used to miss entirely. This stays as an up-front gate so
 // a denied source fails before any listing request is issued.
@@ -369,7 +372,7 @@ export function captureFromHtml(html,url){
  }}
 // Detection needs the rendered DOM for JS-only job boards. browser() returns jobs; this returns
 // markup, so the same inference and parse run on the fetched and the rendered path alike.
-async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{chromium}=await import("playwright-core"),b=await chromium.launch({executablePath:exe,headless:true});try{const p=await b.newPage();await installNavigationGuard(p,s);
+async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{browser:b,closeBrowser}=await guardedBrowser(exe,s,true);try{const ctx=await b.newContext({serviceWorkers:"block"});await installNavigationGuard(ctx,s);const p=await ctx.newPage();
  // Whatever JSON the page fetches for itself is collected here: on a JS-only board the job list
  // arrives in one of these responses, and reading it directly beats scraping the DOM it builds.
  // Only plain GETs are kept, because those are the ones a saved source can replay without a browser.
@@ -379,9 +382,18 @@ async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe
   bodies.push(r.text().then(text=>{if(text.length<=CAPTURE_MAX_BYTES)captures.push({url:r.url(),text})},()=>{}))});
  const response=await p.goto(url,{waitUntil:"domcontentloaded",timeout:30000});await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});
  const html=await p.content();await Promise.allSettled(bodies);
- return{html,status:response?.status()??0,captures}}finally{await b.close()}}finally{add("browserMs",metricStarted)}}
+ return{html,status:response?.status()??0,captures}}finally{await closeBrowser()}}finally{add("browserMs",metricStarted)}}
 async function page(url,s){const r=await get(url,s),cfg=s.configJson||{};if(r.type.includes("json")||["json","workday","eightfold","icims","talentbrew-jibe","phenom"].includes(s.adapterId)||cfg.mode==="json")return{jobs:rows(JSON.parse(r.text),s),next:null};if(r.type.includes("xml")||cfg.mode==="rss"){const{XMLParser}=await import("fast-xml-parser"),x=new XMLParser({ignoreAttributes:false}).parse(r.text),items=x?.rss?.channel?.item||x?.feed?.entry||[];return{feed:true,jobs:(Array.isArray(items)?items:[items]).map(i=>job({title:i.title,company:s.name,url:typeof i.link==="string"?i.link:i.link?.["@_href"],description:i.description||i.summary,postedAt:i.pubDate||i.updated,externalId:i.guid?.["#text"]||i.guid||i.id},s)),next:null}}if(cfg.itemXPath)return xpathPage(r.text,url,s,cfg);return cssPage(r.text,url,s,cfg)}
-async function requestHeaders(s){const cfg=s.configJson||{},headers={...(cfg.requestHeaders||{})};let cookies=Array.isArray(cfg.sessionCookies)?cfg.sessionCookies:[];if(s.sessionStatePath)try{const state=JSON.parse(await readFile(s.sessionStatePath,"utf8"));cookies=[...cookies,...(state.cookies||[])]}catch{throw Error("auth_required: saved browser session is unreadable")};if(cookies.length)headers.cookie=cookies.map(c=>typeof c==="string"?c:`${c.name}=${c.value}`).join("; ");return headers}
+async function requestHeaders(s){
+ if(!s.__credentials)s.__credentials=(async()=>{
+  const cfg=s.configJson||{};let cookies=Array.isArray(cfg.sessionCookies)?cfg.sessionCookies:[];
+  if(s.sessionStatePath)try{const state=JSON.parse(await readFile(s.sessionStatePath,"utf8"));cookies=[...cookies,...(state.cookies||[])]}
+  catch{throw Error("auth_required: saved browser session is unreadable")}
+  s.__sessionCookies=cookies;
+  return cfg.requestHeaders||{};
+ })();
+ return s.__credentials;
+}
 // Workday returns externalPath relative to the site root, not to the CXS endpoint, so
 // resolving it against response.url silently drops the /wday/cxs/{tenant}/{site} prefix.
 // Detail and public URLs are therefore built explicitly per adapter.
@@ -396,10 +408,14 @@ const workdayPaths=(item,cfg)=>{const p=item.externalPath;if(!p||!cfg.tenant||!c
 export const workdayRequisition=item=>{
  const tail=String(item?.externalPath||"").split("/").pop()||"";
  const suffix=tail.includes("_")?tail.slice(tail.lastIndexOf("_")+1).trim():"";
- if(suffix)return suffix;
  // Whatever is left: a label is prose, a requisition id is one token carrying a digit.
- return (Array.isArray(item?.bulletFields)?item.bulletFields:[]).map(value=>String(value??"").trim())
-  .find(value=>value&&!/\s/.test(value)&&/\d/.test(value))||null};
+ const fields=(Array.isArray(item?.bulletFields)?item.bulletFields:[]).map(value=>String(value??"").trim())
+  .filter(value=>value&&!/\s/.test(value)&&/\d/.test(value));
+ // Workday may append a URL version suffix (JR2001099-1) while publishing JR2001099.
+ // Only use the shorter identity when the listing itself corroborates it; real IDs can end -1.
+ if(suffix)return fields.find(value=>value===suffix)||fields.sort((a,b)=>b.length-a.length)
+  .find(value=>suffix.startsWith(value+"-")&&/^\d+$/.test(suffix.slice(value.length+1)))||suffix;
+ return fields[0]||null};
 // A Workday posting open in more than one office publishes the COUNT where the place belongs
 // ("2 Locations"), and hides the real offices in additionalLocations, which only the detail
 // payload carries. Both used to be stored verbatim, so nearly a fifth of a board's listings held
@@ -426,7 +442,14 @@ export const platformLocation=(record,path)=>{
 // Every board publishes how many openings it holds, each under its own name. It is one number on
 // the first page and the cheapest possible answer to "is there anything new here at all?".
 export const boardTotal=data=>{const n=Number(data?.items?.[0]?.TotalJobsCount??data?.total??data?.count??data?.data?.count??data?.totalCount??data?.totalHits??data?.res?.totalRecords??data?.meta?.total);
- return Number.isFinite(n)?n:null};
+ return Number.isInteger(n)&&n>=0?n:null};
+const workdayTotal=(data,cfg)=>{
+ const total=boardTotal(data);
+ if((cfg.__countFacet||cfg.splitFacet)!=="jobFamilyGroup")return total;
+ const values=data.facets?.find(f=>f.facetParameter==="jobFamilyGroup")?.values;
+ return values?.length&&values.every(v=>Number.isInteger(v.count)&&v.count>=0)
+  ?Math.max(total??0,values.reduce((sum,v)=>sum+v.count,0)):total;
+};
 const unwrap=(data,adapterId)=>adapterId==="workday"&&data?.jobPostingInfo?data.jobPostingInfo:adapterId==="oracle"&&data?.items?.[0]?data.items[0]:adapterId==="eightfold"&&data?.data&&!Array.isArray(data.data)?data.data:data;
 const appleLocale=s=>s.configJson?.locale||/^\/([a-z]{2}-[a-z]{2})(?:\/|$)/i.exec(new URL(s.baseUrl).pathname)?.[1]?.toLowerCase()||"en-us";
 const appleSlug=value=>String(value||"job").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"job";
@@ -452,19 +475,19 @@ async function platformDirect(s){
     const data=JSON.parse(response.text),items=collection(data,s)
     // Ashby publishes the entire board without a count. Only this family can use its array
     // length as an exact total; a page from another family must never stand in for its board.
-    if(total===null)total=s.adapterId==="ashby"?items.length:boardTotal(data)
-    if(s.adapterId==="eightfold"&&boardTotal(data)!==total)unstable=true
+    const reported=s.adapterId==="workday"?workdayTotal(data,cfg):boardTotal(data),before=identities.size
+    if(total===null)total=s.adapterId==="ashby"?items.length:reported
+    // Workday omits its total (or sends zero) after page one on some tenants.
+    if(reported!==null&&reported!==total&&!(s.adapterId==="workday"&&reported===0))unstable=true
     for(const raw of items){
       discovered++
       // Hosted boards (Greenhouse, Ashby, Lever, Oracle) publish their own field names; each one
       // maps its record onto the generic keys this loop reads, so nothing below is per-vendor.
       const item=normalizeItem(s.adapterId,raw,cfg,s.baseUrl)
-      if(s.adapterId==="eightfold"){
-        const identity=String(item.id||item.positionUrl||item.canonicalPositionUrl||"")
-        if(!identity||identities.has(identity))unstable=true
-        identities.add(identity)
-      }
       const wd=s.adapterId==="workday"?workdayPaths(item,cfg):{}
+      const identity=String(item.externalId||item.jobReqId||item.requisitionId||item.id||item.jobId||item.externalPath||item.applyUrl||item.url||item.positionUrl||item.canonicalPositionUrl||item.detailUrl||"")
+      if(!identity||identities.has(identity)||!(item.title||item.jobTitle||item.name))unstable=true
+      if(identity)identities.add(identity)
       let full=item,detail=wd.detail||item[cfg.detailUrlField||"detailUrl"]
       const listingUrl=item.externalUrl||item.applyUrl||(wd.public?new URL(wd.public,s.baseUrl).toString():null)||item.url||((item.positionUrl||item.canonicalPositionUrl)?new URL(item.positionUrl||item.canonicalPositionUrl,response.url).toString():null)
       const lkey=listingUrl||detail||item.externalPath||item.id||item.jobId||""
@@ -498,12 +521,15 @@ async function platformDirect(s){
     }
     pages++
     state=request.next(data)
+    // A wrapping endpoint can otherwise waste hundreds of requests on the same page.
+    if(items.length&&identities.size===before){complete=false;break}
     if(!state)break
   }
   if(state)complete=false
-  if(s.adapterId==="eightfold"&&(unstable||(total!==null&&discovered!==total)))complete=false
-  return{jobs:out,discovered,complete,pages,total,totalExact:total!==null,mode:"direct-platform",warnings:[...(pages>=max&&!complete?capped(max):[]),
-    ...(unstable?["Eightfold repeated vacancies or changed its total while paging; this read is unfinished and cannot close stored jobs."]:[])]}
+  if(unstable||(total!==null&&discovered!==total))complete=false
+  return{jobs:out,identities,discovered,complete,pages,total,totalExact:total!==null,mode:"direct-platform",warnings:[...(pages>=max&&!complete?capped(max):[]),
+    ...(unstable?["The board repeated vacancies, omitted identities or changed its total while paging; this read is unfinished and cannot close stored jobs."]:[]),
+    ...(total!==null&&discovered!==total?[`Read ${identities.size} unique vacancies against a published total of ${total}; this read is unfinished and cannot close stored jobs.`]:[])]}
 }
 // Company adapters own their own URLs and paging; they get the same guarded fetch (robots,
 // SSRF guard, redirect and retry policy) every other adapter uses, and the same job normalizer.
@@ -526,11 +552,20 @@ async function workdayDirect(s){const cfg=s.configJson||{};if(!cfg.splitFacet)re
  if(total<(cfg.splitThreshold||2000))return platformDirect(s);
  const facet=(Array.isArray(data.facets)?data.facets:[]).find(f=>f.facetParameter===cfg.splitFacet),values=Array.isArray(facet?.values)?facet.values:[];
  if(!values.length)throw Error(`parse_error: Structure changed: Workday facet "${cfg.splitFacet}" published no values`);
- const seen=new Set,jobs=[];let pages=0,complete=true;
- for(const value of values){const slice=await platformDirect({...s,configJson:{...cfg,splitFacet:null,appliedFacets:{[cfg.splitFacet]:[value.id]}}});
+ const seen=new Set,jobs=[],warnings=[];let pages=0,complete=true;
+ for(const value of values){const slice=await platformDirect({...s,configJson:{...cfg,splitFacet:null,appliedFacets:{...(cfg.appliedFacets||{}),[cfg.splitFacet]:[value.id]}}});
   pages+=slice.pages;complete=complete&&slice.complete;
-  for(const item of slice.jobs)if(!seen.has(item.externalId)){seen.add(item.externalId);jobs.push(item)}}
- return{jobs,discovered:total,complete,pages,total,totalExact:true,mode:"direct-platform",warnings:[`Workday reported ${total} openings, above its own paging cap, so this source was read as ${values.length} ${facet.descriptor||cfg.splitFacet} slices.`]}}
+  for(const identity of slice.identities)seen.add(identity);
+  if(value.count!=null&&slice.discovered!==Number(value.count))complete=false;
+  warnings.push(...slice.warnings);
+  jobs.push(...slice.jobs)}
+ // Workday's unfiltered total itself can be capped at 2,000. Job categories are a
+ // disjoint partition; location facets may overlap, so their counts must not be summed.
+ const partition=cfg.splitFacet==="jobFamilyGroup"&&values.every(v=>Number.isInteger(v.count)&&v.count>=0);
+ const expected=partition?Math.max(total,values.reduce((sum,v)=>sum+v.count,0)):total;
+ if(seen.size!==expected)complete=false;
+ if(!complete)warnings.push(`Read ${seen.size} unique vacancies against an expected total of ${expected}; this split read is unfinished and cannot close stored jobs.`);
+ return{jobs,discovered:seen.size,complete,pages,total:expected,totalExact:true,mode:"direct-platform",warnings:[`Workday reported ${total} openings before splitting; checked ${seen.size} unique vacancies across ${values.length} ${facet.descriptor||cfg.splitFacet} slices.`,...warnings]}}
 async function direct(s){if(s.adapterId==="apple")return appleDirect(s);if(companyAdapters[s.adapterId])return companyDirect(s);if(s.adapterId==="workday")return workdayDirect(s);if(["eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","oracle"].includes(s.adapterId))return platformDirect(s);await robots(s);const c=s.configJson||{};let u=urlFor(s),out=[],pages=0,complete=true,discovered=0,feed=false;while(u&&pages<(c.maxPages||50)){const x=await page(u,s);if(x.feed)feed=true;for(const found of x.jobs){discovered++;if(keep(s,found))out.push(found)}pages++;if(c.pageParam){const n=new URL(urlFor(s));n.searchParams.set(c.pageParam,String(pages+(c.pageStart||0)));u=x.jobs.length?n.toString():null}else u=x.next}if(u)complete=false;
  // A feed publishes its most recent items, not its publisher's whole board, and it says nothing
  // about how many were left out: TEKEVER's careers page counts 123 openings and its RSS carries
@@ -541,11 +576,21 @@ async function direct(s){if(s.adapterId==="apple")return appleDirect(s);if(compa
  if(capped_feed)complete=false;
  return{jobs:out,discovered,complete,pages,total:complete?discovered:null,totalExact:complete,mode:"direct",warnings:[...(pages>=(c.maxPages||50)&&!complete?capped(c.maxPages||50):[]),...(capped_feed?["A feed lists recent items rather than a whole board and publishes no total, so this read is treated as unfinished and nothing was marked closed. Set feedIsWholeBoard on this source if its feed is known to carry every opening."]:[])]}}
 const pauses=new Map;const waitForUser=runId=>new Promise((resolve,reject)=>pauses.set(runId,{resolve,reject}));
-export async function installNavigationGuard(page,s){await page.route("**/*",async route=>{const request=route.request();const guarded=["document","frame"].includes(request.resourceType())||request.isNavigationRequest();if(!guarded)return route.continue();try{await allowed(request.url(),s);await route.continue()}catch{await route.abort("blockedbyclient")}});page.on("popup",popup=>installNavigationGuard(popup,s).catch(()=>popup.close().catch(()=>{})))}
-async function browser(s,capture){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{chromium}=await import("playwright-core"),b=await chromium.launch({executablePath:exe,headless:s.headless!==false});try{const ctx=await b.newContext(s.sessionStatePath?{storageState:s.sessionStatePath}:{}),p=await ctx.newPage();await installNavigationGuard(p,s);await p.goto((await allowed(urlFor(s),s)).toString(),{waitUntil:"domcontentloaded",timeout:30000});cancelledError(s.__runId);if(s.headless===false){emit("needs_user_action",s.__runId,{kind:capture?"login_capture":"login_or_captcha",message:"Complete login or CAPTCHA in Edge, then choose Resume."});await waitForUser(s.__runId);cancelledError(s.__runId)}if(capture)return{jobs:[],discovered:0,complete:true,pages:1,capturedStorageStateBase64:Buffer.from(JSON.stringify(await ctx.storageState())).toString("base64")};await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});const markup=await p.content(),cfg=s.configJson?.itemSelector?s.configJson:(await inferSelectors(markup,p.url()))||{},found=(await cssPage(markup,p.url(),s,cfg)).jobs,jobs=found.filter(item=>keep(s,item));
+async function guardedBrowser(executablePath,s,headless){
+ const proxy=await createBrowserProxy(s);
+ try{
+  const{chromium}=await import("playwright-core");
+  const browser=await chromium.launch({executablePath,headless,proxy:{server:proxy.server,bypass:proxy.bypass},args:["--force-webrtc-ip-handling-policy=disable_non_proxied_udp"]});
+  return{browser,closeBrowser:async()=>{try{await browser.close()}finally{await proxy.close()}}};
+ }catch(error){await proxy.close();throw error}
+}
+export async function installNavigationGuard(context,s){
+ await context.route("**/*",async route=>{try{await allowed(route.request().url(),s);await route.continue()}catch{await route.abort("blockedbyclient")}});
+}
+async function browser(s,capture){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{browser:b,closeBrowser}=await guardedBrowser(exe,s,s.headless!==false);try{const ctx=await b.newContext({...s.sessionStatePath?{storageState:s.sessionStatePath}:{},serviceWorkers:"block"});await installNavigationGuard(ctx,s);const p=await ctx.newPage();await p.goto((await allowed(urlFor(s),s)).toString(),{waitUntil:"domcontentloaded",timeout:30000});cancelledError(s.__runId);if(s.headless===false){emit("needs_user_action",s.__runId,{kind:capture?"login_capture":"login_or_captcha",message:"Complete login or CAPTCHA in Edge, then choose Resume."});await waitForUser(s.__runId);cancelledError(s.__runId)}if(capture)return{jobs:[],discovered:0,complete:true,pages:1,capturedStorageStateBase64:Buffer.from(JSON.stringify(await ctx.storageState())).toString("base64")};await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});const markup=await p.content(),cfg=s.configJson?.itemSelector?s.configJson:(await inferSelectors(markup,p.url()))||{},found=(await cssPage(markup,p.url(),s,cfg)).jobs,jobs=found.filter(item=>keep(s,item));
     // One rendered page, no paging and no vendor total — the same admission totalExact makes.
     // Claiming complete here told the database that everything not on this page had closed.
-    return{jobs,discovered:found.length,complete:false,pages:1,total:null,totalExact:false}}finally{pauses.delete(s.__runId);await b.close()}}finally{add("browserMs",metricStarted)}}
+    return{jobs,discovered:found.length,complete:false,pages:1,total:null,totalExact:false}}finally{pauses.delete(s.__runId);await closeBrowser()}}finally{add("browserMs",metricStarted)}}
 async function scrape(s){try{return await direct(s)}catch(error){const declared=adapters[s.adapterId]?.capabilities.includes("playwright-fallback");if(s.configJson?.allowPlaywrightFallback&&declared&&/^(parse_error|selector_broken)/.test(String(error.message||error))){emit("warning",s.__runId,{code:"playwright_fallback",message:"Declared direct adapter fallback started after parse failure."});return{...(await browser(s,false)),mode:"playwright-fallback"}}throw error}}
 async function enrichDirect(s){
  const items=Array.isArray(s.enrichmentJobs)?s.enrichmentJobs:[];let completed=0,failed=0,lastProgress=0;
@@ -567,6 +612,7 @@ async function enrichDirect(s){
     description:full.description||full.jobDescription||full.job_description,
     descriptionText:full.description||full.jobDescription||full.job_description||full.descriptionText||item.descriptionText,
     descriptionStatus:"complete",descriptionError:null},s);
+   if(!normalized.descriptionText.trim())throw Error("Publisher returned an empty description");
    emit("enriched_job",s.__runId,normalized);completed++
   }catch(error){failed++;emit("enrichment_failed",s.__runId,{jobId:item.jobId,listingHash:item.listingHash,message:String(error?.message||error)})}
   const now=Date.now();if(index===items.length-1||now-lastProgress>=1000){lastProgress=now;emit("progress",s.__runId,{phase:"enriching",current:index+1,total:items.length,requests:counters.requests})}
@@ -693,11 +739,11 @@ async function run(q){const started=Date.now();metrics=blankMetrics();counters.r
   emit("completed",q.runId,terminalPayload({...captured,complete:true,mode:"capture",requests:counters.requests,timingMs:Date.now()-started}));
   return}
  if(q.command==="probe_source"){const d=await timedAdapter(()=>detect(s));emit("completed",q.runId,terminalPayload({...d,adapterVersion:adapters[d.recommendedAdapter]?.version||null,requiredFields:requiredFor(d.recommendedAdapter),warnings:d.notes,mode:"direct",timingMs:Date.now()-started,complete:true}));return}if(!a||a.unsupported||s.kind==="reference")throw Error(s.adapterId==="reference"?"incomplete: reference source cannot be scraped":"incomplete: source needs a verified custom adapter; it remains disabled");if(q.command==="cancel"){emit("cancelled",q.runId,terminalPayload({complete:false}));return}if(q.command==="enrich_source"){const result=await timedAdapter(()=>enrichDirect(s));emit("completed",q.runId,terminalPayload({...result,complete:true,mode:"enrichment",requests:counters.requests,timingMs:Date.now()-started}));return}
- if(q.command==="check_source"){const probe=await timedAdapter(()=>scrape({...s,configJson:{...cfg,maxPages:1,fetchDetail:false,splitFacet:null}}));
+ if(q.command==="check_source"){const probe=await timedAdapter(()=>scrape({...s,configJson:{...cfg,maxPages:1,fetchDetail:false,__countFacet:cfg.splitFacet,splitFacet:null}}));
   emit("completed",q.runId,terminalPayload({complete:true,mode:"check",boardTotal:probe.totalExact?probe.total??null:null,boardTotalExact:Boolean(probe.totalExact),fresh:probe.jobs.length,
    discovered:probe.discovered??probe.jobs.length+counters.skipped+counters.filtered,requests:counters.requests,skipped:counters.skipped,filtered:counters.filtered,
    warnings,timingMs:Date.now()-started}));return}
- const readSource=q.command==="test_source"?{...s,configJson:{...cfg,maxPages:1,fetchDetail:false,splitFacet:null}}:s;
+ const readSource=q.command==="test_source"?{...s,configJson:{...cfg,maxPages:1,fetchDetail:false,__countFacet:cfg.splitFacet,splitFacet:null}}:s;
  const o=await timedAdapter(()=>q.command==="capture_session"?browser(s,true):(cfg.mode==="playwright"||s.adapterId==="playwright"?browser(s,false):scrape(readSource))),
   // A scrape already published each job as it was accepted; re-emitting them here would double
   // every listing. A preview shows the first ten and persists none of them.

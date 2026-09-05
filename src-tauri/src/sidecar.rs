@@ -1220,14 +1220,16 @@ pub struct ScrapeAllResult {
 #[tauri::command]
 pub async fn job_description(
     job_id: String,
+    refresh: Option<bool>,
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<crate::db::JobDescription> {
     let current = crate::db::load_job_description(&state.db.pool, &job_id).await?;
-    if current.status == "complete" {
-        return Ok(current);
-    }
-    let Some((source_id, job)) = state.db.pending_enrichment_job(&job_id).await? else {
+    let Some((source_id, job)) = state
+        .db
+        .pending_enrichment_job(&job_id, refresh.unwrap_or(false))
+        .await?
+    else {
         return Ok(current);
     };
     let mut source = saved_sources(&state, &[source_id])
@@ -1237,7 +1239,7 @@ pub async fn job_description(
         .ok_or("This job's source is not available")?
         .source;
     source["enrichmentJobs"] = serde_json::json!([job]);
-    run(
+    let result = run(
         app,
         state.inner().clone(),
         "enrich_source",
@@ -1245,7 +1247,17 @@ pub async fn job_description(
         None,
         false,
     )
-    .await?;
+    .await;
+    if let Err(error) = result {
+        if current.text.is_empty() {
+            return Err(error);
+        }
+        return Ok(crate::db::JobDescription {
+            text: current.text,
+            status: "failed".into(),
+            error: Some(error),
+        });
+    }
     crate::db::load_job_description(&state.db.pool, &job_id).await
 }
 
@@ -1259,6 +1271,8 @@ struct SavedSource {
     stored: i64,
     baseline: Option<i64>,
     attempted: bool,
+    last_full_at: Option<String>,
+    config_changed_at: Option<String>,
     /// Consecutive times this source's full read was skipped because its total had not moved.
     unchanged_checks: i64,
 }
@@ -1309,6 +1323,29 @@ fn classify_check(
 /// rather than a guess here.
 const MAX_UNCHANGED_SKIPS: i64 = 3;
 
+// Counts cannot reveal replacements or edits on later pages. Bound that uncertainty in time,
+// and invalidate the snapshot when source settings or the global title filter change.
+fn full_read_due(source: &SavedSource, now: chrono::DateTime<chrono::Utc>) -> bool {
+    let Some(last) = source
+        .last_full_at
+        .as_deref()
+        .and_then(|value| chrono::DateTime::parse_from_rfc3339(value).ok())
+    else {
+        return true;
+    };
+    if source.baseline.is_none()
+        || !source.attempted
+        || source.unchanged_checks >= MAX_UNCHANGED_SKIPS
+        || now.signed_duration_since(last) >= chrono::Duration::hours(4)
+        || last > now
+    {
+        return true;
+    }
+    source.config_changed_at.as_deref().is_some_and(|value| {
+        chrono::DateTime::parse_from_rfc3339(value).map_or(true, |changed| changed >= last)
+    })
+}
+
 /// Whether a check result may stand in for a full read.
 ///
 /// Two things this deliberately refuses to do. It never skips on a failed check: a timeout or a
@@ -1327,7 +1364,9 @@ async fn saved_sources(state: &AppState, only: &[String]) -> ApiResult<Vec<Saved
     let rows = sqlx::query(
         "SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.robots_override,s.unchanged_checks,\
          (SELECT count(*) FROM jobs j WHERE j.source_id=s.id AND j.availability<>'archived') AS stored,\
-         (SELECT r.discovered_count FROM scrape_runs r WHERE r.source_id=s.id AND r.status='completed' AND r.complete=1 ORDER BY r.started_at DESC LIMIT 1) AS baseline,\
+         (SELECT r.discovered_count FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape' AND r.status='completed' AND r.complete=1 ORDER BY r.started_at DESC LIMIT 1) AS baseline,\
+         (SELECT r.started_at FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape' AND r.status='completed' AND r.complete=1 ORDER BY r.started_at DESC LIMIT 1) AS last_full_at,\
+         (SELECT MAX(changed_at) FROM (SELECT c.updated_at AS changed_at FROM source_configs c WHERE c.source_id=s.id UNION ALL SELECT updated_at FROM settings WHERE key='scrape.titleAny')) AS config_changed_at,\
          EXISTS(SELECT 1 FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape') AS attempted \
          FROM sources s WHERE s.enabled=1 AND s.kind='active' AND s.deleted_at IS NULL ORDER BY s.name,s.id",
     )
@@ -1369,6 +1408,8 @@ async fn saved_sources(state: &AppState, only: &[String]) -> ApiResult<Vec<Saved
                 stored,
                 baseline,
                 attempted: row.get::<bool, _>("attempted"),
+                last_full_at: row.get("last_full_at"),
+                config_changed_at: row.get("config_changed_at"),
                 unchanged_checks: row.get::<i64, _>("unchanged_checks"),
             })
         })
@@ -1631,13 +1672,8 @@ async fn scrape_all_inner(
                     let outcome = if state.sidecars.batch_cancelled(&batch_id) {
                         CheckDecision::Failed
                     } else {
-                        // New sources bootstrap once. Afterwards even an empty or partial source
-                        // gets a cheap check, so a legitimately empty board is not rebuilt every
-                        // time the app opens. Complete baselines retain the bounded skip budget.
-                        let decision = if force_refresh
-                            || !source.attempted
-                            || (source.baseline.is_some()
-                                && source.unchanged_checks >= MAX_UNCHANGED_SKIPS)
+                        let read_due = full_read_due(&source, chrono::Utc::now());
+                        let decision = if force_refresh || read_due
                         {
                             CheckDecision::Changed
                         } else {
@@ -1696,7 +1732,7 @@ async fn scrape_all_inner(
                                 "scrape_source",
                                 source.source.clone(),
                                 Some(&batch_id),
-                                force_refresh || !source.attempted,
+                                force_refresh || read_due,
                             )
                             .await;
                             scrape_ms.fetch_add(millis(scrape_started.elapsed()) as usize, std::sync::atomic::Ordering::Relaxed);
@@ -2058,8 +2094,81 @@ mod tests {
             stored: 0,
             baseline: Some(0),
             attempted: true,
+            last_full_at: Some(chrono::Utc::now().to_rfc3339()),
+            config_changed_at: None,
             unchanged_checks: 0,
         }
+    }
+
+    #[test]
+    fn unchanged_counts_cannot_skip_stale_or_reconfigured_boards() {
+        let now = chrono::Utc::now();
+        let mut source = saved(0, "example.test");
+        source.last_full_at = Some((now - chrono::Duration::minutes(10)).to_rfc3339());
+        assert!(!full_read_due(&source, now));
+        source.config_changed_at = Some((now - chrono::Duration::minutes(5)).to_rfc3339());
+        assert!(full_read_due(&source, now));
+        source.config_changed_at = None;
+        source.last_full_at = Some((now - chrono::Duration::hours(4)).to_rfc3339());
+        assert!(full_read_due(&source, now));
+        source.last_full_at = Some(now.to_rfc3339());
+        source.baseline = None;
+        assert!(full_read_due(&source, now));
+        source.baseline = Some(0);
+        source.last_full_at = Some("invalid".into());
+        assert!(full_read_due(&source, now));
+        source.last_full_at = Some((now + chrono::Duration::minutes(1)).to_rfc3339());
+        assert!(full_read_due(&source, now));
+    }
+
+    #[tokio::test]
+    async fn saved_source_freshness_uses_full_scrapes_and_invalidates_changed_filters() {
+        let root = std::env::temp_dir().join(format!("jobscraper-freshness-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = crate::db::Database::open(root.join("jobscraper.db"))
+            .await
+            .unwrap();
+        let now = chrono::Utc::now();
+        let old = (now - chrono::Duration::hours(1)).to_rfc3339();
+        let full = (now - chrono::Duration::minutes(10)).to_rfc3339();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,created_at,updated_at) VALUES('fixture','Fixture','https://example.test','json','1',1,?,?)").bind(&old).bind(&old).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES('cfg','fixture','{}',?,?)").bind(&old).bind(&old).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,complete,discovered_count,started_at) VALUES('full','fixture','scrape','completed',1,0,?),('preview','fixture','test','completed',1,999,?)").bind(&full).bind(now.to_rfc3339()).execute(&db.pool).await.unwrap();
+        let state = AppState {
+            db,
+            sidecars: SidecarManager::default(),
+            shown_apply_attempt: Mutex::new(None),
+            automatic_sync_started: false.into(),
+            headless: true,
+        };
+        let only = ["fixture".into()];
+        let source = saved_sources(&state, &only).await.unwrap().remove(0);
+        assert_eq!(
+            source.baseline,
+            Some(0),
+            "a preview cannot become the full-board baseline"
+        );
+        assert!(!full_read_due(&source, now));
+        sqlx::query("UPDATE source_configs SET updated_at=? WHERE source_id='fixture'")
+            .bind(now.to_rfc3339())
+            .execute(&state.db.pool)
+            .await
+            .unwrap();
+        assert!(full_read_due(
+            &saved_sources(&state, &only).await.unwrap()[0],
+            now
+        ));
+        sqlx::query("UPDATE source_configs SET updated_at=? WHERE source_id='fixture'")
+            .bind(&old)
+            .execute(&state.db.pool)
+            .await
+            .unwrap();
+        sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES('scrape.titleAny','[]',?) ON CONFLICT(key) DO UPDATE SET updated_at=excluded.updated_at").bind(now.to_rfc3339()).execute(&state.db.pool).await.unwrap();
+        assert!(full_read_due(
+            &saved_sources(&state, &only).await.unwrap()[0],
+            now
+        ));
+        state.db.pool.close().await;
     }
 
     #[test]

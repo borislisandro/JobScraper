@@ -1,0 +1,29 @@
+{
+  "frontendTestsPassed": 51,
+  "sidecarTestsPassed": 107,
+  "rustTestsPassed": 105,
+  "rustTestsIgnored": 1,
+  "productionFrontendBuild": "passed",
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "warnings": 1,
+    "existingWarning": "src/main.tsx:183 unused dismiss"
+  },
+  "rustFormat": "passed",
+  "diffWhitespace": "passed",
+  "livePreviews": {
+    "passed": 164,
+    "total": 164
+  },
+  "liveFullProofs": {
+    "passed": 10,
+    "total": 10
+  },
+  "limitations": [
+    "No installed desktop smoke test or packaging run",
+    "Full live proofs cover ten employers; the other 154 received previews",
+    "NVIDIA provider-to-provider identity parity remains unproven after HTTP 429",
+    "Final extra guard against undercounted categories verified by fixture after live proofs"
+  ]
+}

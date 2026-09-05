@@ -29,7 +29,7 @@ It is not an auto-apply bot. JobScraper opens the original vacancy in your brows
 
 ### Manage sources
 
-- Browse 134 supported companies by name, home country, or sector and add their prepared settings in one click.
+- Browse 164 supported companies by name, home country, or sector and add their prepared settings in one click.
 - Add other sources manually by pasting a careers-page URL.
 - Detect known ATS platforms, public JSON endpoints, feeds, repeated HTML listings, and supported employer-specific boards.
 - Render JavaScript-only pages through Microsoft Edge when a direct HTTP read is insufficient.
@@ -71,7 +71,7 @@ Reopen JobScraper normally afterward. Settings reports disabled, outdated, or fa
 
 ## Currently supported websites
 
-The company catalog contains 134 supported employers, with their adapter and advanced settings in `sidecar/company-catalog.json`. Browse companies on the Sources page to add or enable one without choosing an adapter. Its home country describes the company, not the locations of all its jobs.
+The company catalog contains 164 supported employers, with their adapter and advanced settings in `sidecar/company-catalog.json`. Browse companies on the Sources page to add or enable one without choosing an adapter. Its home country describes the company, not the locations of all its jobs.
 
 Fresh installs still receive only the existing 21 starter entries (20 readable boards and one legacy reference bookmark). Catalog updates preserve whether a starter is enabled or deleted. The installer asks whether to enable starters; they remain editable from the Sources page either way.
 
@@ -128,7 +128,9 @@ JobScraper is not limited to the starter pack. The source detector and advanced 
 
 Adding a URL is intentionally optimistic but verified: automatic setup saves a working adapter only after a probe produces recognizable listing rows. Unsupported pages are reported instead of being silently accepted as an empty source.
 
-Catalog contract tests check every readable entry against its adapter. To repeat live checks through the actual worker, run `node scripts/verify-company-catalog.mjs` (all supported boards) or append exact company names to check a subset. This opt-in command enforces robots.txt, network guards and pacing, writes one JSON result per company, and never stores jobs. A first-page check proves the current board response; it does not claim a full traversal or benchmark.
+Catalog contract tests check every readable entry against its adapter. To repeat live checks through the actual worker, run `node scripts/verify-company-catalog.mjs` (all supported boards) or append exact company names to check a subset. This opt-in command uses the catalog's robots override, enforces network guards and pacing, writes one JSON result per company, and never stores jobs. A first-page check proves the current board response; it does not claim a full traversal or benchmark.
+
+The [September 5 audit and implementation plan](docs/audits/2026-09-05/project-audit.md) records live coverage, remaining gaps, and measured fixes. Run `node scripts/benchmark-scrape.mjs --fixtures --json` for normal, permanent-error, and repeating-page benchmarks without network access.
 
 When starter settings change, bump the catalog version and regenerate its contract fixture in PowerShell with `$env:UPDATE_STARTER_PACK_FIXTURE='1'; cargo test --manifest-path src-tauri/Cargo.toml starter_pack_matches_the_checked_in_adapter_contract_fixture; Remove-Item Env:UPDATE_STARTER_PACK_FIXTURE`. Ordinary test runs compare the fixture without rewriting it.
 
