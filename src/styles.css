@@ -151,7 +151,9 @@ label.inline:has(:checked){border-color:var(--n800);color:var(--fg)}
 .picker .list .dead{color:var(--n600)}
 .picker footer{display:flex;gap:10px;align-items:center;border-top:1px solid var(--rule);padding-top:12px}
 .picker footer .count{margin-right:auto}
-.filters{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin:0}
+/* Top-aligned, not bottom-aligned: "Stored listing text" carries a line of help under its input,
+   and aligning bottoms pushed that whole field — label and box — up out of line with the rest. */
+.filters{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:0}
 .filters label>span:first-child{margin-bottom:1px}
 .filters input:not([type=checkbox]){width:200px}
 .filters .grow{flex:1;min-width:200px}

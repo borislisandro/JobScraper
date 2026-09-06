@@ -1859,7 +1859,17 @@ pub async fn notify_new_jobs(
     pool: &sqlx::SqlitePool,
     since: &str,
 ) -> ApiResult<()> {
-    let (count, jobs) = crate::db::new_jobs_since(pool, since, 3).await?;
+    // Announcing is the last thing a batch does, so the terms are read here rather than kept from
+    // the start of the run: changing them mid-update takes effect on that update's notification.
+    let terms = crate::db::scrape_filter_terms(
+        &sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key=?")
+            .bind(crate::db::NOTIFY_TITLE_FILTER)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| e.to_string())?
+            .unwrap_or_default(),
+    );
+    let (count, jobs) = crate::db::new_jobs_since(pool, since, 3, &terms).await?;
     let Some((title, body)) = new_jobs_summary(count, &jobs) else {
         crate::db::log(
             pool,
@@ -1868,8 +1878,12 @@ pub async fn notify_new_jobs(
             None,
             "new_jobs_alert",
             None,
-            "No new jobs found; no notification shown.",
-            serde_json::json!({"count": 0}),
+            if terms.is_empty() {
+                "No new jobs found; no notification shown."
+            } else {
+                "No new job matched the notification filter; no notification shown."
+            },
+            serde_json::json!({"count": 0, "notifyTerms": terms}),
         )
         .await;
         return Ok(());

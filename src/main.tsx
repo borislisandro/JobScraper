@@ -517,6 +517,9 @@ const ROBOTS_ACK="robots.autoAcknowledged";
 // Layer one of the two filter layers. This one decides what is ever stored; the Jobs page
 // boxes decide what is shown of what was stored. Mirrors db.rs::SCRAPE_TITLE_FILTER.
 const SCRAPE_TITLE_FILTER="scrape.titleAny";
+// Layer three, and the only one nobody has to be looking at the app to notice. Mirrors
+// db.rs::NOTIFY_TITLE_FILTER.
+const NOTIFY_TITLE_FILTER="notify.titleAny";
 const configFields:Record<string,string[]>={"static-css":["itemSelector","titleSelector","companySelector","locationSelector","dateSelector","urlSelector","descriptionSelector","nextSelector","detailUrlField"],"static-xpath":["itemXPath","titleXPath","companyXPath","locationXPath","urlXPath","descriptionXPath","nextXPath"],playwright:["urlTemplate","itemSelector","titleSelector","nextSelector"],json:["urlTemplate","itemsPath","pageParam","detailUrlField"],rss:["urlTemplate"],apple:["locale","query"],workday:["tenant","site","listingPath","query","pageSize","detailUrlField","splitFacet","splitThreshold"],eightfold:["domain","eightfoldApi","query","pageSize"],icims:["listingPath","query","pageSize","detailUrlField"],"talentbrew-jibe":["listingPath","query","pageSize","detailUrlField"],phenom:["listingPath","query","pageSize","detailUrlField"],
  // Company boards derive their own URLs, so the only thing there is to set is how far to read.
  arm:["maxPages"],amd:["maxPages"],asml:[],mediatek:["maxPages"],google:["maxPages"],cisco:["maxPages"],"sk-hynix":[],"u-blox":[],
@@ -542,20 +545,19 @@ const configureSource=async(draft:SourceDraft)=>{let payload=await probeSource(d
  return{payload,override,adapterId:verdict.adapterId,found:verdict.found};};
 const sourceInput=(draft:SourceDraft,adapterId:string,merged:Record<string,unknown>,finalUrl:string,label:string,override:boolean,disabledReason:string|null=null)=>
  ({id:draft.id||undefined,name:label||finalUrl,baseUrl:finalUrl,adapterId,kind:draft.kind,enabled:disabledReason?false:draft.enabled,robotsOverride:override,allowPrivateNetwork:draft.local,configJson:{...merged,headless:draft.headless,mode:merged.mode==="playwright"||adapterId==="playwright"?"playwright":"direct"},disabledReason});
-// Saved once and applied to every source on its next automatic update. Empty means store everything:
-// a filter that silently discarded a whole run would be indistinguishable from a broken scraper.
-// What gets stored at all, as opposed to what the Jobs page chooses to show.
-function ScrapeFilter(){
+// Saved once and applied on every automatic update. Empty always means "everything": a filter that
+// silently discarded a whole run would be indistinguishable from a broken scraper. Both title
+// filters — what gets stored, and what gets announced — are the same box over a different setting.
+function TitleFilter({settingKey,placeholder,help,describe}:
+ {settingKey:string;placeholder:string;help:string;describe:(terms:string)=>string}){
  const [title,setTitle]=useState("");const [saved,setSaved]=useState("");const [status,setStatus]=useState("");
- useEffect(()=>{getSetting(SCRAPE_TITLE_FILTER).then(stored=>{setTitle(stored??"");setSaved(stored??"")}).catch(()=>{})},[]);
- const save=()=>setSetting(SCRAPE_TITLE_FILTER,title).then(()=>{setSaved(title);
-  setStatus(title.trim()?`Saved. Updates will store only titles containing ${title.trim()}.`:"Saved. Updates will store every listing.")})
+ useEffect(()=>{getSetting(settingKey).then(stored=>{setTitle(stored??"");setSaved(stored??"")}).catch(()=>{})},[settingKey]);
+ const save=()=>setSetting(settingKey,title).then(()=>{setSaved(title);setStatus(describe(title.trim()))})
   .catch(e=>setStatus(e instanceof Error?e.message:String(e)));
  return <div className="setting scrape-filter">
   <label><span>Title contains</span>
-   <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="verification, RTL, design verification"
-    title="Comma-separated; a term can be a phrase. Empty keeps everything. Applied while scraping, so what it drops is never stored — the Jobs filters only change what you see."/></label>
-  <small>Comma-separated; a term can be a phrase. Empty stores everything. This decides what is saved at all — Jobs filters only change what you see.</small>
+   <input value={title} onChange={e=>setTitle(e.target.value)} placeholder={placeholder} title={help}/></label>
+  <small>{help}</small>
   <div className="row"><button className="primary small" disabled={title===saved} onClick={save}>Save filter</button></div>
   {status&&<output className="status">{status}</output>}
  </div>}
@@ -576,7 +578,14 @@ function Settings({open,onClose}:{open:boolean;onClose:()=>void}){
     <div className="setting"><label className="inline"><input type="checkbox" checked={launchAtLogin?.enabled??false} disabled={!launchAtLogin||launchBusy} onChange={event=>toggleLaunch(event.target.checked)}/> Start JobScraper when I sign in</label><small>Starts in the notification area without opening a window.{launchAtLogin?.debugBuild?" This development build registers its debug executable.":""}</small>{launchAtLogin?.issue&&<small className="warning" role="alert">{launchAtLogin.issue}</small>}{launchError&&<small className="warning">{String(launchError)}</small>}</div>
     <div className="setting"><label className="inline"><input type="checkbox" checked={background?.enabled??false} disabled={!background||backgroundBusy} onChange={event=>toggleBackground(event.target.checked)}/> Check for new jobs in the background</label><small>Runs hidden at sign-in and every 4 hours, then shows one notification when new listings appear.{background?.debugBuild?" This development build uses the JobScraper-dev database.":""}</small>{background?.issue&&<small className="warning" role="alert">{background.issue}</small>}{backgroundError&&<small className="warning">{String(backgroundError)}</small>}</div>
    </section>
-   <section><span className="caption">Collecting</span><ScrapeFilter/></section>
+   <section><span className="caption">Collecting</span>
+    <TitleFilter settingKey={SCRAPE_TITLE_FILTER} placeholder="verification, RTL, design verification"
+     help="Comma-separated; a term can be a phrase. Empty stores everything. This decides what is saved at all — Jobs filters only change what you see."
+     describe={terms=>terms?`Saved. Updates will store only titles containing ${terms}.`:"Saved. Updates will store every listing."}/></section>
+   <section><span className="caption">Notifications</span>
+    <TitleFilter settingKey={NOTIFY_TITLE_FILTER} placeholder="verification, DV, formal"
+     help="Comma-separated; a term can be a phrase. Empty announces every new listing. This decides what the notification after an update mentions — everything collected is still on the Jobs page."
+     describe={terms=>terms?`Saved. Updates will announce only new titles containing ${terms}.`:"Saved. Updates will announce every new listing."}/></section>
    <section><span className="caption">Reminders</span><div className="setting"><small>Rebuild pending application and interview reminders after changing system tasks or restoring data.</small><div className="row"><button onClick={()=>api.reconcileReminders().then(result=>setMessage(JSON.stringify(result))).catch(error=>setMessage(String(error)))}>Reconcile reminders</button></div></div></section>
    <section><span className="caption">Data</span><div className="setting"><small>{data?`${data.dbPath} · ${data.jobCount.toLocaleString()} listings · schema ${data.schemaVersion}`:"Loading local data…"}</small></div>
     <div className="danger-zone"><strong>Delete all stored jobs</strong><small>Sources and their settings stay, and anything saved or applied to is kept. The next update re-reads every source in full.</small><button className="small danger" onClick={()=>setPurging(true)}>Delete all jobs…</button></div></section>

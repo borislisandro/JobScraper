@@ -426,6 +426,9 @@ pub async fn scrape_performance(state: State<'_, Arc<AppState>>) -> ApiResult<Pe
 /// The setting holding the scrape-time title filter, the first of the app's two filter layers:
 /// this one decides what is ever stored, the Jobs page decides what is shown of what was stored.
 pub const SCRAPE_TITLE_FILTER: &str = "scrape.titleAny";
+/// The setting holding the notification title filter. It narrows what the finished batch announces,
+/// never what it stores: everything the scrape filter let through is still on the Jobs page.
+pub const NOTIFY_TITLE_FILTER: &str = "notify.titleAny";
 /// Terms are separated by commas or newlines so a phrase ("design verification") stays one term.
 pub fn scrape_filter_terms(raw: &str) -> Vec<String> {
     raw.split(['\n', ','])
@@ -573,23 +576,24 @@ pub async fn new_jobs_since(
     pool: &SqlitePool,
     since: &str,
     limit: i64,
+    terms: &[String],
 ) -> ApiResult<(i64, Vec<NewJob>)> {
-    let count = sqlx::query_scalar(
-        "SELECT count(*) FROM jobs WHERE created_at >= ? AND availability != 'closed'",
+    // ponytail: every new row is read so the terms can be applied in Rust rather than in two
+    // dialects of LIKE. One batch's new listings are a small set; push the match into SQL if a
+    // first full read ever makes this slow.
+    let jobs: Vec<NewJob> = sqlx::query_as(
+        "SELECT title,company FROM jobs WHERE created_at >= ? AND availability != 'closed' ORDER BY created_at DESC",
     )
     .bind(since)
-    .fetch_one(pool)
-    .await
-    .map_err(|e| e.to_string())?;
-    let jobs = sqlx::query_as(
-        "SELECT title,company FROM jobs WHERE created_at >= ? AND availability != 'closed' ORDER BY created_at DESC LIMIT ?",
-    )
-    .bind(since)
-    .bind(limit.max(0))
     .fetch_all(pool)
     .await
     .map_err(|e| e.to_string())?;
-    Ok((count, jobs))
+    let mut matched = jobs
+        .into_iter()
+        .filter(|job| title_passes_scrape_filter(&job.title, terms));
+    let samples: Vec<NewJob> = matched.by_ref().take(limit.max(0) as usize).collect();
+    let count = samples.len() as i64 + matched.count() as i64;
+    Ok((count, samples))
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -4525,6 +4529,12 @@ mod matching_persistence_tests {
                 "closed",
                 "2026-08-31T10:00:02+00:00",
             ),
+            (
+                "other",
+                "Layout engineer",
+                "active",
+                "2026-08-31T10:00:04+00:00",
+            ),
         ] {
             sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Chip Co','','[]',?,?, 't','1',?,?)")
                 .bind(job).bind(title).bind(job).bind(availability).bind(created_at).bind(created_at).execute(&pool).await.unwrap();
@@ -4534,12 +4544,34 @@ mod matching_persistence_tests {
             .execute(&pool)
             .await
             .unwrap();
-        let (count, jobs) = new_jobs_since(&pool, "2026-08-31T10:00:00+00:00", 3)
+        let (count, jobs) = new_jobs_since(&pool, "2026-08-31T10:00:00+00:00", 3, &[])
             .await
             .unwrap();
+        assert_eq!(count, 2);
+        assert_eq!(jobs.len(), 2);
+        assert_eq!(jobs[1].title, "New role");
+        // The notification filter narrows what is announced, never what was stored.
+        let (count, jobs) = new_jobs_since(
+            &pool,
+            "2026-08-31T10:00:00+00:00",
+            3,
+            &["new role".to_string()],
+        )
+        .await
+        .unwrap();
         assert_eq!(count, 1);
         assert_eq!(jobs.len(), 1);
         assert_eq!(jobs[0].title, "New role");
+        // A term that matches nothing must announce nothing, not everything.
+        let (count, _) = new_jobs_since(
+            &pool,
+            "2026-08-31T10:00:00+00:00",
+            3,
+            &["nothing here".to_string()],
+        )
+        .await
+        .unwrap();
+        assert_eq!(count, 0);
     }
     #[tokio::test]
     async fn a_fresh_heartbeat_blocks_the_interrupted_run_sweep() {
