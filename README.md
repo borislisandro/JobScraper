@@ -1,79 +1,24 @@
 # JobScraper
 
-JobScraper is a local-first Windows desktop application for collecting jobs from company career sites, filtering the results, and managing the complete application process.
+Local-first Windows desktop app that collects jobs from company career sites, filters them, and tracks your applications.
 
-It is not an auto-apply bot. JobScraper opens the original vacancy in your browser, records only what you confirm, and never submits an application on your behalf.
+Not an auto-apply bot: it opens the original vacancy in your browser, records only what you confirm, and never submits an application for you.
 
-## What JobScraper does
+## Features
 
-### Collect and maintain job listings
+**Collect** — Scrapes every enabled source on launch, or hidden at sign-in and every 4 hours via Task Scheduler, with one Windows notification per run that finds something new. Incremental checks keep updates light; descriptions are fetched only when a job is opened. Results stream into the local database as they arrive, so cancelled or partially failed runs still keep what they found. A vacancy is marked possibly closed after one full run misses it, closed after two.
 
-- Reads every enabled source automatically when the application opens.
-- Can run hidden at sign-in and every four hours through Windows Task Scheduler.
-- Shows one Windows notification when a background run finds new listings.
-- Uses incremental checks to avoid unnecessary full reads while periodically forcing a complete refresh.
-- Streams accepted listings into the local database while a source is still being read, so useful work survives cancellation or a later page failure.
-- Downloads full descriptions only when a job is opened. This keeps regular updates faster and lighter.
-- Marks a vacancy as possibly closed after one complete read misses it and closed after two complete misses. Partial or failed reads never close jobs.
-- Supports cancellation, retries, partial results, per-source status, and full re-scrubbing.
+**Search** — Filter by source, title, listing text, posting age, country, application status, and closed status. Sort by discovery or publish date, page through results, and open a reader view with description, work mode, seniority, salary, and status. Saved and applied jobs survive their source being disabled or deleted.
 
-### Search and review jobs
+**Sources** — Add any of 164 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login, and filter titles during scraping so unwanted roles are never stored.
 
-- Filter by source, title, any stored listing text, posting age, country, application status, and closed status.
-- Select multiple countries and optionally include jobs whose country cannot be determined.
-- Sort by discovery time or published date.
-- Page through large result sets in batches of 200.
-- Open a focused job reader with description, work mode, seniority, salary, source, and status.
-- Save a vacancy for later or open the original posting to apply.
-- Keep saved and applied jobs even when their source is switched off or removed.
+**Applications** — Board with Saved, Applied, Screening, Interviewing, Offer, Accepted, Rejected, and Withdrawn stages. Stores recruiter details, notes with timestamps, an event timeline, and immutable document snapshots up to 20 MB. Schedules interview reminders (24 h and 1 h before) and ghosting reminders.
 
-### Manage sources
+**Diagnostics** — Local health view for database, sources, listings, and sidecar; last 200 activity entries; scrape medians, p95, slowest phases, retries, and failures, exportable as JSON.
 
-- Browse 164 supported companies by name, home country, or sector and add their prepared settings in one click.
-- Add other sources manually by pasting a careers-page URL.
-- Detect known ATS platforms, public JSON endpoints, feeds, repeated HTML listings, and supported employer-specific boards.
-- Render JavaScript-only pages through Microsoft Edge when a direct HTTP read is insufficient.
-- Test a source before relying on it and inspect normalized preview rows.
-- Enable, disable, edit, or delete sources independently.
-- Configure CSS, XPath, JSON, feed, ATS, and Playwright adapters manually when needed.
-- Capture an authenticated browser session for sites that require login or CAPTCHA completion.
-- Apply an optional title filter during scraping so unwanted roles are never stored.
-- Inspect warnings, failures, redirects, pagination status, and live worker progress in the run log.
+## Supported sites
 
-### Track applications
-
-- Move applications through Saved, Applied, Screening, Interviewing, Offer, Accepted, Rejected, and Withdrawn stages.
-- Drag cards between legal workflow stages on the application board.
-- Confirm whether an application was actually submitted after JobScraper opens the posting.
-- Store recruiter details, source attribution, rejection information, and withdrawal reasons.
-- Add editable notes with timestamps and an event timeline.
-- Attach immutable local document snapshots up to 20 MB and export them later.
-- Schedule interviews and Windows reminders for 24 hours and 1 hour before each interview.
-- Configure ghosting reminders when an application receives no response.
-
-### Diagnose and operate the app
-
-- View database, source, listing, sidecar, and restore health locally.
-- Inspect the last 200 activity entries.
-- Compare scrape medians, p95 timings, slowest phases, request types, retries, and failures.
-- Copy raw diagnostic and performance reports as JSON.
-- Start JobScraper automatically at sign-in.
-- Close the window to the system tray and reopen the existing single instance from the tray or shortcut.
-- Delete stored listings while preserving sources, settings, and jobs linked to applications.
-
-### Windows startup permissions
-
-JobScraper runs as your normal Windows user. Sign-in launch starts in the notification area; background checks and reminders also use least-privileged scheduled tasks. Do not enable **Run this program as an administrator** in the executable's compatibility settings: Windows cannot display a UAC prompt during a scheduled launch.
-
-Older administrator-created tasks may reject changes from a normal account. Close JobScraper, open PowerShell as administrator, and run `repair-startup.ps1` from the installation folder (or `scripts/repair-startup.ps1` in this repository). This one-time repair backs up task definitions, permissions, and compatibility settings under `%LOCALAPPDATA%\JobScraper\startup-repair-*`, grants the task's user management rights, and removes only this executable's `RUNASADMIN` flag. Other compatibility flags and disabled tasks are preserved. If using a different administrator account, pass the original account's SID with `-UserSid` and its installed executable with `-Executable`.
-
-Reopen JobScraper normally afterward. Settings reports disabled, outdated, or failed startup tasks instead of treating task existence as proof of a successful launch. Developer builds do not automatically rewrite installed sign-in tasks.
-
-## Currently supported websites
-
-The company catalog contains 164 supported employers, with their adapter and advanced settings in `sidecar/company-catalog.json`. Browse companies on the Sources page to add or enable one without choosing an adapter. Its home country describes the company, not the locations of all its jobs.
-
-Fresh installs still receive only the existing 21 starter entries (20 readable boards and one legacy reference bookmark). Catalog updates preserve whether a starter is enabled or deleted. The installer asks whether to enable starters; they remain editable from the Sources page either way.
+164 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json) — browse and enable them from the Sources page. Fresh installs enable only the 21 starters below.
 
 | Employer | Careers site | Adapter |
 | --- | --- | --- |
@@ -82,201 +27,81 @@ Fresh installs still receive only the existing 21 starter entries (20 readable b
 | Broadcom | `broadcom.wd1.myworkdayjobs.com` | Workday |
 | Intel | `intel.wd1.myworkdayjobs.com` | Workday |
 | Marvell | `marvell.wd1.myworkdayjobs.com` | Workday |
-| NVIDIA | `nvidia.wd5.myworkdayjobs.com` | Workday with large-board facet splitting |
+| NVIDIA | `nvidia.wd5.myworkdayjobs.com` | Workday (facet splitting) |
 | Micron | `micron.wd1.myworkdayjobs.com` | Workday |
 | NXP | `nxp.wd3.myworkdayjobs.com` | Workday |
 | STMicroelectronics | `stmicroelectronics.eightfold.ai` | Eightfold legacy API |
 | GlobalFoundries | `careers.gf.com` | Eightfold PCSX API |
 | Qualcomm | `careers.qualcomm.com` | Eightfold PCSX API |
-| Apple | `jobs.apple.com` | Apple search API |
-| Arm | `careers.arm.com` | Dedicated employer adapter |
-| AMD | `careers.amd.com` | Dedicated employer adapter |
-| ASML | `asml.com/en/careers/find-your-job` | Sitecore search API with inline descriptions |
-| Cisco | `careers.cisco.com` | Dedicated employer adapter |
-| Google | `google.com/about/careers` | Dedicated employer adapter |
-| MediaTek | `careers.mediatek.com` | Dedicated employer adapter |
-| u-blox | `u-blox.com/en/job-openings` | Algolia listing API plus vacancy details |
-| SK hynix | `talent.skhynix.com` | Combined SK Careers and SK hynix America Greenhouse feeds |
 | Ericsson | `jobs.ericsson.com` | Eightfold PCSX API |
+| Apple | `jobs.apple.com` | Apple search API |
+| Arm | `careers.arm.com` | Employer-specific |
+| AMD | `careers.amd.com` | Employer-specific |
+| Cisco | `careers.cisco.com` | Employer-specific |
+| Google | `google.com/about/careers` | Employer-specific |
+| MediaTek | `careers.mediatek.com` | Employer-specific |
+| ASML | `asml.com/en/careers/find-your-job` | Sitecore search API |
+| u-blox | `u-blox.com/en/job-openings` | Algolia API |
+| SK hynix | `talent.skhynix.com` | SK Careers + Greenhouse |
 
-The starter pack also contains a reference-only Marvell careers URL. Reference sources are never scraped.
+The rest of the catalog is mostly Greenhouse (65), Ashby (32), Workday (28), Eightfold (8), Lever (6), and Oracle Recruiting (5) boards — Infineon, Texas Instruments, KLA, Lam Research, Renesas, Siemens, Synopsys, Cerebras, Tenstorrent and more.
 
-Career sites change without notice. "Supported" means the repository contains a dedicated or verified configuration and automated fixture coverage; it does not guarantee that a third-party site will never change, rate-limit, block, or require authentication.
+### Adapter coverage beyond the catalog
 
-The [company expansion plan](docs/company-expansion-plan.md) tracks all 269 requested engineering candidates in priority order, with per-company status and saved live evidence. New expansion entries must pass a full scrape, unique identity and count checks, representative descriptions, and a warm change check before catalog admission. Reproduce proof with `node scripts/verify-company-catalog.mjs --full "ASML" --report docs/company-proofs/asml.json`.
+Workday · Eightfold · Greenhouse · Ashby · Lever · Oracle Recruiting · iCIMS · TalentBrew/Jibe/Radancy · Phenom · RSS/Atom feeds · public JSON APIs (auto-discovered) · server-rendered HTML (inferred CSS selectors, or manual CSS/XPath) · JavaScript-rendered HTML via Playwright + Edge · authenticated boards via encrypted session capture.
 
-## Reusable adapter coverage
+Adding a URL is verified, not optimistic: automatic setup saves an adapter only after a probe returns recognizable listing rows. Unsupported pages are reported rather than silently accepted.
 
-JobScraper is not limited to the starter pack. The source detector and advanced source editor support:
+"Supported" means the repo has a verified configuration and fixture coverage. Career sites change without notice — check Diagnostics and the source test first when one breaks.
 
-| Source type | Current support |
-| --- | --- |
-| Workday | Direct CXS JSON API, pagination, details, large-board splitting, and optional browser fallback |
-| Eightfold | Current PCSX and legacy APIs, offset or cursor pagination, details, and saved sessions |
-| Greenhouse | Whole-board JSON API and deferred job descriptions |
-| Ashby | Whole-board JSON API with descriptions and an exact board count |
-| Lever | Paged postings API with descriptions |
-| Oracle Recruiting | Pod and site configuration, paged listings, and deferred descriptions |
-| iCIMS | Storefront detection, paged JSON configuration, and details |
-| TalentBrew / Jibe / Radancy | Configurable paged listing API and details |
-| Phenom | Configurable paged listing API and details |
-| RSS and Atom | Direct feed parsing |
-| Public JSON APIs | Automatic endpoint discovery on many JavaScript sites, inferred job arrays, configurable field mapping, and pagination |
-| Server-rendered HTML | Automatic CSS selector inference plus manual CSS or XPath configuration |
-| JavaScript-rendered HTML | Headless or headed Microsoft Edge through Playwright Core |
-| Authenticated boards | Per-source browser-session capture and encrypted session reuse |
+## Stack
 
-Adding a URL is intentionally optimistic but verified: automatic setup saves a working adapter only after a probe produces recognizable listing rows. Unsupported pages are reported instead of being silently accepted as an empty source.
-
-Catalog contract tests check every readable entry against its adapter. To repeat live checks through the actual worker, run `node scripts/verify-company-catalog.mjs` (all supported boards) or append exact company names to check a subset. This opt-in command uses the catalog's robots override, enforces network guards and pacing, writes one JSON result per company, and never stores jobs. A first-page check proves the current board response; it does not claim a full traversal or benchmark.
-
-The [September 5 audit and implementation plan](docs/audits/2026-09-05/project-audit.md) records live coverage, remaining gaps, and measured fixes. Run `node scripts/benchmark-scrape.mjs --fixtures --json` for normal, permanent-error, and repeating-page benchmarks without network access.
-
-When starter settings change, bump the catalog version and regenerate its contract fixture in PowerShell with `$env:UPDATE_STARTER_PACK_FIXTURE='1'; cargo test --manifest-path src-tauri/Cargo.toml starter_pack_matches_the_checked_in_adapter_contract_fixture; Remove-Item Env:UPDATE_STARTER_PACK_FIXTURE`. Ordinary test runs compare the fixture without rewriting it.
-
-## Technology stack
-
-### Desktop and backend
-
-- [Tauri 2](https://tauri.app/) for the native Windows shell, IPC boundary, tray icon, single-instance behavior, dialogs, notifications, and packaging.
-- Rust 2021 for startup, source orchestration, persistence, application workflows, reminders, backup foundations, and operating-system integration.
-- Tokio for asynchronous worker and process management.
-- SQLx with SQLite for local persistence, migrations, foreign keys, WAL mode, and transactional updates.
-- Windows Task Scheduler for sign-in launch, four-hour background synchronization, interview reminders, and ghosting reminders.
-
-### Frontend
-
-- React 19 and TypeScript.
-- TanStack Query for server-state caching and refresh behavior.
-- dnd-kit for the application workflow board.
-- Vite for development and production builds.
-- Vitest, jsdom, and ESLint for frontend verification.
-
-### Scraping sidecar
-
-- A bundled Node.js 24 runtime communicates with Rust over versioned JSON Lines on stdin/stdout.
-- Native `fetch` handles guarded HTTP requests, redirects, pacing, retries, and `Retry-After`.
-- Cheerio parses HTML.
-- `fast-xml-parser` parses RSS and Atom feeds.
-- `xpath` and `@xmldom/xmldom` support XPath sources.
-- Playwright Core drives the installed Microsoft Edge browser for rendering and session capture.
-
-Release packages include the Node runtime and sidecar dependencies. Users do not need Node.js installed.
-
-## Architecture
+Tauri 2 + Rust (persistence, workflow, scheduling, OS integration) · SQLx/SQLite · React 19 + TypeScript + TanStack Query + Vite · bundled Node.js 24 sidecar for all web parsing, talking to Rust over versioned JSON Lines.
 
 ```text
-React + TypeScript UI
-        |
-        | Tauri commands and events
-        v
-Rust application service
-  |-- SQLite database and migrations
-  |-- application workflow and reminders
-  |-- background scheduling and notifications
-  |-- source orchestration and diagnostics
-        |
-        | versioned JSONL protocol
-        v
-Bundled Node.js worker
-  |-- direct ATS and employer adapters
-  |-- HTML, JSON, RSS, and XPath parsers
-  `-- Microsoft Edge / Playwright fallback
+React UI  ──Tauri commands/events──▶  Rust service ──JSONL──▶  Node sidecar
+                                      SQLite, workflow,        ATS adapters,
+                                      reminders, scheduling    HTML/JSON/RSS,
+                                                               Playwright/Edge
 ```
 
-Rust owns persistence and workflow rules. The Node worker owns untrusted web parsing and browser automation. A scrape worker starts only when a test, update, detail request, session capture, or scheduled synchronization needs it, and is terminated on cancellation or application exit.
+Rust owns persistence and rules; the Node worker owns untrusted web parsing and browser automation. A worker starts only when needed and is killed on cancel or exit.
 
-## Local data, privacy, and security
+## Privacy
 
-- Release data is stored under `%LOCALAPPDATA%\JobScraper`.
-- Development data is isolated under `%LOCALAPPDATA%\JobScraper-dev`.
-- There is no account, cloud database, analytics SDK, or application telemetry.
-- The application frontend is prevented by its CSP from making arbitrary internet requests. Network scraping is isolated in the sidecar.
-- URLs, redirects, DNS results, and browser navigations are checked to block private, loopback, reserved, and non-HTTP targets unless local-network access is explicitly enabled for a source.
-- Requests are paced per origin and honor capped `Retry-After` delays.
-- `robots.txt` policy is inspected and any override is stored per source.
-- Captured browser storage is encrypted with AES-256-GCM. Its key is stored through the Windows credential store, and session values are never displayed in the UI.
-- Attached application documents remain local.
-- JobScraper application code makes no startup HTTP request. The embedded Microsoft WebView2 runtime can perform Microsoft-controlled runtime traffic outside JobScraper's code path.
+No account, no cloud, no telemetry. Data lives in `%LOCALAPPDATA%\JobScraper` (dev builds use `JobScraper-dev`). The UI's CSP blocks arbitrary requests; all network access is isolated in the sidecar, which blocks private/loopback/reserved targets, paces requests per origin, honors `Retry-After` and `robots.txt` (overridable per source), and encrypts captured browser sessions with AES-256-GCM keyed through the Windows credential store.
 
-## Requirements
+## Install and build
 
-### Running a packaged build
+Running a packaged build needs Windows 11 x64 and the Edge WebView2 runtime (normally already installed).
 
-- Windows 11 x64.
-- Microsoft Edge WebView2 Runtime. Current Windows installations normally include it.
-
-### Development and release builds
-
-- Windows x64.
-- Node.js 24.
-- pnpm 11.
-- Rust with the `x86_64-pc-windows-msvc` host.
-- Microsoft C++ Build Tools required by the Rust MSVC toolchain.
-- Microsoft Edge for rendered-page and session-capture support.
-
-## Development
-
-The development launcher validates tool versions, installs the locked workspace dependencies, prepares the isolated sidecar, and starts Tauri:
+Building needs Node.js 24, pnpm 11, Rust (`x86_64-pc-windows-msvc`), MSVC C++ Build Tools, and Microsoft Edge.
 
 ```powershell
 pnpm app:dev
-```
-
-Useful verification commands:
-
-```powershell
-pnpm check
-pnpm lint
-pnpm test
-pnpm build
-cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+pnpm check; pnpm lint; pnpm test; pnpm build
 cargo test --manifest-path src-tauri/Cargo.toml
+pnpm package:all   # or package:installer / package:portable
 ```
 
-Benchmark the same worker protocol used by the application without writing jobs or source state:
+Packages land in `artifacts/<version>/` with `SHA256SUMS.txt`. Keep the portable ZIP as one folder — `JobScraper.exe` loads the adjacent `sidecar` directory.
 
-```powershell
-node scripts/benchmark-scrape.mjs --fixtures
-node scripts/benchmark-scrape.mjs
-```
+### Startup permissions
 
-The first command uses deterministic local fixtures. The second also checks enabled sources and exercises warm incremental updates against the development database in read-only mode.
+JobScraper runs as your normal user and uses least-privileged scheduled tasks. Do **not** enable "Run this program as an administrator" — Windows cannot show a UAC prompt during a scheduled launch. If an older admin-created task rejects changes, close the app and run `scripts/repair-startup.ps1` from an elevated PowerShell; it backs up task definitions under `%LOCALAPPDATA%\JobScraper\startup-repair-*` and clears only this executable's `RUNASADMIN` flag.
 
-## Packaging
+## Limitations
 
-Build a current-user NSIS installer, a portable ZIP, or both:
+- Windows only. No cloud sync or multi-device account.
+- Never fills or submits application forms.
+- Authenticated sites may need manual login or CAPTCHA completion before session capture.
+- Some boards omit dates, locations, salaries, or descriptions; missing values stay missing rather than being invented.
+- Google Careers pagination is limited by its robots policy unless overridden.
+- Backup/restore, analytics, CSV export, and duplicate resolution exist in the Rust backend but have no UI yet.
 
-```powershell
-pnpm package:installer
-pnpm package:portable
-pnpm package:all
-```
+## More
 
-The release pipeline runs TypeScript, frontend, sidecar, Rust formatting, and Rust test gates before packaging. Versioned outputs and `SHA256SUMS.txt` are written to `artifacts/<version>/`.
-
-The portable ZIP must be kept as one folder because `JobScraper.exe` loads the adjacent `sidecar` directory. Portable and installed builds both keep user data under `%LOCALAPPDATA%\JobScraper`; moving or upgrading the executable does not move the database.
-
-## Current limitations
-
-- Windows is the only supported desktop platform.
-- JobScraper never fills or submits application forms.
-- There is no cloud sync or multi-device account.
-- Authenticated sites can require manual login or CAPTCHA completion before a session can be captured.
-- Some boards expose incomplete dates, locations, salaries, or descriptions; JobScraper preserves missing values rather than inventing them.
-- Google Careers pagination is restricted by its published robots policy unless the user enables an override.
-- Backup/restore archives, analytics, CSV/data export, and duplicate-resolution services exist in the Rust backend but do not yet have complete user-facing workflows.
-- Site support depends on third-party HTML and API contracts. Diagnostics and source tests are the first place to inspect after a careers-site change.
-
-## Roadmap
-
-The repository does not promise a fixed list of future employers. A site is added to the supported list only after its listing contract is understood, implemented, and covered by fixtures. Planned direction is:
-
-- Expand the verified starter pack with more semiconductor, hardware, and technology employers.
-- Add dedicated adapters for important boards that generic HTML or endpoint detection cannot read reliably.
-- Broaden ATS tenant coverage and improve JavaScript-only, authenticated, and multi-board source handling.
-- Expose the existing backup/restore, analytics, CSV/data export, and duplicate-review backend services in the desktop UI.
-- Add more granular alert controls after the current single-summary background notification workflow is proven in regular use.
-- Continue improving adapter diagnostics, change detection, pagination completeness, and recovery from third-party site changes.
-
-Until a company appears in the current-support table, treat it as discoverable rather than guaranteed: paste its careers URL into **Sources > Add source**, let JobScraper probe it, and use the generated preview to verify the result.
+- [Company expansion plan](docs/company-expansion-plan.md) — 269 candidates, status, live evidence.
+- [Latest audit](docs/audits/2026-09-05/project-audit.md) — coverage, gaps, measured fixes.
+- `node scripts/verify-company-catalog.mjs` — live per-company checks (opt-in, no jobs stored).
+- `node scripts/benchmark-scrape.mjs --fixtures` — offline scrape benchmarks.
