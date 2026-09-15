@@ -17,3 +17,7 @@ src-tauri/sidecar/
 vite.config.js
 vite.config.d.ts
 graphify-out/
+
+# local-only docs
+*.md
+!README.md

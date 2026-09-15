@@ -101,7 +101,5 @@ JobScraper runs as your normal user and uses least-privileged scheduled tasks. D
 
 ## More
 
-- [Company expansion plan](docs/company-expansion-plan.md) — 269 candidates, status, live evidence.
-- [Latest audit](docs/audits/2026-09-05/project-audit.md) — coverage, gaps, measured fixes.
 - `node scripts/verify-company-catalog.mjs` — live per-company checks (opt-in, no jobs stored).
 - `node scripts/benchmark-scrape.mjs --fixtures` — offline scrape benchmarks.
