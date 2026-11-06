@@ -2561,14 +2561,16 @@
       "name": "Bosch",
       "category": "Automotive",
       "priority": "P4",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/BoschGroup",
+      "adapterId": "bosch",
+      "catalogId": "00000000-0000-4000-8000-000000000167",
+      "lastAttemptAt": "2026-11-06T19:34:12.826Z",
+      "evidence": [
+        "company-proofs/bosch.json"
+      ],
+      "notes": "Semiconductor EU batch: 7 chip-design titles on 779 rows (7 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
     {
@@ -4722,6 +4724,25 @@
         "company-proofs/codasip.json"
       ],
       "notes": "Semiconductor EU batch: 6 chip-design titles on 9 rows (4 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 283,
+      "id": "cern",
+      "name": "CERN",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/CERN",
+      "adapterId": "cern",
+      "catalogId": "00000000-0000-4000-8000-000000000166",
+      "lastAttemptAt": "2026-11-06T19:34:06.865Z",
+      "evidence": [
+        "company-proofs/cern.json"
+      ],
+      "notes": "Semiconductor EU batch: 1 chip-design titles on 56 rows (1 in target countries) on 2026-11-06.",
       "nextAction": "Complete; revalidate if this employer changes its board.",
       "batch": "semiconductor-eu",
       "inScope": true

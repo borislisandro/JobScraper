@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "name": "CERN",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:34:04.754Z",
+  "finishedAt": "2026-11-06T19:34:06.865Z",
+  "source": {
+    "id": "cern",
+    "name": "CERN",
+    "baseUrl": "https://jobs.smartrecruiters.com/CERN",
+    "adapterId": "cern",
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.smartrecruiters.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "0b973aa357eed7c995cb7a78b6bc204f160de508b95b3d7f32e47db05cdb5c88",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "28e30c40f1b511555b61b3da4660b131e042c67b941b7e2c98a9de29247a9105",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cern",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 56,
+        "persisted": 56,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 56,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 195,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 195,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 167,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 167,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 56,
+    "uniqueIdentities": 56,
+    "uniqueHashes": 56,
+    "samples": [
+      {
+        "externalId": "744000160223950",
+        "title": "Software Engineer for CERNBox (IT-SD-GSS-2026-174-GRAP)",
+        "company": "CERN",
+        "location": "Geneva, GENEVA, CH",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/CERN/744000160223950",
+        "applyUrl": "https://jobs.smartrecruiters.com/CERN/744000160223950",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000159148620",
+        "title": "Mechanical Engineer for Vacuum (TE-VSC-DLM-2026-173-GRAP)",
+        "company": "CERN",
+        "location": "Geneva, GENEVA, CH",
+        "postedAt": "2026-11-02",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/CERN/744000159148620",
+        "applyUrl": "https://jobs.smartrecruiters.com/CERN/744000159148620",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000117226307",
+        "title": "Theoretical Physicist (TH-SP-2026-68-LD)",
+        "company": "CERN",
+        "location": "Geneva, GENEVA, CH",
+        "postedAt": "2026-03-27",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/CERN/744000117226307",
+        "applyUrl": "https://jobs.smartrecruiters.com/CERN/744000117226307",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.smartrecruiters.com."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cern",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1057,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1058,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 387,
+              "backoff": 0,
+              "response": 514,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 137,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 387,
+                "backoffMs": 0,
+                "responseMs": 514,
+                "bodyMs": 10
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "744000160223950",
+        "title": "Software Engineer for CERNBox (IT-SD-GSS-2026-174-GRAP)",
+        "company": "CERN",
+        "location": "Geneva, GENEVA, CH",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/CERN/744000160223950",
+        "applyUrl": "https://jobs.smartrecruiters.com/CERN/744000160223950",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5692
+      },
+      {
+        "externalId": "744000159148620",
+        "title": "Mechanical Engineer for Vacuum (TE-VSC-DLM-2026-173-GRAP)",
+        "company": "CERN",
+        "location": "Geneva, GENEVA, CH",
+        "postedAt": "2026-11-02",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/CERN/744000159148620",
+        "applyUrl": "https://jobs.smartrecruiters.com/CERN/744000159148620",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4324
+      },
+      {
+        "externalId": "744000117226307",
+        "title": "Theoretical Physicist (TH-SP-2026-68-LD)",
+        "company": "CERN",
+        "location": "Geneva, GENEVA, CH",
+        "postedAt": "2026-03-27",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/CERN/744000117226307",
+        "applyUrl": "https://jobs.smartrecruiters.com/CERN/744000117226307",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5131
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.smartrecruiters.com."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "cern",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 56,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 56,
+        "requests": 1,
+        "skipped": 56,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 220,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 220,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 195,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 195,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

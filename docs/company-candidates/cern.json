@@ -1,0 +1,24 @@
+{
+ "id": "cern",
+ "name": "CERN",
+ "baseUrl": "https://jobs.smartrecruiters.com/CERN",
+ "adapterId": "cern",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 56,
+   "roleTitles": 1,
+   "roleTitlesInTargetCountries": 1,
+   "examples": [
+    "Firmware & FPGA Development Engineer (SY-BI-BP-2026-154-GRAP) — Geneva, GENEVA, CH"
+   ]
+  }
+ }
+}

@@ -4306,6 +4306,55 @@
     "level": "full",
     "evidence": "docs/company-proofs/codasip.json"
    }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000166",
+   "name": "CERN",
+   "country": "CH",
+   "tags": [
+    "semiconductor",
+    "asic",
+    "fpga"
+   ],
+   "adapterId": "cern",
+   "baseUrl": "https://jobs.smartrecruiters.com/CERN",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 56,
+    "level": "full",
+    "evidence": "docs/company-proofs/cern.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000167",
+   "name": "Bosch",
+   "country": "DE",
+   "tags": [
+    "semiconductor",
+    "asic"
+   ],
+   "adapterId": "bosch",
+   "baseUrl": "https://jobs.smartrecruiters.com/BoschGroup",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 779,
+    "level": "full",
+    "evidence": "docs/company-proofs/bosch.json"
+   }
   }
  ]
 }

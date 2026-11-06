@@ -363,3 +363,12 @@ test("a Radancy page that stops publishing its extent is treated as unfinished",
  const result=await scrape("synopsys",{"/search-jobs":listing,"/job/lisbon":`<div class="ats-description">Text.</div>`});
  assert.equal(result.complete,false);
  assert.match(result.warnings.join(" "),/published no page count/)});
+
+test("SmartRecruiters tenants aimed at one country ask the API for only that country",async()=>{
+ const posting=(id,identifier)=>({id,name:`ASIC Verification ${id}`,company:{identifier,name:identifier},visibility:"PUBLIC",location:{city:"Reutlingen",country:"de"},releasedDate:"2026-09-02"});
+ const body=identifier=>({offset:0,totalFound:1,content:[posting("1",identifier)]});
+ const bosch=await scrape("bosch",{"companies/BoschGroup/postings?":body("BoschGroup"),"companies/BoschGroup/postings/1":{jobAd:{sections:{jobDescription:{text:"Verify chips."}}}}},{fetchDetail:false});
+ assert.match(bosch.requests[0].url,/[?&]country=de(&|$)/);assert.equal(bosch.jobs.length,1);assert.equal(bosch.complete,true);
+ const cern=await scrape("cern",{"companies/CERN/postings?":body("CERN")},{fetchDetail:false});assert.match(cern.requests[0].url,/[?&]country=ch(&|$)/);
+ const renesas=await scrape("renesas",{"companies/RenesasElectronics/postings?":body("RenesasElectronics")},{fetchDetail:false});assert.doesNotMatch(renesas.requests[0].url,/country=/,"an unfiltered tenant keeps reading its whole board");
+});
