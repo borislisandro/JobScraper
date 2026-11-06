@@ -1,5 +1,6 @@
-import assert from "node:assert/strict";import {createServer}from "node:http";import {existsSync}from "node:fs";import {spawn}from "node:child_process";import {after,before,test}from "node:test";
+import assert from "node:assert/strict";import {createServer}from "node:http";import {spawn}from "node:child_process";import {after,before,test}from "node:test";
 import {inferJsonMapping,jsonArrays} from "./worker.mjs";
+import {findBrowser} from "./browser-path.mjs";
 // A JS-only board is read from the JSON endpoint its page loads. Inference is pure and runs on the
 // captured payload; these fixtures are the shapes that decide whether a payload is a job list at
 // all, and the end-to-end case proves the generated config actually scrapes.
@@ -67,10 +68,9 @@ test("the inferred config scrapes the endpoint it was inferred from",async()=>{
 
 // The capture path itself: an empty shell that builds its list from XHR is exactly the case
 // selector inference cannot read, and the part most easily broken (response bodies have to be read
-// before the browser closes). Skipped where Edge is not installed, which is the only browser the
-// worker will drive.
-const edge=[process.env.ProgramFiles&&`${process.env.ProgramFiles}/Microsoft/Edge/Application/msedge.exe`,process.env["ProgramFiles(x86)"]&&`${process.env["ProgramFiles(x86)"]}/Microsoft/Edge/Application/msedge.exe`].filter(Boolean).find(p=>existsSync(p));
-test("a JS-only board is detected from the endpoint its page fetches",{skip:edge?false:"Microsoft Edge is not installed"},async()=>{
+// before the browser closes). Skipped where no Chromium-based browser is installed.
+const edge=findBrowser();
+test("a JS-only board is detected from the endpoint its page fetches",{skip:edge?false:"No Chromium-based browser is installed"},async()=>{
  const shell=`<html><body><main id="list">Loading…</main><script>fetch("/api/search?start=0").then(r=>r.json()).then(d=>{document.getElementById("list").textContent=d.data.jobs.length})</script></body></html>`;
  const site=createServer((req,res)=>{
   if(req.url.startsWith("/api/search"))return res.setHeader("content-type","application/json").end(payload);

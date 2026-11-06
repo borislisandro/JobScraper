@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describePreset, parsePresets, presetFrom, withoutPreset, withPreset } from "./presets";
+import { describePreset, parseActiveFilter, parsePresets, presetFrom, serializeActiveFilter, withoutPreset, withPreset } from "./presets";
 import type { JobFilter } from "./api";
 
 const filter: JobFilter = {
@@ -49,5 +49,27 @@ describe("saved views", () => {
     expect(said).toContain("Portugal, Spain");
     expect(said).toContain("posted within 30 days");
     expect(describePreset(presetFrom("Everything", { ...filter, postedWithinDays: null }), c => c)).toContain("any posting date");
+  });
+});
+
+describe("the last-used filter", () => {
+  it("comes back exactly as it was left, typed spaces included", () => {
+    const left = { ...presetFrom("", filter), title: "verification ", countries: ["PT"], postedWithinDays: null };
+    const { name, ...view } = left;
+    expect(name).toBe("");
+    expect(parseActiveFilter(serializeActiveFilter(view))).toEqual(view);
+  });
+  it("is a first launch when nothing usable was stored", () => {
+    expect(parseActiveFilter(null)).toBeNull();
+    expect(parseActiveFilter("")).toBeNull();
+    expect(parseActiveFilter("not json")).toBeNull();
+    expect(parseActiveFilter("[1,2]")).toBeNull();
+    expect(parseActiveFilter("42")).toBeNull();
+  });
+  it("repairs a hand-edited row instead of filtering on junk", () => {
+    const view = parseActiveFilter('{"title":7,"countries":["pt","zzz","Portugal",3],"sort":"x","savedOnly":"yes"}');
+    expect(view).toMatchObject({ title: "", countries: ["PT"], sort: "recent", savedOnly: false });
+    // No window stored is not "any time": it is the default year.
+    expect(view?.postedWithinDays).toBe(365);
   });
 });

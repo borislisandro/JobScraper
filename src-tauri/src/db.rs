@@ -1,6 +1,6 @@
 use crate::notifications::{
-    is_managed_task_path, run_scheduler_blocking, scoped_orphans, Reminder as ScheduledReminder,
-    Scheduler, WindowsTaskScheduler, SYNC_TASK,
+    current_scheduler, is_managed_task_path, run_scheduler_blocking, scoped_orphans,
+    Reminder as ScheduledReminder, Scheduler, SYNC_TASK,
 };
 use crate::{
     domain::{Application, Source, SourceInput, StageInput},
@@ -612,8 +612,7 @@ async fn background_sync_status_pool(pool: &SqlitePool) -> ApiResult<BackgroundS
         .await
         .map_err(|e| e.to_string())?
         .is_some_and(|value| value == "true");
-    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
-    let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    let scheduler = current_scheduler()?;
     let task = run_scheduler_blocking(move || scheduler.status(SYNC_TASK)).await?;
     Ok(BackgroundSyncStatus {
         enabled: task.enabled,
@@ -634,8 +633,7 @@ pub async fn set_background_sync(
     enabled: bool,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<BackgroundSyncStatus> {
-    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
-    let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    let scheduler = current_scheduler()?;
     run_scheduler_blocking(move || {
         if enabled {
             scheduler.create_sync()?;
@@ -652,6 +650,18 @@ pub async fn set_background_sync(
     )
     .await?;
     background_sync_status_pool(&state.db.pool).await
+}
+/// Turns on what the toggles in Settings turn on — start at sign-in and the four-hourly background
+/// check — for `--setup-background`, so an installer can leave the app working the way the user
+/// expects without opening it first. Writes the same setting the UI reads, so the two never disagree.
+pub async fn enable_background_defaults(pool: &SqlitePool) -> ApiResult<()> {
+    let scheduler = current_scheduler()?;
+    run_scheduler_blocking(move || {
+        scheduler.create_startup()?;
+        scheduler.create_sync()
+    })
+    .await?;
+    write_setting(pool, SYNC_BACKGROUND, "true").await
 }
 pub fn normalize_canonical_url(value: &str) -> Option<String> {
     let mut url = Url::parse(value).ok()?;
@@ -743,6 +753,54 @@ pub fn migration_error(error: sqlx::migrate::MigrateError) -> String {
         other => other.to_string(),
     }
 }
+/// Whether a database error is the kind that passes by itself. Signing in starts several
+/// JobScraper processes at once — the hidden app, the background check, and whatever the user
+/// opens — and on Windows a process that is closing the database deletes its write-ahead files at
+/// the very moment another is opening it. That surfaces as "unable to open database file" or
+/// "database is locked" for a few hundred milliseconds, and the next attempt simply works.
+pub fn is_transient_database_error(message: &str) -> bool {
+    let message = message.to_ascii_lowercase();
+    [
+        "database is locked",
+        "database table is locked",
+        "database schema is locked",
+        "unable to open database",
+        "disk i/o error",
+        "used by another process",
+        "(code: 5)",
+        "(code: 6)",
+        "(code: 14)",
+        "(code: 10)",
+        "os error 5)",
+        "os error 32)",
+        "os error 33)",
+        "pool timed out",
+    ]
+    .iter()
+    .any(|marker| message.contains(marker))
+}
+/// Delays between attempts: about fifteen seconds in all, which outlasts any other JobScraper
+/// process finishing its work, while a database that is genuinely unreadable still reports
+/// itself within a splash screen's patience.
+const TRANSIENT_RETRY_DELAYS_MS: [u64; 10] =
+    [250, 500, 1000, 1000, 2000, 2000, 2000, 2000, 2000, 2000];
+/// Runs `operation`, trying again after a pause when it fails for a transient reason. Any other
+/// failure — a migration from a newer version, a corrupt file — is returned at once.
+pub async fn retry_transient<T, F, Fut>(mut operation: F) -> ApiResult<T>
+where
+    F: FnMut() -> Fut,
+    Fut: std::future::Future<Output = ApiResult<T>>,
+{
+    for delay in TRANSIENT_RETRY_DELAYS_MS {
+        match operation().await {
+            Err(error) if is_transient_database_error(&error) => {
+                tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
+            }
+            result => return result,
+        }
+    }
+    operation().await
+}
 impl Database {
     /// Builds the pool without touching the disk, so application startup can manage its state
     /// and paint a window before any I/O happens. Connecting and migrating is `prepare()`.
@@ -759,6 +817,14 @@ impl Database {
         }
     }
     pub async fn prepare(&self) -> ApiResult<()> {
+        // "Unable to open database file" is also what a missing folder reports, and waiting does
+        // not create one: only a folder that exists can be locked by someone else.
+        if !self.root.is_dir() {
+            return self.prepare_once().await;
+        }
+        retry_transient(|| self.prepare_once()).await
+    }
+    async fn prepare_once(&self) -> ApiResult<()> {
         sqlx::query("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;")
             .execute(&self.pool)
             .await
@@ -2002,6 +2068,30 @@ pub async fn backfill_location_countries(pool: &SqlitePool) -> ApiResult<u64> {
     )
     .await?;
     Ok(rows.len() as u64)
+}
+/// The Windows installer asks whether to include the bundled company boards, and without a Yes
+/// they all stay switched off — which on Linux, where no installer asks, meant a first launch whose
+/// "Update now" had nothing to read and said nothing about it. So the first launch stands in for
+/// that Yes, once: it leaves the same marker file the installer does, and the opt-in below applies
+/// it. After that every board is the user's to switch off, and nothing switches it back on.
+const FIRST_LAUNCH_KEY: &str = "starterPack.firstLaunchHandled";
+pub async fn queue_first_launch_opt_in(
+    pool: &SqlitePool,
+    local: &std::path::Path,
+) -> ApiResult<()> {
+    if !cfg!(target_os = "linux") {
+        return Ok(());
+    }
+    let handled: Option<String> = sqlx::query_scalar("SELECT value FROM settings WHERE key=?")
+        .bind(FIRST_LAUNCH_KEY)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    if handled.is_some() {
+        return Ok(());
+    }
+    std::fs::write(local.join("starter-pack.optin"), b"first launch").map_err(|e| e.to_string())?;
+    write_setting(pool, FIRST_LAUNCH_KEY, "true").await
 }
 /// Switches on the starter-pack boards when the installer was told to include them. The installer
 /// cannot touch the database — it does not exist until first run — so it leaves a file behind and
@@ -3346,11 +3436,7 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
         .fetch_all(pool)
         .await
         .map_err(|e| e.to_string())?;
-    let executable = std::env::current_exe()
-        .map_err(|e| e.to_string())?
-        .display()
-        .to_string();
-    let scheduler = WindowsTaskScheduler::packaged(executable);
+    let scheduler = current_scheduler()?;
     let mut scheduled = 0;
     let mut missed = 0;
     let mut errors = 0;
@@ -4956,6 +5042,33 @@ mod matching_persistence_tests {
     // The installer cannot write to a database that does not exist yet, so its answer arrives as a
     // file. What matters is that it is spent: a user who switches a board off must not find it on
     // again next launch.
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn the_first_linux_launch_switches_the_pack_on_once_and_never_again() {
+        let root = std::env::temp_dir().join(format!("jobscraper-firstlaunch-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        db.install_starter_pack().await.unwrap();
+        let enabled = || async {
+            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM sources WHERE enabled=1")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap()
+        };
+        queue_first_launch_opt_in(&db.pool, &root).await.unwrap();
+        assert!(apply_starter_pack_opt_in(&db.pool, &root).await.unwrap() >= 19);
+        let on = enabled().await;
+        assert!(on >= 19);
+        // A board the user then switches off must stay off through every later launch.
+        sqlx::query("UPDATE sources SET enabled=0 WHERE enabled=1 AND name='Broadcom'")
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        queue_first_launch_opt_in(&db.pool, &root).await.unwrap();
+        assert!(!root.join("starter-pack.optin").exists());
+        assert_eq!(apply_starter_pack_opt_in(&db.pool, &root).await.unwrap(), 0);
+        assert_eq!(enabled().await, on - 1);
+    }
     #[tokio::test]
     async fn the_installer_opt_in_switches_the_pack_on_once_and_is_then_gone() {
         let root = std::env::temp_dir().join(format!("jobscraper-optin-{}", Uuid::new_v4()));
@@ -6883,5 +6996,58 @@ mod performance_history_tests {
         assert_eq!(run.jobs, 6);
         assert_eq!(run.slowest_phase.as_ref().unwrap().key, "work.scrape");
         assert!(run.source_name.is_none());
+    }
+}
+
+#[cfg(test)]
+mod transient_retry_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    #[test]
+    fn only_passing_lock_collisions_count_as_transient() {
+        for message in [
+            "error returned from database: (code: 14) unable to open database file",
+            "error returned from database: (code: 5) database is locked",
+            "The process cannot access the file because it is being used by another process. (os error 32)",
+            "pool timed out while waiting for an open connection",
+        ] {
+            assert!(is_transient_database_error(message), "{message}");
+        }
+        for message in [
+            "This database was created by a newer version of JobScraper (schema 30). Install the newer version to open it — your data is intact.",
+            "error returned from database: (code: 11) database disk image is malformed",
+            "error returned from database: (code: 1) no such table: jobs",
+        ] {
+            assert!(!is_transient_database_error(message), "{message}");
+        }
+    }
+    #[tokio::test]
+    async fn a_collision_that_clears_is_waited_out() {
+        let attempts = AtomicU32::new(0);
+        let result = retry_transient(|| async {
+            if attempts.fetch_add(1, Ordering::SeqCst) < 2 {
+                Err(
+                    "error returned from database: (code: 14) unable to open database file"
+                        .to_string(),
+                )
+            } else {
+                Ok("opened")
+            }
+        })
+        .await;
+        assert_eq!(result.unwrap(), "opened");
+        assert_eq!(attempts.load(Ordering::SeqCst), 3);
+    }
+    #[tokio::test]
+    async fn a_real_failure_is_reported_at_once() {
+        let attempts = AtomicU32::new(0);
+        let result: ApiResult<()> = retry_transient(|| async {
+            attempts.fetch_add(1, Ordering::SeqCst);
+            Err("This database was created by a newer version of JobScraper".to_string())
+        })
+        .await;
+        assert!(result.is_err());
+        assert_eq!(attempts.load(Ordering::SeqCst), 1);
     }
 }

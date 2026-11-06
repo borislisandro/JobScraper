@@ -3,12 +3,14 @@ mod db;
 mod domain;
 mod locations;
 mod notifications;
+#[cfg(unix)]
+mod process_tree;
 mod sessions;
 mod sidecar;
 mod startup;
 
 use db::Database;
-use notifications::{run_scheduler_blocking, Scheduler, WindowsTaskScheduler};
+use notifications::{current_scheduler, run_scheduler_blocking, Scheduler};
 use startup::Startup;
 use std::{
     path::PathBuf,
@@ -29,6 +31,8 @@ pub struct AppState {
     pub automatic_sync_started: std::sync::atomic::AtomicBool,
     pub headless: bool,
 }
+/// Turns on start-at-sign-in and the background check from the command line, then exits.
+const SETUP_BACKGROUND_ARGUMENT: &str = "--setup-background";
 fn parse_deliver_reminder_args(args: &[String]) -> Result<Option<String>, String> {
     let Some(index) = args.iter().position(|arg| arg == "--deliver-reminder") else {
         return Ok(None);
@@ -95,14 +99,40 @@ fn reveal(app: &tauri::AppHandle) {
         let _ = window.set_focus();
     }
 }
+/// Where the failed-to-start note goes: the per-user data directory the app would have used, found
+/// without a running app because this is the case where there isn't one.
+fn startup_log_path() -> PathBuf {
+    let data = if cfg!(windows) {
+        std::env::var_os("LOCALAPPDATA").map(PathBuf::from)
+    } else {
+        std::env::var_os("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .filter(|path| path.is_absolute())
+            .or_else(|| {
+                std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".local/share"))
+            })
+    };
+    data.unwrap_or_default().join("JobScraper/logs/startup.log")
+}
 pub fn run() {
+    // WebKitGTK's DMA-BUF renderer aborts the whole process on Wayland with NVIDIA's proprietary
+    // driver ("Error 71 (Protocol error) dispatching to Wayland display") before a window ever
+    // appears. Other GPUs keep the fast path, and an explicit setting is never overridden.
+    #[cfg(target_os = "linux")]
+    if std::path::Path::new("/proc/driver/nvidia").exists()
+        && std::env::var_os("WEBKIT_DISABLE_DMABUF_RENDERER").is_none()
+    {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
     // The scheduled background check and reminder delivery are separate processes by design, and
     // the single-instance plugin ends any second process outright: it hands its arguments over and
     // calls exit. Filtering inside the callback cannot help, because the callback runs in the
     // process that stays alive. So a scheduled run never registers the plugin at all — with the
     // window now living in the tray the app is almost always running, and every four-hourly check
     // and every reminder would otherwise die the moment it started.
-    let scheduled = std::env::args().any(|arg| arg == "--sync" || arg == "--deliver-reminder");
+    let scheduled = std::env::args().any(|arg| {
+        arg == "--sync" || arg == "--deliver-reminder" || arg == SETUP_BACKGROUND_ARGUMENT
+    });
     let mut builder = tauri::Builder::default();
     if !scheduled {
         // Registered first, as the plugin requires: clicking the shortcut while the app sits in the
@@ -147,6 +177,19 @@ pub fn run() {
                 } else {
                     "JobScraper"
                 });
+            if args.len() == 2 && args[1] == SETUP_BACKGROUND_ARGUMENT {
+                std::fs::create_dir_all(&local)?;
+                let db =
+                    tauri::async_runtime::block_on(Database::open(local.join("jobscraper.db")))?;
+                let outcome =
+                    tauri::async_runtime::block_on(db::enable_background_defaults(&db.pool));
+                match &outcome {
+                    Ok(()) => println!("Start at sign-in and background checks are on."),
+                    Err(error) => eprintln!("Could not turn them on: {error}"),
+                }
+                app.handle().exit(i32::from(outcome.is_err()));
+                return Ok(());
+            }
             if let Some(reminder_id) =
                 parse_deliver_reminder_args(&args).map_err(std::io::Error::other)?
             {
@@ -171,8 +214,7 @@ pub fn run() {
                         shown,
                     ))
                     .map_err(std::io::Error::other)?;
-                    let executable = std::env::current_exe()?.display().to_string();
-                    let scheduler = WindowsTaskScheduler::packaged(executable);
+                    let scheduler = current_scheduler().map_err(std::io::Error::other)?;
                     let task = format!(
                         "\\JobScraper\\{}",
                         notifications::task_name(&reminder_id).map_err(std::io::Error::other)?
@@ -300,11 +342,12 @@ pub fn run() {
         .unwrap_or_else(|error| {
             // The window is already on screen by the time this could fail, so a panic here is a
             // dead white frame with nowhere to look. Leave a note where support would look first.
+            let log = startup_log_path();
+            if let Some(folder) = log.parent() {
+                let _ = std::fs::create_dir_all(folder);
+            }
             let _ = std::fs::write(
-                std::env::var_os("LOCALAPPDATA")
-                    .map(PathBuf::from)
-                    .unwrap_or_default()
-                    .join("JobScraper/logs/startup.log"),
+                log,
                 format!(
                     "JobScraper failed to start: {error}
 "
@@ -313,14 +356,23 @@ pub fn run() {
             std::process::exit(1)
         })
         .run(|app, event| match event {
-            tauri::RunEvent::Exit => app.state::<Arc<AppState>>().sidecars.cancel_all(),
+            // The reminder and setup invocations exit before AppState exists, and asking for
+            // state that was never managed panics — turning a clean exit into a crash.
+            tauri::RunEvent::Exit => {
+                if let Some(state) = app.try_state::<Arc<AppState>>() {
+                    state.sidecars.cancel_all();
+                }
+            }
             tauri::RunEvent::WindowEvent {
                 label,
                 event: tauri::WindowEvent::Focused(true),
                 ..
             } if label == "main" => {
                 let app = app.clone();
-                let state = app.state::<Arc<AppState>>().inner().clone();
+                let Some(state) = app.try_state::<Arc<AppState>>() else {
+                    return;
+                };
+                let state = state.inner().clone();
                 tauri::async_runtime::spawn(async move {
                     let _ = db::emit_apply_confirmation_on_focus(&app, &state).await;
                 });

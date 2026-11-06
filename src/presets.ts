@@ -1,13 +1,14 @@
-// Saved views for the Jobs page. The filters are deliberately view state — they reset to a year and
-// no country on every launch, so nothing narrows silently over time — but re-typing "verification"
-// and re-picking Portugal every morning is its own kind of friction. A view is that choice, named
-// and kept, and applying one is always explicit.
+// Saved views for the Jobs page, and the filter the page was last left on. A view is a choice
+// named and kept, and applying one is always explicit; the last-used filter is restored on its
+// own, so closing the app or restarting the computer never costs you "verification" and Portugal.
 //
-// Stored in the settings table under one key, through the get/set commands that already exist: a
-// list this short does not need a table, a migration or a command of its own.
-import type { JobFilter } from "./api";
+// Both live in the settings table, through the get/set commands that already exist: values this
+// small do not need a table, a migration or a command of their own.
+import { DEFAULT_POSTED_WINDOW, type JobFilter } from "./api";
 
 export const PRESETS_KEY = "jobs.savedViews";
+/// The filter as it was when the page was last used, kept so it is still there on the next launch.
+export const ACTIVE_FILTER_KEY = "jobs.activeFilter";
 /// Neither the source ticks nor the triage toggles belong to a view. Source ids go stale as boards
 /// come and go, and whether dismissed rows show — or what counts as new — is where you are in
 /// today's reading, not what you were looking for.
@@ -49,17 +50,7 @@ export function parsePresets(raw: string | null | undefined): FilterPreset[] {
   const seen = new Set<string>();
   return parsed
     .filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object")
-    .map(entry => ({
-      name: asString(entry.name).trim().slice(0, 60),
-      title: asString(entry.title),
-      keyword: asString(entry.keyword),
-      sort: entry.sort === "posted" ? ("posted" as const) : ("recent" as const),
-      savedOnly: asBool(entry.savedOnly),
-      includeClosed: asBool(entry.includeClosed),
-      postedWithinDays: asWindow(entry.postedWithinDays),
-      countries: asCodes(entry.countries),
-      includeUnknownLocations: asBool(entry.includeUnknownLocations),
-    }))
+    .map(entry => ({ name: asString(entry.name).trim().slice(0, 60), ...readView(entry) }))
     .filter(preset => {
       const key = preset.name.toLowerCase();
       if (!preset.name || seen.has(key)) return false;
@@ -67,6 +58,44 @@ export function parsePresets(raw: string | null | undefined): FilterPreset[] {
       return true;
     })
     .slice(0, MAX_PRESETS);
+}
+/// The filter fields of a stored entry, each one checked: a value that is not what it should be
+/// falls back to the default instead of filtering the list in some way nobody asked for.
+const readView = (entry: Record<string, unknown>): Omit<FilterPreset, "name"> => ({
+  title: asString(entry.title),
+  keyword: asString(entry.keyword),
+  sort: entry.sort === "posted" ? ("posted" as const) : ("recent" as const),
+  savedOnly: asBool(entry.savedOnly),
+  includeClosed: asBool(entry.includeClosed),
+  postedWithinDays: asWindow(entry.postedWithinDays),
+  countries: asCodes(entry.countries),
+  includeUnknownLocations: asBool(entry.includeUnknownLocations),
+});
+export type ActiveFilter = Omit<FilterPreset, "name">;
+/// What to store for the last-used filter. Text is kept exactly as typed — trimming would eat a
+/// space the next launch should still find.
+export const serializeActiveFilter = (filter: ActiveFilter): string =>
+  JSON.stringify({
+    title: filter.title,
+    keyword: filter.keyword,
+    sort: filter.sort,
+    savedOnly: filter.savedOnly,
+    includeClosed: filter.includeClosed,
+    postedWithinDays: filter.postedWithinDays,
+    countries: filter.countries,
+    includeUnknownLocations: filter.includeUnknownLocations,
+  });
+/// `null` means nothing usable was stored, which is the same as a first launch.
+export function parseActiveFilter(raw: string | null | undefined): ActiveFilter | null {
+  try {
+    const parsed: unknown = JSON.parse(raw || "null");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const entry = parsed as Record<string, unknown>;
+    // "Any time" is stored as null; a row with no window at all never chose it.
+    return { ...readView(entry), postedWithinDays: "postedWithinDays" in entry ? asWindow(entry.postedWithinDays) : DEFAULT_POSTED_WINDOW };
+  } catch {
+    return null;
+  }
 }
 /// Saving under a name that already exists replaces it: that is what someone means by saving a view
 /// they have just adjusted, and two views with one name cannot be told apart afterwards.

@@ -1,0 +1,12 @@
+{
+  "build": { "beforeBundleCommand": { "script": "scripts/prepare-release.sh --preflight-only", "cwd": ".." } },
+  "app": { "security": { "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost tauri://localhost; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'" } },
+  "bundle": {
+    "targets": ["deb", "rpm"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"],
+    "category": "Productivity",
+    "shortDescription": "Local-first job search organizer",
+    "longDescription": "Collects jobs from company career sites, filters them, and tracks your applications. Runs from the notification area so background checks and reminders keep working with the window closed.",
+    "resources": { "sidecar": "sidecar", "../scripts/repair-startup.ps1": null }
+  }
+}

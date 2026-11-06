@@ -6,9 +6,9 @@ import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-
 import { ask } from "@tauri-apps/plugin-dialog";
 import { aggregateRows, formatDuration, latestSummary, phaseRows, recentFailures, requestKindRows } from "./performance-ui";
 import { COUNTRIES } from "./countries";
-import { describePreset, parsePresets, presetFrom, PRESETS_KEY, withoutPreset, withPreset, type FilterPreset } from "./presets";
+import { ACTIVE_FILTER_KEY, describePreset, parseActiveFilter, parsePresets, presetFrom, PRESETS_KEY, serializeActiveFilter, withoutPreset, withPreset, type ActiveFilter, type FilterPreset } from "./presets";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { captureJob, jobCountries, listCompanyCatalog, newSince, REVIEWED_KEY, saveCapturedJob, setJobDismissed, type CapturedJob, type CatalogCompany } from "./api";
+import { captureJob, jobCountries, listCompanyCatalog, newSince, refreshJobs, REVIEWED_KEY, saveCapturedJob, setJobDismissed, type CapturedJob, type CatalogCompany } from "./api";
 import { api, appLogs, backgroundSyncStatus, DEFAULT_POSTED_WINDOW, jobDescription, launchAtLoginStatus, POSTED_WINDOWS, purgeAllJobs, setBackgroundSync, setLaunchAtLogin, startupStatus, type StartupStatus, cancelScrape, cancelScrapeAll, captureSession, deleteBrowserSession, getSetting, setSetting, hasBrowserSession, scrapeAll, scrapePerformance, sourceConfig, startAutomaticSync, validateAttachmentSize, type Application, type Job, type JobDescription, type JobFilter, type Source, type WorkerEvent } from "./api";
 import { listenForApplyConfirmation } from "./apply-prompts";
 import { listenForScrapeEvents } from "./scrape-events";
@@ -70,7 +70,7 @@ function App(){
  const scrapableSources=allSources.filter(source=>source.kind!=="reference").length;
  const attention=allSources.filter(source=>source.kind!=="reference"&&!source.enabled&&source.disabledReason).length;
  const badges:Record<Page,string>={Jobs:jobCount===undefined?"":String(jobCount),Sources:scrapableSources?`${activeSources} of ${scrapableSources}`:"0",Applications:String(allApps.length),Diagnostics:attention?String(attention):""};
- const decide=(decision:"yes"|"no"|"not_yet")=>attempt&&api.applyDecision(attempt.applicationId,decision).then(()=>{setAttempt(undefined);qc.invalidateQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["apps"]})});
+ const decide=(decision:"yes"|"no"|"not_yet")=>attempt&&api.applyDecision(attempt.applicationId,decision).then(()=>{setAttempt(undefined);refreshJobs(qc);qc.invalidateQueries({queryKey:["apps"]})});
  // A page is mounted the first time it is opened and only hidden afterwards, never unmounted.
  // Scraping always continued in the backend when the user switched away — what was thrown away
  // was every trace of it in the window: the Updating…/Cancel state of Update Jobs, the running
@@ -80,7 +80,7 @@ function App(){
  const open=(next:Page)=>{setPage(next);setVisited(current=>current.includes(next)?current:[...current,next])};
  const lastUpdate=allSources.map(source=>source.lastSuccessAt?new Date(source.lastSuccessAt).getTime():0).reduce((latest,value)=>Math.max(latest,value),0);
  const updateNow=()=>{const runId=crypto.randomUUID();setUpdating(true);setUpdateStatus("Updating sources");scrapeAll(runId,[],false)
-  .then(summary=>{setUpdateStatus(describeUpdateSummary(summary));qc.invalidateQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["sources"]})})
+  .then(summary=>{setUpdateStatus(describeUpdateSummary(summary));refreshJobs(qc);qc.invalidateQueries({queryKey:["sources"]})})
   .catch(error=>setUpdateStatus(String(error))).finally(()=>setUpdating(false))};
  useEffect(()=>{const close=(event:KeyboardEvent)=>{if(event.key==="Escape")setSettingsOpen(false)};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[]);
  return <main>
@@ -138,7 +138,7 @@ function useJobActions(job:Job,onStatus:(message:string)=>void){
  // and still lands on a correct, gap-free result: an infinite query's invalidation refetches every
  // loaded page in order, recomputing each page's offset from the one before it, so a dismissal that
  // shrinks the filtered set does not duplicate or skip a row the way stale fixed offsets would.
- const refresh=()=>{qc.invalidateQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["apps"]})};
+ const refresh=()=>{refreshJobs(qc);qc.invalidateQueries({queryKey:["apps"]})};
  const act=(open:boolean)=>{setBusy(true);
   // Save and Apply are the same save; Apply just also opens the posting. Saving twice is
   // harmless because the backend returns the existing application for a job.
@@ -228,17 +228,24 @@ function CaptureJob({onClose,onSaved}:{onClose:()=>void;onSaved:(message:string)
    {draft
     ? <button className="primary" disabled={busy||!draft.title.trim()} onClick={save}>{busy?"Saving…":"Save job"}</button>
     : <button className="primary" disabled={busy||!url.trim()} onClick={read}>{busy?"Reading…":"Read the page"}</button>}</footer></div></dialog>}
+// The filters are kept in the settings table, so the page opens on what it was last left on — after
+// closing the app, and after restarting the computer. They are read before the page first renders:
+// starting from the defaults and swapping the saved filter in afterwards would flash the wrong
+// list and run a query for it.
 function Jobs({onCount}:{onCount:(count:number)=>void}){
+ const {data,isError}=useQuery({queryKey:["active-filter"],queryFn:()=>getSetting(ACTIVE_FILTER_KEY).then(parseActiveFilter),staleTime:Infinity,gcTime:Infinity,retry:false});
+ // If the setting cannot be read the page still opens, on the defaults.
+ if(data===undefined&&!isError)return null;
+ return <JobsView onCount={onCount} initial={data??null}/>}
+function JobsView({onCount,initial}:{onCount:(count:number)=>void;initial:ActiveFilter|null}){
  const qc=useQueryClient();
- const [title,setTitle]=useState(""),[keyword,setKeyword]=useState(""),[sort,setSort]=useState<JobFilter["sort"]>("recent"),[savedOnly,setSavedOnly]=useState(false),[includeClosed,setIncludeClosed]=useState(false);
+ const [title,setTitle]=useState(initial?.title??""),[keyword,setKeyword]=useState(initial?.keyword??""),[sort,setSort]=useState<JobFilter["sort"]>(initial?.sort??"recent"),[savedOnly,setSavedOnly]=useState(initial?.savedOnly??false),[includeClosed,setIncludeClosed]=useState(initial?.includeClosed??false);
  // Countries are matched on the codes worked out when each job was stored, so this sends codes and
  // not city names. A listing whose country could not be worked out at all is left out while a
  // country filter is on — it is the one that would otherwise show up under every country.
  const [includeDismissed,setIncludeDismissed]=useState(false);const [capturing,setCapturing]=useState(false);
- const [countries,setCountries]=useState<string[]>([]),[includeUnknownLocations,setIncludeUnknownLocations]=useState(false);
- // View state, so it resets to a year on every launch rather than remembering a narrow window
- // you set once and then wondered about.
- const [postedWithin,setPostedWithin]=useState<number|null>(DEFAULT_POSTED_WINDOW);
+ const [countries,setCountries]=useState<string[]>(initial?.countries??[]),[includeUnknownLocations,setIncludeUnknownLocations]=useState(initial?.includeUnknownLocations??false);
+ const [postedWithin,setPostedWithin]=useState<number|null>(initial?initial.postedWithinDays:DEFAULT_POSTED_WINDOW);
  // undefined means "not narrowed yet", which resolves to every followed source once they load.
  // Kept out of the database on purpose: this is where you are looking, not what you follow.
  const [shown,setShown]=useState<string[]>();
@@ -279,7 +286,7 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
   const progress=event.payload;if(!active||progress.runId!==automaticRun)return;
   if(!automaticStarted.current)automaticStarted.current=Date.now();setBatch(automaticRun);
   const elapsed=automaticStarted.current?` · ${elapsedSince(automaticStarted.current)}`:"";
-  if(!progress.phase){qc.invalidateQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["sources"]});const complete=(progress.completed??0)>=(progress.total??1);
+  if(!progress.phase){refreshJobs(qc);qc.invalidateQueries({queryKey:["sources"]});const complete=(progress.completed??0)>=(progress.total??1);
    setStatus(complete?(progress.cancelled?`Update cancelled${elapsed}.`:`${progress.failed?`Update finished; ${progress.failed} source${progress.failed===1?"":"s"} could not be read${elapsed}.`:`Jobs are up to date${elapsed}.`} Descriptions download when opened.`):`Updating sources · ${progress.completed}/${progress.total}${elapsed}`);
    if(complete)setBatch(undefined)}
   if(progress.phase==="source-progress")setStatus(`Reading ${progress.source||"source"} · ${progress.requests||0} requests${elapsed}`);
@@ -287,8 +294,12 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
  // "Filtered" means the view differs from the default one, which is what makes the empty state
  // honest: hiding closed jobs is the default, so turning them back on counts as a change too.
  const filtered=!!(title.trim()||keyword.trim()||savedOnly||includeClosed||countries.length||includeUnknownLocations||postedWithin!==DEFAULT_POSTED_WINDOW);
- // Saved views. The filters stay view state that resets on every launch — nothing narrows behind
- // your back — but a view you use daily is worth naming once instead of rebuilding each morning.
+ // Whatever the filters are now is what the next launch opens on. Typing waits for a pause so a
+ // word is stored once, not once per letter. The saved value is also what a launch reads, so it
+ // is written only after the page has started from it — never over it with the defaults.
+ const activeFilter=serializeActiveFilter({title,keyword,sort,savedOnly,includeClosed,postedWithinDays:postedWithin,countries,includeUnknownLocations});
+ useEffect(()=>{const timer=setTimeout(()=>{setSetting(ACTIVE_FILTER_KEY,activeFilter).catch(()=>{})},300);return()=>clearTimeout(timer)},[activeFilter]);
+ // Saved views: a named filter you can switch to deliberately, for the ones you use day after day.
  const {data:savedViews=[]}=useQuery({queryKey:["saved-views"],queryFn:()=>getSetting(PRESETS_KEY).then(parsePresets)});
  const [naming,setNaming]=useState<string>();
  const storeViews=(next:FilterPreset[])=>setSetting(PRESETS_KEY,JSON.stringify(next))
@@ -350,7 +361,7 @@ function Jobs({onCount}:{onCount:(count:number)=>void}){
    </section>
   </div>
   <div className="scroll">
-   {capturing&&<CaptureJob onClose={()=>setCapturing(false)} onSaved={message=>{setStatus(message);qc.removeQueries({queryKey:["jobs"]})}}/>}
+   {capturing&&<CaptureJob onClose={()=>setCapturing(false)} onSaved={message=>{setStatus(message);{qc.removeQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["job-countries"]})}}}/>}
    {status&&<output className="status">{status}</output>}
    {/* The daily loop: what has arrived since you last said you were done, and a way to say it again. */}
    {(!!newCount||onlyNew)&&<div className="new-since">
@@ -434,7 +445,7 @@ function Sources(){
   if(item.event==="warning"&&typeof item.payload.message==="string"){const text=item.payload.message;setNotices(current=>current.includes(text)?current:[...current,text])}
   if(item.event==="needs_user_action")setPaused(item);
    if(["completed","cancelled","failed"].includes(item.event))setPaused(current=>current?.runId===item.runId?undefined:current);
-   if(item.event==="completed"){qc.invalidateQueries({queryKey:["sources"]});qc.invalidateQueries({queryKey:["jobs"]})}
+   if(item.event==="completed"){qc.invalidateQueries({queryKey:["sources"]});refreshJobs(qc)}
    setLastRun(item.runId);
    setLog(current=>{
     const withoutProgress=item.event==="progress"||["completed","cancelled","failed"].includes(item.event)
@@ -456,9 +467,9 @@ function Sources(){
   catch(e){setResult(e instanceof Error?e.message:String(e))}};
  const test=async(source:Source)=>{setResult(`Testing ${source.name}…`);try{const events=await api.test(source);setPreview(previewFromEvents(events));setResult(describeOutcome(events,source.name))}catch(e){setResult(`${source.name}: ${describeFailure()} (see Diagnostics for details)`);console.error(e)}};
  const rebuild=()=>{const runId=crypto.randomUUID(),started=Date.now();setRebuilding(true);setResult("Rebuilding listings from every selected source in parallel…");scrapeAll(runId,[],true)
-  .then(summary=>{setResult(`${describeUpdateSummary(summary)} ${elapsedSince(started)}. Descriptions still download only when opened.`);qc.invalidateQueries({queryKey:["jobs"]});qc.invalidateQueries({queryKey:["sources"]})})
+  .then(summary=>{setResult(`${describeUpdateSummary(summary)} ${elapsedSince(started)}. Descriptions still download only when opened.`);refreshJobs(qc);qc.invalidateQueries({queryKey:["sources"]})})
   .catch(error=>setResult(String(error))).finally(()=>setRebuilding(false))};
- const toggle=(source:Source,enabled:boolean)=>api.setSourceEnabled(source.id,enabled).then(()=>{qc.invalidateQueries({queryKey:["sources"]});qc.invalidateQueries({queryKey:["jobs"]})}).catch(e=>setResult(String(e)));
+ const toggle=(source:Source,enabled:boolean)=>api.setSourceEnabled(source.id,enabled).then(()=>{qc.invalidateQueries({queryKey:["sources"]});refreshJobs(qc)}).catch(e=>setResult(String(e)));
  const lastRead=(source:Source)=>source.lastSuccessAt?`${new Date(source.lastSuccessAt).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})} · ${source.jobCount.toLocaleString()} listings`:source.disabledReason||"Not read yet";
  return <div className={logShown?"sources-layout":"sources-layout log-hidden"}>
   <section className="sources-main">
@@ -467,7 +478,7 @@ function Sources(){
      <button onClick={manualSource}>Add source manually</button><button className="primary" onClick={()=>setBrowsing(true)}>Browse companies</button></div></header>
    <div className="scroll">
     {paused&&<aside className="paused" aria-live="polite"><span className="tag">PAUSED</span>
-     <span className="text">Login or CAPTCHA needs your action in headed Edge.</span>
+     <span className="text">Login or CAPTCHA needs your action in the browser window.</span>
      <button onClick={()=>cancelScrape(paused.runId)}>Cancel</button>
      <button className="primary" onClick={()=>api.resumeScrape(paused.runId)}>Resume &amp; save session</button></aside>}
     {result&&<output className="status">{result}</output>}
@@ -488,7 +499,7 @@ function Sources(){
       <div className="actions">
        <button onClick={()=>test(s)}>Test</button>
        <button onClick={()=>setSelected(s)}>Edit</button>
-       <button className="danger" onClick={()=>confirm(`Remove ${s.name}? Jobs already saved to Applications are kept.`)&&api.deleteSource(s.id).then(()=>{qc.invalidateQueries({queryKey:["sources"]});qc.invalidateQueries({queryKey:["jobs"]})})}>Delete</button>
+       <button className="danger" onClick={()=>confirm(`Remove ${s.name}? Jobs already saved to Applications are kept.`)&&api.deleteSource(s.id).then(()=>{qc.invalidateQueries({queryKey:["sources"]});refreshJobs(qc)})}>Delete</button>
       </div></article>)}</div>}
     {error&&<p className="error">{String(error)}</p>}
     {preview&&<><div className="rule"><h3>Test preview · not saved</h3><hr/>
@@ -624,7 +635,7 @@ export function SourceForm({source,onCancel,onSave}:{source:Source;onCancel:()=>
     <label><span>Max pages</span><input type="number" min="1" max="500" value={Number(config.maxPages||50)} onChange={e=>setConfig(c=>({...c,maxPages:Number(e.target.value)}))}/></label>
     {(configFields[adapter]||[]).map(key=><label key={key}><span>{key}{requiredFields(adapter).includes(key)?" *":""}</span><input value={String(config[key]||"")} onChange={e=>setConfig(current=>({...current,[key]:key==="pageSize"?Number(e.target.value):e.target.value}))}/></label>)}</div>
     <hr/>
-    <label className="inline"><input type="checkbox" checked={headless} onChange={e=>setHeadless(e.target.checked)}/> Headless Edge</label>
+    <label className="inline"><input type="checkbox" checked={headless} onChange={e=>setHeadless(e.target.checked)}/> Headless browser</label>
     <label className="inline"><input type="checkbox" checked={robots} onChange={e=>setRobots(e.target.checked)}/> Override robots.txt</label>
     <label className="inline"><input type="checkbox" checked={local} onChange={e=>setLocal(e.target.checked)}/> Allow private/local network</label>
    <label className="inline"><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/> Select this source</label></section>}
@@ -720,7 +731,7 @@ function StageColumn({stage,count,children}:{stage:string;count:number;children:
   <h3><span className="name">{stageLabel(stage)}</span><span className="count">{count}</span></h3>
   {count?children:<div className="empty">{stage==="planned"?"Nothing saved":"Nothing here"}</div>}</section>}
 function Applications({onConfirmAttempt}:{onConfirmAttempt:(attempt:{applicationId:string;attemptId:string})=>void}){const qc=useQueryClient();const {data:apps=[]}=useQuery({queryKey:["apps"],queryFn:api.apps});const [selected,setSelected]=useState<string>();const [error,setError]=useState("");
- const refresh=()=>{qc.invalidateQueries({queryKey:["apps"]});qc.invalidateQueries({queryKey:["jobs"]})};
+ const refresh=()=>{qc.invalidateQueries({queryKey:["apps"]});refreshJobs(qc)};
  // Same manual-override escape as the drawer's Stage dropdown: dragging straight to Applied
  // needs a stated reason instead of Open application + confirmation.
  const move=(a:Application,stage:string)=>{if(stage===a.currentStage)return;

@@ -48,6 +48,11 @@ export const backgroundSyncStatus=()=>invoke<BackgroundSyncStatus>("background_s
 export const setBackgroundSync=(enabled:boolean)=>invoke<BackgroundSyncStatus>("set_background_sync",{enabled});
 export type LaunchAtLoginStatus={enabled:boolean;debugBuild:boolean;issue:string|null;lastResult:number|null};
 // Which countries the jobs in scope are actually in, and how many could not be placed at all.
+/// Everything on the Jobs page that comes from the jobs table has to be refreshed together. The
+/// country list is counted from those same rows, and refreshing only the list left the picker
+/// showing the countries of the last time the app opened — empty, on a first run — however many
+/// jobs had arrived since.
+export const refreshJobs=(client:{invalidateQueries:(filters:{queryKey:readonly unknown[]})=>unknown})=>{client.invalidateQueries({queryKey:["jobs"]});client.invalidateQueries({queryKey:["job-countries"]})};
 export const jobCountries=(sourceIds:string[])=>invoke<[{code:string;jobs:number}[],number]>("job_countries",{sourceIds});
 export const launchAtLoginStatus=()=>invoke<LaunchAtLoginStatus>("launch_at_login_status");
 export const setLaunchAtLogin=(enabled:boolean)=>invoke<LaunchAtLoginStatus>("set_launch_at_login",{enabled});

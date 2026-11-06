@@ -1,16 +1,16 @@
 # JobScraper
 
-Local-first Windows desktop app that collects jobs from company career sites, filters them, and tracks your applications.
+Local-first desktop app for Windows and Linux that collects jobs from company career sites, filters them, and tracks your applications.
 
 Not an auto-apply bot: it opens the original vacancy in your browser, records only what you confirm, and never submits an application for you.
 
 ## Features
 
-**Collect** — Scrapes every enabled source on launch, or hidden at sign-in and every 4 hours via Task Scheduler, with one Windows notification per run that finds something new. Incremental checks keep updates light; descriptions are fetched only when a job is opened. Results stream into the local database as they arrive, so cancelled or partially failed runs still keep what they found. A vacancy is marked possibly closed after one full run misses it, closed after two.
+**Collect** — Scrapes every enabled source on launch, or hidden at sign-in and every 4 hours via Task Scheduler (Windows) or a systemd user timer (Linux), with one desktop notification per run that finds something new. Incremental checks keep updates light; descriptions are fetched only when a job is opened. Results stream into the local database as they arrive, so cancelled or partially failed runs still keep what they found. A vacancy is marked possibly closed after one full run misses it, closed after two.
 
 **Search** — Filter by source, title, listing text, posting age, country, application status, and closed status. Sort by discovery or publish date, page through results, and open a reader view with description, work mode, seniority, salary, and status. Saved and applied jobs survive their source being disabled or deleted.
 
-**Sources** — Add any of 164 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login, and filter titles during scraping so unwanted roles are never stored.
+**Sources** — Add any of 164 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge, Google Chrome or Chromium, whichever is installed. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login, and filter titles during scraping so unwanted roles are never stored.
 
 **Applications** — Board with Saved, Applied, Screening, Interviewing, Offer, Accepted, Rejected, and Withdrawn stages. Stores recruiter details, notes with timestamps, an event timeline, and immutable document snapshots up to 20 MB. Schedules interview reminders (24 h and 1 h before) and ghosting reminders.
 
@@ -62,20 +62,18 @@ Tauri 2 + Rust (persistence, workflow, scheduling, OS integration) · SQLx/SQLit
 React UI  ──Tauri commands/events──▶  Rust service ──JSONL──▶  Node sidecar
                                       SQLite, workflow,        ATS adapters,
                                       reminders, scheduling    HTML/JSON/RSS,
-                                                               Playwright/Edge
+                                                               Playwright/browser
 ```
 
 Rust owns persistence and rules; the Node worker owns untrusted web parsing and browser automation. A worker starts only when needed and is killed on cancel or exit.
 
 ## Privacy
 
-No account, no cloud, no telemetry. Data lives in `%LOCALAPPDATA%\JobScraper` (dev builds use `JobScraper-dev`). The UI's CSP blocks arbitrary requests; all network access is isolated in the sidecar, which blocks private/loopback/reserved targets, paces requests per origin, honors `Retry-After` and `robots.txt` (overridable per source), and encrypts captured browser sessions with AES-256-GCM keyed through the Windows credential store.
+No account, no cloud, no telemetry. Data lives in `%LOCALAPPDATA%\JobScraper` on Windows and `~/.local/share/JobScraper` on Linux (dev builds use `JobScraper-dev`). The UI's CSP blocks arbitrary requests; all network access is isolated in the sidecar, which blocks private/loopback/reserved targets, paces requests per origin, honors `Retry-After` and `robots.txt` (overridable per source), and encrypts captured browser sessions with AES-256-GCM keyed through the system credential store (Windows Credential Manager, or the Secret Service — GNOME Keyring or KWallet — on Linux).
 
 ## Install and build
 
-Running a packaged build needs Windows 11 x64 and the Edge WebView2 runtime (normally already installed).
-
-Building needs Node.js 24, pnpm 11, Rust (`x86_64-pc-windows-msvc`), MSVC C++ Build Tools, and Microsoft Edge.
+**Windows** — running a packaged build needs Windows 11 x64 and the Edge WebView2 runtime (normally already installed). Building needs Node.js 24, pnpm 11, Rust (`x86_64-pc-windows-msvc`), MSVC C++ Build Tools, and Microsoft Edge.
 
 ```powershell
 pnpm app:dev
@@ -86,13 +84,27 @@ pnpm package:all   # or package:installer / package:portable
 
 Packages land in `artifacts/<version>/` with `SHA256SUMS.txt`. Keep the portable ZIP as one folder — `JobScraper.exe` loads the adjacent `sidecar` directory.
 
-### Startup permissions
+**Linux** — x86_64 with WebKitGTK 4.1, a systemd user session, and a Chromium-based browser for JavaScript-rendered sites (set `JOBSCRAPER_BROWSER` to its path if it lives somewhere unusual). Building needs Node.js 24, pnpm 11, Rust, and the Tauri system libraries — on Fedora:
+
+```bash
+sudo dnf install webkit2gtk4.1-devel gtk3-devel libsoup3-devel librsvg2-devel \
+  libappindicator-gtk3-devel libxdo-devel dbus-devel openssl-devel patchelf rpm-build
+pnpm app:dev:linux
+pnpm package:linux   # release gates, then .rpm and .deb in artifacts/<version>/
+sudo dnf install artifacts/1.0.0/JobScraper-*.rpm
+jobscraper --setup-background   # start at sign-in + background checks, without opening the app
+```
+
+The installed app can also switch both on from Settings.
+
+### Startup permissions (Windows)
 
 JobScraper runs as your normal user and uses least-privileged scheduled tasks. Do **not** enable "Run this program as an administrator" — Windows cannot show a UAC prompt during a scheduled launch. If an older admin-created task rejects changes, close the app and run `scripts/repair-startup.ps1` from an elevated PowerShell; it backs up task definitions under `%LOCALAPPDATA%\JobScraper\startup-repair-*` and clears only this executable's `RUNASADMIN` flag.
 
 ## Limitations
 
-- Windows only. No cloud sync or multi-device account.
+- Windows and Linux (x86_64) only. No cloud sync or multi-device account.
+- On Linux, background checks and reminders run from systemd user timers, so they work while you are signed in (or have enabled lingering with `loginctl enable-linger`); a reminder that came due while the computer was off is delivered at the next sign-in.
 - Never fills or submits application forms.
 - Authenticated sites may need manual login or CAPTCHA completion before session capture.
 - Some boards omit dates, locations, salaries, or descriptions; missing values stay missing rather than being invented.

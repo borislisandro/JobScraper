@@ -1,26 +1,38 @@
 import { execFileSync, spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { access } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const installRoot = process.argv[2];
 if (!installRoot) throw new Error("Pass the installed JobScraper directory.");
-const node = join(installRoot, "sidecar", "node.exe");
+const windows = process.platform === "win32";
+const node = join(installRoot, "sidecar", windows ? "node.exe" : "node");
 const worker = join(installRoot, "sidecar", "worker.mjs");
 await Promise.all([access(node), access(worker)]);
 
-function edgePids() {
-  const output = execFileSync(
-    "tasklist.exe",
-    ["/FI", "IMAGENAME eq msedge.exe", "/FO", "CSV", "/NH"],
-    { encoding: "utf8" },
-  );
-  return new Set(
-    [...output.matchAll(/^"msedge\.exe","(\d+)"/gim)].map((match) => match[1]),
-  );
+// Processes of the browser the worker drives, so a leak after the worker exits is visible. Windows
+// asks Task Manager for Edge; Linux reads the process names out of /proc.
+async function browserPids() {
+  if (windows) {
+    const output = execFileSync(
+      "tasklist.exe",
+      ["/FI", "IMAGENAME eq msedge.exe", "/FO", "CSV", "/NH"],
+      { encoding: "utf8" },
+    );
+    return new Set(
+      [...output.matchAll(/^"msedge\.exe","(\d+)"/gim)].map((match) => match[1]),
+    );
+  }
+  const pids = new Set();
+  for (const entry of await readdir("/proc")) {
+    if (!/^\d+$/.test(entry)) continue;
+    const name = await readFile(`/proc/${entry}/comm`, "utf8").catch(() => "");
+    if (/^(chrome|chromium|msedge|brave)/i.test(name.trim())) pids.add(entry);
+  }
+  return pids;
 }
 
-const before = edgePids();
+const before = await browserPids();
 const server = createServer((_request, response) => {
   response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
   response.end(
@@ -41,9 +53,9 @@ try {
     `${JSON.stringify({
       protocolVersion: 1,
       command: "test_source",
-      runId: "installed-edge-smoke",
+      runId: "installed-browser-smoke",
       source: {
-        id: "installed-edge-smoke",
+        id: "installed-browser-smoke",
         name: "Local fixture",
         baseUrl: `http://127.0.0.1:${address.port}/jobs`,
         adapterId: "playwright",
@@ -76,16 +88,16 @@ try {
     .map((line) => JSON.parse(line));
   if (events[0]?.event !== "started") throw new Error("Missing started event.");
   if (!events.some((event) => event.event === "job" && event.payload?.title === "Firmware Engineer")) {
-    throw new Error(`Installed Edge did not extract fixture job: ${stdout}`);
+    throw new Error(`Installed browser did not extract fixture job: ${stdout}`);
   }
   const completed = events.at(-1);
   if (completed?.event !== "completed" || completed.payload?.complete !== false || completed.payload?.pages !== 1) {
     throw new Error(`Missing safe single-page browser result: ${stdout}`);
   }
   await new Promise((resolve) => setTimeout(resolve, 2_000));
-  const leaked = [...edgePids()].filter((pid) => !before.has(pid));
-  if (leaked.length) throw new Error(`Edge process leak after worker exit: ${leaked.join(", ")}`);
-  process.stdout.write(`${JSON.stringify({ events: events.map((event) => event.event), leakedEdgePids: leaked })}\n`);
+  const leaked = [...(await browserPids())].filter((pid) => !before.has(pid));
+  if (leaked.length) throw new Error(`Browser process leak after worker exit: ${leaked.join(", ")}`);
+  process.stdout.write(`${JSON.stringify({ events: events.map((event) => event.event), leakedBrowserPids: leaked })}\n`);
 } finally {
   await new Promise((resolve) => server.close(resolve));
 }

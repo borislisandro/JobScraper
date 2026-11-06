@@ -25,7 +25,7 @@ const failureText: Record<string, string> = {
   captcha_required: "This site asks for a CAPTCHA before it will show its jobs.",
   robots_denied: "This site asks automated tools not to read its job listings.",
   rate_limited: "This site is asking us to slow down. Try again in a few minutes.",
-  browser_incompatible: "Microsoft Edge is needed to read this site and was not found.",
+  browser_incompatible: "A Chromium-based browser (Edge, Chrome or Chromium) is needed to read this site and was not found.",
   selector_broken: "This site's job list changed shape and can no longer be read.",
   parse_error: "This website doesn't work with JobScraper.",
   network_error: "Could not reach this site. Check the address.",
@@ -40,7 +40,7 @@ export const describeFailure = (code?: string) =>
 const unsupportedText: Record<string, string> = {
   not_found: "That page could not be found. Check the address and try again.",
   blocked: "This site blocks automated tools from reading its job listings.",
-  no_browser: "This site needs Microsoft Edge to be read, and Edge was not found.",
+  no_browser: "This site needs a Chromium-based browser (Edge, Chrome or Chromium) to be read, and none was found.",
   no_listings: "No job listings could be read from this page. Try the page that lists the jobs.",
 };
 export const describeUnsupported = (reason?: string) =>
@@ -114,6 +114,9 @@ export function describeOutcome(events: WorkerEvent[], sourceName: string) {
 }
 
 export function describeUpdateSummary(result: ScrapeAllResult) {
+  if (!(result.completedSources || result.unchangedSources || result.failedSources || result.cancelledSources)) {
+    return "No sources are switched on. Turn some on from the Sources tab.";
+  }
   const parts = [
     `${result.completedSources} read`,
     `${result.unchangedSources} unchanged`,
