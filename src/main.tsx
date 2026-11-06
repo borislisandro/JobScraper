@@ -9,11 +9,12 @@ import { COUNTRIES } from "./countries";
 import { describePreset, parsePresets, presetFrom, PRESETS_KEY, withoutPreset, withPreset, type FilterPreset } from "./presets";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { captureJob, jobCountries, listCompanyCatalog, newSince, REVIEWED_KEY, saveCapturedJob, setJobDismissed, type CapturedJob, type CatalogCompany } from "./api";
-import { api, appLogs, backgroundSyncStatus, DEFAULT_POSTED_WINDOW, jobDescription, launchAtLoginStatus, POSTED_WINDOWS, purgeAllJobs, setBackgroundSync, setLaunchAtLogin, startupStatus, type StartupStatus, cancelScrape, cancelScrapeAll, captureSession, deleteBrowserSession, getSetting, setSetting, hasBrowserSession, scrapeAll, scrapePerformance, sourceConfig, startAutomaticSync, validateAttachmentSize, type Application, type Job, type JobDescription, type JobFilter, type Source, type WorkerEvent } from "./api";
+import { api, appLogs, backgroundSyncStatus, DEFAULT_POSTED_WINDOW, jobDescription, launchAtLoginStatus, POSTED_WINDOWS, purgeAllJobs, setBackgroundSync, setLaunchAtLogin, startupStatus, type StartupStatus, cancelScrape, cancelScrapeAll, captureSession, deleteBrowserSession, getSetting, setSetting, hasBrowserSession, scrapeAll, scrapePerformance, sourceConfig, startAutomaticSync, type Application, type Job, type JobDescription, type JobFilter, type Source, type WorkerEvent } from "./api";
 import { listenForApplyConfirmation } from "./apply-prompts";
 import { listenForScrapeEvents } from "./scrape-events";
 import { catalogSource, describeFailure, describeLogEvent, describeOutcome, describeUnsupported, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
-import { DOCUMENT_TYPES, documentTypeLabel, applicationStages, boardMoveError, isApplied, stageLabel } from "./application-ui";
+import { BOARD_COLUMNS, boardColumn, isApplied, stageLabel, websiteUrl } from "./application-ui";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import "./styles.css";
 
 const queryClient=new QueryClient({defaultOptions:{queries:{refetchOnWindowFocus:false}}}); const pages=["Jobs","Sources","Applications","Diagnostics"] as const; type Page=typeof pages[number];
@@ -76,7 +77,7 @@ function App(){
  // was every trace of it in the window: the Updating…/Cancel state of Update Jobs, the running
  // state of Update this source, the test preview, and the finished message. Leaving the page
  // mounted keeps all of it, so leaving and coming back shows the run exactly where it got to.
- const views:Record<Page,React.ReactNode>={Jobs:<Jobs onCount={setJobCount}/>,Sources:<Sources/>,Applications:<Applications onConfirmAttempt={setAttempt}/>,Diagnostics:<Diagnostics/>};
+ const views:Record<Page,React.ReactNode>={Jobs:<Jobs onCount={setJobCount}/>,Sources:<Sources/>,Applications:<Applications/>,Diagnostics:<Diagnostics/>};
  const open=(next:Page)=>{setPage(next);setVisited(current=>current.includes(next)?current:[...current,next])};
  const lastUpdate=allSources.map(source=>source.lastSuccessAt?new Date(source.lastSuccessAt).getTime():0).reduce((latest,value)=>Math.max(latest,value),0);
  const updateNow=()=>{const runId=crypto.randomUUID();setUpdating(true);setUpdateStatus("Updating sources");scrapeAll(runId,[],false)
@@ -167,7 +168,7 @@ export const JobCard=React.memo(function JobCard({job,sourceName,onStatus,onOpen
     {gone&&<span className="pill" title={job.availability==="closed"
      ?"Two complete reads of this board did not list this job."
      :"The last complete read of this board did not list this job."}>{gone}</span>}
-    {stage&&<span className={isApplied(stage)?"pill applied":"pill good"}>{isApplied(stage)?`Applied · ${stageLabel(stage)}`:"Saved"}</span>}
+    {stage&&<span className={isApplied(stage)?"pill applied":"pill good"}>{stageLabel(stage)}</span>}
    </span>
    <span className="row-actions">{job.dismissedAt
      ? <button className="small" disabled={busy} onClick={event=>{event.stopPropagation();dismiss(false)}}>Undismiss</button>
@@ -638,108 +639,56 @@ export function SourceForm({source,onCancel,onSave}:{source:Source;onCancel:()=>
 // ---------------------------------------------------------------------------------------------
 // Applications
 // ---------------------------------------------------------------------------------------------
-function localDateTimeValue(utc:string){const date=new Date(utc);const offset=date.getTimezoneOffset()*60_000;return new Date(date.getTime()-offset).toISOString().slice(0,16)}
-export function InterviewPanel({applicationId,refresh}:{applicationId:string;refresh:()=>void}){const [open,setOpen]=useState(false);const [opened,setOpened]=useState(false);const {data:items=[],refetch}=useQuery({queryKey:["interviews",applicationId],queryFn:()=>api.interviews(applicationId),enabled:open,staleTime:Infinity});const [stage,setStage]=useState("phone screen");const [when,setWhen]=useState("");const [notes,setNotes]=useState("");const [outcome,setOutcome]=useState("");const [editing,setEditing]=useState<string>();const [message,setMessage]=useState("");const save=()=>{if(!when)return;api.saveInterview({id:editing,applicationId,stage,scheduledAt:new Date(when).toISOString(),notes:notes||null,outcome:outcome||null}).then(()=>{setMessage(editing?"Interview and reminders rescheduled.":"Interview reminders scheduled for 24h and 1h before.");setWhen("");setNotes("");setOutcome("");setEditing(undefined);refetch();refresh()}).catch(e=>setMessage(String(e)))};return <details onToggle={event=>{const next=event.currentTarget.open;setOpen(next);if(next)setOpened(true)}}><summary>Interviews &amp; reminders</summary>{opened&&<><label>Stage<select value={stage} onChange={e=>setStage(e.target.value)}><option>phone screen</option><option>recruiter</option><option>technical</option><option>onsite</option><option>final</option><option>custom</option></select></label><label>Local date/time<input type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)}/></label><label>Notes<input value={notes} onChange={e=>setNotes(e.target.value)}/></label><label>Outcome<input value={outcome} onChange={e=>setOutcome(e.target.value)}/></label><button type="button" onClick={save}>{editing?"Reschedule interview":"Schedule interview"}</button>{items.map(item=><div key={item.id}><span>{item.stage} · {new Date(item.scheduledAt).toLocaleString()} {item.outcome&&`· ${item.outcome}`}</span><button type="button" onClick={()=>{setEditing(item.id);setStage(item.stage);setWhen(localDateTimeValue(item.scheduledAt));setNotes(item.notes||"");setOutcome(item.outcome||"")}}>Edit</button><button type="button" onClick={()=>api.deleteInterview(item.id).then(()=>refetch())}>Cancel</button></div>)}<label>Ghost threshold days<input type="number" defaultValue={14} min="1" max="365" onBlur={e=>api.ghostThreshold(applicationId,Number(e.target.value)).then(()=>setMessage("Ghost reminder rescheduled.")).catch(err=>setMessage(String(err)))}/></label>{message&&<small>{message}</small>}</>}</details>}
-export function ApplicationDrawer({applicationId,onClose,refresh}:{applicationId:string;onClose:()=>void;refresh:()=>void}){
- // What the next attachment will be filed as; the picker sits above the file input.
- const [documentType,setDocumentType]=useState<string>("cv");
- const {data,refetch:queryRefetch}=useQuery({queryKey:["application-details",applicationId],queryFn:()=>api.applicationDetails(applicationId)});const refetch=()=>queryRefetch();const [note,setNote]=useState("");const [message,setMessage]=useState("");if(!data)return <dialog open className="drawer" aria-label="Application details"><div className="sheet"><div className="dialog-body"><p className="muted">Loading details…</p></div></div></dialog>;const app=data.application;
- const saveDetails=(event:React.FormEvent<HTMLFormElement>)=>{event.preventDefault();const form=new FormData(event.currentTarget);api.saveApplicationDetails({applicationId,recruiterName:form.get("name")||null,recruiterEmail:form.get("email")||null,recruiterPhone:form.get("phone")||null,sourceAttribution:form.get("source")||null,rejectionReason:form.get("rejection")||null,rejectionCategory:form.get("category")||null,withdrawnReason:form.get("withdrawn")||null}).then(()=>{setMessage("Details saved.");refetch();refresh()}).catch(e=>setMessage(String(e)))};const attachFile=(file:File,type:string)=>{try{validateAttachmentSize(file.size)}catch(error){setMessage(String(error));return}file.arrayBuffer().then(bytes=>api.attachDocument({applicationId,documentType:type,filename:file.name,mimeType:file.type||"application/octet-stream"},bytes)).then(()=>{setMessage("Immutable snapshot attached.");refetch()}).catch(e=>setMessage(String(e)))};const exportFile=(item:typeof data.documents[number])=>api.exportDocument(item.id).then(bytes=>{const url=URL.createObjectURL(new Blob([bytes],{type:item.mimeType}));const link=document.createElement("a");link.href=url;link.download=item.filename;link.click();URL.revokeObjectURL(url)}).catch(e=>setMessage(String(e)));
- // "Applied" is normally reached only through Open application + explicit confirmation, so it
- // is not a plain board move — but sometimes the user applied outside JobScraper entirely, and
- // there has to be a way to say so. A stated reason is the manual override; skipping it here
- // just re-shows why the direct move was refused, same wording the drag-and-drop board gives.
- const moveStage=(stage:string)=>{if(stage===app.currentStage)return;
-  if(stage==="applied"){const reason=prompt(`${boardMoveError(app.currentStage,"applied")} To set it manually anyway, say why:`);
-   if(reason===null)return;if(!reason.trim())return setMessage(boardMoveError(app.currentStage,"applied")!);
-   api.stage(app.id,"applied",reason.trim(),true).then(()=>{setMessage("Moved to Applied.");refetch();refresh()}).catch(error=>setMessage(String(error)));return}
-  const error=boardMoveError(app.currentStage,stage);if(error)return setMessage(error);
-  api.stage(app.id,stage).then(()=>{setMessage(`Moved to ${stageLabel(stage)}.`);refetch();refresh()}).catch(error=>setMessage(String(error)))};
- // Removes the tracked application, not the job — the listing stays scraped and searchable, it
- // just stops carrying a stage. Notes, documents and interview records go with it, so this asks
- // first; there is no undo once confirmed.
- const remove=()=>ask(`Remove ${app.title||"this job"} from Saved? Notes, documents and interview history go with it. This cannot be undone.`,{title:"Remove from saved?",kind:"warning"})
-  .then(confirmed=>{if(confirmed)api.deleteApplication(applicationId).then(()=>{refresh();onClose()}).catch(error=>setMessage(String(error)))});
- return <dialog open className="drawer" aria-label="Application details"><div className="sheet">
-  <header><div><h2>{app.title||"Application"}</h2>
-    <p>{app.company} · {stageLabel(app.currentStage)}{data.firstResponseAt?` · first response ${new Date(data.firstResponseAt).toLocaleString()}`:" · no response yet"}</p></div>
-   <div className="actions"><button className="small danger" onClick={remove}>Remove from saved</button>
-    <button className="close" aria-label="Close" onClick={onClose}>✕</button></div></header>
-  <div className="dialog-body">
-   {message&&<output className="status">{message}</output>}
-   <p className="hint">{data.sourceName}{data.sourceUrl&&<> · <a href={data.sourceUrl} target="_blank" rel="noreferrer">Open source</a></>}</p>
-   <label><span>Stage</span><select value={app.currentStage} onChange={event=>moveStage(event.target.value)}>{applicationStages.map(stage=><option key={stage} value={stage}>{stageLabel(stage)}</option>)}</select></label>
-   <form onSubmit={saveDetails}>
-    <span className="caption">Recruiter</span>
-    <div className="field-grid">
-     <label><span>Name</span><input name="name" defaultValue={app.recruiterName||""}/></label>
-     <label><span>Email</span><input name="email" type="email" defaultValue={app.recruiterEmail||""}/></label>
-     <label><span>Phone</span><input name="phone" defaultValue={app.recruiterPhone||""}/></label>
-     <label><span>Source attribution</span><input name="source" defaultValue={app.sourceAttribution||""}/></label></div>
-    <span className="caption">Outcome</span>
-    <div className="field-grid">
-     <label><span>Rejection reason</span><input name="rejection" defaultValue={app.rejectionReason||""}/></label>
-     <label><span>Rejection category</span><input name="category" defaultValue={app.rejectionCategory||""}/></label>
-     <label className="wide"><span>Withdrawal reason</span><input name="withdrawn" defaultValue={app.withdrawnReason||""}/></label></div>
-    <button className="quiet">Save details</button></form>
-   <hr/>
-   <InterviewPanel applicationId={applicationId} refresh={()=>{refetch();refresh()}}/>
-   <hr/>
-   <section><span className="caption">Notes</span>
-    <textarea rows={3} placeholder="Add a note…" value={note} onChange={e=>setNote(e.target.value)}/>
-    <button className="quiet" disabled={!note.trim()} onClick={()=>api.saveNote({applicationId,body:note}).then(()=>{setNote("");refetch()}).catch(e=>setMessage(String(e)))}>Add note</button>
-    {data.notes.map(item=><article className="note" key={item.id}><p>{item.body}</p>
-     <div className="actions"><small>{new Date(item.updatedAt||item.createdAt).toLocaleString()}</small>
-      <button className="link" onClick={()=>{const body=prompt("Edit note",item.body);if(body)api.saveNote({id:item.id,applicationId,body}).then(()=>refetch())}}>Edit</button>
-      <button className="link" onClick={()=>api.deleteNote(item.id).then(()=>refetch())}>Delete</button></div></article>)}</section>
-   <hr/>
-   <section><span className="caption">Documents</span>
-    {data.documents.map(doc=><div className="row" key={doc.id}><div><span>{doc.filename}</span>
-      <small>{documentTypeLabel(doc.documentType)} · {doc.size} B · immutable snapshot</small></div>
-      <button onClick={()=>exportFile(doc)}>Export</button></div>)}
-    {/* Every attachment used to be filed as a cover letter, whatever it was, and the list below
-        then said so — a CV labelled as a cover letter is worse than no label at all. */}
-    <label><span>Attach as</span><select value={documentType} onChange={event=>setDocumentType(event.target.value)}>
-     {DOCUMENT_TYPES.map(type=><option key={type.value} value={type.value}>{type.label}</option>)}</select></label>
-    <label><span>Attach a local file</span><input type="file" onChange={e=>e.target.files?.[0]&&attachFile(e.target.files[0],documentType)}/></label></section>
-   <hr/>
-   <section><span className="caption">Timeline</span>
-    {data.events.map(event=><div className="event" key={event.id}><span className="dot"/>
-     <div><span>{event.eventType}{event.fromStage?` · ${stageLabel(event.fromStage)} → ${stageLabel(event.toStage)}`:""}{event.reason?` · ${event.reason}`:""}</span>
-      <small>{new Date(event.occurredAt).toLocaleString()}</small></div></div>)}</section>
-  </div></div></dialog>}
-function AppCard({app,details,onConfirmAttempt}:{app:Application;details:(id:string)=>void;onConfirmAttempt:(attempt:{applicationId:string;attemptId:string})=>void}){const drag=useDraggable({id:app.id,data:{application:app}});const[message,setMessage]=useState("");const when=app.appliedAt?`applied ${new Date(app.appliedAt).toLocaleDateString()}`:app.acceptedAt?`accepted ${new Date(app.acceptedAt).toLocaleDateString()}`:"saved";
- // A "Not yet" answer stops JobScraper asking again on its own, but the question still needs an
- // answer eventually; this is where the user comes back to give it, on their own time.
- const confirm=()=>api.confirmApplication(app.id).then(attempt=>attempt&&onConfirmAttempt(attempt));
- return <article className="card" ref={drag.setNodeRef} {...drag.listeners} {...drag.attributes} style={{opacity:drag.isDragging?.55:1}}><strong>{app.title||"Job"}</strong><p>{app.company}</p><span className="when">{when}</span><span className="card-actions"><button className="small" onPointerDown={e=>e.stopPropagation()} onClick={()=>details(app.id)}>Open</button>
-  {app.pendingConfirmation?<button className="small primary" onPointerDown={e=>e.stopPropagation()} onClick={confirm}>Confirm application</button>
-   :app.currentStage==="planned"&&<button className="small primary" onPointerDown={e=>e.stopPropagation()} onClick={()=>api.openApply(app.id).then(()=>setMessage("Application opened. Confirm when JobScraper regains focus.")).catch(e=>setMessage(String(e)))}>Apply</button>}</span>{message&&<small>{message}</small>}</article>}
+// Two columns, three buttons a card. Marking applied by hand counts as the user's own word, so it
+// goes through as a manual override with a fixed reason; an apply attempt still waiting on the
+// "Did you submit?" question is answered Yes instead, so that question is not left hanging.
+const markApplied=(app:Application)=>app.pendingConfirmation
+ ?api.applyDecision(app.id,"yes")
+ :api.stage(app.id,"applied","Marked applied on the Applications board",true);
+const moveBackToSaved=(app:Application)=>api.stage(app.id,"planned","Moved back to Saved",true);
+export function AppCard({app,onStatus,refresh}:{app:Application;onStatus:(message:string)=>void;refresh:()=>void}){
+ const drag=useDraggable({id:app.id,data:{application:app}});const [busy,setBusy]=useState(false);
+ const applied=isApplied(app.currentStage),url=websiteUrl(app),name=app.title||"this job";
+ const run=(work:()=>Promise<unknown>,done:string)=>{setBusy(true);
+  work().then(()=>{onStatus(done);refresh()}).catch(error=>onStatus(String(error))).finally(()=>setBusy(false))};
+ // Unsaving is cheap to undo — Save it again from Jobs. Removing an applied one loses the record
+ // that you applied, and when, so that one asks first.
+ const remove=()=>{if(!applied)return run(()=>api.deleteApplication(app.id),`Unsaved ${name}.`);
+  ask(`Remove ${name} from Applications? The record that you applied goes with it.`,{title:"Remove application?",kind:"warning"})
+   .then(confirmed=>{if(confirmed)run(()=>api.deleteApplication(app.id),`Removed ${name}.`)})};
+ const when=applied?(app.appliedAt?`applied ${new Date(app.appliedAt).toLocaleDateString()}`:"applied"):"saved";
+ const stop=(event:React.PointerEvent)=>event.stopPropagation();
+ return <article className="card" ref={drag.setNodeRef} {...drag.listeners} {...drag.attributes} style={{opacity:drag.isDragging?.55:1}}>
+  <strong>{app.title||"Job"}</strong><p>{app.company}</p><span className="when">{when}</span>
+  <span className="card-actions">
+   <button className="small" disabled={!url} title={url?undefined:"This listing has no web address"} onPointerDown={stop}
+    onClick={()=>url&&openUrl(url).catch(error=>onStatus(String(error)))}>Open website</button>
+   {applied
+    ? <button className="small" disabled={busy} onPointerDown={stop} onClick={()=>run(()=>moveBackToSaved(app),`Moved ${name} back to Saved.`)}>Back to saved</button>
+    : <button className="small primary" disabled={busy} onPointerDown={stop} onClick={()=>run(()=>markApplied(app),`Marked ${name} as applied.`)}>Apply</button>}
+   <button className="small quiet" disabled={busy} onPointerDown={stop} onClick={remove}>{applied?"Remove":"Unsave"}</button>
+  </span></article>}
 function StageColumn({stage,count,children}:{stage:string;count:number;children:React.ReactNode}){const drop=useDroppable({id:stage});
- const folded=["accepted","rejected","withdrawn"].includes(stage);return <section ref={drop.setNodeRef} className={[drop.isOver?"drop-active":"",folded?"folded":""].filter(Boolean).join(" ")}>
+ return <section ref={drop.setNodeRef} className={drop.isOver?"drop-active":""}>
   <h3><span className="name">{stageLabel(stage)}</span><span className="count">{count}</span></h3>
-  {count?children:<div className="empty">{stage==="planned"?"Nothing saved":"Nothing here"}</div>}</section>}
-function Applications({onConfirmAttempt}:{onConfirmAttempt:(attempt:{applicationId:string;attemptId:string})=>void}){const qc=useQueryClient();const {data:apps=[]}=useQuery({queryKey:["apps"],queryFn:api.apps});const [selected,setSelected]=useState<string>();const [error,setError]=useState("");
+  {count?children:<div className="empty">{stage==="planned"?"Nothing saved":"Nothing applied to yet"}</div>}</section>}
+function Applications(){const qc=useQueryClient();const {data:apps=[]}=useQuery({queryKey:["apps"],queryFn:api.apps});const [status,setStatus]=useState("");
  const refresh=()=>{qc.invalidateQueries({queryKey:["apps"]});qc.invalidateQueries({queryKey:["jobs"]})};
- // Same manual-override escape as the drawer's Stage dropdown: dragging straight to Applied
- // needs a stated reason instead of Open application + confirmation.
- const move=(a:Application,stage:string)=>{if(stage===a.currentStage)return;
-  if(stage==="applied"){const reason=prompt(`${boardMoveError(a.currentStage,"applied")} To set it manually anyway, say why:`);
-   if(reason===null)return;if(!reason.trim())return setError(boardMoveError(a.currentStage,"applied")!);
-   api.stage(a.id,"applied",reason.trim(),true).then(refresh).catch(e=>setError(String(e)));return}
-  const err=boardMoveError(a.currentStage,stage);if(err){setError(err);return}
-  api.stage(a.id,stage).then(refresh).catch(e=>setError(String(e)))};
- const onDragEnd=(event:DragEndEvent)=>{const app=event.active.data.current?.application as Application|undefined;const stage=event.over?.id;if(app&&typeof stage==="string")move(app,stage)};
- const openCount=apps.filter(app=>!["accepted","rejected","withdrawn"].includes(app.currentStage)).length,interviewing=apps.filter(app=>app.currentStage==="interviewing").length;
+ const onDragEnd=(event:DragEndEvent)=>{const app=event.active.data.current?.application as Application|undefined;const target=event.over?.id;
+  if(!app||typeof target!=="string"||target===boardColumn(app.currentStage))return;
+  const name=app.title||"this job";
+  (target==="applied"?markApplied(app):moveBackToSaved(app))
+   .then(()=>{setStatus(target==="applied"?`Marked ${name} as applied.`:`Moved ${name} back to Saved.`);refresh()})
+   .catch(error=>setStatus(String(error)))};
+ const applied=apps.filter(app=>isApplied(app.currentStage)).length;
  return <div className="view">
-  <div className="toolbar"><header><div><h2>Applications</h2><p>Drag a card between columns, or open it for notes, documents and interviews. Applied is recorded when you confirm after opening a posting.</p></div><span className="count">{openCount} open · {interviewing} interviewing</span></header>
-   {error&&<output className="status warning">{error}</output>}</div>
+  <div className="toolbar"><header><div><h2>Applications</h2><p>Save a job on the Jobs page and it lands here. Press Apply once you have applied, or drag the card across.</p></div><span className="count">{apps.length-applied} saved · {applied} applied</span></header>
+   {status&&<output className="status">{status}</output>}</div>
   <div className="scroll" style={{display:"block"}}>
    {!apps.length?<div className="empty"><strong>Nothing saved yet</strong><span>Press Save or Apply on a job and it lands here as Saved.</span></div>
-    :<DndContext onDragEnd={onDragEnd}><div className="board">{applicationStages.map(stage=>{const cards=apps.filter(a=>a.currentStage===stage);
-     return <StageColumn stage={stage} count={cards.length} key={stage}>{cards.map(a=><AppCard app={a} details={setSelected} onConfirmAttempt={onConfirmAttempt} key={a.id}/>)}</StageColumn>})}</div></DndContext>}
+    :<DndContext onDragEnd={onDragEnd}><div className="board">{BOARD_COLUMNS.map(stage=>{const cards=apps.filter(a=>boardColumn(a.currentStage)===stage);
+     return <StageColumn stage={stage} count={cards.length} key={stage}>{cards.map(a=><AppCard app={a} onStatus={setStatus} refresh={refresh} key={a.id}/>)}</StageColumn>})}</div></DndContext>}
   </div>
-  {selected&&<ApplicationDrawer applicationId={selected} onClose={()=>setSelected(undefined)} refresh={refresh}/>}
  </div>}
 
 // ---------------------------------------------------------------------------------------------

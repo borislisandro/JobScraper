@@ -88,6 +88,9 @@ pub struct Application {
     /// An apply attempt still awaits a decision, including one already answered "not_yet" and
     /// silenced from the automatic prompt. The Applications card offers to ask again for this.
     pub pending_confirmation: bool,
+    /// The job's own page and its apply link, so the Applications card can open the website.
+    pub canonical_url: Option<String>,
+    pub apply_url: Option<String>,
 }
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]

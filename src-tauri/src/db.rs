@@ -715,7 +715,7 @@ pub struct PersistBatchResult {
     pub written: u32,
     pub unchanged: u32,
 }
-const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company,EXISTS(SELECT 1 FROM application_attempts att WHERE att.application_id=a.id AND att.resolved_at IS NULL) AS pending_confirmation FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
+const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company,EXISTS(SELECT 1 FROM application_attempts att WHERE att.application_id=a.id AND att.resolved_at IS NULL) AS pending_confirmation,j.canonical_url,j.apply_url FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
     let url = Url::parse(value).map_err(|_| "A valid HTTP(S) URL is required".to_string())?;
     if !matches!(url.scheme(), "http" | "https") {
@@ -2765,13 +2765,15 @@ pub async fn transition_application(
     } else {
         None
     };
-    sqlx::query("UPDATE applications SET current_stage=?, applied_at=COALESCE(applied_at,?),accepted_at=CASE WHEN ?='accepted' THEN COALESCE(accepted_at,?) ELSE accepted_at END,rejection_reason=CASE WHEN ?='rejected' THEN ? ELSE rejection_reason END,withdrawn_reason=CASE WHEN ?='withdrawn' THEN ? ELSE withdrawn_reason END,updated_at=? WHERE id=?").bind(&input.stage).bind(applied).bind(&input.stage).bind(&occurred).bind(&input.stage).bind(&input.reason).bind(&input.stage).bind(&input.reason).bind(&occurred).bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    sqlx::query("UPDATE applications SET current_stage=?, applied_at=CASE WHEN ?='planned' THEN NULL ELSE COALESCE(applied_at,?) END,accepted_at=CASE WHEN ?='accepted' THEN COALESCE(accepted_at,?) ELSE accepted_at END,rejection_reason=CASE WHEN ?='rejected' THEN ? ELSE rejection_reason END,withdrawn_reason=CASE WHEN ?='withdrawn' THEN ? ELSE withdrawn_reason END,updated_at=? WHERE id=?").bind(&input.stage).bind(&input.stage).bind(applied).bind(&input.stage).bind(&occurred).bind(&input.stage).bind(&input.reason).bind(&input.stage).bind(&input.reason).bind(&occurred).bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,from_stage,to_stage,reason,occurred_at,payload_json) VALUES(?,?, 'stage_changed',?,?,?,?,?)").bind(id()).bind(&input.application_id).bind(&current).bind(&input.stage).bind(&input.reason).bind(&occurred).bind(serde_json::json!({"manualOverride":input.manual_override,"metadata":input.payload.unwrap_or_else(||serde_json::json!({}))}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     if input.stage == "applied" {
         let due = ghost_due_from(&occurred, 14)?;
         sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)").bind(id()).bind(&input.application_id).bind(due).bind(&occurred).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
+    // Moving back to Saved ("unapply") also stops the ghosting reminder the apply had scheduled.
     if [
+        "planned",
         "screening",
         "interviewing",
         "offer",
