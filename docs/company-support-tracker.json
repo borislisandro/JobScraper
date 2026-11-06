@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-02",
+  "updatedAt": "2026-11-06",
   "objective": "Work the 14 focus employers first: they are the ones hiring digital design and verification engineers (HDL, RTL, ASIC) and are not in the catalog yet. Everything after them is the wider ASIC/embedded/hardware backlog, in priority order, with a complete live worker proof before each catalog admission. Rows outside that discipline stay recorded as out of scope rather than deleted.",
   "companies": [
     {
@@ -1485,14 +1485,16 @@
       "name": "Teledyne",
       "category": "Test and measurement",
       "priority": "P3",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
+      "status": "supported",
+      "officialCareersUrl": "https://www.teledyne.com/en-us/careers",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-00000000015e",
+      "lastAttemptAt": "2026-11-06T19:24:09.219Z",
+      "evidence": [
+        "company-proofs/teledyne.json"
+      ],
+      "notes": "Semiconductor EU batch: 13 chip-design titles on 768 rows (4 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
     {
@@ -1801,14 +1803,16 @@
       "name": "Pragmatic Semiconductor",
       "category": "Semiconductors",
       "priority": "P4",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
+      "status": "supported",
+      "officialCareersUrl": "https://talent.pragmaticsemi.com/",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000015d",
+      "lastAttemptAt": "2026-11-06T19:23:36.453Z",
+      "evidence": [
+        "company-proofs/pragmatic-semiconductor.json"
+      ],
+      "notes": "Semiconductor EU batch: 1 chip-design titles on 15 rows (1 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
     {
@@ -3316,14 +3320,16 @@
       "name": "IonQ",
       "category": "Quantum",
       "priority": "P5",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/ionq",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000159",
+      "lastAttemptAt": "2026-11-06T19:23:29.848Z",
+      "evidence": [
+        "company-proofs/ionq.json"
+      ],
+      "notes": "Semiconductor EU batch: 3 chip-design titles on 120 rows (2 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
     {
@@ -3460,14 +3466,16 @@
       "name": "Riverlane",
       "category": "Quantum",
       "priority": "P5",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/riverlane",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000157",
+      "lastAttemptAt": "2026-11-06T19:23:24.615Z",
+      "evidence": [
+        "company-proofs/riverlane.json"
+      ],
+      "notes": "Semiconductor EU batch: 2 chip-design titles on 37 rows (2 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
     {
@@ -3687,14 +3695,16 @@
       "name": "Philips",
       "category": "Medical devices",
       "priority": "P5",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
+      "status": "supported",
+      "officialCareersUrl": "https://www.careers.philips.com/",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-00000000015f",
+      "lastAttemptAt": "2026-11-06T19:25:12.273Z",
+      "evidence": [
+        "company-proofs/philips.json"
+      ],
+      "notes": "Semiconductor EU batch: 5 chip-design titles on 810 rows (0 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
     {
@@ -4467,6 +4477,139 @@
       "evidence": [],
       "notes": "",
       "nextAction": "Discover the official careers board and confirm employer identity.",
+      "inScope": true
+    },
+    {
+      "sequence": 270,
+      "id": "semidynamics",
+      "name": "Semidynamics",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://careers.semidynamics.com/",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000154",
+      "lastAttemptAt": "2026-11-06T19:23:15.351Z",
+      "evidence": [
+        "company-proofs/semidynamics.json"
+      ],
+      "notes": "Semiconductor EU batch: 13 chip-design titles on 38 rows (12 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 271,
+      "id": "fractile",
+      "name": "Fractile",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/fractile",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-000000000155",
+      "lastAttemptAt": "2026-11-06T19:23:16.697Z",
+      "evidence": [
+        "company-proofs/fractile.json"
+      ],
+      "notes": "Semiconductor EU batch: 4 chip-design titles on 25 rows (4 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 272,
+      "id": "arago",
+      "name": "Arago",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/arago",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-000000000156",
+      "lastAttemptAt": "2026-11-06T19:23:18.003Z",
+      "evidence": [
+        "company-proofs/arago.json"
+      ],
+      "notes": "Semiconductor EU batch: 6 chip-design titles on 15 rows (6 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 273,
+      "id": "baya-systems",
+      "name": "Baya Systems",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/bayasystems",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000158",
+      "lastAttemptAt": "2026-11-06T19:23:27.227Z",
+      "evidence": [
+        "company-proofs/baya-systems.json"
+      ],
+      "notes": "Semiconductor EU batch: 9 chip-design titles on 23 rows (3 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 274,
+      "id": "olix",
+      "name": "Olix",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/olix",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-00000000015a",
+      "lastAttemptAt": "2026-11-06T19:23:31.072Z",
+      "evidence": [
+        "company-proofs/olix.json"
+      ],
+      "notes": "Semiconductor EU batch: 3 chip-design titles on 22 rows (3 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 275,
+      "id": "dolphin-semiconductor",
+      "name": "Dolphin Semiconductor",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://careers.dolphin-semiconductor.com/",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000015b",
+      "lastAttemptAt": "2026-11-06T19:23:32.990Z",
+      "evidence": [
+        "company-proofs/dolphin-semiconductor.json"
+      ],
+      "notes": "Semiconductor EU batch: 2 chip-design titles on 4 rows (2 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 276,
+      "id": "prophesee",
+      "name": "Prophesee",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://careers.prophesee.ai/",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000015c",
+      "lastAttemptAt": "2026-11-06T19:23:34.757Z",
+      "evidence": [
+        "company-proofs/prophesee.json"
+      ],
+      "notes": "Semiconductor EU batch: 1 chip-design titles on 9 rows (1 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
       "inScope": true
     }
   ],

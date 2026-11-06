@@ -1,0 +1,27 @@
+{
+ "id": "baya-systems",
+ "name": "Baya Systems",
+ "baseUrl": "https://job-boards.greenhouse.io/bayasystems",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "bayasystems",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 23,
+   "roleTitles": 9,
+   "roleTitlesInTargetCountries": 3,
+   "examples": [
+    "Hardware Verification Engineer — Cambridge, England, United Kingdom",
+    "Microarchitect and RTL Design Engineer — Cambridge, England, United Kingdom",
+    "SOC-IP Architect — Cambridge, England, United Kingdom; Remote - Europe"
+   ]
+  }
+ }
+}

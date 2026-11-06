@@ -1,0 +1,28 @@
+{
+ "id": "fractile",
+ "name": "Fractile",
+ "baseUrl": "https://jobs.ashbyhq.com/fractile",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "fractile",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 25,
+   "roleTitles": 4,
+   "roleTitlesInTargetCountries": 4,
+   "examples": [
+    "Senior Verification Engineer — Bristol, UK, London, UK",
+    "Senior/Principal Physical Design Engineer — Bristol, UK, London, UK",
+    "Senior/Principal DFT Engineer — Bristol, UK, London, UK",
+    "Early Career SoC Architect — Bristol, UK, London, UK"
+   ]
+  }
+ }
+}

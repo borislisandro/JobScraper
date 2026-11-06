@@ -1,0 +1,29 @@
+{
+ "id": "teledyne",
+ "name": "Teledyne",
+ "baseUrl": "https://flir.wd1.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "configJson": {
+  "tenant": "flir",
+  "site": "flircareers",
+  "maxPages": 500,
+  "expectedHost": "flir.wd1.myworkdayjobs.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 768,
+   "roleTitles": 13,
+   "roleTitlesInTargetCountries": 4,
+   "examples": [
+    "Analog and Mixed-Signal Designer — France Grenoble",
+    "IC Design & CAD Manager — France Grenoble",
+    "FPGA Design Engineer — Spain Sevilla TDY",
+    "Engineer - Verification and Test — UK Chelmsford TDY"
+   ]
+  }
+ }
+}

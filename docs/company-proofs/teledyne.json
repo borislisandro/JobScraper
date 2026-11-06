@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "name": "Teledyne",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:23:36.991Z",
+  "finishedAt": "2026-11-06T19:24:09.219Z",
+  "source": {
+    "id": "teledyne",
+    "name": "Teledyne",
+    "baseUrl": "https://flir.wd1.myworkdayjobs.com/",
+    "adapterId": "workday",
+    "configJson": {
+      "tenant": "flir",
+      "site": "flircareers",
+      "maxPages": 500,
+      "expectedHost": "flir.wd1.myworkdayjobs.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "teledyne",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 768,
+        "persisted": 768,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 39,
+        "boardTotal": 768,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 28991,
+        "pages": 39,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 28991,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 49,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 28757,
+              "body": 79,
+              "browser": 0,
+              "adapterOther": 88,
+              "emit": 16
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 39,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 28757,
+                "bodyMs": 79
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 768,
+    "uniqueIdentities": 768,
+    "uniqueHashes": 768,
+    "samples": [
+      {
+        "externalId": "REQ36842",
+        "title": "Lifesciences Coop",
+        "company": "Teledyne",
+        "location": "Canada Waterloo ON",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Waterloo-ON/Lifesciences-Coop_REQ36842-1",
+        "applyUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Waterloo-ON/Lifesciences-Coop_REQ36842-1",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "REQ37108",
+        "title": "Optical Operator",
+        "company": "Teledyne",
+        "location": "UK St Asaph",
+        "postedAt": "2026-10-12",
+        "canonicalUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/UK---St-Asaph/Optical-Operator_REQ37108",
+        "applyUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/UK---St-Asaph/Optical-Operator_REQ37108",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "REQ31131",
+        "title": "Specialiste des operations",
+        "company": "Teledyne",
+        "location": "Canada Bromont QC TDY",
+        "postedAt": "2026-10-07",
+        "canonicalUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Bromont-QC-TDY/Specialiste-des-operations_REQ31131",
+        "applyUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Bromont-QC-TDY/Specialiste-des-operations_REQ31131",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "teledyne",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1336,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1335,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 88,
+              "backoff": 0,
+              "response": 1217,
+              "body": 12,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 88,
+                "backoffMs": 0,
+                "responseMs": 1217,
+                "bodyMs": 12
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "REQ36842",
+        "title": "Lifesciences Coop",
+        "company": "Teledyne",
+        "location": "Canada - Waterloo, ON",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Waterloo-ON/Lifesciences-Coop_REQ36842-1",
+        "applyUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Waterloo-ON/Lifesciences-Coop_REQ36842-1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1434
+      },
+      {
+        "externalId": "REQ37108",
+        "title": "Optical Operator",
+        "company": "Teledyne",
+        "location": "UK - St Asaph",
+        "postedAt": "2026-10-12",
+        "canonicalUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/UK---St-Asaph/Optical-Operator_REQ37108",
+        "applyUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/UK---St-Asaph/Optical-Operator_REQ37108",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4098
+      },
+      {
+        "externalId": "REQ31131",
+        "title": "Specialiste des operations",
+        "company": "Teledyne",
+        "location": "Canada - Bromont, QC (TDY)",
+        "postedAt": "2026-10-07",
+        "canonicalUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Bromont-QC-TDY/Specialiste-des-operations_REQ31131",
+        "applyUrl": "https://flir.wd1.myworkdayjobs.com/flircareers/job/Canada---Bromont-QC-TDY/Specialiste-des-operations_REQ31131",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2094
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "teledyne",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 768,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 1,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1313,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1313,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1278,
+              "body": 20,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1278,
+                "bodyMs": 20
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

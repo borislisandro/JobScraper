@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Arago",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:23:17.227Z",
+  "finishedAt": "2026-11-06T19:23:18.003Z",
+  "source": {
+    "id": "arago",
+    "name": "Arago",
+    "baseUrl": "https://jobs.ashbyhq.com/arago",
+    "adapterId": "ashby",
+    "configJson": {
+      "token": "arago",
+      "maxPages": 500,
+      "expectedHost": "api.ashbyhq.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arago",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 15,
+        "persisted": 15,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 15,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 208,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 208,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 178,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 178,
+                "bodyMs": 11
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 15,
+    "uniqueIdentities": 15,
+    "uniqueHashes": 15,
+    "samples": [
+      {
+        "externalId": "25cfdecb-8269-489f-90a6-d7b18cc5cf8c",
+        "title": "Senior Analog IC Design Engineer",
+        "company": "Arago",
+        "location": "Paris Offices, Tel Aviv Offices",
+        "postedAt": "2026-10-13",
+        "canonicalUrl": "https://jobs.ashbyhq.com/arago/25cfdecb-8269-489f-90a6-d7b18cc5cf8c",
+        "applyUrl": "https://jobs.ashbyhq.com/arago/25cfdecb-8269-489f-90a6-d7b18cc5cf8c",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4168
+      },
+      {
+        "externalId": "a6dd0384-bda2-4bcb-b60b-b0b78c29bbfd",
+        "title": "Senior Packaging Engineer",
+        "company": "Arago",
+        "location": "Paris Offices",
+        "postedAt": "2026-11-04",
+        "canonicalUrl": "https://jobs.ashbyhq.com/arago/a6dd0384-bda2-4bcb-b60b-b0b78c29bbfd",
+        "applyUrl": "https://jobs.ashbyhq.com/arago/a6dd0384-bda2-4bcb-b60b-b0b78c29bbfd",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3867
+      },
+      {
+        "externalId": "9c8d0670-c90d-4504-92bb-f2cf9f2e6ed8",
+        "title": "Technical Sourcer",
+        "company": "Arago",
+        "location": "Paris Offices",
+        "postedAt": "2026-09-15",
+        "canonicalUrl": "https://jobs.ashbyhq.com/arago/9c8d0670-c90d-4504-92bb-f2cf9f2e6ed8",
+        "applyUrl": "https://jobs.ashbyhq.com/arago/9c8d0670-c90d-4504-92bb-f2cf9f2e6ed8",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3692
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arago",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 15,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 15,
+        "requests": 1,
+        "skipped": 15,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 110,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 111,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 86,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 86,
+                "bodyMs": 11
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

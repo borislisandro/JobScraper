@@ -3797,6 +3797,359 @@
     "level": "full",
     "evidence": "docs/company-proofs/ceva.json"
    }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000154",
+   "name": "Semidynamics",
+   "country": "ES",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "verification"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.semidynamics.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.semidynamics.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 38,
+    "level": "full",
+    "evidence": "docs/company-proofs/semidynamics.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000155",
+   "name": "Fractile",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "ai-hardware",
+    "verification"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/fractile",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "fractile",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 25,
+    "level": "full",
+    "evidence": "docs/company-proofs/fractile.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000156",
+   "name": "Arago",
+   "country": "FR",
+   "tags": [
+    "semiconductor",
+    "ai-hardware",
+    "asic"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/arago",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "arago",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 15,
+    "level": "full",
+    "evidence": "docs/company-proofs/arago.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000157",
+   "name": "Riverlane",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "quantum",
+    "fpga"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/riverlane",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "riverlane",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 37,
+    "level": "full",
+    "evidence": "docs/company-proofs/riverlane.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000158",
+   "name": "Baya Systems",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "verification"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/bayasystems",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "bayasystems",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 23,
+    "level": "full",
+    "evidence": "docs/company-proofs/baya-systems.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000159",
+   "name": "IonQ",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "quantum",
+    "fpga"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/ionq",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "ionq",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 120,
+    "level": "full",
+    "evidence": "docs/company-proofs/ionq.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015a",
+   "name": "Olix",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "ai-hardware",
+    "verification"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/olix",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "olix",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 22,
+    "level": "full",
+    "evidence": "docs/company-proofs/olix.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015b",
+   "name": "Dolphin Semiconductor",
+   "country": "FR",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "verification"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.dolphin-semiconductor.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.dolphin-semiconductor.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 4,
+    "level": "full",
+    "evidence": "docs/company-proofs/dolphin-semiconductor.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015c",
+   "name": "Prophesee",
+   "country": "FR",
+   "tags": [
+    "semiconductor",
+    "asic",
+    "verification"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://careers.prophesee.ai/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "careers.prophesee.ai",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 9,
+    "level": "full",
+    "evidence": "docs/company-proofs/prophesee.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015d",
+   "name": "Pragmatic Semiconductor",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "asic",
+    "verification"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://talent.pragmaticsemi.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "talent.pragmaticsemi.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 15,
+    "level": "full",
+    "evidence": "docs/company-proofs/pragmatic-semiconductor.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015e",
+   "name": "Teledyne",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "asic",
+    "fpga"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://flir.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "flir",
+    "site": "flircareers",
+    "maxPages": 500,
+    "expectedHost": "flir.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 768,
+    "level": "full",
+    "evidence": "docs/company-proofs/teledyne.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015f",
+   "name": "Philips",
+   "country": "NL",
+   "tags": [
+    "semiconductor",
+    "asic"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://philips.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "tenant": "philips",
+    "site": "jobs-and-careers",
+    "maxPages": 500,
+    "expectedHost": "philips.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 810,
+    "level": "full",
+    "evidence": "docs/company-proofs/philips.json"
+   }
   }
  ]
 }
