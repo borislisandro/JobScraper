@@ -1,0 +1,13 @@
+{
+ "id": "csem",
+ "name": "CSEM",
+ "baseUrl": "https://www.csem.ch/en/jobs/",
+ "adapterId": "csem",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "www.csem.ch"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

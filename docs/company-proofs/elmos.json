@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "name": "Elmos Semiconductor",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:39:24.535Z",
+  "finishedAt": "2026-11-06T19:39:25.488Z",
+  "source": {
+    "id": "elmos",
+    "name": "Elmos Semiconductor",
+    "baseUrl": "https://elmos.career.softgarden.de/jobs.feed.json",
+    "adapterId": "json",
+    "configJson": {
+      "itemsPath": "dataFeedElement",
+      "maxPages": 5,
+      "expectedHost": "elmos.career.softgarden.de",
+      "feedIsWholeBoard": true,
+      "fieldMap": {
+        "title": "item.title",
+        "url": "item.url",
+        "externalId": "item.identifier.value",
+        "postedAt": "item.datePosted",
+        "description": "item.description",
+        "location": "item.jobLocation.address.addressLocality"
+      }
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "discovery": {
+      "relevance": {
+        "checkedAt": "2026-11-06",
+        "boardJobs": 19,
+        "roleTitles": 0,
+        "roleTitlesInTargetCountries": 0,
+        "examples": []
+      }
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "8fcafe92ccd7f4d038c5b687495caa1d951bceebc82a630b81da2dd3338312bf",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "28e30c40f1b511555b61b3da4660b131e042c67b941b7e2c98a9de29247a9105",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "elmos",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 19,
+        "persisted": 19,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 19,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 258,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 259,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 229,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 2
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 229,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 19,
+    "uniqueIdentities": 19,
+    "uniqueHashes": 19,
+    "samples": [
+      {
+        "externalId": "62744589",
+        "title": "Development Engineer (m/f/d) Digital",
+        "company": "Elmos Semiconductor",
+        "location": "Frankfurt (Oder)",
+        "postedAt": "2026-10-11",
+        "canonicalUrl": "https://elmos.career.softgarden.de/jobs/62744589/Development-Engineer-m-f-d-Digital/",
+        "applyUrl": "https://elmos.career.softgarden.de/jobs/62744589/Development-Engineer-m-f-d-Digital/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2520
+      },
+      {
+        "externalId": "67369895",
+        "title": "Praxisbegleitendes Studium (m/w/d) Elektrotechnik (Technische Hochschule Georg Agricola - Wintersemester 2027)",
+        "company": "Elmos Semiconductor",
+        "location": "Dortmund",
+        "postedAt": "2026-10-11",
+        "canonicalUrl": "https://elmos.career.softgarden.de/jobs/67369895/Praxisbegleitendes-Studium-m-w-d-Elektrotechnik-Technische-Hochschule-Georg-Agricola---Wintersemester-2027-/",
+        "applyUrl": "https://elmos.career.softgarden.de/jobs/67369895/Praxisbegleitendes-Studium-m-w-d-Elektrotechnik-Technische-Hochschule-Georg-Agricola---Wintersemester-2027-/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2444
+      },
+      {
+        "externalId": "68590767",
+        "title": "Entwicklungsingenieur (m/w/d) Analog",
+        "company": "Elmos Semiconductor",
+        "location": "Dortmund",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://elmos.career.softgarden.de/jobs/68590767/Entwicklungsingenieur-m-w-d-Analog/",
+        "applyUrl": "https://elmos.career.softgarden.de/jobs/68590767/Entwicklungsingenieur-m-w-d-Analog/",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2481
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "elmos",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 19,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 19,
+        "requests": 1,
+        "skipped": 19,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 237,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 237,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 210,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 210,
+                "bodyMs": 10
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

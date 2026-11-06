@@ -4355,6 +4355,173 @@
     "level": "full",
     "evidence": "docs/company-proofs/bosch.json"
    }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000168",
+   "name": "Elmos Semiconductor",
+   "country": "DE",
+   "tags": [
+    "semiconductor",
+    "asic"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://elmos.career.softgarden.de/jobs.feed.json",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "dataFeedElement",
+    "maxPages": 5,
+    "expectedHost": "elmos.career.softgarden.de",
+    "feedIsWholeBoard": true,
+    "fieldMap": {
+     "title": "item.title",
+     "url": "item.url",
+     "externalId": "item.identifier.value",
+     "postedAt": "item.datePosted",
+     "description": "item.description",
+     "location": "item.jobLocation.address.addressLocality"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 19,
+    "level": "full",
+    "evidence": "docs/company-proofs/elmos.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000169",
+   "name": "Kalray",
+   "country": "FR",
+   "tags": [
+    "semiconductor",
+    "ai-hardware",
+    "ip"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://www.kalrayinc.com/wp-json/wp/v2/jobs?per_page=100&_embed=1",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "",
+    "maxPages": 5,
+    "expectedHost": "www.kalrayinc.com",
+    "fieldMap": {
+     "title": "title.rendered",
+     "url": "link",
+     "externalId": "id",
+     "postedAt": "date",
+     "description": "content.rendered",
+     "location": "_embedded.wp:term.1.0.name"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 15,
+    "level": "full",
+    "evidence": "docs/company-proofs/kalray.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016a",
+   "name": "Openchip",
+   "country": "ES",
+   "tags": [
+    "semiconductor",
+    "ai-hardware",
+    "verification"
+   ],
+   "adapterId": "openchip",
+   "baseUrl": "https://openchip.factorialhr.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "openchip.factorialhr.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 24,
+    "level": "full",
+    "evidence": "docs/company-proofs/openchip.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016b",
+   "name": "Racyics",
+   "country": "DE",
+   "tags": [
+    "semiconductor",
+    "asic",
+    "dft"
+   ],
+   "adapterId": "racyics",
+   "baseUrl": "https://racyics.de/career/jobs/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "racyics.de"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 22,
+    "level": "full",
+    "evidence": "docs/company-proofs/racyics.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016c",
+   "name": "CSEM",
+   "country": "CH",
+   "tags": [
+    "semiconductor",
+    "asic"
+   ],
+   "adapterId": "csem",
+   "baseUrl": "https://www.csem.ch/en/jobs/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "www.csem.ch"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 25,
+    "level": "full",
+    "evidence": "docs/company-proofs/csem.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016d",
+   "name": "Arteris",
+   "country": "FR",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "verification"
+   ],
+   "adapterId": "arteris",
+   "baseUrl": "https://jobs.jobvite.com/arteris/jobs?nl=1",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.jobvite.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 27,
+    "level": "full",
+    "evidence": "docs/company-proofs/arteris.json"
+   }
   }
  ]
 }

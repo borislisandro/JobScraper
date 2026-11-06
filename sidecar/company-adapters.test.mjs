@@ -372,3 +372,54 @@ test("SmartRecruiters tenants aimed at one country ask the API for only that cou
  const cern=await scrape("cern",{"companies/CERN/postings?":body("CERN")},{fetchDetail:false});assert.match(cern.requests[0].url,/[?&]country=ch(&|$)/);
  const renesas=await scrape("renesas",{"companies/RenesasElectronics/postings?":body("RenesasElectronics")},{fetchDetail:false});assert.doesNotMatch(renesas.requests[0].url,/country=/,"an unfiltered tenant keeps reading its whole board");
 });
+
+test("Openchip reads offices as places, defers to the vacancy page for text, and fails loudly when the markup changes",async()=>{
+ const item=(id,slug,title,remote="false")=>`<li class='job-offer-item w-full' data-is-remote='${remote}' data-job-postings-url='https://openchip.factorial.com/job_posting/${slug}-${id}'><div class='mb-4'><div class="text-sm font-bold factorial__headingFontFamily">${title}
+</div><div class="text-sm text-gray-350">HARDWARE</div><a class='buttonSecondary' href='https://openchip.factorial.com/job_posting/${slug}-${id}'>Apply now</a></div></li>`;
+ const listing=`<div class='mb-12'><div class='mb-2'><h3 class="factorial__headingFontFamily">Barcelona
+</h3></div><ul>${item(11,"functional-verification-engineer","Functional Verification Engineer")}${item(12,"soc-architect","SoC Architect","true")}${item(11,"functional-verification-engineer","Functional Verification Engineer")}</ul></div><div class='mb-12'><div class='mb-2'><h3>Roma</h3></div><ul>${item(13,"rtl-lead","RTL Lead")}</ul></div>`;
+ const page=`<html><body><h1>Functional Verification Engineer</h1><div class="styledText"><p>Own the UVM environment.</p><ul><li>SystemVerilog</li></ul></div></body></html>`;
+ const result=await scrape("openchip",{"openchip.factorialhr.com":listing,"job_posting/":page});
+ assert.equal(result.jobs.length,3,"a vacancy repeated on the page is one job");assert.equal(result.complete,true);assert.equal(result.total,3);
+ const verification=result.jobs.find(job=>job.externalId==="11");
+ assert.equal(verification.location,"Barcelona");assert.equal(result.jobs.find(job=>job.externalId==="13").location,"Roma");
+ assert.match(verification.description,/Own the UVM environment/);assert.equal(verification.descriptionStatus,"complete");
+ assert.equal(result.jobs.find(job=>job.externalId==="12").workMode,"remote");
+ const deferred=await scrape("openchip",{"openchip.factorialhr.com":listing},{fetchDetail:false});assert.equal(deferred.jobs[0].descriptionStatus,"pending");
+ await assert.rejects(scrape("openchip",{"openchip.factorialhr.com":"<html><body>maintenance</body></html>"}),/parse_error/);
+ const broken=await scrape("openchip",{"openchip.factorialhr.com":listing,"job_posting/":"<html><body>nothing</body></html>"});assert.equal(broken.jobs[0].descriptionStatus,"failed","a vacancy page that changed shape degrades instead of failing the board");
+});
+test("Racyics reads its job table, strips the arrow marker and keeps the places column",async()=>{
+ const row=(slug,title,place)=>`<tr><td><p><a href="https://racyics.de/career/jobs/${slug}/">&gt; ${title}</a></p></td><td><p>${place}</p></td></tr>`;
+ const listing=`<table><tr><td><a href="https://racyics.de/career/jobs/">Open Positions</a></td></tr>${row("dft-architect","DFT Architect / Lead","Dresden, Duisburg or Frankfurt/Main, Germany")}${row("senior-digital-design-engineer","Senior/Principal Digital Design Engineer","Dresden, Germany")}</table>`;
+ const page=`<main><article><div class="entry-content"><h1>Job Offer: DFT Architect</h1><hr/><p>Scan and ATPG insertion.</p></div></article></main>`;
+ const result=await scrape("racyics",{"racyics.de/career/jobs/dft-architect":page,"racyics.de/career/jobs/senior-digital":page,"racyics.de/career/jobs/":listing});
+ assert.deepEqual(result.jobs.map(job=>job.title),["DFT Architect / Lead","Senior/Principal Digital Design Engineer"]);
+ assert.equal(result.jobs[0].location,"Dresden, Duisburg or Frankfurt/Main, Germany");assert.equal(result.jobs[0].externalId,"dft-architect");
+ assert.match(result.jobs[0].description,/Scan and ATPG insertion/);assert.doesNotMatch(result.jobs[0].description,/Job Offer/);
+ await assert.rejects(scrape("racyics",{"racyics.de/career/jobs/":"<table><tr><td>No vacancies</td></tr></table>"}),/parse_error/);
+});
+test("CSEM takes title, place and text from the JobPosting on each vacancy page",async()=>{
+ const teaser=(id,title,place)=>`<a href="/en/jobs/${id}" class="job-teaser"><div class="header"></div><h3>${title}</h3><div class="tags-wrapper"><div class="tag">Full Time</div><div class="tag">${place}</div></div></a>`;
+ const listing=`<p class="result-count">2 results</p>${teaser(197509,"Digital Radio IC Design Engineer","Neuchâtel")}${teaser(197346,"Back2Business Program","Zürich")}`;
+ const posting=(title)=>`<script type="application/ld+json">${JSON.stringify({"@context":"https://schema.org","@graph":[{"@type":"WebPage"},{"@type":"JobPosting",title,datePosted:"2026-11-02T00:00:00Z",description:"<p>Design the digital baseband.</p>",jobLocation:{address:{addressLocality:"Neuchâtel",addressCountry:"CH"}}}]})}</script>`;
+ const result=await scrape("csem",{"csem.ch/en/jobs/197509":posting("Digital Radio IC Design Engineer (F/M/D)"),"csem.ch/en/jobs/197346":posting("Back2Business Program"),"csem.ch/en/jobs/":listing});
+ assert.equal(result.jobs.length,2);const first=result.jobs.find(job=>job.externalId==="197509");
+ assert.equal(first.title,"Digital Radio IC Design Engineer (F/M/D)");assert.equal(first.location,"Neuchâtel, CH");assert.equal(first.postedAt,"2026-11-02T00:00:00Z");assert.match(first.description,/digital baseband/);
+ const noPosting=await scrape("csem",{"csem.ch/en/jobs/1":"<html></html>","csem.ch/en/jobs/":teaser(1,"Role","Bern")});assert.equal(noPosting.jobs[0].descriptionStatus,"failed");
+ await assert.rejects(scrape("csem",{"csem.ch/en/jobs/":"<html><body>Loading</body></html>"}),/parse_error/);
+});
+test("Arteris reads Jobvite's plain board, hides location counts and names every office from the vacancy page",async()=>{
+ const listing=`<h3>Engineering</h3><table class="jv-job-list"><tbody>
+  <tr><td class="jv-job-list-name"><a href="/arteris/job/oAAA">Principal Design Verification Engineer</a></td><td class="jv-job-list-location">Biot,
+   France</td></tr>
+  <tr><td class="jv-job-list-name"><a href="/arteris/job/oBBB">Sales Application Engineer H/F</a></td><td class="jv-job-list-location"><div class="jv-meta">3 Locations</div></td></tr></tbody></table>`;
+ const detail=(places)=>`<div class="jv-job-detail-meta">Application Engineering<span class="jv-inline-separator"></span> ${places}</div><div class="jv-job-detail-description"><p>Verify NoC IP with UVM.</p></div>`;
+ const result=await scrape("arteris",{"arteris/jobs":listing,"arteris/job/oAAA?nl=1":detail("Biot, France"),"arteris/job/oBBB?nl=1":detail("Paris, France<span class=\"jv-inline-separator\"></span> Biot, France")});
+ assert.equal(result.jobs.length,2);const verification=result.jobs.find(job=>job.externalId==="oAAA"),sales=result.jobs.find(job=>job.externalId==="oBBB");
+ assert.equal(verification.location,"Biot, France");assert.match(verification.description,/Verify NoC IP/);
+ assert.equal(sales.location,"Paris, France; Biot, France","a bare location count is replaced by the places the vacancy page names");
+ assert.equal(verification.url,"https://jobs.jobvite.com/arteris/job/oAAA");
+ const deferred=await scrape("arteris",{"arteris/jobs":listing},{fetchDetail:false});assert.equal(deferred.jobs.find(job=>job.externalId==="oBBB").location,null);
+ await assert.rejects(scrape("arteris",{"arteris/jobs":"<html><body>no table</body></html>"}),/parse_error/);
+});

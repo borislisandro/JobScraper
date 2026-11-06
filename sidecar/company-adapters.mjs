@@ -40,7 +40,13 @@ export const companyAdapters={
  // credentials that page hands the browser, read from its own bundle, and the index name is the
  // one its "Job Openings" widget is configured with. Vacancy detail lives on Salesforce Recruit.
  "u-blox":{name:"u-blox",host:"www.u-blox.com",base:"https://www.u-blox.com",
-  algolia:{appId:"L87M8KNOMJ",apiKey:"b5a0aca646f3378b36d8758634d16954",index:"open_positions_en-US"}}
+  algolia:{appId:"L87M8KNOMJ",apiKey:"b5a0aca646f3378b36d8758634d16954",index:"open_positions_en-US"}},
+ // Chip employers on boards whose listing is server-rendered HTML with no JSON behind it. Each one is read from the
+ // page a visitor sees, then enriched from the vacancy page, and none of them publishes a total to reconcile against.
+ openchip:{name:"Openchip",host:"openchip.factorialhr.com",base:"https://openchip.factorialhr.com",listing:"https://openchip.factorialhr.com/"},
+ racyics:{name:"Racyics",host:"racyics.de",base:"https://racyics.de",listing:"https://racyics.de/career/jobs/"},
+ csem:{name:"CSEM",host:"www.csem.ch",base:"https://www.csem.ch",listing:"https://www.csem.ch/en/jobs/"},
+ arteris:{name:"Arteris",host:"jobs.jobvite.com",base:"https://jobs.jobvite.com",listing:"https://jobs.jobvite.com/arteris/jobs?nl=1"}
 };
 export const companyAdapterIds=Object.keys(companyAdapters);
 // Boards whose listing pages publish no posting date. A scrape defers detail pages for speed,
@@ -430,12 +436,74 @@ async function smartRecruiters(site,context){
   warnings:[...warnings,...(unstable?["SmartRecruiters changed its total or repeated a posting while paging; this run cannot close stored jobs."]:[])]};
 }
 
-const scrapers={rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,cern:smartRecruiters,bosch:smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
+// ---- Chip employers read from server-rendered HTML --------------------------------------------------------------
+const hostedJob=(rows,site,label)=>{const byUrl=new Map;for(const row of rows)if(row.url&&row.title&&!byUrl.has(row.url))byUrl.set(row.url,row);
+ if(!byUrl.size)throw Error(`parse_error: Structure changed: ${label} listing has no vacancies`);return[...byUrl.values()]};
+// A board with no total cannot prove it was read to the end, but a listing page that parsed into rows is the whole board for every
+// employer here, so a successful parse is complete; zero rows is a parse_error above, never an empty board.
+async function singlePageBoard(site,context,{list,detail,label}){
+ const jobs=hostedJob(list(await markup(context.request,site.listing),site),site,label);
+ const {enriched,seen,filtered,warnings}=await enrichListings(jobs,context,detail,`${label} vacancy page`);
+ return{jobs:enriched,seen,filtered,pages:1,complete:true,total:jobs.length,totalExact:false,warnings}}
+
+// Openchip (Factorial HR): offices are headings, each followed by the vacancies open there.
+const openchipList=(html,site)=>{const $=cheerio.load(html);
+ return $("li.job-offer-item").map((_,el)=>{const li=$(el),url=clean(li.attr("data-job-postings-url"));
+  return{title:clean(li.find("div.factorial__headingFontFamily").first().text()),url,externalId:url?.match(/-(\d+)\/?$/)?.[1]||url,
+   location:clean(li.closest("div.mb-12").find("h3").first().text()),description:clean(li.find("div.text-gray-350").first().text()),
+   workMode:li.attr("data-is-remote")==="true"?"remote":null}}).get()};
+const openchipDetail=(html,current)=>{const $=cheerio.load(html),body=$("div.styledText").first();
+ if(!clean(body.text()))throw Error("selector_broken: Openchip vacancy page has no description");
+ return{...current,description:clean(body.text()),descriptionHtml:body.html()}};
+const openchip=(site,context)=>singlePageBoard(site,context,{list:openchipList,detail:openchipDetail,label:"Openchip"});
+
+// Racyics: a WordPress table of "> Title | places" rows, one vacancy page each.
+const racyicsList=(html,site)=>{const $=cheerio.load(html);
+ return $("tr").map((_,el)=>{const row=$(el),link=row.find("a[href*='/career/jobs/']").first(),url=absolute(link.attr("href"),site.base);
+  if(!url||url.replace(/\/$/,"")===site.listing.replace(/\/$/,""))return null;
+  return{title:clean(link.text())?.replace(/^>\s*/,""),url,externalId:new URL(url).pathname.split("/").filter(Boolean).pop(),
+   location:clean(row.find("td").eq(1).text())}}).get().filter(Boolean)};
+const racyicsDetail=(html,current)=>{const $=cheerio.load(html),body=$("main .entry-content").first().clone();body.find("h1, hr, script, style").remove();
+ if(!clean(body.text()))throw Error("selector_broken: Racyics vacancy page has no description");
+ return{...current,description:clean(body.text()),descriptionHtml:body.html()}};
+const racyics=(site,context)=>singlePageBoard(site,context,{list:racyicsList,detail:racyicsDetail,label:"Racyics"});
+
+// CSEM: teasers link to /en/jobs/{id}; the vacancy page carries a schema.org JobPosting with title, place, date and text.
+const csemList=(html,site)=>{const $=cheerio.load(html);
+ return $("a.job-teaser").map((_,el)=>{const card=$(el),href=card.attr("href"),url=absolute(href,site.base);
+  return{title:clean(card.find("h2, h3, h4, [class*=title]").first().text())||"CSEM vacancy",url,externalId:href?.match(/(\d+)\/?$/)?.[1],
+   location:clean(card.find(".tag").last().text())}}).get()};
+const csemDetail=(html,current)=>{const $=cheerio.load(html);let posting=null;
+ $("script[type='application/ld+json']").each((_,el)=>{if(posting)return;try{const data=JSON.parse($(el).text()),graph=Array.isArray(data["@graph"])?data["@graph"]:[],nodes=[data,...graph,...graph.flatMap(node=>Object.values(node||{}))];
+  posting=nodes.find(node=>node&&typeof node==="object"&&node["@type"]==="JobPosting")||null}catch{}});
+ if(!posting||!clean(posting.description))throw Error("parse_error: CSEM vacancy page has no JobPosting");
+ const place=posting.jobLocation?.address;
+ return{...current,title:clean(posting.title)||current.title,postedAt:posting.datePosted||current.postedAt,
+  location:[place?.addressLocality,place?.addressCountry].map(clean).filter(Boolean).join(", ")||current.location,
+  description:clean(cheerio.load(`<div>${posting.description}</div>`)("div").text()),descriptionHtml:posting.description}};
+const csem=(site,context)=>singlePageBoard(site,context,{list:csemList,detail:csemDetail,label:"CSEM"});
+
+// Arteris (Jobvite): the ?nl=1 pages are the plain-HTML job board the company site frames; without it Jobvite redirects.
+const arterisList=(html,site)=>{const $=cheerio.load(html);
+ return $("table.jv-job-list tr").map((_,el)=>{const row=$(el),link=row.find("td.jv-job-list-name a").first(),href=link.attr("href");
+  if(!href)return null;const id=href.split("/").filter(Boolean).pop();
+  return{title:clean(link.text()),url:absolute(href,site.base),detailUrl:absolute(`${href}?nl=1`,site.base),externalId:id,
+   // "3 Locations" is a count, not a place; the vacancy page names them.
+   location:(()=>{const place=clean(row.find("td.jv-job-list-location").text());return place&&!/^\d+\s+locations?$/i.test(place)?place:null})(),
+   description:clean(row.closest("table").prevAll("h3").first().text())}}).get().filter(Boolean)};
+const arterisDetail=(html,current)=>{const $=cheerio.load(html),body=$(".jv-job-detail-description").first(),meta=$(".jv-job-detail-meta").first().clone();
+ if(!clean(body.text()))throw Error("selector_broken: Arteris vacancy page has no description");
+ meta.find(".jv-inline-separator").replaceWith("|");
+ const parts=clean(meta.text())?.split("|").map(clean).filter(Boolean)||[];
+ return{...current,location:parts.slice(1).join("; ")||current.location,description:clean(body.text()),descriptionHtml:body.html()}};
+const arteris=(site,context)=>singlePageBoard(site,context,{list:arterisList,detail:arterisDetail,label:"Arteris"});
+
+const scrapers={openchip,racyics,csem,arteris,rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,cern:smartRecruiters,bosch:smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
 export const companyNeedsCheerio=(adapterId,fetchDetail=true)=>
- ["rambus","arm","google","sk-hynix","synopsys","l3harris"].includes(adapterId)||(adapterId==="u-blox"&&fetchDetail);
+ ["rambus","arm","google","sk-hynix","synopsys","l3harris","openchip","racyics","csem","arteris"].includes(adapterId)||(adapterId==="u-blox"&&fetchDetail);
 
 export async function enrichCompany(adapterId,item,request){
- const enrichers={rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,cern:smartRecruitersDetail,bosch:smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
+ const enrichers={openchip:openchipDetail,racyics:racyicsDetail,csem:csemDetail,arteris:arterisDetail,rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,cern:smartRecruitersDetail,bosch:smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
  const detail=enrichers[adapterId];
  if(!detail)throw Error(`incomplete: ${adapterId} has no detail enricher`);
  await loadCheerio();

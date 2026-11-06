@@ -1,0 +1,32 @@
+{
+ "id": "elmos",
+ "name": "Elmos Semiconductor",
+ "baseUrl": "https://elmos.career.softgarden.de/jobs.feed.json",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "dataFeedElement",
+  "maxPages": 5,
+  "expectedHost": "elmos.career.softgarden.de",
+  "feedIsWholeBoard": true,
+  "fieldMap": {
+   "title": "item.title",
+   "url": "item.url",
+   "externalId": "item.identifier.value",
+   "postedAt": "item.datePosted",
+   "description": "item.description",
+   "location": "item.jobLocation.address.addressLocality"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 19,
+   "roleTitles": 0,
+   "roleTitlesInTargetCountries": 0,
+   "examples": []
+  }
+ }
+}
