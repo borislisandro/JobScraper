@@ -68,9 +68,9 @@ async fn start(
         startup.set(app, "migrating", "Working out where existing jobs are");
     }
     startup.set(app, "seeding", "Setting up job sources");
-    state.db.install_starter_pack().await?;
-    // The installer's answer to "Include semiconductor companies?", applied once.
-    db::apply_starter_pack_opt_in(&state.db.pool, local).await?;
+    // A new install holds no sources; the user picks a profile on the Sources tab. This only keeps the
+    // sources an earlier version created in step with the catalog.
+    state.db.reconcile_catalog_sources().await?;
     if !state.headless {
         startup.set(app, "scheduling", "Setting up reminders");
         // Scheduler failure is recorded on reminder rows and never blocks local application use.

@@ -224,6 +224,8 @@ pub fn run() {
             startup::startup_status,
             db::list_sources,
             db::list_company_catalog,
+            db::list_profiles,
+            db::apply_profile,
             db::list_app_logs,
             db::scrape_performance,
             sidecar::job_description,

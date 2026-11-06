@@ -68,10 +68,11 @@ pub struct CatalogCompany {
     pub adapter_id: String,
     pub base_url: String,
     pub config: serde_json::Value,
-    /// Seeded into a fresh database: the default semiconductor list (49 as of 2026-11-06.1). The rest are
-    /// offered in the app and added on request, so a new install does not open on every catalog source.
+    /// The profiles this company belongs to (`semiconductor`, `data-science`, ...). Choosing a profile on
+    /// the Sources tab adds exactly these companies. A company with no profile is only offered in
+    /// "Browse companies"; a catalog of 240 boards is not something to put on a new user's screen.
     #[serde(default)]
-    pub starter: bool,
+    pub profiles: Vec<String>,
     #[serde(default = "active_kind")]
     pub kind: String,
     pub disabled_reason: Option<String>,
@@ -82,9 +83,18 @@ pub struct CatalogCompany {
 fn active_kind() -> String {
     "active".into()
 }
+/// A named set of catalog companies the user can switch the whole app to.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CatalogProfile {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+}
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CompanyCatalog {
     pub version: String,
+    #[serde(default)]
+    pub profiles: Vec<CatalogProfile>,
     pub companies: Vec<CatalogCompany>,
 }
 static CATALOG: std::sync::LazyLock<CompanyCatalog> = std::sync::LazyLock::new(|| {
@@ -95,10 +105,13 @@ pub fn company_catalog() -> &'static CompanyCatalog {
     &CATALOG
 }
 // Bump the catalog's version whenever any starter's URL, adapter or settings change. A pack
-// corrected without a new version reaches nobody: install_starter_pack stops at the version check,
+// corrected without a new version reaches nobody: reconcile_catalog_sources stops at the version check,
 // and every database stamped with the old number keeps the values that did not work. That is
 // exactly how installs ended up reading jobs.cisco.com and www.careers.mediatek.com long after
 // both were fixed here.
+/// The reason the catalog's first versions stamped on every board they seeded switched off. Switching a
+/// profile off is not a fault, so reconciliation clears it wherever it is still on a row.
+const LEGACY_STARTER_REASON: &str = "Starter source is disabled until you review and enable it.";
 fn starter_pack_version() -> &'static str {
     &CATALOG.version
 }
@@ -804,7 +817,10 @@ impl Database {
         db.prepare().await?;
         Ok(db)
     }
-    pub async fn install_starter_pack(&self) -> ApiResult<()> {
+    /// Brings the sources this app created from the catalog up to date with the catalog shipped in this
+    /// version. It only ever updates rows that already exist: a fresh install holds no sources at all, and
+    /// companies arrive when the user picks a profile (`apply_profile`) or adds them from the picker.
+    pub async fn reconcile_catalog_sources(&self) -> ApiResult<()> {
         let installed: Option<String> = sqlx::query_scalar(
             "SELECT value FROM schema_metadata WHERE key='starter_pack_version'",
         )
@@ -826,87 +842,8 @@ impl Database {
         // fingerprint. Microchip's board is a Workday tenant on wd5.myworkdaysite.com (its own
         // careers host only 302s to a marketing page), and u-blox's openings come from the Algolia
         // index its job-openings page queries client-side; both were verified live.
-        let starters: Vec<&CatalogCompany> = company_catalog()
-            .companies
-            .iter()
-            .filter(|company| company.starter)
-            .collect();
-        for company in starters {
-            // A board the user already added from the picker has a generated ID, not this catalog ID,
-            // so seeding it again would put a second copy of the same board on the Sources tab and read
-            // it twice. Their copy stays exactly as they left it. Rows an older pack wrote carry a
-            // starter-pack version in their config and are not the user's: those are still reconciled
-            // (and the untouched legacy ones retired) below.
-            let user_copy: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources s WHERE s.id<>? AND s.deleted_at IS NULL AND s.base_url=? AND s.adapter_id=? AND NOT EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=s.id AND c.config_json LIKE '%starterPackVersion%') LIMIT 1")
-                .bind(company.id.as_str()).bind(company.base_url.as_str()).bind(company.adapter_id.as_str())
-                .fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
-            if user_copy.is_some() {
-                continue;
-            }
-            let (source_id, name, url, adapter, kind) = (
-                company.id.as_str(),
-                company.name.as_str(),
-                company.base_url.as_str(),
-                company.adapter_id.as_str(),
-                company.kind.as_str(),
-            );
-            let reason = company.disabled_reason.as_deref();
-            let t = now();
-            sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,1,0,?,?)")
-    .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(reason).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":starter_pack_version(),"adapterVersion":"1.1.0","mode":"direct"});
-            if let (Some(base), Some(extra)) = (config.as_object_mut(), company.config.as_object())
-            {
-                base.extend(extra.clone());
-            }
-            sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
-                .bind(id()).bind(source_id).bind(config.to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            // Legacy packs used generated source IDs. Retire only an untouched,
-            // disabled old starter with no dependent history; user-created sources
-            // and every historical reference remain intact.
-            sqlx::query("UPDATE sources SET enabled=0,deleted_at=?,disabled_reason='Replaced by versioned starter-pack source' WHERE id<>? AND name=? AND base_url=? AND adapter_id=? AND enabled=0 AND deleted_at IS NULL AND created_at=updated_at AND disabled_reason='Starter source is disabled until you review and enable it.' AND NOT EXISTS (SELECT 1 FROM scrape_runs WHERE scrape_runs.source_id=sources.id) AND NOT EXISTS (SELECT 1 FROM jobs WHERE jobs.source_id=sources.id) AND EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=sources.id AND c.created_at=c.updated_at AND c.config_json LIKE '%starterPackVersion%')")
-                .bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            // INSERT OR IGNORE cannot fix a row an earlier pack already wrote, so the fields this
-            // pack owns are asserted here. Deliberately not restricted to untouched rows: enabling
-            // a source counts as touching it, and the rows most in need of correcting are the ones
-            // someone tried to use. What belongs to the user is left alone — whether the source is
-            // switched on, and whether it was deleted.
-            sqlx::query("UPDATE sources SET name=?,base_url=?,adapter_id=?,disabled_reason=CASE WHEN enabled=0 THEN ? ELSE disabled_reason END,updated_at=? WHERE id=? AND (name<>? OR base_url<>? OR adapter_id<>? OR (enabled=0 AND disabled_reason IS NOT ?))")
-                .bind(name).bind(url).bind(adapter).bind(reason).bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).bind(reason).execute(&self.pool).await.map_err(|e| e.to_string())?;
-            // The config is replaced rather than merged into: merging leaves behind whatever an
-            // older pack wrote and this one dropped, and those leftovers are not inert — the
-            // "pageSize": 0 an earlier pack left on Micron and NVIDIA asks Workday for zero rows a
-            // page. Only the two settings that are genuinely the user's survive the replacement.
-            let existing_config: Option<String> =
-                sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=?")
-                    .bind(source_id)
-                    .fetch_optional(&self.pool)
-                    .await
-                    .map_err(|e| e.to_string())?;
-            if let Some(existing) = existing_config {
-                let mut wanted = config.clone();
-                if let (Some(target), Ok(previous)) = (
-                    wanted.as_object_mut(),
-                    serde_json::from_str::<serde_json::Value>(&existing),
-                ) {
-                    for key in ["query", "headless"] {
-                        if let Some(kept) = previous.get(key) {
-                            target.insert(key.into(), kept.clone());
-                        }
-                    }
-                }
-                if wanted.to_string() != existing {
-                    sqlx::query(
-                        "UPDATE source_configs SET config_json=?,updated_at=? WHERE source_id=?",
-                    )
-                    .bind(wanted.to_string())
-                    .bind(&t)
-                    .bind(source_id)
-                    .execute(&self.pool)
-                    .await
-                    .map_err(|e| e.to_string())?;
-                }
-            }
+        for company in company_catalog().companies.iter() {
+            self.sync_catalog_company(company, false).await?;
         }
         // A source the app stored under a guessed adapter keeps that guess forever, and the
         // generic selector adapter turns a board's navigation shell into "jobs" (Apple's 11
@@ -1056,6 +993,83 @@ impl Database {
         }
         sqlx::query("INSERT INTO schema_metadata(key,value) VALUES('starter_pack_version',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value")
             .bind(starter_pack_version()).execute(&self.pool).await.map_err(|e| e.to_string())?;
+        Ok(())
+    }
+    /// Writes one catalog company into `sources` / `source_configs`. With `create` the rows are inserted if
+    /// missing (switched off); without it only a row that already exists is brought up to date.
+    async fn sync_catalog_company(&self, company: &CatalogCompany, create: bool) -> ApiResult<()> {
+        if !create {
+            let exists: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources WHERE id=?")
+                .bind(company.id.as_str())
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+            if exists.is_none() {
+                return Ok(());
+            }
+        }
+        let (source_id, name, url, adapter, kind) = (
+            company.id.as_str(),
+            company.name.as_str(),
+            company.base_url.as_str(),
+            company.adapter_id.as_str(),
+            company.kind.as_str(),
+        );
+        let t = now();
+        if create {
+        sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,1,0,?,?)")
+.bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(None::<&str>).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+        }
+        let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":starter_pack_version(),"adapterVersion":"1.1.0","mode":"direct"});
+        if let (Some(base), Some(extra)) = (config.as_object_mut(), company.config.as_object())
+        {
+            base.extend(extra.clone());
+        }
+        if create {
+        sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+            .bind(id()).bind(source_id).bind(config.to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
+        }
+        // INSERT OR IGNORE cannot fix a row an earlier version already wrote, so the fields the
+        // catalog owns are asserted here. Deliberately not restricted to untouched rows: enabling
+        // a source counts as touching it, and the rows most in need of correcting are the ones
+        // someone tried to use. What belongs to the user is left alone — whether the source is
+        // switched on, and whether it was deleted.
+        sqlx::query("UPDATE sources SET name=?,base_url=?,adapter_id=?,disabled_reason=CASE WHEN disabled_reason=? THEN NULL ELSE disabled_reason END,updated_at=? WHERE id=? AND (name<>? OR base_url<>? OR adapter_id<>? OR disabled_reason=?)")
+            .bind(name).bind(url).bind(adapter).bind(LEGACY_STARTER_REASON).bind(&t).bind(source_id).bind(name).bind(url).bind(adapter).bind(LEGACY_STARTER_REASON).execute(&self.pool).await.map_err(|e| e.to_string())?;
+        // The config is replaced rather than merged into: merging leaves behind whatever an
+        // older pack wrote and this one dropped, and those leftovers are not inert — the
+        // "pageSize": 0 an earlier pack left on Micron and NVIDIA asks Workday for zero rows a
+        // page. Only the two settings that are genuinely the user's survive the replacement.
+        let existing_config: Option<String> =
+            sqlx::query_scalar("SELECT config_json FROM source_configs WHERE source_id=?")
+                .bind(source_id)
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+        if let Some(existing) = existing_config {
+            let mut wanted = config.clone();
+            if let (Some(target), Ok(previous)) = (
+                wanted.as_object_mut(),
+                serde_json::from_str::<serde_json::Value>(&existing),
+            ) {
+                for key in ["query", "headless"] {
+                    if let Some(kept) = previous.get(key) {
+                        target.insert(key.into(), kept.clone());
+                    }
+                }
+            }
+            if wanted.to_string() != existing {
+                sqlx::query(
+                    "UPDATE source_configs SET config_json=?,updated_at=? WHERE source_id=?",
+                )
+                .bind(wanted.to_string())
+                .bind(&t)
+                .bind(source_id)
+                .execute(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+            }
+        }
         Ok(())
     }
     pub async fn persist_worker_job(
@@ -2014,44 +2028,210 @@ pub async fn backfill_location_countries(pool: &SqlitePool) -> ApiResult<u64> {
     .await?;
     Ok(rows.len() as u64)
 }
-/// Switches on the starter-pack boards when the installer was told to include them. The installer
-/// cannot touch the database — it does not exist until first run — so it leaves a file behind and
-/// this reads it.
-///
-/// Answering that question is a decision made now, so it outranks whatever state those boards were
-/// left in before: one deleted or switched off in an earlier install comes back. That is what
-/// ticking the box means, and an install that answered Yes over an old database and silently
-/// changed nothing — because every starter row had been retired months earlier — is the bug this
-/// replaced. The file is deleted either way, so no later launch can undo what the user does next.
-pub async fn apply_starter_pack_opt_in(
-    pool: &SqlitePool,
-    local: &std::path::Path,
-) -> ApiResult<u64> {
-    let marker = local.join("starter-pack.optin");
-    if !marker.exists() {
-        return Ok(0);
-    }
-    let switched = sqlx::query("UPDATE sources SET enabled=1,deleted_at=NULL,disabled_reason=NULL,updated_at=? WHERE kind='active' AND (enabled=0 OR deleted_at IS NOT NULL) AND id IN (SELECT source_id FROM source_configs WHERE instr(config_json,'starterPackVersion')>0)")
-        .bind(now())
-        .execute(pool)
+/// The profile the user last chose on the Sources tab. Absent means "no profile": the sources are whatever
+/// the user has added or switched on by hand.
+const PROFILE_ACTIVE: &str = "profile.active";
+/// Source IDs a profile switched on. Only these are switched off again when the user changes profile, so a
+/// company the user turned on or added themselves is never taken away by a profile change.
+const PROFILE_MANAGED: &str = "profile.managed";
+async fn read_setting(pool: &SqlitePool, key: &str) -> ApiResult<Option<String>> {
+    sqlx::query_scalar("SELECT value FROM settings WHERE key=?")
+        .bind(key)
+        .fetch_optional(pool)
         .await
-        .map_err(|e| e.to_string())?
-        .rows_affected();
-    let _ = std::fs::remove_file(&marker);
-    // Recorded because the failure this replaced was invisible: the answer was taken, nothing
-    // happened, and nothing said so.
-    log(
-        pool,
-        "info",
-        None,
-        None,
-        "starter_pack",
-        None,
-        &format!("Installer choice applied: {switched} company job boards switched on."),
-        serde_json::json!({ "switched": switched }),
-    )
-    .await;
-    Ok(switched)
+        .map_err(|e| e.to_string())
+}
+async fn read_managed(pool: &SqlitePool) -> ApiResult<std::collections::BTreeSet<String>> {
+    Ok(read_setting(pool, PROFILE_MANAGED)
+        .await?
+        .and_then(|text| serde_json::from_str::<Vec<String>>(&text).ok())
+        .unwrap_or_default()
+        .into_iter()
+        .collect())
+}
+async fn write_managed(pool: &SqlitePool, managed: &std::collections::BTreeSet<String>) -> ApiResult<()> {
+    let ids: Vec<&String> = managed.iter().collect();
+    write_setting(pool, PROFILE_MANAGED, &serde_json::to_string(&ids).map_err(|e| e.to_string())?).await
+}
+/// The user took this source over (switched it by hand): profile changes leave it alone from now on.
+async fn forget_managed(pool: &SqlitePool, source_id: &str) -> ApiResult<()> {
+    let mut managed = read_managed(pool).await?;
+    if managed.remove(source_id) {
+        write_managed(pool, &managed).await?;
+    }
+    Ok(())
+}
+/// What choosing a profile did, so the Sources tab can say it and read what is new.
+#[derive(Debug, Default, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ProfileApplied {
+    pub profile: Option<String>,
+    /// Companies that were not on the Sources tab and now are.
+    pub added: u64,
+    /// Companies that were there but off (or removed earlier) and are now on.
+    pub switched_on: u64,
+    /// Companies the previous profile had switched on that this one does not include.
+    pub switched_off: u64,
+    /// Companies of the profile that were already on, or that the user already follows from their own copy.
+    pub already_following: u64,
+    /// The profile's companies that have never been read: the app reads these now.
+    pub read_now: Vec<String>,
+}
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProfileSummary {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub companies: i64,
+    /// How many of its companies are switched on right now.
+    pub on: i64,
+}
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProfilesState {
+    pub active: Option<String>,
+    pub profiles: Vec<ProfileSummary>,
+}
+fn profile_companies(profile_id: &str) -> Vec<&'static CatalogCompany> {
+    company_catalog()
+        .companies
+        .iter()
+        .filter(|company| {
+            company.kind == "active" && company.profiles.iter().any(|id| id == profile_id)
+        })
+        .collect()
+}
+impl Database {
+    /// Makes the Sources tab follow a profile: its companies are added (or switched back on) and read, and the
+    /// companies the previous profile switched on, which this one does not include, are switched off. Their
+    /// stored jobs stay. `None` clears the profile and changes no source.
+    ///
+    /// Never touched: a source the user added or switched on themselves, however it got there. A board the user
+    /// already has under their own copy is not added a second time.
+    pub async fn apply_profile(&self, profile_id: Option<&str>) -> ApiResult<ProfileApplied> {
+        let catalog = company_catalog();
+        let companies = match profile_id {
+            Some(id) => {
+                if !catalog.profiles.iter().any(|profile| profile.id == id) {
+                    return Err(format!("Unknown profile: {id}"));
+                }
+                profile_companies(id)
+            }
+            None => Vec::new(),
+        };
+        let wanted: std::collections::BTreeSet<&str> =
+            companies.iter().map(|company| company.id.as_str()).collect();
+        let mut managed = read_managed(&self.pool).await?;
+        let mut applied = ProfileApplied {
+            profile: profile_id.map(str::to_string),
+            ..ProfileApplied::default()
+        };
+        if profile_id.is_some() {
+            // Off first, so a company both profiles share is never switched off and back on.
+            let leaving: Vec<String> = managed
+                .iter()
+                .filter(|id| !wanted.contains(id.as_str()))
+                .cloned()
+                .collect();
+            for id in leaving {
+                applied.switched_off += sqlx::query("UPDATE sources SET enabled=0,updated_at=? WHERE id=? AND enabled=1 AND deleted_at IS NULL")
+                    .bind(now()).bind(&id).execute(&self.pool).await.map_err(|e| e.to_string())?.rows_affected();
+                managed.remove(&id);
+            }
+        }
+        for company in companies {
+            // A board the user already added from the picker has a generated ID, not this catalog ID, so seeding
+            // it again would put a second copy on the Sources tab and read it twice. Their copy is left as it is.
+            let user_copy: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources s WHERE s.id<>? AND s.deleted_at IS NULL AND s.base_url=? AND s.adapter_id=? AND NOT EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=s.id AND c.config_json LIKE '%starterPackVersion%') LIMIT 1")
+                .bind(company.id.as_str()).bind(company.base_url.as_str()).bind(company.adapter_id.as_str())
+                .fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            if user_copy.is_some() {
+                applied.already_following += 1;
+                continue;
+            }
+            let was_live: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources WHERE id=? AND deleted_at IS NULL")
+                .bind(company.id.as_str()).fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            self.sync_catalog_company(company, true).await?;
+            // Choosing a profile is a decision made now, so it outranks a board that was switched off or removed
+            // earlier: that board comes back.
+            let changed = sqlx::query("UPDATE sources SET enabled=1,deleted_at=NULL,disabled_reason=NULL,updated_at=? WHERE id=? AND kind='active' AND (enabled=0 OR deleted_at IS NOT NULL)")
+                .bind(now()).bind(company.id.as_str()).execute(&self.pool).await.map_err(|e| e.to_string())?.rows_affected();
+            if changed > 0 {
+                managed.insert(company.id.clone());
+                if was_live.is_some() {
+                    applied.switched_on += 1;
+                } else {
+                    applied.added += 1;
+                }
+            } else {
+                applied.already_following += 1;
+            }
+            let never_read: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources WHERE id=? AND enabled=1 AND deleted_at IS NULL AND last_success_at IS NULL")
+                .bind(company.id.as_str()).fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            if never_read.is_some() {
+                applied.read_now.push(company.id.clone());
+            }
+        }
+        write_managed(&self.pool, &managed).await?;
+        match profile_id {
+            Some(id) => write_setting(&self.pool, PROFILE_ACTIVE, id).await?,
+            None => {
+                sqlx::query("DELETE FROM settings WHERE key=?").bind(PROFILE_ACTIVE).execute(&self.pool).await.map_err(|e| e.to_string())?;
+            }
+        }
+        log(
+            &self.pool,
+            "info",
+            None,
+            None,
+            "profile",
+            None,
+            &match profile_id {
+                Some(id) => format!(
+                    "Profile {id} applied: {} added, {} switched on, {} switched off.",
+                    applied.added, applied.switched_on, applied.switched_off
+                ),
+                None => "Profile cleared; no source was changed.".to_string(),
+            },
+            serde_json::json!({"profile": profile_id, "added": applied.added, "switchedOn": applied.switched_on, "switchedOff": applied.switched_off}),
+        )
+        .await;
+        Ok(applied)
+    }
+    pub async fn profiles_state(&self) -> ApiResult<ProfilesState> {
+        let catalog = company_catalog();
+        let active = read_setting(&self.pool, PROFILE_ACTIVE)
+            .await?
+            .filter(|id| catalog.profiles.iter().any(|profile| &profile.id == id));
+        let mut profiles = Vec::new();
+        for profile in &catalog.profiles {
+            let ids: Vec<&str> = profile_companies(&profile.id).iter().map(|company| company.id.as_str()).collect();
+            let on: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL AND id IN (SELECT value FROM json_each(?))")
+                .bind(serde_json::to_string(&ids).map_err(|e| e.to_string())?)
+                .fetch_one(&self.pool).await.map_err(|e| e.to_string())?;
+            profiles.push(ProfileSummary {
+                id: profile.id.clone(),
+                name: profile.name.clone(),
+                description: profile.description.clone(),
+                companies: ids.len() as i64,
+                on,
+            });
+        }
+        Ok(ProfilesState { active, profiles })
+    }
+}
+#[tauri::command]
+pub async fn list_profiles(state: State<'_, Arc<AppState>>) -> ApiResult<ProfilesState> {
+    state.db.profiles_state().await
+}
+/// `profile_id` null means "no profile".
+#[tauri::command]
+pub async fn apply_profile(
+    profile_id: Option<String>,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<ProfileApplied> {
+    state.db.apply_profile(profile_id.as_deref()).await
 }
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -2379,6 +2559,8 @@ pub async fn set_source_enabled(
     // fact that it is currently unticked, which the enabled flag already says. Selecting a source
     // clears the recorded reason because the user is overriding that finding on purpose.
     sqlx::query("UPDATE sources SET enabled=?,disabled_reason=CASE WHEN ? THEN NULL ELSE disabled_reason END,updated_at=? WHERE id=?").bind(enabled).bind(enabled).bind(now()).bind(&source_id).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
+    // Switching a source by hand makes it the user's: a later profile change leaves it as they set it.
+    forget_managed(&state.db.pool, &source_id).await?;
     Ok(())
 }
 #[tauri::command]
@@ -4966,104 +5148,6 @@ mod matching_persistence_tests {
         assert_eq!(sorted.first().unwrap().id, "fresh");
         assert_eq!(sorted.len(), 4);
     }
-    // The installer cannot write to a database that does not exist yet, so its answer arrives as a
-    // file. What matters is that it is spent: a user who switches a board off must not find it on
-    // again next launch.
-    #[tokio::test]
-    async fn the_installer_opt_in_switches_the_pack_on_once_and_is_then_gone() {
-        let root = std::env::temp_dir().join(format!("jobscraper-optin-{}", Uuid::new_v4()));
-        std::fs::create_dir_all(&root).unwrap();
-        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
-        db.prepare().await.unwrap();
-        db.install_starter_pack().await.unwrap();
-        let enabled_count = || async {
-            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM sources WHERE enabled=1")
-                .fetch_one(&db.pool)
-                .await
-                .unwrap()
-        };
-        // The pack installs switched off, and stays that way when the installer was not told to
-        // include it.
-        assert_eq!(enabled_count().await, 0);
-        assert_eq!(
-            apply_starter_pack_opt_in(&db.pool, &root).await.unwrap(),
-            0,
-            "no marker, no change"
-        );
-        let marker = root.join("starter-pack.optin");
-        std::fs::write(&marker, "1").unwrap();
-        let switched = apply_starter_pack_opt_in(&db.pool, &root).await.unwrap();
-        assert!(switched >= 19, "every active starter is on, got {switched}");
-        assert_eq!(enabled_count().await, switched as i64);
-        // Reference-only sources are never scraped, so they are never switched on.
-        let reference: i64 =
-            sqlx::query_scalar("SELECT count(*) FROM sources WHERE kind='reference' AND enabled=1")
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-        assert_eq!(reference, 0);
-        // Spent: the file is gone, and a board switched off afterwards stays off.
-        assert!(!marker.exists());
-        sqlx::query("UPDATE sources SET enabled=0,updated_at='later' WHERE id='00000000-0000-4000-8000-000000000003'").execute(&db.pool).await.unwrap();
-        assert_eq!(apply_starter_pack_opt_in(&db.pool, &root).await.unwrap(), 0);
-        let broadcom: i64 = sqlx::query_scalar(
-            "SELECT enabled FROM sources WHERE id='00000000-0000-4000-8000-000000000003'",
-        )
-        .fetch_one(&db.pool)
-        .await
-        .unwrap();
-        assert_eq!(
-            broadcom, 0,
-            "a board the user switched off is not switched back on"
-        );
-        std::fs::remove_dir_all(&root).ok();
-    }
-
-    // Installing over a database where the pack had been deleted long ago: answering Yes has to
-    // bring those boards back, because that is what answering Yes means. This install answered
-    // Yes, changed nothing, and said nothing — the app opened with one source in it.
-    #[tokio::test]
-    async fn the_opt_in_revives_boards_retired_by_an_earlier_install() {
-        let root = std::env::temp_dir().join(format!("jobscraper-revive-{}", Uuid::new_v4()));
-        std::fs::create_dir_all(&root).unwrap();
-        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
-        db.prepare().await.unwrap();
-        db.install_starter_pack().await.unwrap();
-        // Exactly the state the reported install was in: every starter soft-deleted, one source
-        // left alive, and each row edited since it was created.
-        sqlx::query("UPDATE sources SET deleted_at='2026-08-29T16:05:49Z',updated_at='2026-08-29T16:05:49Z' WHERE id<>'00000000-0000-4000-8000-000000000020'")
-            .execute(&db.pool)
-            .await
-            .unwrap();
-        let alive: i64 =
-            sqlx::query_scalar("SELECT count(*) FROM sources WHERE deleted_at IS NULL")
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-        assert_eq!(alive, 1, "the database starts with one source, as reported");
-        std::fs::write(root.join("starter-pack.optin"), "1").unwrap();
-        let switched = apply_starter_pack_opt_in(&db.pool, &root).await.unwrap();
-        assert!(switched >= 19, "retired boards come back, got {switched}");
-        let listed: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM sources WHERE deleted_at IS NULL AND enabled=1 AND kind='active'",
-        )
-        .fetch_one(&db.pool)
-        .await
-        .unwrap();
-        assert!(
-            listed >= 19,
-            "and they are on the Sources tab, got {listed}"
-        );
-        // A reference source is not a board and stays retired.
-        let reference: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM sources WHERE kind='reference' AND deleted_at IS NULL",
-        )
-        .fetch_one(&db.pool)
-        .await
-        .unwrap();
-        assert_eq!(reference, 0);
-        std::fs::remove_dir_all(&root).ok();
-    }
     // The pack is the source of truth for its own sources, and it has to reach installs that
     // already have them. An install carrying jobs.cisco.com and "pageSize": 0 from an older pack
     // read nothing at all, and every route to fixing it — a new version, a reconcile — stopped at
@@ -5073,7 +5157,7 @@ mod matching_persistence_tests {
         let root = std::env::temp_dir().join(format!("jobscraper-pack-{}", Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
         let db = Database::open(root.join("jobscraper.db")).await.unwrap();
-        db.install_starter_pack().await.unwrap();
+        db.apply_profile(Some("semiconductor")).await.unwrap();
         let cisco = "00000000-0000-4000-8000-000000000013";
         // Exactly the reported state: an older pack's URL and settings, the stale key it left
         // behind, a search term of the user's own, and the row switched on and therefore "edited".
@@ -5087,7 +5171,7 @@ mod matching_persistence_tests {
             .await
             .unwrap();
 
-        db.install_starter_pack().await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
 
         let (url, adapter, enabled, reason): (String, String, i64, Option<String>) =
             sqlx::query_as(
@@ -5451,7 +5535,7 @@ mod matching_persistence_tests {
             .fetch_one(&mut *observer)
             .await
             .unwrap();
-        db.install_starter_pack().await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
         let after: i64 = sqlx::query_scalar("PRAGMA data_version")
             .fetch_one(&mut *observer)
             .await
@@ -5463,41 +5547,10 @@ mod matching_persistence_tests {
     }
 
     #[tokio::test]
-    async fn starter_reconciliation_retires_only_exact_untouched_legacy_rows() {
-        let root = std::env::temp_dir().join(format!("jobscraper-starter-{}", Uuid::new_v4()));
-        std::fs::create_dir_all(&root).unwrap();
-        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
-        let stamp = "2026-01-01T00:00:00Z";
-        // Analog Devices (still classified "workday" in the live starter pack) stands
-        // in for a pre-versioned legacy row here; Microchip's own classification was
-        // corrected live-fire testing found it isn't actually a Workday tenant.
-        for (source, changed) in [("legacy", false), ("user-owned", true)] {
-            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?, 'https://analogdevices.wd1.myworkdayjobs.com/','workday','1.0.0',0,'active','Starter source is disabled until you review and enable it.',0,0,?,?)")
-                .bind(source).bind("Analog Devices").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
-            sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
-                .bind(format!("config-{source}")).bind(source).bind("{\"starterPackVersion\":\"1.0.0\"}").bind(stamp).bind(if changed { "2026-01-02T00:00:00Z" } else { stamp }).execute(&db.pool).await.unwrap();
-        }
-        db.install_starter_pack().await.unwrap();
-        let retired: Option<String> =
-            sqlx::query_scalar("SELECT deleted_at FROM sources WHERE id='legacy'")
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-        let preserved: Option<String> =
-            sqlx::query_scalar("SELECT deleted_at FROM sources WHERE id='user-owned'")
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-        assert!(retired.is_some());
-        assert!(preserved.is_none());
-        db.pool.close().await;
-    }
-
-    #[tokio::test]
     async fn starter_reconciliation_backfills_corrected_host_and_tenant_on_an_untouched_row() {
         // Simulates a database installed before the live-fire fixes: Intel seeded
         // against the stale jobs.intel.com host with no tenant/site, and Microchip
-        // still misclassified as Workday. install_starter_pack must correct both in
+        // still misclassified as Workday. reconcile_catalog_sources must correct both in
         // place without the user re-adding the sources, exactly like the original
         // NVIDIA adapter fix — but only because these rows were never edited.
         let root = std::env::temp_dir().join(format!("jobscraper-reconcile-{}", Uuid::new_v4()));
@@ -5514,7 +5567,7 @@ mod matching_persistence_tests {
             .bind(microchip_id).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
         sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
             .bind("config-microchip").bind(microchip_id).bind(r#"{"schemaVersion":"1.1.0","starterPackVersion":"2026-08-28","expectedHost":"careers.microchip.com","adapterVersion":"1.1.0","mode":"direct"}"#).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
-        db.install_starter_pack().await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
         let (intel_url, intel_config): (String, String) = sqlx::query_as(
             "SELECT s.base_url, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id=?",
         )
@@ -5558,7 +5611,7 @@ mod matching_persistence_tests {
             .bind(microchip_id).execute(&db.pool).await.unwrap();
         sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
             .bind("config-microchip").bind(microchip_id).bind(r#"{"schemaVersion":"1.1.0","starterPackVersion":"2026-08-30","expectedHost":"www.microchip.com","adapterVersion":"1.1.0","mode":"direct"}"#).bind("2026-01-01T00:00:00Z").bind("2026-01-01T00:00:00Z").execute(&db.pool).await.unwrap();
-        db.install_starter_pack().await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
         let (adapter, base_url, enabled, config): (String, String, bool, String) =
             sqlx::query_as("SELECT s.adapter_id, s.base_url, s.enabled, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id=?")
                 .bind(microchip_id)
@@ -5601,7 +5654,7 @@ mod matching_persistence_tests {
             sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
                 .bind(format!("config-{source_id}")).bind(source_id).bind(r#"{"itemSelector":"li","titleSelector":"a","urlPrefix":"/careers/pt","pageSize":20}"#).bind(stamp).bind("2026-01-02T00:00:00Z").execute(&db.pool).await.unwrap();
         }
-        db.install_starter_pack().await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
         let rows: Vec<(String, String, bool, String)> = sqlx::query_as("SELECT s.id,s.adapter_id,s.enabled,c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id IN ('old-apple','current-apple') ORDER BY s.id")
             .fetch_all(&db.pool).await.unwrap();
         assert_eq!(rows.len(), 2);
@@ -5665,7 +5718,7 @@ mod matching_persistence_tests {
             sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,'t1','t2')")
                 .bind(format!("config-{source_id}")).bind(source_id).bind(config).execute(&db.pool).await.unwrap();
         }
-        db.install_starter_pack().await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
         let rows: Vec<(String, String, String)> = sqlx::query_as("SELECT s.id,s.adapter_id,c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id WHERE s.id LIKE 'user-%' ORDER BY s.id")
             .fetch_all(&db.pool).await.unwrap();
         let by_id: std::collections::HashMap<_, _> = rows
@@ -5704,20 +5757,145 @@ mod matching_persistence_tests {
         db.pool.close().await;
     }
 
-    // Adding a company from the picker gives it a generated ID, so when a later pack promotes that
-    // company to a starter the same board would otherwise exist twice and be read twice.
+    async fn fresh_database(tag: &str) -> Database {
+        let root = std::env::temp_dir().join(format!("jobscraper-{tag}-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        Database::open(root.join("jobscraper.db")).await.unwrap()
+    }
+    async fn count(db: &Database, sql: &str) -> i64 {
+        sqlx::query_scalar(sql).fetch_one(&db.pool).await.unwrap()
+    }
+    fn profile_ids(profile: &str) -> Vec<String> {
+        profile_companies(profile).iter().map(|company| company.id.clone()).collect()
+    }
+    // A new install has nothing in it: the old starter pack put dozens of employers on screen before the
+    // person had said what they were looking for.
+    #[tokio::test]
+    async fn a_new_install_holds_no_sources_until_a_profile_is_chosen() {
+        let db = fresh_database("empty").await;
+        db.reconcile_catalog_sources().await.unwrap();
+        assert_eq!(count(&db, "SELECT count(*) FROM sources").await, 0);
+        let state = db.profiles_state().await.unwrap();
+        assert_eq!(state.active, None);
+        let ids: Vec<&str> = state.profiles.iter().map(|profile| profile.id.as_str()).collect();
+        assert_eq!(ids, ["semiconductor", "data-science"]);
+        assert!(state.profiles.iter().all(|profile| profile.companies > 10 && profile.on == 0));
+        db.pool.close().await;
+    }
+    #[tokio::test]
+    async fn choosing_a_profile_adds_its_companies_switches_them_on_and_lists_the_unread() {
+        let db = fresh_database("choose").await;
+        let wanted = profile_ids("semiconductor");
+        let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
+        assert_eq!(applied.profile.as_deref(), Some("semiconductor"));
+        assert_eq!(applied.added as usize, wanted.len());
+        assert_eq!((applied.switched_on, applied.switched_off, applied.already_following), (0, 0, 0));
+        let mut read_now = applied.read_now.clone();
+        read_now.sort();
+        let mut expected = wanted.clone();
+        expected.sort();
+        assert_eq!(read_now, expected, "every new company is read straight away");
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL").await as usize, wanted.len());
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE disabled_reason IS NOT NULL").await, 0);
+        let state = db.profiles_state().await.unwrap();
+        assert_eq!(state.active.as_deref(), Some("semiconductor"));
+        let semiconductor = state.profiles.iter().find(|profile| profile.id == "semiconductor").unwrap();
+        let data_science = state.profiles.iter().find(|profile| profile.id == "data-science").unwrap();
+        assert_eq!((semiconductor.on as usize, data_science.on), (wanted.len(), 0));
+        // Companies the profile has never heard of are not in it.
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE name='Anthropic'").await, 0);
+        db.pool.close().await;
+    }
+    #[tokio::test]
+    async fn changing_profile_switches_off_only_what_the_previous_profile_turned_on() {
+        let db = fresh_database("switch").await;
+        let semiconductor = profile_ids("semiconductor");
+        let data_science = profile_ids("data-science");
+        db.apply_profile(Some("semiconductor")).await.unwrap();
+        // The user keeps one chip company for themselves by switching it on by hand (the picker does exactly this).
+        let kept = semiconductor[0].clone();
+        forget_managed(&db.pool, &kept).await.unwrap();
+        // ...and follows a company of their own that no profile includes.
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('mine','Mine','https://jobs.example.test/mine','static-css','1.1.0',1,'active',1,0,'t','t')")
+            .execute(&db.pool).await.unwrap();
+        let applied = db.apply_profile(Some("data-science")).await.unwrap();
+        assert_eq!(applied.added as usize, data_science.len());
+        assert_eq!(applied.switched_off as usize, semiconductor.len() - 1);
+        for id in &semiconductor {
+            let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id=?").bind(id).fetch_one(&db.pool).await.unwrap();
+            assert_eq!(enabled, i64::from(*id == kept), "{id}");
+        }
+        assert_eq!(count(&db, "SELECT enabled FROM sources WHERE id='mine'").await, 1);
+        // Switched off is not removed: the sources and their stored jobs are all still there.
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize, semiconductor.len() + data_science.len() + 1);
+        // Going back brings the first set back without adding anything twice.
+        let back = db.apply_profile(Some("semiconductor")).await.unwrap();
+        assert_eq!((back.added, back.switched_on as usize, back.switched_off as usize), (0, semiconductor.len() - 1, data_science.len()));
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize, semiconductor.len() + data_science.len() + 1);
+        db.pool.close().await;
+    }
+    #[tokio::test]
+    async fn applying_a_profile_again_changes_nothing_and_reads_only_what_was_never_read() {
+        let db = fresh_database("again").await;
+        let wanted = profile_ids("data-science");
+        db.apply_profile(Some("data-science")).await.unwrap();
+        sqlx::query("UPDATE sources SET last_success_at='2026-11-07T00:00:00Z' WHERE id<>?").bind(&wanted[0]).execute(&db.pool).await.unwrap();
+        let again = db.apply_profile(Some("data-science")).await.unwrap();
+        assert_eq!((again.added, again.switched_on, again.switched_off), (0, 0, 0));
+        assert_eq!(again.already_following as usize, wanted.len());
+        assert_eq!(again.read_now, vec![wanted[0].clone()], "only the board that was never read is read again");
+        db.pool.close().await;
+    }
+    #[tokio::test]
+    async fn a_profile_brings_back_boards_that_were_switched_off_or_removed() {
+        let db = fresh_database("revive").await;
+        let wanted = profile_ids("semiconductor");
+        db.apply_profile(Some("semiconductor")).await.unwrap();
+        sqlx::query("UPDATE sources SET enabled=0 WHERE id=?").bind(&wanted[0]).execute(&db.pool).await.unwrap();
+        sqlx::query("UPDATE sources SET deleted_at='2026-11-01T00:00:00Z',enabled=0 WHERE id=?").bind(&wanted[1]).execute(&db.pool).await.unwrap();
+        let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
+        assert_eq!(applied.switched_on, 1);
+        assert_eq!(applied.added, 1, "a removed board counts as added back");
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL").await as usize, wanted.len());
+        db.pool.close().await;
+    }
+    #[tokio::test]
+    async fn clearing_the_profile_forgets_it_and_changes_no_source() {
+        let db = fresh_database("clear").await;
+        db.apply_profile(Some("semiconductor")).await.unwrap();
+        let before = count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await;
+        let cleared = db.apply_profile(None).await.unwrap();
+        assert_eq!((cleared.profile, cleared.added, cleared.switched_off), (None, 0, 0));
+        assert_eq!(db.profiles_state().await.unwrap().active, None);
+        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await, before);
+        assert!(db.apply_profile(Some("astronaut")).await.is_err(), "a profile that does not exist is refused");
+        db.pool.close().await;
+    }
+    // Reconciliation keeps rows an earlier version created in step with the catalog, and clears the
+    // "disabled until you review it" note the first catalog versions stamped on every board they seeded.
+    #[tokio::test]
+    async fn reconciling_only_repairs_existing_rows_and_clears_the_old_disabled_note() {
+        let db = fresh_database("reconcile").await;
+        let cadence = profile_companies("semiconductor").into_iter().find(|company| company.name == "Cadence").unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Cadence old name','https://old.example.test/','workday','1.1.0',0,'active','Starter source is disabled until you review and enable it.',1,0,'t','t')")
+            .bind(&cadence.id).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES('c1',?,'{\"starterPackVersion\":\"old\"}','t','t')")
+            .bind(&cadence.id).execute(&db.pool).await.unwrap();
+        db.reconcile_catalog_sources().await.unwrap();
+        let (name, url, reason): (String, String, Option<String>) = sqlx::query_as("SELECT name,base_url,disabled_reason FROM sources WHERE id=?")
+            .bind(&cadence.id).fetch_one(&db.pool).await.unwrap();
+        assert_eq!((name.as_str(), url.as_str(), reason), ("Cadence", cadence.base_url.as_str(), None));
+        assert_eq!(count(&db, "SELECT count(*) FROM sources").await, 1, "nothing else is created");
+        db.pool.close().await;
+    }
+    // Adding a company from the picker gives it a generated ID, so when a profile later includes that
+    // company the same board would otherwise exist twice and be read twice.
     #[tokio::test]
     async fn a_board_the_user_already_added_is_not_seeded_a_second_time() {
-        let root = std::env::temp_dir().join(format!("jobscraper-usercopy-{}", Uuid::new_v4()));
-        std::fs::create_dir_all(&root).unwrap();
-        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let db = fresh_database("usercopy").await;
         let stamp = "2026-10-01T00:00:00Z";
-        let starters: Vec<&CatalogCompany> = company_catalog()
-            .companies
-            .iter()
-            .filter(|company| company.starter && company.kind == "active")
-            .collect();
-        let (kept, deleted) = (starters[0], starters[1]);
+        let companies = profile_companies("semiconductor");
+        let (kept, deleted) = (companies[0], companies[1]);
         for (source, company, deleted_at, enabled) in [
             ("user-copy", kept, None, 1),
             ("user-deleted", deleted, Some("2026-10-02T00:00:00Z"), 0),
@@ -5727,64 +5905,33 @@ mod matching_persistence_tests {
             sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,'{\"mode\":\"direct\"}',?,?)")
                 .bind(format!("config-{source}")).bind(source).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
         }
-        db.install_starter_pack().await.unwrap();
-        let live_copies: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM sources WHERE base_url=? AND adapter_id=? AND deleted_at IS NULL",
-        )
-        .bind(&kept.base_url)
-        .bind(&kept.adapter_id)
-        .fetch_one(&db.pool)
-        .await
-        .unwrap();
-        assert_eq!(
-            live_copies, 1,
-            "the user's copy is the only copy of that board"
-        );
-        let seeded: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=?")
-            .bind(&kept.id)
-            .fetch_one(&db.pool)
-            .await
-            .unwrap();
+        let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
+        assert_eq!(applied.already_following, 1, "their own copy counts as followed");
+        let live_copies = count(&db, &format!("SELECT count(*) FROM sources WHERE base_url='{}' AND adapter_id='{}' AND deleted_at IS NULL", kept.base_url, kept.adapter_id)).await;
+        assert_eq!(live_copies, 1, "the user's copy is the only copy of that board");
+        let seeded: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=?").bind(&kept.id).fetch_one(&db.pool).await.unwrap();
         assert_eq!(seeded, 0, "the catalog row is not seeded beside it");
-        let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id='user-copy'")
-            .fetch_one(&db.pool)
-            .await
-            .unwrap();
+        let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id='user-copy'").fetch_one(&db.pool).await.unwrap();
         assert_eq!(enabled, 1, "the user's copy is left exactly as they had it");
-        let reseeded: i64 =
-            sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=? AND deleted_at IS NULL")
-                .bind(&deleted.id)
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-        assert_eq!(
-            reseeded, 1,
-            "a copy the user deleted does not block the starter"
-        );
-        let others: i64 =
-            sqlx::query_scalar("SELECT count(*) FROM sources WHERE id LIKE '00000000-%'")
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-        assert!(
-            others >= 40,
-            "every other starter is still seeded, got {others}"
-        );
+        let revived: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=? AND deleted_at IS NULL").bind(&deleted.id).fetch_one(&db.pool).await.unwrap();
+        assert_eq!(revived, 1, "a copy the user deleted does not block the profile");
         db.pool.close().await;
     }
 
-    // R5: nothing connected the starter pack to the adapter layer, so a source could
-    // seed a config the sidecar's requestFor() rejects and nothing would notice until
-    // a live run failed. This test and sidecar/starter-pack.contract.test.mjs share one
-    // fixture (sidecar/starter-pack.fixture.json): this one fails if install_starter_pack
-    // changes without updating the checked-in fixture; the Node test fails if the seeded
-    // config no longer builds a request. Neither side can drift from the other silently.
+    // R5: nothing connected the catalog to the adapter layer, so a source could seed a config the
+    // sidecar's requestFor() rejects and nothing would notice until a live run failed. This test and
+    // sidecar/starter-pack.contract.test.mjs share one fixture (sidecar/profile-sources.fixture.json):
+    // this one fails if what the profiles seed changes without updating the checked-in fixture; the Node
+    // test fails if the seeded config no longer builds a request. Neither side can drift silently.
     #[tokio::test]
-    async fn starter_pack_matches_the_checked_in_adapter_contract_fixture() {
+    async fn profile_sources_match_the_checked_in_adapter_contract_fixture() {
         let root = std::env::temp_dir().join(format!("jobscraper-fixture-{}", Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
         let db = Database::open(root.join("jobscraper.db")).await.unwrap();
-        db.install_starter_pack().await.unwrap();
+        // Every profile in turn: the fixture is everything a person can end up following through a profile.
+        for profile in &company_catalog().profiles {
+            db.apply_profile(Some(profile.id.as_str())).await.unwrap();
+        }
         let rows: Vec<(String, String, String, String)> = sqlx::query_as(
             "SELECT s.name, s.base_url, s.adapter_id, c.config_json FROM sources s JOIN source_configs c ON c.source_id=s.id ORDER BY s.id",
         )
@@ -5800,10 +5947,10 @@ mod matching_persistence_tests {
         let fixture_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("..")
             .join("sidecar")
-            .join("starter-pack.fixture.json");
+            .join("profile-sources.fixture.json");
         // Regenerate from the actual installer, so fixture updates never copy its defaults by
         // hand. Ordinary test runs still fail on drift and never rewrite the checked-in file.
-        if std::env::var("UPDATE_STARTER_PACK_FIXTURE").as_deref() == Ok("1") {
+        if std::env::var("UPDATE_PROFILE_FIXTURE").as_deref() == Ok("1") {
             std::fs::write(
                 &fixture_path,
                 format!("{}\n", serde_json::to_string_pretty(&actual).unwrap()),
@@ -5815,7 +5962,7 @@ mod matching_persistence_tests {
         assert_eq!(
             serde_json::to_string_pretty(&actual).unwrap(),
             serde_json::to_string_pretty(&expected).unwrap(),
-            "install_starter_pack no longer matches sidecar/starter-pack.fixture.json — \
+            "the profile sources no longer match sidecar/profile-sources.fixture.json — \
              update the fixture (it drives the Node adapter-contract test) alongside this change"
         );
         db.pool.close().await;

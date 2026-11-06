@@ -11,7 +11,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 slug = lambda n: re.sub(r'^-|-$', '', re.sub(r'[^a-z0-9]+', '-', n.lower()))
 catalog = [c for c in json.load(open(f'{ROOT}/sidecar/company-catalog.json'))['companies'] if c['kind'] != 'reference']
-starter = {c['name'] for c in catalog if c.get('starter')}
+starter = {c['name'] for c in catalog if c.get('profiles')}
 TERMS = ['engineer', 'verification']
 norm = lambda t: re.sub(r'[^a-z0-9]+', ' ', t.lower()).strip()
 word = lambda term, title: re.search(r'\b' + term + r's?\b', title, re.I) is not None
@@ -122,7 +122,7 @@ for a, b in text:
 
 # ---------------- Companies ----------------
 ws = wb.create_sheet('Companies')
-cols = [('Company', 24), ('Default list', 8), ('Adapter', 14), ('Country', 8),
+cols = [('Company', 24), ('In a profile', 8), ('Adapter', 14), ('Country', 8),
         ('Scraper ran', 9), ('Scraper complete', 10), ('Scraper jobs', 9), ('Scraper "engineer"', 10), ('Scraper "verification"', 11), ('Scrape secs', 8),
         ('Site total', 11), ('Site total is', 9), ('Site "engineer"', 10), ('Site "engineer" is', 9), ('Site "verification"', 11), ('Site "verification" is', 9), ('Site list loaded (links)', 10), ('Site read', 14),
         ('Total: scraper/site', 10), ('Engineer: scraper/site', 10), ('Verification: scraper/site', 11), ('Title overlap', 9),
@@ -192,7 +192,7 @@ sm.column_dimensions['A'].width = 30
 for col in 'BCDEFGH': sm.column_dimensions[col].width = 16
 sm['A1'] = 'Are the supported companies scraped correctly?'; sm['A1'].font = Font(name=F, size=14, bold=True)
 sm['A2'] = 'Scraper results compared with the same searches on each company\'s own careers page. See Method for how and Companies for every number.'; sm['A2'].font = body
-sm['A4'] = 'Status'; sm['B4'] = 'Companies'; sm['C4'] = 'Share'; sm['D4'] = 'Default-list companies'
+sm['A4'] = 'Status'; sm['B4'] = 'Companies'; sm['C4'] = 'Share'; sm['D4'] = 'Companies in a profile'
 for c in 'ABCD': sm[f'{c}4'].font = hdr_font; sm[f'{c}4'].fill = hdr_fill; sm[f'{c}4'].alignment = Alignment(horizontal='center')
 rng = f'Companies!${L["Status"]}$2:${L["Status"]}${last}'; dl = f'Companies!$B$2:$B${last}'
 for i, s_ in enumerate(['Working', 'Likely working', 'Partially working', 'Not working', 'Cannot verify']):
@@ -218,7 +218,7 @@ for c in 'BCDEFG': sm[f'{c}{e}'] = f'=SUM({c}14:{c}{e-1})'
 for c in 'ABCDEFG': sm[f'{c}{e}'].font = bold; sm[f'{c}{e}'].border = box
 sm[f'A{e+2}'] = 'Jobs'; sm[f'A{e+2}'].font = bold
 sm[f'A{e+3}'] = 'Jobs the scraper read, all companies'; sm[f'B{e+3}'] = f'=SUM(Companies!$G$2:$G${last})'
-sm[f'A{e+4}'] = 'Jobs the scraper read, default list'; sm[f'B{e+4}'] = f'=SUMIFS(Companies!$G$2:$G${last},{dl},"yes")'
+sm[f'A{e+4}'] = 'Jobs the scraper read, companies in a profile'; sm[f'B{e+4}'] = f'=SUMIFS(Companies!$G$2:$G${last},{dl},"yes")'
 for r in (e+3, e+4): sm[f'A{r}'].font = body; sm[f'B{r}'].font = body; sm[f'B{r}'].number_format = '#,##0'
 wb.save(sys.argv[1] if len(sys.argv) > 1 else f'{ROOT}/docs/scrape-audit/scraper-vs-website.xlsx')
 print('written', len(rows))

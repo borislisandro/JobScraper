@@ -4,7 +4,7 @@
 // have to match, and everything else is refused unless the proof passed.
 //
 // node scripts/admit-company.mjs <trackerId> <proof.json> --country NL --tags semiconductor,equipment
-//   --careers <official careers URL> [--notes "..."] [--create-row]
+//   --careers <official careers URL> [--notes "..."] [--create-row] [--profiles semiconductor,data-science]
 //
 // --create-row adds the tracker row when the employer was never queued (new batches such as
 // semiconductor-eu), so nobody hand-edits the tracker JSON.
@@ -41,8 +41,8 @@ const evidence=proofPath.replaceAll("\\","/").replace(/^\.\//,"");
 if(!evidence.startsWith("docs/company-proofs/"))throw Error("Proofs belong in docs/company-proofs/");
 catalog.companies.push({id,name:row.name,country:options.country,tags:options.tags.split(",").map(tag=>tag.trim()).filter(Boolean),
  adapterId:proof.source.adapterId,baseUrl:proof.source.baseUrl,kind:"active",
- disabledReason:"Starter source is disabled until you review and enable it.",
- config:proof.source.configJson,starter:false,
+ config:proof.source.configJson,
+ ...(options.profiles?{profiles:options.profiles.split(",").map(id=>id.trim()).filter(Boolean)}:{}),
  verified:{at:proof.finishedAt.slice(0,10),jobs:proof.listing.jobs,level:"full",evidence}});
 
 Object.assign(row,{status:"supported",officialCareersUrl:options.careers,adapterId:proof.source.adapterId,catalogId:id,
