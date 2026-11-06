@@ -1,0 +1,14 @@
+{
+ "id": "talkdesk",
+ "name": "Talkdesk",
+ "baseUrl": "https://job-boards.greenhouse.io/talkdesk2",
+ "adapterId": "greenhouse",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "token": "talkdesk2",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ }
+}

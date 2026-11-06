@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "name": "Flix",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:50:17.987Z",
+  "finishedAt": "2026-10-30T20:50:19.963Z",
+  "source": {
+    "id": "flix",
+    "name": "Flix",
+    "baseUrl": "https://job-boards.greenhouse.io/flix",
+    "adapterId": "greenhouse",
+    "configJson": {
+      "token": "flix",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "flix",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 128,
+        "persisted": 128,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 128,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 236,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 235,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 203,
+              "body": 8,
+              "browser": 0,
+              "adapterOther": 14,
+              "emit": 2
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 203,
+                "bodyMs": 8
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 128,
+    "uniqueIdentities": 128,
+    "uniqueHashes": 128,
+    "samples": [
+      {
+        "externalId": "8907024002",
+        "title": "Agente de Venta Full Time - Terminal Sur",
+        "company": "Flix",
+        "location": "Santiago",
+        "postedAt": "2026-10-23",
+        "canonicalUrl": "https://flix.careers/job/8907024002?gh_jid=8907024002",
+        "applyUrl": "https://flix.careers/job/8907024002?gh_jid=8907024002",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "8783584002",
+        "title": "Security Engineer (m/f/d)",
+        "company": "Flix",
+        "location": "Warsaw",
+        "postedAt": "2026-09-04",
+        "canonicalUrl": "https://flix.careers/job/8783584002?gh_jid=8783584002",
+        "applyUrl": "https://flix.careers/job/8783584002?gh_jid=8783584002",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "8772972002",
+        "title": "Zendesk Manager / Developer of Solutions for Migrations into Zendesk (m/f/d)",
+        "company": "Flix",
+        "location": "Lisbon",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://flix.careers/job/8772972002?gh_jid=8772972002",
+        "applyUrl": "https://flix.careers/job/8772972002?gh_jid=8772972002",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "flix",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 909,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 909,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 245,
+              "backoff": 0,
+              "response": 640,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 245,
+                "backoffMs": 0,
+                "responseMs": 640,
+                "bodyMs": 7
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "8907024002",
+        "title": "Agente de Venta Full Time - Terminal Sur",
+        "company": "Flix",
+        "location": "Santiago",
+        "postedAt": "2026-10-23",
+        "canonicalUrl": "https://flix.careers/job/8907024002?gh_jid=8907024002",
+        "applyUrl": "https://flix.careers/job/8907024002?gh_jid=8907024002",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3586
+      },
+      {
+        "externalId": "8783584002",
+        "title": "Security Engineer (m/f/d)",
+        "company": "Flix",
+        "location": "Warsaw",
+        "postedAt": "2026-09-04",
+        "canonicalUrl": "https://flix.careers/job/8783584002?gh_jid=8783584002",
+        "applyUrl": "https://flix.careers/job/8783584002?gh_jid=8783584002",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4597
+      },
+      {
+        "externalId": "8772972002",
+        "title": "Zendesk Manager / Developer of Solutions for Migrations into Zendesk (m/f/d)",
+        "company": "Flix",
+        "location": "Lisbon",
+        "postedAt": "2026-09-02",
+        "canonicalUrl": "https://flix.careers/job/8772972002?gh_jid=8772972002",
+        "applyUrl": "https://flix.careers/job/8772972002?gh_jid=8772972002",
+        "descriptionStatus": "complete",
+        "descriptionChars": 10007
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "flix",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 128,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 128,
+        "requests": 1,
+        "skipped": 128,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 228,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 228,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 203,
+              "body": 8,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 203,
+                "bodyMs": 8
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

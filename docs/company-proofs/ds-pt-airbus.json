@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "name": "Airbus (Portugal)",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:53:42.710Z",
+  "finishedAt": "2026-10-30T20:53:49.896Z",
+  "source": {
+    "id": "airbus",
+    "name": "Airbus (Portugal)",
+    "baseUrl": "https://ag.wd3.myworkdayjobs.com/",
+    "adapterId": "workday",
+    "configJson": {
+      "maxPages": 500,
+      "site": "Airbus",
+      "tenant": "ag",
+      "query": "Portugal",
+      "expectedHost": "ag.wd3.myworkdayjobs.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "airbus",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 70,
+        "persisted": 70,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 4,
+        "boardTotal": 70,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 3935,
+        "pages": 4,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 3935,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 28,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 3877,
+              "body": 12,
+              "browser": 0,
+              "adapterOther": 15,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 4,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 3877,
+                "bodyMs": 12
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 70,
+    "uniqueIdentities": 70,
+    "uniqueHashes": 70,
+    "samples": [
+      {
+        "externalId": "JR10451648",
+        "title": "Project and Business Improvement Management for Aerostructures Procurement",
+        "company": "Airbus (Portugal)",
+        "location": "Lisbon Airbus Portugal (+1 more)",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Project-and-Business-Improvement-Management-for-Aerostructures-Procurement_JR10451648",
+        "applyUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Project-and-Business-Improvement-Management-for-Aerostructures-Procurement_JR10451648",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "JR10429459",
+        "title": "IT Internal Control Consultant",
+        "company": "Airbus (Portugal)",
+        "location": "Lisbon Airbus Portugal",
+        "postedAt": "2026-10-22",
+        "canonicalUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/IT-Internal-Control-Consultant_JR10429459",
+        "applyUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/IT-Internal-Control-Consultant_JR10429459",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "JR10435916",
+        "title": "Export Control Due Diligence Manager",
+        "company": "Airbus (Portugal)",
+        "location": "Lisbon Airbus Portugal",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Export-Control-Due-Diligence-Manager_JR10435916",
+        "applyUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Export-Control-Due-Diligence-Manager_JR10435916",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "airbus",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1475,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1475,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1334,
+              "body": 125,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1334,
+                "bodyMs": 125
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "JR10451648",
+        "title": "Project and Business Improvement Management for Aerostructures Procurement",
+        "company": "Airbus (Portugal)",
+        "location": "Lisbon (Airbus Portugal)",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Project-and-Business-Improvement-Management-for-Aerostructures-Procurement_JR10451648",
+        "applyUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Project-and-Business-Improvement-Management-for-Aerostructures-Procurement_JR10451648",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5527
+      },
+      {
+        "externalId": "JR10429459",
+        "title": "IT Internal Control Consultant",
+        "company": "Airbus (Portugal)",
+        "location": "Lisbon (Airbus Portugal)",
+        "postedAt": "2026-10-22",
+        "canonicalUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/IT-Internal-Control-Consultant_JR10429459",
+        "applyUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/IT-Internal-Control-Consultant_JR10429459",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4274
+      },
+      {
+        "externalId": "JR10435916",
+        "title": "Export Control Due Diligence Manager",
+        "company": "Airbus (Portugal)",
+        "location": "Lisbon (Airbus Portugal)",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Export-Control-Due-Diligence-Manager_JR10435916",
+        "applyUrl": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Export-Control-Due-Diligence-Manager_JR10435916",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6877
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "airbus",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 70,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 1,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1200,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1200,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1178,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1178,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

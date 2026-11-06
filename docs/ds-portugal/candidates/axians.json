@@ -1,0 +1,24 @@
+{
+ "id": "axians",
+ "name": "Axians Portugal",
+ "baseUrl": "https://axiansgroup.teamtailor.com/jobs.json?per_page=100",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "items",
+  "pageParam": "page",
+  "pageStart": 1,
+  "maxPages": 500,
+  "expectedHost": "axiansgroup.teamtailor.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "url",
+   "externalId": "id",
+   "postedAt": "date_published",
+   "description": "content_html",
+   "location": "_jobposting.jobLocation.0.address"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

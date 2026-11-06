@@ -1,0 +1,22 @@
+{
+ "id": "transperfect",
+ "name": "TransPerfect (Unbabel)",
+ "baseUrl": "https://transperfect.recruitee.com/api/offers/",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "offers",
+  "maxPages": 500,
+  "expectedHost": "transperfect.recruitee.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "careers_url",
+   "externalId": "id",
+   "postedAt": "published_at",
+   "description": "description",
+   "location": "location"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

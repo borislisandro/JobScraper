@@ -1,0 +1,14 @@
+{
+ "id": "zego",
+ "name": "Zego",
+ "baseUrl": "https://jobs.ashbyhq.com/zego",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "zego",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

@@ -1,0 +1,14 @@
+{
+ "id": "gocardless",
+ "name": "GoCardless",
+ "baseUrl": "https://job-boards.greenhouse.io/gocardless",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "gocardless",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

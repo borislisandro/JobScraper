@@ -11,6 +11,15 @@ export const companyAdapters={
  // country does not page through thousands of unrelated vacancies (Bosch lists 5,000+ worldwide, 779 in Germany).
  cern:{name:"CERN",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/CERN",smartRecruitersToken:"CERN",smartRecruitersCountry:"ch"},
  bosch:{name:"Bosch",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/BoschGroup",smartRecruitersToken:"BoschGroup",smartRecruitersCountry:"de"},
+ devoteam:{name:"Devoteam",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Devoteam",smartRecruitersToken:"Devoteam",smartRecruitersCountry:"pt"},
+ "bosch-portugal":{name:"Bosch Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/BoschGroup",smartRecruitersToken:"BoschGroup",smartRecruitersCountry:"pt"},
+ "natixis-portugal":{name:"Natixis in Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/NatixisInPortugal",smartRecruitersToken:"NatixisInPortugal",smartRecruitersCountry:"pt"},
+ inetum:{name:"Inetum",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Inetum2",smartRecruitersToken:"Inetum2",smartRecruitersCountry:"pt"},
+ "act-digital":{name:"act digital",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/AlterSolutions",smartRecruitersToken:"AlterSolutions",smartRecruitersCountry:"pt"},
+ ilof:{name:"iLoF",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",smartRecruitersToken:"ILoF-IntelligentLabOnFiber",smartRecruitersCountry:"pt"},
+ "dbservices-portugal":{name:"DBServices Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/DBServicesPortugal",smartRecruitersToken:"DBServicesPortugal",smartRecruitersCountry:"pt"},
+ sixt:{name:"SIXT",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/SIXT",smartRecruitersToken:"SIXT",smartRecruitersCountry:"pt"},
+ ubiwhere:{name:"Ubiwhere",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Ubiwhere",smartRecruitersToken:"Ubiwhere"},
  "arista-networks":{name:"Arista Networks",host:"www.arista.com",base:"https://www.arista.com",smartRecruitersToken:"AristaNetworks"},
  rambus:{name:"Rambus",host:"careers-rambus.icims.com",base:"https://careers-rambus.icims.com",listing:"https://careers-rambus.icims.com/jobs/search?in_iframe=1",datesOnDetailOnly:true},
  ceva:{name:"CEVA",host:"www.ceva-ip.com",base:"https://www.ceva-ip.com",listing:"https://www.comeet.co/careers-api/2.0/company/76.005/positions?token=67526BE6752D332D33026BE135F033A8&details=true"},
@@ -508,12 +517,12 @@ const arterisDetail=(html,current)=>{const $=cheerio.load(html),body=$(".jv-job-
  return{...current,location:parts.slice(1).join("; ")||current.location,description:clean(body.text()),descriptionHtml:body.html()}};
 const arteris=(site,context)=>singlePageBoard(site,context,{list:arterisList,detail:arterisDetail,label:"Arteris"});
 
-const scrapers={openchip,racyics,csem,arteris,rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,cern:smartRecruiters,bosch:smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
+const scrapers={openchip,racyics,csem,arteris,rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,cern:smartRecruiters,bosch:smartRecruiters,"bosch-portugal":smartRecruiters,devoteam:smartRecruiters,ubiwhere:smartRecruiters,sixt:smartRecruiters,"natixis-portugal":smartRecruiters,inetum:smartRecruiters,"act-digital":smartRecruiters,ilof:smartRecruiters,"dbservices-portugal":smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
 export const companyNeedsCheerio=(adapterId,fetchDetail=true)=>
  ["rambus","arm","google","sk-hynix","synopsys","l3harris","openchip","racyics","csem","arteris"].includes(adapterId)||(adapterId==="u-blox"&&fetchDetail);
 
 export async function enrichCompany(adapterId,item,request){
- const enrichers={openchip:openchipDetail,racyics:racyicsDetail,csem:csemDetail,arteris:arterisDetail,rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,cern:smartRecruitersDetail,bosch:smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
+ const enrichers={openchip:openchipDetail,racyics:racyicsDetail,csem:csemDetail,arteris:arterisDetail,rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,cern:smartRecruitersDetail,bosch:smartRecruitersDetail,"bosch-portugal":smartRecruitersDetail,devoteam:smartRecruitersDetail,ubiwhere:smartRecruitersDetail,sixt:smartRecruitersDetail,"natixis-portugal":smartRecruitersDetail,inetum:smartRecruitersDetail,"act-digital":smartRecruitersDetail,ilof:smartRecruitersDetail,"dbservices-portugal":smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
  const detail=enrichers[adapterId];
  if(!detail)throw Error(`incomplete: ${adapterId} has no detail enricher`);
  await loadCheerio();

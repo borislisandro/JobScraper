@@ -1,0 +1,292 @@
+
+### Farfetch
+  page  https://www.farfetch.com/careers/ -> fetch failed
+  LIVE  ashby token=farfetch jobs=49 e.g. Salesforce Developer
+  LIVE  lever token=farfetch jobs=43 e.g. AI & Automation Engineer
+
+### Revolut
+  page  https://www.revolut.com/careers/ -> 403 https://www.revolut.com/careers/
+  (nothing recognised — read the page by hand)
+
+### Sword Health
+  page  https://swordhealth.com/careers -> 429 https://swordhealth.com/careers
+  LIVE  greenhouse token=swordhealth jobs=61 e.g. Business Development Manager - Germany
+
+### Feedzai
+  page  https://feedzai.com/careers/ -> 200 https://careers.feedzai.com/
+  LIVE  greenhouse token=feedzai jobs=15 e.g. Advanced Product Manager - Digital Trust
+
+### Critical Software
+  page  https://www.criticalsoftware.com/en/careers -> 404 https://criticalsoftware.com/en/careers
+  (nothing recognised — read the page by hand)
+
+### Blip
+  page  https://blip.pt/careers/ -> 404 https://www.blip.pt/careers/
+  LIVE  greenhouse token=blip jobs=2 e.g. Blip General Interest Form
+
+### Mindera
+  page  https://mindera.com/careers/ -> 200 https://mindera.com/careers
+  seen  ?workable {"adapter":"?workable","token":"apply"}
+
+### Uphold
+  page  https://uphold.com/en/careers -> 200 https://uphold.com/careers
+  (nothing recognised — read the page by hand)
+
+### Jumia
+  page  https://group.jumia.com/careers -> 200 https://group.jumia.com/careers
+  seen  greenhouse {"adapter":"greenhouse","token":"jumia"}
+  LIVE  greenhouse token=jumia jobs=23 e.g. Defective Team Leader - Jumia (Full Time)
+
+### Pepco Tech Hub
+  page  https://pepco-group.com/careers -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### Natixis
+  page  https://careers.natixis.com -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### BNP Paribas Portugal
+  page  https://group.bnpparibas/en/careers -> 403 https://group.bnpparibas/en/careers
+  (nothing recognised — read the page by hand)
+
+### Euronext
+  page  https://www.euronext.com/en/about/careers -> 200 https://www.euronext.com/en/about/careers
+  (nothing recognised — read the page by hand)
+
+### Bosch Portugal
+  page  https://jobs.bosch.com -> 200 https://jobs.bosch.com/en
+  seen  ?smartrecruiters {"adapter":"?smartrecruiters","token":"BoschGroup"}
+
+### Mercedes-Benz.io
+  page  https://www.mercedes-benz.io/careers -> 404 https://www.mercedes-benz.io/careers
+  (nothing recognised — read the page by hand)
+
+### Fraunhofer Portugal AICOS
+  page  https://www.fraunhofer.pt/en/careers.html -> 200 https://www.fraunhofer.pt/en/careers.html
+  (nothing recognised — read the page by hand)
+
+### INESC TEC
+  page  https://www.inesctec.pt/en/careers -> 404 https://www.inesctec.pt/en/careers
+  (nothing recognised — read the page by hand)
+
+### Defined.ai
+  page  https://www.defined.ai/careers -> 404 https://defined.ai/careers
+  (nothing recognised — read the page by hand)
+
+### NDrive
+  page  https://www.ndrive.com/careers -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### Altice Labs
+  page  https://www.alticelabs.com/careers -> 200 https://www.alticelabs.com/careers/
+  (nothing recognised — read the page by hand)
+
+### Ubiwhere
+  page  https://www.ubiwhere.com/careers -> 200 https://www.ubiwhere.com/en
+  (nothing recognised — read the page by hand)
+
+### Altice Portugal
+  page  https://www.alticeportugal.pt/carreiras -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### NOS
+  page  https://www.nos.pt/en/about-nos/careers -> 404 https://www.nos.pt/en/about-nos/careers
+  (nothing recognised — read the page by hand)
+
+### Vodafone Portugal
+  page  https://www.vodafone.pt/carreiras.html -> 404 https://www.vodafone.pt/carreiras.html
+  (nothing recognised — read the page by hand)
+
+### EDP
+  page  https://careers.edp.com -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### Galp
+  page  https://galp.com/corp/en/careers -> 200 https://www.galp.com/corp/en/people
+  (nothing recognised — read the page by hand)
+
+### Sonae
+  page  https://www.sonae.pt/pt/carreiras/ -> 247 https://www.sonae.pt/pt/carreiras/
+  (nothing recognised — read the page by hand)
+
+### Jerónimo Martins
+  page  https://www.jeronimomartins.com/en/careers/ -> 200 https://www.jeronimomartins.com/en/careers/
+  (nothing recognised — read the page by hand)
+
+### Millennium bcp
+  page  https://ind.millenniumbcp.pt/en/Particulares/Pages/Carreiras.aspx -> 200 https://ind.millenniumbcp.pt/pt/Particulares/_layouts/15/BCP.SDC.FEP.Foundation.Presentation/Error/404.aspx
+  (nothing recognised — read the page by hand)
+
+### Santander Tecnologia
+  page  https://www.santander.com/en/careers -> 200 https://www.santander.com/en/careers
+  seen  workday {"adapter":"workday","tenant":"santander","site":"SantanderCareers","host":"santander.wd3.myworkdayjobs.com"}
+
+### Fidelidade
+  page  https://www.fidelidade.pt/PT/sobre-nos/carreiras -> 404 https://fidelidade.pt/PT/sobre-nos/carreiras
+  (nothing recognised — read the page by hand)
+
+### Ageas Portugal
+  page  https://www.ageas.pt/carreiras -> 404 https://www.ageas.pt/carreiras/
+  (nothing recognised — read the page by hand)
+
+### Talkdesk
+  page  https://www.talkdesk.com/careers/ -> 200 https://job-boards.greenhouse.io/talkdesk2/
+  seen  greenhouse {"adapter":"greenhouse","token":"talkdesk2"}
+  LIVE  greenhouse token=talkdesk2 jobs=36 e.g. AI Customer Experience Manager 
+
+### Unbabel
+  page  https://unbabel.com/careers/ -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### OutSystems
+  page  https://www.outsystems.com/careers/ -> 200 https://www.outsystems.com/careers
+  (nothing recognised — read the page by hand)
+
+### Cloudflare
+  page  https://www.cloudflare.com/careers/jobs/ -> 200 https://www.cloudflare.com/careers/jobs/
+  LIVE  greenhouse token=cloudflare jobs=461 e.g. Account Executive, FedCiv
+
+### Priberam
+  page  https://www.priberam.com/careers -> 200 https://priberam.com/careers/
+  (nothing recognised — read the page by hand)
+
+### Glovo
+  page  https://jobs.glovoapp.com -> 200 https://careers.glovoapp.com/
+  (nothing recognised — read the page by hand)
+
+### Uber
+  page  https://www.uber.com/global/en/careers/ -> 406 https://www.uber.com/global/en/careers/
+  (nothing recognised — read the page by hand)
+
+### Google
+  page  https://www.google.com/about/careers/applications/jobs/results/?location=Portugal -> 200 https://www.google.com/about/careers/applications/jobs/results/?location=Portugal
+  (nothing recognised — read the page by hand)
+
+### Microsoft
+  page  https://careers.microsoft.com/v2/global/en/locations/portugal -> 200 https://careers.microsoft.com/v2/global/en/errorPages/404.html
+  (nothing recognised — read the page by hand)
+
+### Amazon
+  page  https://www.amazon.jobs/en/locations/lisbon-portugal -> 404 https://www.amazon.jobs/en/locations/lisbon-portugal
+  (nothing recognised — read the page by hand)
+
+### Nmbrs
+  page  https://www.nmbrs.com/en/careers -> 200 https://www.nmbrs.com/nl/careers
+  (nothing recognised — read the page by hand)
+
+### Acolad
+  page  https://www.acolad.com/en/careers.html -> 200 https://www.acolad.com/
+  (nothing recognised — read the page by hand)
+
+### Upwork
+  page  https://www.upwork.com/careers -> 403 https://www.upwork.com/careers
+  LIVE  greenhouse token=upwork jobs=6 e.g. Executive Assistant, Office of the CEO
+
+### Nebius
+  page  https://nebius.com/careers -> 200 https://nebius.com/careers
+  LIVE  greenhouse token=nebius jobs=376 e.g. 3PL Operations Manager
+
+### Powertalent
+  page  https://powertalent.io/careers -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### Cleverti
+  page  https://www.cleverti.com/careers -> 200 https://99xtech.com/uk
+  (nothing recognised — read the page by hand)
+
+### Closer
+  page  https://www.closer.pt/careers -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### Xpand IT
+  page  https://www.xpand-it.com/careers -> 200 https://xpand-it.com/en/careers/
+  (nothing recognised — read the page by hand)
+
+### Novabase
+  page  https://www.novabase.com/en/careers -> 404 https://www.novabase.com/en/careers/
+  (nothing recognised — read the page by hand)
+
+### Glintt
+  page  https://www.glintt.com/careers -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### NTT DATA Portugal
+  page  https://www.nttdata.com/pt/en/careers -> 404 https://www.nttdata.com/pt/en/careers
+  (nothing recognised — read the page by hand)
+
+### CGI Portugal
+  page  https://www.cgi.com/portugal/en/careers -> 403 https://www.cgi.com/portugal/en/careers
+  (nothing recognised — read the page by hand)
+
+### Capgemini Portugal
+  page  https://www.capgemini.com/pt-en/careers -> 200 https://www.capgemini.com/pt-en/careers
+  (nothing recognised — read the page by hand)
+
+### Devoteam
+  page  https://www.devoteam.com/careers/ -> 403 https://www.devoteam.com/careers/
+  (nothing recognised — read the page by hand)
+
+### Deloitte Portugal
+  page  https://www.deloitte.com/pt/en/careers.html -> 200 https://www.deloitte.com/pt/pt.html
+  (nothing recognised — read the page by hand)
+
+### Accenture Portugal
+  page  https://www.accenture.com/pt-en/careers -> 404 https://www.accenture.com/pt-en/careers
+  (nothing recognised — read the page by hand)
+
+### Celfocus
+  page  https://www.celfocus.com/careers -> 404 https://www.celfocus.com/careers
+  (nothing recognised — read the page by hand)
+
+### Metyis
+  page  https://www.metyis.com/careers -> 404 https://www.metyis.com/careers
+  (nothing recognised — read the page by hand)
+
+### Dellent
+  page  https://www.dellent.com/careers -> 404 https://www.dellent.com/careers
+  (nothing recognised — read the page by hand)
+
+### Syone
+  page  https://www.syone.com/careers -> 200 https://www.syone.com/careers
+  (nothing recognised — read the page by hand)
+
+### Infineon
+  page  https://www.infineon.com/cms/en/careers/ -> 200 https://www.infineon.com/careers
+  (nothing recognised — read the page by hand)
+
+### Siemens Healthineers
+  page  https://www.siemens-healthineers.com/careers -> 200 https://www.siemens-healthineers.com/careers
+  seen  workday {"adapter":"workday","tenant":"onehealthineers","site":"SHSJB","host":"onehealthineers.wd3.myworkdayjobs.com"}
+  seen  ?avature {"adapter":"?avature"}
+
+### Novartis
+  page  https://www.novartis.com/careers -> 200 https://www.novartis.com/careers
+  (nothing recognised — read the page by hand)
+
+### Volkswagen Digital Solutions
+  page  https://www.vwds.pt/careers -> 200 https://vwg-digitalsolutions.pt/careers/
+  (nothing recognised — read the page by hand)
+
+### Critical Manufacturing
+  page  https://www.criticalmanufacturing.com/careers -> 404 https://www.criticalmanufacturing.com/careers
+  (nothing recognised — read the page by hand)
+
+### Veniam
+  page  https://veniam.com/careers/ -> fetch failed
+  (nothing recognised — read the page by hand)
+
+### Aptoide
+  page  https://www.aptoide.com/careers -> 200 https://en.aptoide.com/
+  (nothing recognised — read the page by hand)
+
+### Onfido
+  page  https://onfido.com/careers/ -> 403 https://www.entrust.com/careers/
+  (nothing recognised — read the page by hand)
+
+### Zalando
+  page  https://jobs.zalando.com -> 200 https://jobs.zalando.com/en
+  (nothing recognised — read the page by hand)
+
+### Booking.com
+  page  https://jobs.booking.com -> 200 https://jobs.booking.com/booking/jobs
+  seen  icims {"adapter":"icims","host":"employees-holdings-workingatbooking.icims.com"}

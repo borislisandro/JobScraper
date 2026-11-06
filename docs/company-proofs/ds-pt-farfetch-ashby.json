@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Farfetch (Ashby)",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T17:30:55.934Z",
+  "finishedAt": "2026-10-30T17:30:56.858Z",
+  "source": {
+    "id": "farfetch-ashby",
+    "name": "Farfetch (Ashby)",
+    "baseUrl": "https://jobs.ashbyhq.com/farfetch",
+    "adapterId": "ashby",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "token": "farfetch",
+      "maxPages": 500,
+      "expectedHost": "api.ashbyhq.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "318ab3511b786df19abe92cf2374bc1ac8a4e0c6c2e73f1a57ef50f1e2e1c494",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "farfetch-ashby",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 49,
+        "persisted": 49,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 49,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 188,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 188,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 106,
+              "body": 24,
+              "browser": 0,
+              "adapterOther": 33,
+              "emit": 13
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 106,
+                "bodyMs": 24
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 49,
+    "uniqueIdentities": 49,
+    "uniqueHashes": 49,
+    "samples": [
+      {
+        "externalId": "930d4b64-f25b-4fa4-b9e4-988570bcce1f",
+        "title": "Salesforce Developer",
+        "company": "Farfetch (Ashby)",
+        "location": "Porto",
+        "postedAt": "2026-10-13",
+        "canonicalUrl": "https://jobs.ashbyhq.com/farfetch/930d4b64-f25b-4fa4-b9e4-988570bcce1f",
+        "applyUrl": "https://jobs.ashbyhq.com/farfetch/930d4b64-f25b-4fa4-b9e4-988570bcce1f",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5960
+      },
+      {
+        "externalId": "beffd8eb-4fa7-477f-8da4-7d3fa1f79b99",
+        "title": "Senior Project Manager – Supply Chain & Operations",
+        "company": "Farfetch (Ashby)",
+        "location": "Porto",
+        "postedAt": "2026-10-13",
+        "canonicalUrl": "https://jobs.ashbyhq.com/farfetch/beffd8eb-4fa7-477f-8da4-7d3fa1f79b99",
+        "applyUrl": "https://jobs.ashbyhq.com/farfetch/beffd8eb-4fa7-477f-8da4-7d3fa1f79b99",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5661
+      },
+      {
+        "externalId": "4b6bef7e-5f3c-4d75-b6e5-f0716cffc332",
+        "title": "Senior Legal Counsel - Privacy",
+        "company": "Farfetch (Ashby)",
+        "location": "Porto",
+        "postedAt": "2026-10-13",
+        "canonicalUrl": "https://jobs.ashbyhq.com/farfetch/4b6bef7e-5f3c-4d75-b6e5-f0716cffc332",
+        "applyUrl": "https://jobs.ashbyhq.com/farfetch/4b6bef7e-5f3c-4d75-b6e5-f0716cffc332",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5484
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "farfetch-ashby",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 49,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 49,
+        "requests": 1,
+        "skipped": 49,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 143,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 143,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 94,
+              "body": 24,
+              "browser": 0,
+              "adapterOther": 13,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 94,
+                "bodyMs": 24
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

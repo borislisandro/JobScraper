@@ -1,0 +1,14 @@
+{
+ "id": "thorit",
+ "name": "Thorit",
+ "baseUrl": "https://jobs.ashbyhq.com/thorit",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "thorit",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

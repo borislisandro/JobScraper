@@ -1,0 +1,16 @@
+{
+ "id": "bitsight",
+ "name": "Bitsight (Portugal)",
+ "baseUrl": "https://bitsight.wd1.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "maxPages": 500,
+  "site": "bitsight",
+  "tenant": "bitsight",
+  "query": "Portugal",
+  "expectedHost": "bitsight.wd1.myworkdayjobs.com"
+ }
+}

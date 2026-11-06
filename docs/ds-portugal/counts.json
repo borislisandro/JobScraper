@@ -1,0 +1,1766 @@
+{
+ "countedAt": "2026-10-30T22:03:44.848Z",
+ "tag": "data-ai-pt",
+ "rows": [
+  {
+   "company": "Devoteam",
+   "boardRows": 218,
+   "portugal": 218,
+   "core": 31,
+   "adjacent": 19,
+   "titles": [
+    {
+     "title": "Devoteam Cyber Trust | AI Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000155943032"
+    },
+    {
+     "title": "Distributed Cloud | AI/ML Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000154967709"
+    },
+    {
+     "title": "Distributed Cloud | AI Engineer",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000152476602"
+    },
+    {
+     "title": "Retail & E-Commerce | Data Analyst",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000143702688"
+    },
+    {
+     "title": "Investment Sector | Senior Smart Automation & Angentic AI Dev",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000139637522"
+    },
+    {
+     "title": "Distributed Cloud | Data Analyst",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000136270900"
+    },
+    {
+     "title": "Distributed Cloud | Data Analyst",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000136275878"
+    },
+    {
+     "title": "Creative Tech | Edge AI Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000135703644"
+    },
+    {
+     "title": "Distributed Cloud | Senior AI Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000135271419"
+    },
+    {
+     "title": "Distributed Cloud | AI Data Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000134967599"
+    },
+    {
+     "title": "Distributed Cloud | AI Data Engineer",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000134966482"
+    },
+    {
+     "title": "Distributed Cloud | Analytics Engineer",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000131704813"
+    },
+    {
+     "title": "Distributed Cloud | Analytics Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000131706209"
+    },
+    {
+     "title": "Digital Impulse | AI Transformation Consultant",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000128443169"
+    },
+    {
+     "title": "Retail & ECommerce | Senior Software Engineer – AI & Agent Architecture",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000126505769"
+    },
+    {
+     "title": "Distributed Cloud | GenAI Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000118874697"
+    },
+    {
+     "title": "Distributed Cloud | Machine Learning Engineer",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000116464017"
+    },
+    {
+     "title": "Distributed Cloud | Machine Learning Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000116463457"
+    },
+    {
+     "title": "Distributed Cloud | MLOps",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000116463337"
+    },
+    {
+     "title": "Distributed Cloud | MLOps",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000116462592"
+    },
+    {
+     "title": "Distributed Cloud | Data Scientist",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000116410988"
+    },
+    {
+     "title": "Energy Sector l Data Scientist",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000116372252"
+    },
+    {
+     "title": "Telecom Sector | Data Analyst",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000113675443"
+    },
+    {
+     "title": "Distributed Cloud | Presales Engineer (Cloud, AI & Data)",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000109281817"
+    },
+    {
+     "title": "Banking Sector | Data Analyst",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000104976835"
+    },
+    {
+     "title": "Distributed Cloud | Power BI Specialist",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000102562785"
+    },
+    {
+     "title": "Distributed Cloud | Power BI Specialist",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000102562545"
+    },
+    {
+     "title": "Distributed Cloud | AI Data Architect",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000101852368"
+    },
+    {
+     "title": "Distributed Cloud | Data Scientist",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000101693925"
+    },
+    {
+     "title": "Banking Sector | Data Analyst",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000101595185"
+    },
+    {
+     "title": "Distributed Cloud | AI/Machine Learning Engineer",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/Devoteam/744000100393940"
+    }
+   ],
+   "adjacentTitles": [
+    "Digital Impulse | Data Governance Analyst",
+    "Distributed Cloud | AWS Data Architect",
+    "Retail & E-Commerce | Data Engineer",
+    "Distributed Cloud | Data Engineer",
+    "Distributed Cloud | Data Engineer",
+    "Distributed Cloud | French Speaker Data Engineer",
+    "Distributed Cloud | Data Architect",
+    "Energy Sector | Data Engineer",
+    "Telecom Sector | Data Engineer (Azure & Microsoft Fabric)",
+    "Banking Sector | Data Engineer",
+    "Distributed Cloud | Data Architect",
+    "Banking Sector | Big Data Platform Administrator",
+    "Banking Sector | Data Engineer",
+    "Distributed Cloud | Azure Data Engineer",
+    "Distributed Cloud | Azure Data Engineer",
+    "Distributed Cloud | GCP Data Engineer",
+    "Distributed Cloud | GCP Data Engineer",
+    "Distributed Cloud | AWS Data Engineer",
+    "Distributed Cloud | AWS Data Engineer"
+   ]
+  },
+  {
+   "company": "Bosch (Portugal)",
+   "boardRows": 219,
+   "portugal": 219,
+   "core": 30,
+   "adjacent": 4,
+   "titles": [
+    {
+     "title": "Extracurricular Internship – DevOps & GenAI Engineer for Quality (f/m/div.)",
+     "location": "Braga, Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158794999"
+    },
+    {
+     "title": "Automation & AI Project Manager (f/m/div.)",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158461490"
+    },
+    {
+     "title": "AI Engineering Automation Intern (f/m/div.)",
+     "location": "São João, Aveiro, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158348849"
+    },
+    {
+     "title": "AI Analytics Engineer Go to Market (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158315400"
+    },
+    {
+     "title": "Senior AI Solution Developer Go to Market - ERP Workflows (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158314926"
+    },
+    {
+     "title": "Senior AI Solution Developer Go to Market - CRM Workflows (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158314170"
+    },
+    {
+     "title": "AI Solution Developer Go-to-Market (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158314329"
+    },
+    {
+     "title": "Senior AI Integration Engineer Go-to-Market (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000158313999"
+    },
+    {
+     "title": "Global Compliance Technology & AI Project Lead (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000157521156"
+    },
+    {
+     "title": "Compliance AI and Technology Architect (f/m/div.)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000157521769"
+    },
+    {
+     "title": "Extracurricular Internship: AI-Assisted Software Engineering Intern (f/m/div.)",
+     "location": "Ovar, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000156523049"
+    },
+    {
+     "title": "Software Engineer - AI (f/m/div.)",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000155993379"
+    },
+    {
+     "title": "Data Analyst (f/m/div.)",
+     "location": "Braga, Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000155202204"
+    },
+    {
+     "title": "Extracurricular Internship: AI Implementation in Corporate Quality (f/m/div.)",
+     "location": "Aveiro, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000153820750"
+    },
+    {
+     "title": "Business Analyst - AI Sales Solution (f/m/div.)",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000152621397"
+    },
+    {
+     "title": "Generative AI & Agentic AI Solutions Developer (f/m/div.)",
+     "location": "Braga, Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000152142709"
+    },
+    {
+     "title": "GenAI Engineer - Engineering Automation (f/m/div.)",
+     "location": "Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000151412414"
+    },
+    {
+     "title": "Data Analytics Expert (f/m/div.)",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000150718569"
+    },
+    {
+     "title": "Mid Software Engineer - AI (f/m/div.)",
+     "location": "Braga, Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000149880279"
+    },
+    {
+     "title": "Extracurricular Internship: AI & Automation Development (f/m/div.)",
+     "location": "Aveiro, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000148960754"
+    },
+    {
+     "title": "MLOps Engineer (f/m/div.)",
+     "location": "Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000148721054"
+    },
+    {
+     "title": "Computer Vision, Optics & AI Expert (f/m/div.)",
+     "location": "Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000148550099"
+    },
+    {
+     "title": "Security Engineer – Vulnerability Management & AI-Driven Security Operations (f/m/div.)",
+     "location": "Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000144549674"
+    },
+    {
+     "title": "Applied AI Engineer (f/m/div.)",
+     "location": "Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000144027727"
+    },
+    {
+     "title": "Data Analyst (f/m/div.)",
+     "location": "Braga, Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000143804029"
+    },
+    {
+     "title": "AI/ML Team Leader - Technology Development (f/m/div.)",
+     "location": "Braga, Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000136167490"
+    },
+    {
+     "title": "Senior Analytics Engineer (f/m/div.)",
+     "location": "Braga, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000135765439"
+    },
+    {
+     "title": "MLOps Engineer (f/m/div.)",
+     "location": "Braga, Sequeira, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000128879308"
+    },
+    {
+     "title": "Senior MLOps & Cloud Solutions Engineer",
+     "location": "Lisboa, Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000032417845"
+    },
+    {
+     "title": "Senior Data Scientist (f/m/div.)",
+     "location": "Ovar, PT",
+     "url": "https://jobs.smartrecruiters.com/BoschGroup/744000005770059"
+    }
+   ],
+   "adjacentTitles": [
+    "Extracurricular Internship: Agile Moderator & Data Engineering (f/m/div.)",
+    "Senior Data Engineer (f/m/div.)",
+    "Data Engineer (f/m/div.)",
+    "Data Engineer"
+   ]
+  },
+  {
+   "company": "Inetum",
+   "boardRows": 455,
+   "portugal": 455,
+   "core": 26,
+   "adjacent": 17,
+   "titles": [
+    {
+     "title": "Data Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000158485339"
+    },
+    {
+     "title": "SAP Analytics Junior Consultant",
+     "location": "Porto, Porto District, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000157196579"
+    },
+    {
+     "title": "Data Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000156525889"
+    },
+    {
+     "title": "Data Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000154120209"
+    },
+    {
+     "title": "Generative AI Developer",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000149063429"
+    },
+    {
+     "title": "Power BI Developer",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000148819859"
+    },
+    {
+     "title": "Data Scientist - AI and Machine Learning",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000145685069"
+    },
+    {
+     "title": "AI Agents Engineer / AI Engineer",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000140672739"
+    },
+    {
+     "title": "Systems Administrator – AI Driven",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000140661029"
+    },
+    {
+     "title": "Digital Training Instructor – Microsoft 365, Copilot & Generative AI",
+     "location": "Porto, Porto District, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000138384079"
+    },
+    {
+     "title": "AI Developer",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000134856045"
+    },
+    {
+     "title": "Full-Stack Developer (Node.js / AI Platform)",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000130832414"
+    },
+    {
+     "title": "Data Analyst & Data Visualization Specialist",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000128886449"
+    },
+    {
+     "title": "AI/ML Data Engineer",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000126740039"
+    },
+    {
+     "title": "AI Architect",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000107715905"
+    },
+    {
+     "title": "Project Manager with Data Analysis",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000107497964"
+    },
+    {
+     "title": "Business Data Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000095472254"
+    },
+    {
+     "title": "Data Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000094210715"
+    },
+    {
+     "title": "Data Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000090913475"
+    },
+    {
+     "title": "Data & BI Analyst",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000090356596"
+    },
+    {
+     "title": "Generative AI Specialist",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000082114290"
+    },
+    {
+     "title": "GenAI Engineer",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000080983056"
+    },
+    {
+     "title": "Business Intelligence Consultant (Power BI)",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000072415945"
+    },
+    {
+     "title": "Business Intelligence Consultant (specializing in Microsoft Power BI)",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000071033288"
+    },
+    {
+     "title": "Data Analyst Senior",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000056694825"
+    },
+    {
+     "title": "Machine Learning Officer - Senior",
+     "location": "Lisbon, Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/Inetum2/744000055571342"
+    }
+   ],
+   "adjacentTitles": [
+    "Data Engineer (Dataiku Expert)",
+    "Data Engineer",
+    "Data Engineer Consultant",
+    "Data Engineer",
+    "Data Engineer",
+    "Data Governance Analyst",
+    "Data Engineer (Elastic & Python)",
+    "Senior Data Engineer (Teradata)",
+    "ETL DEVELOPER",
+    "Data Architect (Functional)",
+    "Tableau Data Engineer",
+    "Big Data Engineer",
+    "Data Engineer",
+    "IA Data Engineer",
+    "Data Engineer: Multi-stack",
+    "Data Engineer",
+    "Python Developer (Data Engineer)"
+   ]
+  },
+  {
+   "company": "DataCamp",
+   "boardRows": 40,
+   "portugal": 20,
+   "core": 12,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Curriculum Manager - Data Science and AI",
+     "location": "Belgium; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7261634"
+    },
+    {
+     "title": "Curriculum Manager - Data Science and AI",
+     "location": "Belgium; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7067243"
+    },
+    {
+     "title": "Curriculum Manager - Data Science and AI",
+     "location": "Belgium; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7531007"
+    },
+    {
+     "title": "Curriculum Manager - Data Science and AI",
+     "location": "Belgium; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7261637"
+    },
+    {
+     "title": "Principal AI Engineer - AI Creator",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7754781"
+    },
+    {
+     "title": "Principal AI Engineer - AI Creator",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7754782"
+    },
+    {
+     "title": "Principal AI Engineer - AI Creator",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7754783"
+    },
+    {
+     "title": "Principal AI Engineer - AI Creator",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7754712"
+    },
+    {
+     "title": "Principal AI Engineer - AI Tutor",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7481117"
+    },
+    {
+     "title": "Principal AI Engineer - AI Tutor",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7619318"
+    },
+    {
+     "title": "Principal AI Engineer - AI Tutor",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7619315"
+    },
+    {
+     "title": "Principal AI Engineer - AI Tutor",
+     "location": "Belgium; Dubai; Portugal; United Kingdom; United States",
+     "url": "https://job-boards.greenhouse.io/datacamp/jobs/7619320"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Accenture (Portugal)",
+   "boardRows": 157,
+   "portugal": 111,
+   "core": 11,
+   "adjacent": 2,
+   "titles": [
+    {
+     "title": "Senior AI Engineer",
+     "location": "Lisbon Santos 37",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Santos-37/Senior-AI-Engineer_R00330758"
+    },
+    {
+     "title": "AI Engineer - Mid/Senior Level",
+     "location": "Lisbon",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon/AI-Engineer---Mid-Senior-Level_R00362903"
+    },
+    {
+     "title": "Junior AI Engineer",
+     "location": "Lisbon Santos 37",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Santos-37/Junior-AI-Engineer_R00330751"
+    },
+    {
+     "title": "AI/ML Senior Manager Engineer",
+     "location": "Lisbon",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon/AI---ML-Engineer_14508745"
+    },
+    {
+     "title": "Data & AI Security Consultant",
+     "location": "Porto",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Porto/Data---AI-Security-Consultant_R00278424-1"
+    },
+    {
+     "title": "GenAI/Agentic Engineer",
+     "location": "Lisbon Santos 37",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Santos-37/AI-Engineer_R00330689"
+    },
+    {
+     "title": "GenAI Platform Architect",
+     "location": "Lisbon Santos 37",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Santos-37/GenAI-Platform-Architect_R00340469"
+    },
+    {
+     "title": "Manager - AI Native",
+     "location": "Braga Polo de Negocios de Braga",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Braga-Polo-de-Negocios-de-Braga/Manager---AI-Native_R00347449"
+    },
+    {
+     "title": "AI Native Software Engineer",
+     "location": "Braga Polo de Negocios de Braga",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Braga-Polo-de-Negocios-de-Braga/Junior-AI-Engineer_R00347452"
+    },
+    {
+     "title": "Generative AI Platform Architect",
+     "location": "Lisbon Amoreiras Square",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Amoreiras-Square/GenAI-Platform-Architect_14511387-1"
+    },
+    {
+     "title": "Senior AI Data Engineer",
+     "location": "Lisbon",
+     "url": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon/Data-Engineer_R00278414"
+    }
+   ],
+   "adjacentTitles": [
+    "Senior Data Engineer",
+    "Data Engineer - Mid & Senior Level"
+   ]
+  },
+  {
+   "company": "Axians Portugal",
+   "boardRows": 113,
+   "portugal": 109,
+   "core": 9,
+   "adjacent": 6,
+   "titles": [
+    {
+     "title": "Web Analytics Consultant",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8644459-web-analytics-consultant"
+    },
+    {
+     "title": "Junior Data Analyst",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8635068-junior-data-analyst"
+    },
+    {
+     "title": "AI Enable Architect",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8615619-ai-enable-architect"
+    },
+    {
+     "title": "Senior Data Scientist",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8532613-senior-data-scientist"
+    },
+    {
+     "title": "AI Engineer",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8516811-ai-engineer"
+    },
+    {
+     "title": "Privacy & AI Compliance Consultant",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8510845-privacy-ai-compliance-consultant"
+    },
+    {
+     "title": "Junior Software & AI Engineer",
+     "location": "Lisbon, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8480243-junior-software-ai-engineer"
+    },
+    {
+     "title": "AI Privacy Engineer",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8086113-ai-privacy-engineer"
+    },
+    {
+     "title": "AI Security Engineer",
+     "location": "Lisboa, PT",
+     "url": "https://axiansgroup.teamtailor.com/jobs/8086050-ai-security-engineer"
+    }
+   ],
+   "adjacentTitles": [
+    "SENIOR DATA ENGINEER",
+    "Data Architect",
+    "Data Engineer",
+    "Data Engineer - Data Governance & Cloud Data Plataform",
+    "Data Engineer / Analyst",
+    "ETL Developer"
+   ]
+  },
+  {
+   "company": "SIXT (Portugal)",
+   "boardRows": 24,
+   "portugal": 24,
+   "core": 7,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Staff Data Scientist Reinforcement Learning – Offer Intelligence (m/f/d)",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000158580179"
+    },
+    {
+     "title": "Senior Marketing Data Analyst",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000158483817"
+    },
+    {
+     "title": "Senior AI Growth Strategist CRM (m/f/d)",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000158292979"
+    },
+    {
+     "title": "Performance Marketing, AI & Automation Manager (m/f/d)",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000157106079"
+    },
+    {
+     "title": "(Senior) Machine Learning Engineer, Revenue Management (m/f/d)",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000156579110"
+    },
+    {
+     "title": "Senior Web & Product Analytics Specialist (m/f/d)",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000152648889"
+    },
+    {
+     "title": "Agentic AI Engineer (m/f/d)",
+     "location": "Lisbon, PT",
+     "url": "https://jobs.smartrecruiters.com/SIXT/744000151053619"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Farfetch (Lever)",
+   "boardRows": 43,
+   "portugal": 24,
+   "core": 5,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "AI & Automation Engineer",
+     "location": "Porto",
+     "url": "https://jobs.lever.co/farfetch/0b01e28a-ab56-4a3b-a843-2795c3faad1c"
+    },
+    {
+     "title": "Data Scientist – Experimentation Platform",
+     "location": "Porto",
+     "url": "https://jobs.lever.co/farfetch/2ca146e1-6061-420f-92e1-8fd1db75a6b5"
+    },
+    {
+     "title": "Junior Analytics Engineer",
+     "location": "Porto",
+     "url": "https://jobs.lever.co/farfetch/ee7f0172-9b8e-48f4-bba1-9aea5d1c56e7"
+    },
+    {
+     "title": "Machine Learning Engineering Manager",
+     "location": "Porto",
+     "url": "https://jobs.lever.co/farfetch/3936342c-3c2a-4914-8c25-058d276fce03"
+    },
+    {
+     "title": "Senior Data Scientist",
+     "location": "Porto",
+     "url": "https://jobs.lever.co/farfetch/a242baa0-9706-42ba-ae3c-f01f830d81d7"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Zego",
+   "boardRows": 36,
+   "portugal": 10,
+   "core": 5,
+   "adjacent": 3,
+   "titles": [
+    {
+     "title": "Lead AI Product Manager - Telematics, Portugal",
+     "location": "Portugal",
+     "url": "https://jobs.ashbyhq.com/zego/1cd0488c-52e3-4bba-8c32-0c30b89ae741"
+    },
+    {
+     "title": "Senior AI Product Manager - Mobile Experience, Portugal",
+     "location": "Portugal",
+     "url": "https://jobs.ashbyhq.com/zego/f13e980d-a8f1-434b-bc25-1982692339cb"
+    },
+    {
+     "title": "Senior AI Product Manager – Growth, Portugal",
+     "location": "Portugal",
+     "url": "https://jobs.ashbyhq.com/zego/5394057d-041e-4403-a785-dad8a6b9f036"
+    },
+    {
+     "title": "Senior AI Product Manager - Platform, Portugal",
+     "location": "Portugal",
+     "url": "https://jobs.ashbyhq.com/zego/fa54b7a5-7b61-4092-8048-b03e7c3c65ab"
+    },
+    {
+     "title": "Lead AI Product Manager - Product Vertical, Portugal",
+     "location": "Portugal",
+     "url": "https://jobs.ashbyhq.com/zego/464ab4bb-69bf-4add-b5b5-60cd1b8957d4"
+    }
+   ],
+   "adjacentTitles": [
+    "Data Engineer, Portugal",
+    "Senior Data Engineer, Portugal",
+    "Lead Data Engineer, Portugal"
+   ]
+  },
+  {
+   "company": "IQVIA (Portugal)",
+   "boardRows": 88,
+   "portugal": 24,
+   "core": 4,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Consultant - Data Science, Commercial Services Analytics US Dedicated",
+     "location": "Lisbon Portugal",
+     "url": "https://iqvia.wd1.myworkdayjobs.com/IQVIA/job/Lisbon-Portugal/Senior-Consultant---Data-Science--Commercial-Services-Analytics-US-Dedicated_R1572691"
+    },
+    {
+     "title": "Associate Consultant  / Consultant - Commercial Services Analytics US Dedicated",
+     "location": "Porto Salvo Portugal",
+     "url": "https://iqvia.wd1.myworkdayjobs.com/IQVIA/job/Porto-Salvo-Portugal/Associate-Consultant---Consultant_R1562479"
+    },
+    {
+     "title": "BI Consultant Back-End & Semantic Modelling",
+     "location": "Porto Salvo Portugal",
+     "url": "https://iqvia.wd1.myworkdayjobs.com/IQVIA/job/Porto-Salvo-Portugal/BI-Consultant-Back-End---Semantic-Modelling_R1567701-1"
+    },
+    {
+     "title": "Senior Consultant - Data Science, Commercial Services Analytics US Dedicated",
+     "location": "Porto Salvo Portugal",
+     "url": "https://iqvia.wd1.myworkdayjobs.com/IQVIA/job/Porto-Salvo-Portugal/Senior-Consultant---Data-Science--Commercial-Services-Analytics-US-Dedicated_R1572694"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Metyis",
+   "boardRows": 71,
+   "portugal": 21,
+   "core": 4,
+   "adjacent": 5,
+   "titles": [
+    {
+     "title": "AI Data Governance Implementation Lead",
+     "location": "Porto, Porto, Portugal",
+     "url": "https://metyisag.recruitee.com/o/ai-data-governance-implementation-lead"
+    },
+    {
+     "title": "AI Product Owner",
+     "location": "Porto, Porto, Portugal",
+     "url": "https://metyisag.recruitee.com/o/ai-product-owner-1"
+    },
+    {
+     "title": "AI Solutions Engineering Analyst",
+     "location": "Porto, Porto, Portugal",
+     "url": "https://metyisag.recruitee.com/o/ai-solutions-engineering-analyst"
+    },
+    {
+     "title": "Azure Data & Analytics DevOps Engineer",
+     "location": "Porto, Porto, Portugal",
+     "url": "https://metyisag.recruitee.com/o/azure-data-analytics-devops-engineer"
+    }
+   ],
+   "adjacentTitles": [
+    "Data Governance Implementation Lead",
+    "Data Engineering Lead (Fashion)",
+    "Data Engineering Associate",
+    "Data Governance Implementation Lead",
+    "Data Engineering Principal (Fashion)"
+   ]
+  },
+  {
+   "company": "Sword Health",
+   "boardRows": 61,
+   "portugal": 17,
+   "core": 4,
+   "adjacent": 1,
+   "titles": [
+    {
+     "title": "Senior AI Engineer",
+     "location": "Remote - Portugal",
+     "url": "https://job-boards.greenhouse.io/swordhealth/jobs/4415136009"
+    },
+    {
+     "title": "Senior AI Software Engineer",
+     "location": "Remote - Portugal",
+     "url": "https://job-boards.greenhouse.io/swordhealth/jobs/4422658009"
+    },
+    {
+     "title": "Senior QA Analyst, AI Solutions",
+     "location": "Remote - Portugal",
+     "url": "https://job-boards.greenhouse.io/swordhealth/jobs/4422666009"
+    },
+    {
+     "title": "Staff AI Product Manager, Phoenix Platform",
+     "location": "Remote - Portugal",
+     "url": "https://job-boards.greenhouse.io/swordhealth/jobs/4394521009"
+    }
+   ],
+   "adjacentTitles": [
+    "Senior Data Platform Engineer"
+   ]
+  },
+  {
+   "company": "Neotalent Conclusion (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 4,
+   "core": 4,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Lisboa, Porto Híbrido",
+     "url": "https://www.itjobs.pt/oferta/517684/machine-learning-engineer"
+    },
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Lisboa, Porto Híbrido",
+     "url": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer"
+    },
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Remoto",
+     "url": "https://www.itjobs.pt/oferta/517033/machine-learning-engineer"
+    },
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Lisboa, Porto Presencial",
+     "url": "https://www.itjobs.pt/oferta/517257/machine-learning-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Airbus (Portugal)",
+   "boardRows": 70,
+   "portugal": 67,
+   "core": 3,
+   "adjacent": 3,
+   "titles": [
+    {
+     "title": "Quality Engineer & BI Specialist",
+     "location": "Lisbon Airbus Portugal (+1 more)",
+     "url": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Quality-Standards---Digital-Lead---Quality-Customer-Services---Cross-Programmes_JR10449860"
+    },
+    {
+     "title": "Procurement Data Analyst",
+     "location": "Lisbon Airbus Portugal (+1 more)",
+     "url": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Procurement-Data-Analyst_JR10446958"
+    },
+    {
+     "title": "Data Scientist",
+     "location": "Lisbon Airbus Portugal",
+     "url": "https://ag.wd3.myworkdayjobs.com/Airbus/job/Lisbon-Airbus-Portugal/Data-Scientist_JR10446290"
+    }
+   ],
+   "adjacentTitles": [
+    "PMO for Aerostructures Data Governance",
+    "Senior Data Engineer - Airline Operations Intelligence",
+    "Data Governance Officer"
+   ]
+  },
+  {
+   "company": "Air Apps",
+   "boardRows": 499,
+   "portugal": 48,
+   "core": 3,
+   "adjacent": 1,
+   "titles": [
+    {
+     "title": "Data Analyst",
+     "location": "Lisbon",
+     "url": "https://jobs.ashbyhq.com/airapps/bc545f0d-e59b-4746-ae78-2ec0c459adc2"
+    },
+    {
+     "title": "AI Product Manager",
+     "location": "Lisbon",
+     "url": "https://jobs.ashbyhq.com/airapps/45cfc30b-6ecd-4237-8d72-fbca9c4087d3"
+    },
+    {
+     "title": "AI/ML Engineer",
+     "location": "Lisbon",
+     "url": "https://jobs.ashbyhq.com/airapps/cc91168e-1133-4d69-b7cb-93698570bbf0"
+    }
+   ],
+   "adjacentTitles": [
+    "Data Engineer"
+   ]
+  },
+  {
+   "company": "Intermedia",
+   "boardRows": 53,
+   "portugal": 29,
+   "core": 3,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Data Scientist",
+     "location": "Portugal",
+     "url": "https://intermedia.pinpointhq.com/en/postings/eea0f008-1beb-412e-899b-ff5c447956e3"
+    },
+    {
+     "title": "Senior UI/UX Designer (AI Assistants & Digital Agents)",
+     "location": "Portugal",
+     "url": "https://intermedia.pinpointhq.com/en/postings/0b819de3-e36f-44e5-8baf-f785a7f4680a"
+    },
+    {
+     "title": "Sr. Product Manager - AI Builder",
+     "location": "Portugal",
+     "url": "https://intermedia.pinpointhq.com/en/postings/0f398e5f-ddc5-4251-96fe-c86c74131d51"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Hiire",
+   "boardRows": 26,
+   "portugal": 24,
+   "core": 3,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Computer Vision Engineer - Six Floor Solutions",
+     "location": "Lisbon, PT",
+     "url": "https://hiire.teamtailor.com/jobs/8383311-senior-computer-vision-engineer-six-floor-solutions"
+    },
+    {
+     "title": "Senior Machine Learning Engineer (NLP)",
+     "location": "Porto, PT",
+     "url": "https://hiire.teamtailor.com/jobs/7978935-senior-machine-learning-engineer-nlp"
+    },
+    {
+     "title": "Senior AI Engineer",
+     "location": "Porto, PT",
+     "url": "https://hiire.teamtailor.com/jobs/7783492-senior-ai-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Flix",
+   "boardRows": 128,
+   "portugal": 12,
+   "core": 3,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Data Scientist – Marketing Measurement & Causal Inference (m/f/d)",
+     "location": "Lisbon",
+     "url": "https://flix.careers/job/8706297002?gh_jid=8706297002"
+    },
+    {
+     "title": "Senior Data Scientist (m/f/d)",
+     "location": "Lisbon",
+     "url": "https://flix.careers/job/8687296002?gh_jid=8687296002"
+    },
+    {
+     "title": "Senior Marketing Data Scientist (m/f/d)",
+     "location": "Lisbon",
+     "url": "https://flix.careers/job/8706295002?gh_jid=8706295002"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "GoCardless",
+   "boardRows": 27,
+   "portugal": 9,
+   "core": 3,
+   "adjacent": 1,
+   "titles": [
+    {
+     "title": "Data Analyst II",
+     "location": "Lisbon, Portugal",
+     "url": "https://job-boards.greenhouse.io/gocardless/jobs/7699254"
+    },
+    {
+     "title": "Data Science Manager",
+     "location": "Lisbon, Portugal",
+     "url": "https://job-boards.greenhouse.io/gocardless/jobs/7525979"
+    },
+    {
+     "title": "Threat and Analytics Lead",
+     "location": "Lisbon, Portugal",
+     "url": "https://job-boards.greenhouse.io/gocardless/jobs/8159050"
+    }
+   ],
+   "adjacentTitles": [
+    "Data Engineer"
+   ]
+  },
+  {
+   "company": "iLoF",
+   "boardRows": 4,
+   "portugal": 4,
+   "core": 3,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Data Science & AI Manager",
+     "location": "Porto, Porto District, PT",
+     "url": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber/744000157519274"
+    },
+    {
+     "title": "Senior / Lead Data Scientist – Physical Sciences & Biomedical Signals",
+     "location": "Porto, Porto District, PT",
+     "url": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber/744000157496434"
+    },
+    {
+     "title": "Data Scientist - Applied Mathematics & Clinical Analytics",
+     "location": "Porto, Porto District, PT",
+     "url": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber/744000157492152"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "team.it (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 3,
+   "core": 3,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Lisboa Presencial",
+     "url": "https://www.itjobs.pt/oferta/518035/machine-learning-engineer"
+    },
+    {
+     "title": "Senior AI Solution Engineer",
+     "location": "Lisboa Presencial",
+     "url": "https://www.itjobs.pt/oferta/518030/senior-ai-solution-engineer"
+    },
+    {
+     "title": "Senior AI Solution Engineer",
+     "location": "Porto Presencial",
+     "url": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Dellent (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 3,
+   "core": 3,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Generative AI Engineer",
+     "location": "Lisboa Híbrido",
+     "url": "https://www.itjobs.pt/oferta/516931/generative-ai-engineer"
+    },
+    {
+     "title": "Generative AI Product Engineer",
+     "location": "Lisboa Híbrido",
+     "url": "https://www.itjobs.pt/oferta/516797/generative-ai-product-engineer"
+    },
+    {
+     "title": "Generative AI Engineer",
+     "location": "Lisboa Híbrido",
+     "url": "https://www.itjobs.pt/oferta/516798/generative-ai-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Natixis in Portugal",
+   "boardRows": 46,
+   "portugal": 46,
+   "core": 2,
+   "adjacent": 3,
+   "titles": [
+    {
+     "title": "GCP/Power BI Data Analyst (French Speaker) | BPCE-SI",
+     "location": "Portugal, PT",
+     "url": "https://jobs.smartrecruiters.com/NatixisInPortugal/744000157875639"
+    },
+    {
+     "title": "Data Analyst | Finance",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/NatixisInPortugal/744000156744610"
+    }
+   ],
+   "adjacentTitles": [
+    "GCP/Python Data Engineer (French Speaker) | BPCE-SI",
+    "Data Engineer (French Speaker) | BPCE-SI",
+    "GCP Data Engineer | BPCE-SI"
+   ]
+  },
+  {
+   "company": "Volkswagen Digital Solutions",
+   "boardRows": 9,
+   "portugal": 9,
+   "core": 2,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "AI/ML Data Scientist",
+     "location": "Lisbon/Porto",
+     "url": "https://jobs.eu.lever.co/vwgds/330dfc68-5c2a-42d0-bf1d-43c040d1f6e0"
+    },
+    {
+     "title": "SAP Business Intelligence Consultant – BW, Datasphere & SAC",
+     "location": "Lisbon/Porto",
+     "url": "https://jobs.eu.lever.co/vwgds/d2af0ca8-200a-4d76-b563-ebf7f3d056d8"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Loka",
+   "boardRows": 15,
+   "portugal": 9,
+   "core": 2,
+   "adjacent": 1,
+   "titles": [
+    {
+     "title": "Machine Learning Engineer",
+     "location": "LatAm, North Macedonia, Portugal, Serbia",
+     "url": "https://job-boards.greenhouse.io/lokainc/jobs/4097610007"
+    },
+    {
+     "title": "Senior Machine Learning Engineer",
+     "location": "LatAm, North Macedonia, Portugal, Serbia",
+     "url": "https://job-boards.greenhouse.io/lokainc/jobs/4067015007"
+    }
+   ],
+   "adjacentTitles": [
+    "Senior Data Engineer"
+   ]
+  },
+  {
+   "company": "Mercedes-Benz.io",
+   "boardRows": 4,
+   "portugal": 4,
+   "core": 2,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Analytics Engineer (f/m/x)",
+     "location": "Hybrid, Lisboa, Portugal",
+     "url": "https://mbio.recruitee.com/o/analytics-engineer-fmx"
+    },
+    {
+     "title": "AI Engineer (f/m/x)",
+     "location": "Hybrid, Lisboa, Portugal",
+     "url": "https://mbio.recruitee.com/o/ai-engineer-fmx"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Swisscom (via Landing.jobs)",
+   "boardRows": 0,
+   "portugal": 3,
+   "core": 2,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Agentic AI Engineer",
+     "location": "Lisbon, PT",
+     "url": "https://landing.jobs/at/swisscom/agentic-ai-engineer"
+    },
+    {
+     "title": "AI Platform Engineer",
+     "location": "Lisbon, PT",
+     "url": "https://landing.jobs/at/swisscom/ai-platform-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Damia (via Landing.jobs)",
+   "boardRows": 0,
+   "portugal": 3,
+   "core": 2,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Data Scientist",
+     "location": "Lisbon, PT",
+     "url": "https://landing.jobs/at/damia/data-scientist-in-lisbon-2026"
+    },
+    {
+     "title": "AI Solutions Consultant",
+     "location": "Lisbon, PT",
+     "url": "https://landing.jobs/at/damia/ai-solutions-consultant"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "TEKEVER",
+   "boardRows": 115,
+   "portugal": 66,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "AI Documentation Engineer | AR5",
+     "location": "Caldas da Rainha, PT",
+     "url": "https://careers.tekever.com/jobs/7807466-ai-documentation-engineer-ar5"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "act digital",
+   "boardRows": 64,
+   "portugal": 64,
+   "core": 1,
+   "adjacent": 3,
+   "titles": [
+    {
+     "title": "Senior Data Scientist (Machine Learning)",
+     "location": "Lisboa, PT",
+     "url": "https://jobs.smartrecruiters.com/AlterSolutions/744000025785845"
+    }
+   ],
+   "adjacentTitles": [
+    "Mid Data Engineer",
+    "Senior Data Engineer",
+    "Data Engineer GCP (Google Cloud Plataform)"
+   ]
+  },
+  {
+   "company": "Farfetch (Ashby)",
+   "boardRows": 49,
+   "portugal": 34,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Data Scientist",
+     "location": "Porto",
+     "url": "https://jobs.ashbyhq.com/farfetch/36b844b2-df89-4ada-a9d9-ac4c579c44fc"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Veeva Systems",
+   "boardRows": 892,
+   "portugal": 12,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Data Analyst",
+     "location": "Portugal - Lisbon",
+     "url": "https://jobs.lever.co/veeva/398a6579-7bb0-4e63-b43a-2042d4947d56"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Finom",
+   "boardRows": 89,
+   "portugal": 11,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Machine Learning Engineer",
+     "location": "Portugal",
+     "url": "https://jobs.eu.lever.co/pnlfin/1f649504-80e4-4255-9983-9f8647faa237"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Smartex.ai",
+   "boardRows": 10,
+   "portugal": 10,
+   "core": 1,
+   "adjacent": 1,
+   "titles": [
+    {
+     "title": "Master's Thesis in Machine Learning - AI-Assisted Image Segmentation & Labeling Systems",
+     "location": "Porto, Portugal",
+     "url": "https://odoo.smartex.ai/jobs/master-s-thesis-in-machine-learning-ai-assisted-image-segmentation-labeling-systems-318"
+    }
+   ],
+   "adjacentTitles": [
+    "Data Engineer"
+   ]
+  },
+  {
+   "company": "Santander (Portugal)",
+   "boardRows": 30,
+   "portugal": 9,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "CRM Data Analyst",
+     "location": "Lisboa",
+     "url": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Lisboa/CRM-Data-Analyst_Req1587418"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Indicium AI",
+   "boardRows": 32,
+   "portugal": 8,
+   "core": 1,
+   "adjacent": 3,
+   "titles": [
+    {
+     "title": "AI Engineer",
+     "location": "Lisbon",
+     "url": "https://job-boards.eu.greenhouse.io/indiciumai/jobs/4695065101"
+    }
+   ],
+   "adjacentTitles": [
+    "Associate Data Engineer",
+    "Principal Data Engineer",
+    "Senior Data Engineer"
+   ]
+  },
+  {
+   "company": "BearingPoint Portugal",
+   "boardRows": 7,
+   "portugal": 7,
+   "core": 1,
+   "adjacent": 1,
+   "titles": [
+    {
+     "title": "(Senior) Data Scientist",
+     "location": "Lisboa, Lisbon, PT",
+     "url": "https://bearingpointportugal.teamtailor.com/jobs/7815495-senior-data-scientist"
+    }
+   ],
+   "adjacentTitles": [
+    "Cloud Data Engineer"
+   ]
+  },
+  {
+   "company": "Celfocus",
+   "boardRows": 6,
+   "portugal": 6,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior Data Scientist",
+     "location": "Porto, Europe, PT",
+     "url": "https://celfocus.teamtailor.com/jobs/8638290-senior-data-scientist"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Superhuman",
+   "boardRows": 72,
+   "portugal": 4,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Hub - Porto",
+     "url": "https://jobs.ashbyhq.com/superhuman%20platform%20inc/1779ef05-5a7a-4067-bd64-cbc6ab3e6b82"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Thorit",
+   "boardRows": 12,
+   "portugal": 4,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "AI & Data Engineer (all genders)",
+     "location": "Lisbon Office",
+     "url": "https://jobs.ashbyhq.com/thorit/78eb4ddc-f50f-41d5-a425-10c1b0fa54e9"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "DBServices Portugal",
+   "boardRows": 3,
+   "portugal": 3,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Machine Learning Engineer | Data Engineer",
+     "location": "Porto, Porto, PT",
+     "url": "https://jobs.smartrecruiters.com/DBServicesPortugal/743999742367732"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "PagerDuty",
+   "boardRows": 47,
+   "portugal": 2,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Senior AI/ML Engineer",
+     "location": "Lisbon",
+     "url": "https://job-boards.greenhouse.io/pagerduty/jobs/6144823004"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Integer Consulting (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "AI Engineer (Generative AI Specialist)",
+     "location": "Híbrido",
+     "url": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Frimarc - Indústria e Comércio (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Generative AI Engineer",
+     "location": "Faro Presencial",
+     "url": "https://www.itjobs.pt/oferta/517508/generative-ai-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Adentis (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Machine Learning Engineer",
+     "location": "Porto Remoto",
+     "url": "https://www.itjobs.pt/oferta/518208/machine-learning-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Olisipo (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "Mid Machine Learning Engineer",
+     "location": "Lisboa Presencial",
+     "url": "https://www.itjobs.pt/oferta/517422/mid-machine-learning-engineer"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Volkswagen Group Digital Solutions [Portugal] (via Landing.jobs)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 1,
+   "adjacent": 0,
+   "titles": [
+    {
+     "title": "AI/ML Data Scientist",
+     "location": "Lisbon, PT",
+     "url": "https://landing.jobs/at/volkswagen-group-digital-solutions-portugal/ai-ml-data-scientist"
+    }
+   ],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Emma Sleep",
+   "boardRows": 74,
+   "portugal": 33,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "OLX",
+   "boardRows": 58,
+   "portugal": 12,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "TransPerfect (Unbabel)",
+   "boardRows": 686,
+   "portugal": 12,
+   "core": 0,
+   "adjacent": 1,
+   "titles": [],
+   "adjacentTitles": [
+    "Data Engineering | Intern | Lisbon"
+   ]
+  },
+  {
+   "company": "Talkdesk",
+   "boardRows": 38,
+   "portugal": 8,
+   "core": 0,
+   "adjacent": 1,
+   "titles": [],
+   "adjacentTitles": [
+    "Data Governance & Compliance Manager"
+   ]
+  },
+  {
+   "company": "Feedzai",
+   "boardRows": 15,
+   "portugal": 7,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Bitsight (Portugal)",
+   "boardRows": 6,
+   "portugal": 6,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Critical Software",
+   "boardRows": 11,
+   "portugal": 5,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "MobiLab Solutions",
+   "boardRows": 7,
+   "portugal": 4,
+   "core": 0,
+   "adjacent": 1,
+   "titles": [],
+   "adjacentTitles": [
+    "Data Engineer (English speaking) (M/F/D)"
+   ]
+  },
+  {
+   "company": "IG&H Portugal",
+   "boardRows": 61,
+   "portugal": 3,
+   "core": 0,
+   "adjacent": 2,
+   "titles": [],
+   "adjacentTitles": [
+    "Senior (Principal) Databricks Engineer",
+    "Databricks Engineer"
+   ]
+  },
+  {
+   "company": "Indicium AI (via Landing.jobs)",
+   "boardRows": 0,
+   "portugal": 2,
+   "core": 0,
+   "adjacent": 2,
+   "titles": [],
+   "adjacentTitles": [
+    "Senior Data Engineer",
+    "Principal Data Engineer"
+   ]
+  },
+  {
+   "company": "Ubiwhere",
+   "boardRows": 1,
+   "portugal": 1,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Miguel Carril (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Feel Group (via ITJobs.pt)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "Accenture (via Landing.jobs)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 0,
+   "adjacent": 0,
+   "titles": [],
+   "adjacentTitles": []
+  },
+  {
+   "company": "INSCALE (via Landing.jobs)",
+   "boardRows": 0,
+   "portugal": 1,
+   "core": 0,
+   "adjacent": 1,
+   "titles": [],
+   "adjacentTitles": [
+    "Senior Data Engineer"
+   ]
+  }
+ ]
+}

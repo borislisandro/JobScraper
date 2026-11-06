@@ -1,0 +1,107 @@
+# proven = full live worker proof passed (docs/company-proofs/ds-pt-<id>.json). "PT" = rows located in Portugal; "data/AI" = of those, titles matching data/ML/AI/analyst keywords at probe time.
+# Noise warning: boards marked [query] are text-searched for "Portugal" and may leak a few non-PT rows; boards marked [wide] return the whole worldwide board.
+company|status|ats|board_rows|PT_rows|data_AI_PT|notes
+Farfetch (Ashby)|admitted|ashby:farfetch|49|34|1|Porto Senior Data Scientist
+Farfetch (Lever)|admitted|lever:farfetch|43|24|5|Data Scientist Experimentation, Data Analyst, AI & Automation Eng; 2023 leftovers on board
+Sword Health|admitted|greenhouse:swordhealth|61|17|5|
+Feedzai|admitted|greenhouse:feedzai|15|7|2|
+Talkdesk|admitted|greenhouse:talkdesk2|36|8|1|token is talkdesk2
+Celfocus|admitted|teamtailor json feed|6|6|2|Senior Data Scientist
+Devoteam|admitted|smartrecruiters:Devoteam country=pt|218|218|many|new adapter id
+Bosch (Portugal)|admitted|smartrecruiters:BoschGroup country=pt|220|220|many|Data Scientist Aveiro (Cacia), Braga, Lisbon; new adapter id
+Ubiwhere|admitted|smartrecruiters:Ubiwhere|1|1|0|Aveiro; almost empty
+Santander (Portugal)|admitted|workday santander.wd3 [query]|30|~30|?|
+Natixis in Portugal|admitted|smartrecruiters:NatixisInPortugal|46|46|12|Porto; many roles want French
+Inetum|admitted|smartrecruiters:Inetum2 country=pt|455|455|19+|Lisbon/Porto; AI Agents Engineer
+act digital (Alter Solutions)|admitted|smartrecruiters:AlterSolutions country=pt|64|64|10|Senior Data Scientist Lisbon; Porto roles
+iLoF|admitted|smartrecruiters:ILoF-IntelligentLabOnFiber|4|4|3|Porto; 3 data science roles
+DBServices Portugal|admitted|smartrecruiters:DBServicesPortugal|3|3|1|ML/Data Engineer Porto
+Metyis|admitted|recruitee:metyisag json|71|21|10|Porto; AI Product Owner, AI Data Governance, CRM Analyst
+Mercedes-Benz.io|admitted|recruitee:mbio json|4|4|3|Analytics Engineer, AI Engineer, Digital Analyst; Lisbon/Braga hybrid
+Hiire|admitted|teamtailor:hiire json|26|25|2|Porto; Senior ML Engineer NLP, Senior AI Engineer
+Flix|admitted|greenhouse:flix|128|12|3|Lisbon; 3 data scientist roles
+Finom|admitted|lever-eu:pnlfin|89|11|1|Remote Portugal Senior ML Engineer
+Volkswagen Digital Solutions|admitted|lever-eu:vwgds|9|9|3|Lisbon/Porto; AI/ML Data Scientist
+DataCamp|admitted|greenhouse:datacamp|40|20|12|Portugal-eligible; mostly curriculum/content roles
+AirApps|admitted|ashby:airapps|499|48|7|Lisbon; Data Analyst, Data Engineer, Product Analyst
+Superhuman|admitted|ashby:superhuman platform inc|72|4|1|ML Engineer, Porto hub
+Thorit|admitted|ashby:thorit|12|4|1|Lisbon AI & Data Engineer; wants native Portuguese
+Veeva Systems|admitted|lever:veeva [wide]|892|7|3|Lisbon remote data ops/ML roles
+Emma Sleep|admitted|lever:emma-sleep|74|33|2|Lisbon; analyst roles
+OLX|admitted|lever-eu:olx|58|12|0|Lisbon; Data Science Manager seen on aggregator
+PagerDuty|admitted|greenhouse:pagerduty|47|2|1|Lisbon Senior AI/ML Engineer
+TransPerfect (Unbabel)|admitted|recruitee:transperfect json [wide]|686|19|2|Lisbon; Python AI Engineer; noisy
+Bitsight (Portugal)|admitted|workday bitsight.wd1 [query]|6|6|?|Remote Portugal Data Scientist (junior-friendly)
+IQVIA (Portugal)|admitted|workday iqvia.wd1 [query]|89|~89|?|Lisbon AI Engineer; mostly clinical roles, noisy
+Airbus (Portugal)|admitted|workday ag.wd3 Airbus [query]|70|~70|?|Lisbon; Data Scientist AI; noisy
+Accenture (Portugal)|admitted|workday accenture.wd103 [query]|158|?|?|graduate programme Lisbon; very noisy (Spain/data-centre rows)
+Revolut|blocked-by-site|in-house; detector returns reason=blocked even from a real browser|?|?|?|Bot protection refuses automated access. Not attempting to evade it; apply by hand (Porto DS Risk/Credit, 2027 grad programme)
+Critical Software|admitted|breezy:critical-software json (?verbose=true)|11|5|0|Coimbra/Porto/Lisbon; no data/AI role open at count time (earlier DS/ML roles seen on aggregators)
+Expleo Portugal|next-adapter|icims expleo-jobs-pt-en.icims.com|?|?|?|different iCIMS markup than Rambus; one Data Engineer role seen
+Tietoevry|discover|smartrecruiters (token not Tietoevry1)|?|?|?|Lead AI Engineer Lisbon seen
+Tripadvisor|discover|greenhouse:tripadvisor has 1 PT row; ML roles posted on join.com|82|1|0|Lisbon ML Scientist/Engineer roles are on join.com
+Cegid|discover|?|?|?|?|Braga AI Factory Data Scientist seen
+Eurotux|discover|?|?|?|?|Braga Data Scientist seen
+Dellent Consulting|discover|?|?|?|?|Aveiro/Porto ML Engineer seen
+Logicalis Portugal|discover|?|?|?|?|Aveiro seen
+Planet Farms|discover|?|?|?|?|Coimbra MLOps seen
+akapeople|discover|?|?|?|?|Braga computer vision seen
+Continental (Lousado)|discover|?|?|?|?|MLOps junior seen
+Smartex.ai|discover|?|?|?|?|Porto ML/computer vision, urgent hiring
+NILG.AI|discover|?|?|?|?|Porto AI consultancy
+Upgraide|discover|?|?|?|?|Porto AI consultancy
+Datacentric|discover|?|?|?|?|Porto AI consultancy
+DareData|discover|?|?|?|?|Portugal data consultancy
+Closer Consulting|discover|?|?|?|?|DS consultancy
+Intelligent Algorithms|discover|?|?|?|?|Lisbon AI consultancy
+Twistag|discover|?|?|?|?|Lisbon AI agency
+Capgemini Portugal|discover|?|?|?|?|DS roles Porto/Lisbon
+Fyld|discover|?|?|?|?|Porto ML Engineer seen
+Fraunhofer Portugal AICOS|discover|?|?|?|?|Porto applied AI research
+INESC TEC|discover|?|?|?|?|Porto research, strong fit
+Altice Labs|discover|?|?|?|?|Aveiro
+Mindera|skip|workable:mindera|0|0|0|0 open jobs
+Unbabel|skip|redirects to TransPerfect|||| covered by TransPerfect row
+Jobgether|skip|lever:jobgether|3935|11|3|worldwide remote board, 11 PT rows; too noisy
+Amazon|skip|amazon.jobs|3 PT|||too few
+Samba TV|skip|lever:sambatv|61|3|0|Porto engineering only
+Dashlane|skip|greenhouse:dashlane|12|3|0|no data roles in PT
+UJET|skip|greenhouse:ujet|9|3|0|Porto support/engineering only
+OutSystems|skip|workday tenant now errors|||| earlier search hit was stale
+Nmbrs|skip|recruitee:nmbrs|10|0|0|
+Uber|skip|name collision|||| 
+Blip|skip|greenhouse:blip|2|0|0|
+Cloudflare|skip|greenhouse:cloudflare|461|1|0|
+Axians Portugal|admitted|teamtailor:axiansgroup json|113|109|9|Lisbon/Porto; web analytics, data protection, many IT roles
+BearingPoint Portugal|admitted|teamtailor:bearingpointportugal json|7|7|1|Lisbon; Senior Data Scientist, Cloud Data Engineer
+GoCardless|admitted|greenhouse:gocardless|27|9|3|Lisbon; Data Science Manager, Data Analyst II, Data Engineer
+Indicium AI|admitted|greenhouse:indiciumai|32|8|1|Lisbon; AI Engineer, Data Consultant
+TEKEVER|admitted (earlier)|json teamtailor|123|66|1|Porto/Lisbon defence/UAV; tagged data-ai-pt
+Usercentrics|pending-rate-limit|workable:usercentrics|48|8|2|Senior Data Scientist Lisbon; Workable blocked my IP (Cloudflare 1015) after heavy probing
+knok|pending-rate-limit|workable:knok|15|15|3|ML Engineer Matosinhos
+Greenvolt|pending-rate-limit|workable:greenvolt|79|17|4|
+payabl|pending-rate-limit|workable:payabl|76|11|2|Senior Data Analyst Lisbon
+Joom|pending-rate-limit|workable:joom|20|11|2|
+GeroDigital|pending-rate-limit|workable:gerodigital|8|8|1|Data Analyst Porto
+Bnberry|pending-rate-limit|workable:bnberry|48|9|1|
+Trade Nation|pending-rate-limit|workable:trade-nation|67|8|1|Head of Data & AI Lisbon
+Deblock|pending-rate-limit|workable:deblock|15|6|3|Porto
+CoverGo|pending-rate-limit|workable:covergo|233|9|3|
+Alongside|pending-rate-limit|workable (slug unresolved)|?|7|?|Machine Learning Engineer Porto
+
+Smartex.ai|parked|odoo website odoo.smartex.ai/jobs (static HTML)|10|10|1|Porto, all roles; incl. Master's thesis in ML, Data Engineer. Needs a detail-page description fetch for static-css, which the worker lacks
+Euronext|rejected|detector matched the nav menu (li.internal-menu__item)|||| not a job listSIXT (Portugal)|admitted|smartrecruiters:SIXT country=pt|24|24|7|Lisbon; Staff Data Scientist (RL), Marketing Data Analyst
+Zego|admitted|ashby:zego|36|10|5|Portugal-based; mostly AI Product Manager roles
+Loka|admitted|greenhouse:lokainc|15|9|2|remote ML Engineer open to Portugal
+Intermedia|admitted|pinpoint json|53|29|3|remote Portugal; Data Scientist (LLM/RAG)
+IG&H Portugal|admitted|recruitee:igh json|61|3|0|Lisbon Databricks engineers
+MobiLab Solutions|admitted|personio xml + detailSelector|7|4|0|Aveiro; Data Engineer, Cloud roles
+Smartex.ai|admitted|odoo html + detailSelector|10|10|1|Porto; ML thesis, Data Engineer
+ITJobs.pt - AI|admitted|html list /emprego/ai|16|16|many|aggregates Neotalent, team.it, Dellent, Integer Consulting, Adentis, Olisipo; other ITJobs role pages redirect to ?q= searches that robots.txt disallows
+Landing.jobs - Data / Machine Learning / Artificial Intelligence|admitted|html lists|23|~21|many|aggregates Swisscom, Damia, KI performance; data-analyst and data-engineer pages skipped (52 results, 50 rendered)
+Pipedrive|skip|lever board empty|||| 
+Euronext|rejected|nav menu|||| 
+Emprego.pro|skip|robots.txt returns 403||||
+SAPO Emprego|skip|search param ignored; list not narrowable||||
+INESC TEC|no-board|research calls published as PDF editais||||
+NILG.AI / DareData / Upgraide / Datacentric|no-board|no public careers page found||||

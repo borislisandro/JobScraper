@@ -1,0 +1,580 @@
+
+### Farfetch
+  (no hosted board answered)
+
+### Revolut
+  (no hosted board answered)
+
+### Sword Health
+  (no hosted board answered)
+
+### Feedzai
+  (no hosted board answered)
+
+### Critical Software
+  breezy token=critical-software total=11 PT=5 PT+data/AI=0
+     e.g. CTD - Technology Director (Energy) [Portugal; Lisbon, PT; Porto, PT; Viseu, PT; Coimbra, PT; Portugal; Portugal; Portugal; Portugal; Portugal]
+          Proactive Applications [Coimbra, PT; Porto, PT; Viseu, PT; Lisbon, PT; Portugal; Portugal; Portugal; Portugal; Portugal; Portugal]
+          Senior Product Manager – Defence [Lisbon, PT; Porto, PT; Viseu, PT; Coimbra, PT; Portugal; Portugal; Portugal; Portugal; Portugal; Portugal]
+
+### Blip
+  (no hosted board answered)
+
+### Mindera
+  (no hosted board answered)
+
+### Uphold
+  (no hosted board answered)
+
+### Jumia
+  (no hosted board answered)
+
+### Pepco Tech Hub
+  (no hosted board answered)
+
+### Natixis
+  (no hosted board answered)
+
+### BNP Paribas Portugal
+  (no hosted board answered)
+
+### Euronext
+  (no hosted board answered)
+
+### Bosch Portugal
+  (no hosted board answered)
+
+### Mercedes-Benz.io
+  (no hosted board answered)
+
+### Fraunhofer Portugal AICOS
+  (no hosted board answered)
+
+### INESC TEC
+  (no hosted board answered)
+
+### Defined.ai
+  (no hosted board answered)
+
+### NDrive
+  (no hosted board answered)
+
+### Altice Labs
+  (no hosted board answered)
+
+### Ubiwhere
+  (no hosted board answered)
+
+### Altice Portugal
+  (no hosted board answered)
+
+### NOS
+  (no hosted board answered)
+
+### Vodafone Portugal
+  (no hosted board answered)
+
+### EDP
+  (no hosted board answered)
+
+### Galp
+  (no hosted board answered)
+
+### Sonae
+  (no hosted board answered)
+
+### Jerónimo Martins
+  (no hosted board answered)
+
+### Millennium bcp
+  (no hosted board answered)
+
+### Santander Tecnologia
+  (no hosted board answered)
+
+### Fidelidade
+  (no hosted board answered)
+
+### Ageas Portugal
+  (no hosted board answered)
+
+### Talkdesk
+  (no hosted board answered)
+
+### Unbabel
+  (no hosted board answered)
+
+### OutSystems
+  (no hosted board answered)
+
+### Cloudflare
+  (no hosted board answered)
+
+### Priberam
+  (no hosted board answered)
+
+### Glovo
+  (no hosted board answered)
+
+### Uber
+  (no hosted board answered)
+
+### Google
+  breezy token=google total=1 PT=0 PT+data/AI=0
+
+### Microsoft
+  (no hosted board answered)
+
+### Amazon
+  (no hosted board answered)
+
+### Nmbrs
+  (no hosted board answered)
+
+### Acolad
+  (no hosted board answered)
+
+### Upwork
+  (no hosted board answered)
+
+### Nebius
+  (no hosted board answered)
+
+### Powertalent
+  (no hosted board answered)
+
+### Cleverti
+  (no hosted board answered)
+
+### Closer
+  (no hosted board answered)
+
+### Xpand IT
+  (no hosted board answered)
+
+### Novabase
+  (no hosted board answered)
+
+### Glintt
+  (no hosted board answered)
+
+### NTT DATA Portugal
+  (no hosted board answered)
+
+### CGI Portugal
+  (no hosted board answered)
+
+### Capgemini Portugal
+  (no hosted board answered)
+
+### Devoteam
+  (no hosted board answered)
+
+### Deloitte Portugal
+  (no hosted board answered)
+
+### Accenture Portugal
+  (no hosted board answered)
+
+### Celfocus
+  (no hosted board answered)
+
+### Metyis
+  (no hosted board answered)
+
+### Dellent
+  (no hosted board answered)
+
+### Syone
+  (no hosted board answered)
+
+### Infineon
+  (no hosted board answered)
+
+### Siemens Healthineers
+  (no hosted board answered)
+
+### Novartis
+  (no hosted board answered)
+
+### Volkswagen Digital Solutions
+  (no hosted board answered)
+
+### Critical Manufacturing
+  (no hosted board answered)
+
+### Veniam
+  (no hosted board answered)
+
+### Aptoide
+  (no hosted board answered)
+
+### Onfido
+  (no hosted board answered)
+
+### Zalando
+  (no hosted board answered)
+
+### Booking.com
+  (no hosted board answered)
+
+### Finom
+  (no hosted board answered)
+
+### Jobgether
+  (no hosted board answered)
+
+### Cegid
+  (no hosted board answered)
+
+### Eurotux
+  (no hosted board answered)
+
+### Dellent Consulting
+  (no hosted board answered)
+
+### Logicalis Portugal
+  (no hosted board answered)
+
+### Planet Farms
+  (no hosted board answered)
+
+### NILG.AI
+  (no hosted board answered)
+
+### Upgraide
+  (no hosted board answered)
+
+### Datacentric
+  (no hosted board answered)
+
+### Mind Source
+  (no hosted board answered)
+
+### Flix
+  (no hosted board answered)
+
+### DareData
+  (no hosted board answered)
+
+### Twistag
+  (no hosted board answered)
+
+### Intelligent Algorithms
+  (no hosted board answered)
+
+### PrimeIT
+  (no hosted board answered)
+
+### Closer Consulting
+  (no hosted board answered)
+
+### Fyld
+  (no hosted board answered)
+
+### MobiLab Solutions
+  (no hosted board answered)
+
+### SISCOG
+  (no hosted board answered)
+
+### InterProlog
+  (no hosted board answered)
+
+### Smartex
+  (no hosted board answered)
+
+### Defined.ai
+  (no hosted board answered)
+
+### NDrive
+  (no hosted board answered)
+
+### Aptoide
+  (no hosted board answered)
+
+### Unbabel
+  (no hosted board answered)
+
+### Priberam
+  (no hosted board answered)
+
+### Outsystems
+  (no hosted board answered)
+
+### Glovo
+  (no hosted board answered)
+
+### Criteo
+  (no hosted board answered)
+
+### Bitsight
+  (no hosted board answered)
+
+### Hostelworld
+  (no hosted board answered)
+
+### Zendesk
+  pinpoint token=zendesk total=4 PT=0 PT+data/AI=0
+
+### Anchorage Digital
+  (no hosted board answered)
+
+### Blip.pt
+  (no hosted board answered)
+
+### Landing Jobs
+  (no hosted board answered)
+
+### Coverflex
+  (no hosted board answered)
+
+### Moey
+  (no hosted board answered)
+
+### Bold International
+  (no hosted board answered)
+
+### Wefox
+  (no hosted board answered)
+
+### Visma
+  (no hosted board answered)
+
+### Ctt
+  (no hosted board answered)
+
+### Sensei
+  (no hosted board answered)
+
+### Toku
+  (no hosted board answered)
+
+### Kuantic
+  (no hosted board answered)
+
+### Magnum
+  (no hosted board answered)
+
+### Mimic
+  (no hosted board answered)
+
+### Alongside
+  (no hosted board answered)
+
+### Usercentrics
+  (no hosted board answered)
+
+### knok
+  (no hosted board answered)
+
+### BOI Boi
+  (no hosted board answered)
+
+### Greenvolt
+  (no hosted board answered)
+
+### Mindera
+  (no hosted board answered)
+
+### payabl
+  pinpoint token=payabl total=4 PT=0 PT+data/AI=0
+
+### Joom
+  pinpoint token=joom total=5 PT=0 PT+data/AI=0
+
+### GeroDigital
+  (no hosted board answered)
+
+### Bnberry
+  (no hosted board answered)
+
+### Trade Nation
+  (no hosted board answered)
+
+### RevoData
+  (no hosted board answered)
+
+### Intetics
+  (no hosted board answered)
+
+### Deblock
+  pinpoint token=deblock total=4 PT=0 PT+data/AI=0
+
+### CoverGo
+  (no hosted board answered)
+
+### Omilia
+  (no hosted board answered)
+
+### SPD Technology
+  (no hosted board answered)
+
+### Zyte
+  (no hosted board answered)
+
+### Rydoo
+  (no hosted board answered)
+
+### Valis
+  (no hosted board answered)
+
+### Emerging Travel Group
+  (no hosted board answered)
+
+### Huzzle
+  (no hosted board answered)
+
+### 1GLOBAL
+  (no hosted board answered)
+
+### Trinetix
+  (no hosted board answered)
+
+### Triptease
+  (no hosted board answered)
+
+### Ocean Infinity
+  (no hosted board answered)
+
+### Adidas
+  (no hosted board answered)
+
+### BNP Paribas
+  (no hosted board answered)
+
+### Banco de Portugal
+  (no hosted board answered)
+
+### PrimeIT
+  (no hosted board answered)
+
+### Growin
+  (no hosted board answered)
+
+### Glintt
+  (no hosted board answered)
+
+### Avanade
+  (no hosted board answered)
+
+### Go IT Concept
+  (no hosted board answered)
+
+### Damia
+  (no hosted board answered)
+
+### Noesis
+  (no hosted board answered)
+
+### ITDS Portugal
+  (no hosted board answered)
+
+### Integer Consulting
+  (no hosted board answered)
+
+### Mind Source
+  (no hosted board answered)
+
+### Ageas
+  (no hosted board answered)
+
+### INEGI
+  (no hosted board answered)
+
+### Neotalent
+  (no hosted board answered)
+
+### TUI
+  pinpoint token=tui total=5 PT=0 PT+data/AI=0
+
+### Visual Thinking
+  (no hosted board answered)
+
+### Apgar
+  (no hosted board answered)
+
+### MCC Consulting
+  (no hosted board answered)
+
+### Fyllo
+  (no hosted board answered)
+
+### Acredius
+  (no hosted board answered)
+
+### Planicare
+  (no hosted board answered)
+
+### Iskaypet
+  (no hosted board answered)
+
+### Carglass
+  (no hosted board answered)
+
+### Mota-Engil
+  (no hosted board answered)
+
+### Knok Healthcare
+  (no hosted board answered)
+
+### Vestas
+  (no hosted board answered)
+
+### Deloitte
+  (no hosted board answered)
+
+### Fujitsu
+  (no hosted board answered)
+
+### Procter Gamble
+  (no hosted board answered)
+
+### Pepco
+  (no hosted board answered)
+
+### Aubay
+  (no hosted board answered)
+
+### Everis
+  (no hosted board answered)
+
+### NTT Data
+  pinpoint token=nttdata total=5 PT=0 PT+data/AI=0
+
+### Sogeti
+  (no hosted board answered)
+
+### Altran
+  (no hosted board answered)
+
+### Alten
+  pinpoint token=alten total=4 PT=0 PT+data/AI=0
+
+### Ness
+  (no hosted board answered)
+
+### Wavecom
+  (no hosted board answered)
+
+### Bold International
+  (no hosted board answered)
+
+### Glooma
+  (no hosted board answered)
+
+### Sonae IM
+  (no hosted board answered)
+
+### Cleverti
+  (no hosted board answered)
+
+### Zscaler
+  (no hosted board answered)
+
+### Cognizant
+  (no hosted board answered)
+
+### Wipro
+  (no hosted board answered)
+FINISHED

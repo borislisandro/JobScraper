@@ -1,0 +1,14 @@
+{
+ "id": "sword-health",
+ "name": "Sword Health",
+ "baseUrl": "https://job-boards.greenhouse.io/swordhealth",
+ "adapterId": "greenhouse",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "token": "swordhealth",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ }
+}

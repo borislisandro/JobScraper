@@ -1,0 +1,14 @@
+{
+ "id": "farfetch-lever",
+ "name": "Farfetch (Lever)",
+ "baseUrl": "https://jobs.lever.co/farfetch",
+ "adapterId": "lever",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "token": "farfetch",
+  "maxPages": 500,
+  "expectedHost": "api.lever.co"
+ }
+}

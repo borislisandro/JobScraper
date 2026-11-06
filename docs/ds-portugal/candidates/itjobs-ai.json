@@ -1,0 +1,19 @@
+{
+ "id": "itjobs-ai",
+ "name": "ITJobs.pt - AI",
+ "baseUrl": "https://www.itjobs.pt/emprego/ai",
+ "adapterId": "static-css",
+ "configJson": {
+  "itemSelector": "ul.listing > li",
+  "titleSelector": "a.title",
+  "urlSelector": "a.title",
+  "companySelector": ".list-name a",
+  "locationSelector": ".list-details",
+  "maxPages": 1,
+  "expectedHost": "www.itjobs.pt",
+  "detailSelector": ".content-block"
+ },
+ "kind": "active",
+ "robotsOverride": false,
+ "allowPrivateNetwork": false
+}

@@ -1,0 +1,16 @@
+{
+ "id": "iqvia",
+ "name": "IQVIA (Portugal)",
+ "baseUrl": "https://iqvia.wd1.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "configJson": {
+  "maxPages": 500,
+  "site": "IQVIA",
+  "tenant": "iqvia",
+  "query": "Portugal",
+  "expectedHost": "iqvia.wd1.myworkdayjobs.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

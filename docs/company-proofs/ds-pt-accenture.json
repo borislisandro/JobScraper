@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "name": "Accenture (Portugal)",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:53:50.428Z",
+  "finishedAt": "2026-10-30T20:54:09.856Z",
+  "source": {
+    "id": "accenture",
+    "name": "Accenture (Portugal)",
+    "baseUrl": "https://accenture.wd103.myworkdayjobs.com/",
+    "adapterId": "workday",
+    "configJson": {
+      "maxPages": 500,
+      "site": "AccentureCareers",
+      "tenant": "accenture",
+      "query": "Portugal",
+      "expectedHost": "accenture.wd103.myworkdayjobs.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "accenture",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 158,
+        "persisted": 158,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 8,
+        "boardTotal": 158,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 13758,
+        "pages": 8,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 13758,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 31,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 13689,
+              "body": 12,
+              "browser": 0,
+              "adapterOther": 22,
+              "emit": 3
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 8,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 13689,
+                "bodyMs": 12
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 158,
+    "uniqueIdentities": 158,
+    "uniqueHashes": 158,
+    "samples": [
+      {
+        "externalId": "R00348027",
+        "title": "DATA CENTER CONSTRUCTION MANAGER (España y Portugal)",
+        "company": "Accenture (Portugal)",
+        "location": "Madrid",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Madrid/DATA-CENTER-CONSTRUCTION-MANAGER--Espaa-y-Portugal-_R00348027",
+        "applyUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Madrid/DATA-CENTER-CONSTRUCTION-MANAGER--Espaa-y-Portugal-_R00348027",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "R00353630",
+        "title": "Financial Crime Compliance Associate",
+        "company": "Accenture (Portugal)",
+        "location": "Lisbon Exeo Lumnia",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Exeo-Lumnia/Financial-Crime-Compliance-Associate_R00353630",
+        "applyUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Exeo-Lumnia/Financial-Crime-Compliance-Associate_R00353630",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "R00361247",
+        "title": "Alliance Insights and Management Lead",
+        "company": "Accenture (Portugal)",
+        "location": "London",
+        "postedAt": "2026-10-22",
+        "canonicalUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/London/Alliance-Insights-and-Management-Lead_R00361247",
+        "applyUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/London/Alliance-Insights-and-Management-Lead_R00361247",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "accenture",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1729,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1730,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1705,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1705,
+                "bodyMs": 9
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "R00348027",
+        "title": "DATA CENTER CONSTRUCTION MANAGER (España y Portugal)",
+        "company": "Accenture (Portugal)",
+        "location": "Madrid",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Madrid/DATA-CENTER-CONSTRUCTION-MANAGER--Espaa-y-Portugal-_R00348027",
+        "applyUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Madrid/DATA-CENTER-CONSTRUCTION-MANAGER--Espaa-y-Portugal-_R00348027",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3910
+      },
+      {
+        "externalId": "R00353630",
+        "title": "Financial Crime Compliance Associate",
+        "company": "Accenture (Portugal)",
+        "location": "Lisbon, Exeo Lumnia",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Exeo-Lumnia/Financial-Crime-Compliance-Associate_R00353630",
+        "applyUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/Lisbon-Exeo-Lumnia/Financial-Crime-Compliance-Associate_R00353630",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6173
+      },
+      {
+        "externalId": "R00361247",
+        "title": "Alliance Insights and Management Lead",
+        "company": "Accenture (Portugal)",
+        "location": "London",
+        "postedAt": "2026-10-22",
+        "canonicalUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/London/Alliance-Insights-and-Management-Lead_R00361247",
+        "applyUrl": "https://accenture.wd103.myworkdayjobs.com/AccentureCareers/job/London/Alliance-Insights-and-Management-Lead_R00361247",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4777
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "accenture",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 158,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 1,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 3364,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 3364,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 3342,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 3342,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

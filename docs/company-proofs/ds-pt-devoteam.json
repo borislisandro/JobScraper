@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "name": "Devoteam",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T17:32:28.712Z",
+  "finishedAt": "2026-10-30T17:32:31.708Z",
+  "source": {
+    "id": "devoteam",
+    "name": "Devoteam",
+    "baseUrl": "https://jobs.smartrecruiters.com/Devoteam",
+    "adapterId": "devoteam",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.smartrecruiters.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "855c4070873baf1c0c7fdcfe1e9cc46ba27360840df7ab9fd0cc73005364a3c8",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "8ac866442b7a0394636b0645bf3d2fc8dd946eb1d1f04aec48e1b1fc3dd0b283",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "devoteam",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 218,
+        "persisted": 218,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 3,
+        "boardTotal": 218,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 907,
+        "pages": 3,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 908,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 35,
+              "pacing": 392,
+              "backoff": 0,
+              "response": 423,
+              "body": 23,
+              "browser": 0,
+              "adapterOther": 26,
+              "emit": 7
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 3,
+                "pacingMs": 392,
+                "backoffMs": 0,
+                "responseMs": 423,
+                "bodyMs": 23
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 218,
+    "uniqueIdentities": 218,
+    "uniqueHashes": 218,
+    "samples": [
+      {
+        "externalId": "744000158806579",
+        "title": "OutSystems | Developer",
+        "company": "Devoteam",
+        "location": "Lisboa, Lisboa, PT",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Devoteam/744000158806579",
+        "applyUrl": "https://jobs.smartrecruiters.com/Devoteam/744000158806579",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000116464017",
+        "title": "Distributed Cloud | Machine Learning Engineer",
+        "company": "Devoteam",
+        "location": "Porto, Porto, PT",
+        "postedAt": "2026-03-24",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Devoteam/744000116464017",
+        "applyUrl": "https://jobs.smartrecruiters.com/Devoteam/744000116464017",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000057625185",
+        "title": "Distributed Cloud | AWS Data Engineer",
+        "company": "Devoteam",
+        "location": "Porto, Porto, PT",
+        "postedAt": "2025-05-05",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Devoteam/744000057625185",
+        "applyUrl": "https://jobs.smartrecruiters.com/Devoteam/744000057625185",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.smartrecruiters.com."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "devoteam",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1018,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1018,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 13,
+              "pacing": 230,
+              "backoff": 0,
+              "response": 483,
+              "body": 13,
+              "browser": 0,
+              "adapterOther": 277,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 230,
+                "backoffMs": 0,
+                "responseMs": 483,
+                "bodyMs": 13
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "744000158806579",
+        "title": "OutSystems | Developer",
+        "company": "Devoteam",
+        "location": "Lisboa, Lisboa, PT",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Devoteam/744000158806579",
+        "applyUrl": "https://jobs.smartrecruiters.com/Devoteam/744000158806579",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3023
+      },
+      {
+        "externalId": "744000116464017",
+        "title": "Distributed Cloud | Machine Learning Engineer",
+        "company": "Devoteam",
+        "location": "Porto, Porto, PT",
+        "postedAt": "2026-03-24",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Devoteam/744000116464017",
+        "applyUrl": "https://jobs.smartrecruiters.com/Devoteam/744000116464017",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2815
+      },
+      {
+        "externalId": "744000057625185",
+        "title": "Distributed Cloud | AWS Data Engineer",
+        "company": "Devoteam",
+        "location": "Porto, Porto, PT",
+        "postedAt": "2025-05-05",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Devoteam/744000057625185",
+        "applyUrl": "https://jobs.smartrecruiters.com/Devoteam/744000057625185",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2776
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.smartrecruiters.com."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "devoteam",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 218,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 229,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 229,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 12,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 190,
+              "body": 14,
+              "browser": 0,
+              "adapterOther": 10,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 190,
+                "bodyMs": 14
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

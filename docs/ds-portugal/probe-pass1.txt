@@ -1,0 +1,235 @@
+
+### Farfetch
+  ashby token=farfetch total=49 PT=34 PT+data/AI=1
+     e.g. Senior Data Scientist [Porto]
+  lever token=farfetch total=43 PT=24 PT+data/AI=5
+     e.g. AI & Automation Engineer [Porto; Porto; PT]
+          Data Scientist – Experimentation Platform [Porto; Porto; PT]
+          Junior Analytics Engineer [Porto; Porto; PT]
+
+### Revolut
+  (no hosted board answered)
+
+### Sword Health
+  greenhouse token=swordhealth total=61 PT=17 PT+data/AI=5
+     e.g. Senior AI Engineer [Remote - Portugal]
+          Senior AI Software Engineer [Remote - Portugal]
+          Senior Data Platform Engineer [Remote - Portugal]
+
+### Feedzai
+  greenhouse token=feedzai total=15 PT=7 PT+data/AI=2
+     e.g. Analyst Relations Manager [Portugal]
+          Senior Analyst Engineer - Intelligence Management [Portugal]
+
+### Critical Software
+  (no hosted board answered)
+
+### Blip
+  greenhouse token=blip total=2 PT=0 PT+data/AI=0
+
+### Mindera
+  (no hosted board answered)
+
+### Uphold
+  (no hosted board answered)
+
+### Jumia
+  greenhouse token=jumia total=23 PT=1 PT+data/AI=0
+     e.g. Treasury Ops Specialist - Jumia (Full Time) [Portugal]
+
+### Pepco Tech Hub
+  (no hosted board answered)
+
+### Natixis
+  (no hosted board answered)
+
+### BNP Paribas Portugal
+  (no hosted board answered)
+
+### Euronext
+  (no hosted board answered)
+
+### Bosch Portugal
+  (no hosted board answered)
+
+### Mercedes-Benz.io
+  (no hosted board answered)
+
+### Fraunhofer Portugal AICOS
+  (no hosted board answered)
+
+### INESC TEC
+  (no hosted board answered)
+
+### Defined.ai
+  (no hosted board answered)
+
+### NDrive
+  (no hosted board answered)
+
+### Altice Labs
+  (no hosted board answered)
+
+### Ubiwhere
+  smartrecruiters token=ubiwhere total=1 PT=1 PT+data/AI=0
+     e.g. Frontend Engineer [Aveiro, pt]
+
+### Altice Portugal
+  (no hosted board answered)
+
+### NOS
+  (no hosted board answered)
+
+### Vodafone Portugal
+  (no hosted board answered)
+
+### EDP
+  (no hosted board answered)
+
+### Galp
+  (no hosted board answered)
+
+### Sonae
+  (no hosted board answered)
+
+### Jerónimo Martins
+  (no hosted board answered)
+
+### Millennium bcp
+  (no hosted board answered)
+
+### Santander Tecnologia
+  (no hosted board answered)
+
+### Fidelidade
+  (no hosted board answered)
+
+### Ageas Portugal
+  (no hosted board answered)
+
+### Talkdesk
+  (no hosted board answered)
+
+### Unbabel
+  (no hosted board answered)
+
+### OutSystems
+  (no hosted board answered)
+
+### Cloudflare
+  greenhouse token=cloudflare total=461 PT=1 PT+data/AI=0
+     e.g. Systems Engineer, Network Automation [Lisbon, Portugal]
+
+### Priberam
+  (no hosted board answered)
+
+### Glovo
+  (no hosted board answered)
+
+### Uber
+  smartrecruiters token=uber total=1 PT=0 PT+data/AI=0
+
+### Google
+  (no hosted board answered)
+
+### Microsoft
+  (no hosted board answered)
+
+### Amazon
+  personio token=amazon total=3 PT=0 PT+data/AI=0
+
+### Nmbrs
+  recruitee token=nmbrs total=10 PT=0 PT+data/AI=0
+
+### Acolad
+  (no hosted board answered)
+
+### Upwork
+  greenhouse token=upwork total=6 PT=2 PT+data/AI=0
+     e.g. Senior People Operations Specialist [Lisbon, Portugal]
+          Upwork is hiring in Lisbon, Portugal  [Lisbon, Portugal]
+
+### Nebius
+  greenhouse token=nebius total=376 PT=0 PT+data/AI=0
+
+### Powertalent
+  (no hosted board answered)
+
+### Cleverti
+  (no hosted board answered)
+
+### Closer
+  (no hosted board answered)
+
+### Xpand IT
+  (no hosted board answered)
+
+### Novabase
+  (no hosted board answered)
+
+### Glintt
+  (no hosted board answered)
+
+### NTT DATA Portugal
+  (no hosted board answered)
+
+### CGI Portugal
+  (no hosted board answered)
+
+### Capgemini Portugal
+  (no hosted board answered)
+
+### Devoteam
+  smartrecruiters token=devoteam total=100 PT=13 PT+data/AI=2
+     e.g. Software Development| Quality Assurance Analyst [Lisboa, pt]
+          Digital Impulse | Business Analyst  [Lisboa, pt]
+
+### Deloitte Portugal
+  (no hosted board answered)
+
+### Accenture Portugal
+  (no hosted board answered)
+
+### Celfocus
+  teamtailor token=celfocus total=6 PT=6 PT+data/AI=2
+     e.g. Senior Data Scientist [Porto, Porto, Portugal, Lisbon, Lisboa, Portugal]
+          Application Security Analyst [Lisbon, Lisboa, Portugal, Porto, Porto, Portugal]
+
+### Metyis
+  (no hosted board answered)
+
+### Dellent
+  (no hosted board answered)
+
+### Syone
+  (no hosted board answered)
+
+### Infineon
+  (no hosted board answered)
+
+### Siemens Healthineers
+  (no hosted board answered)
+
+### Novartis
+  (no hosted board answered)
+
+### Volkswagen Digital Solutions
+  (no hosted board answered)
+
+### Critical Manufacturing
+  (no hosted board answered)
+
+### Veniam
+  (no hosted board answered)
+
+### Aptoide
+  (no hosted board answered)
+
+### Onfido
+  (no hosted board answered)
+
+### Zalando
+  (no hosted board answered)
+
+### Booking.com
+  (no hosted board answered)

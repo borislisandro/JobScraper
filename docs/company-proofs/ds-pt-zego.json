@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Zego",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T21:37:27.327Z",
+  "finishedAt": "2026-10-30T21:37:28.097Z",
+  "source": {
+    "id": "zego",
+    "name": "Zego",
+    "baseUrl": "https://jobs.ashbyhq.com/zego",
+    "adapterId": "ashby",
+    "configJson": {
+      "token": "zego",
+      "maxPages": 500,
+      "expectedHost": "api.ashbyhq.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "4cab6cebe238ede1b602c890fcaaa1548341c9ac0bba82c07e71ec799ca75563",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "fd17dc6b69336d89379bb5c650d6457bfa6c1e4e9794d6157492f05fa60acc33",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "zego",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 36,
+        "persisted": 36,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 36,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 153,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 153,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 105,
+              "body": 17,
+              "browser": 0,
+              "adapterOther": 17,
+              "emit": 5
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 105,
+                "bodyMs": 17
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 36,
+    "uniqueIdentities": 36,
+    "uniqueHashes": 36,
+    "samples": [
+      {
+        "externalId": "2370ecf6-1bb6-4402-84c5-5428b2511302",
+        "title": "Lead AI Product Manager - Telematics",
+        "company": "Zego",
+        "location": "London",
+        "postedAt": "2026-09-23",
+        "canonicalUrl": "https://jobs.ashbyhq.com/zego/2370ecf6-1bb6-4402-84c5-5428b2511302",
+        "applyUrl": "https://jobs.ashbyhq.com/zego/2370ecf6-1bb6-4402-84c5-5428b2511302",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5818
+      },
+      {
+        "externalId": "359b0271-8f09-4cdf-90ed-ba2b0ed00910",
+        "title": "Complaints Team Leader - Claims",
+        "company": "Zego",
+        "location": "Halifax",
+        "postedAt": "2026-09-16",
+        "canonicalUrl": "https://jobs.ashbyhq.com/zego/359b0271-8f09-4cdf-90ed-ba2b0ed00910",
+        "applyUrl": "https://jobs.ashbyhq.com/zego/359b0271-8f09-4cdf-90ed-ba2b0ed00910",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5049
+      },
+      {
+        "externalId": "03331446-3f60-4a97-9fd7-25cb96e64423",
+        "title": "Employee Relations Advisor",
+        "company": "Zego",
+        "location": "London",
+        "postedAt": "2026-10-09",
+        "canonicalUrl": "https://jobs.ashbyhq.com/zego/03331446-3f60-4a97-9fd7-25cb96e64423",
+        "applyUrl": "https://jobs.ashbyhq.com/zego/03331446-3f60-4a97-9fd7-25cb96e64423",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5228
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "zego",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 36,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 36,
+        "requests": 1,
+        "skipped": 36,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 120,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 120,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 86,
+              "body": 16,
+              "browser": 0,
+              "adapterOther": 8,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 86,
+                "bodyMs": 16
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

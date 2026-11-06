@@ -1,0 +1,21 @@
+{
+ "id": "critical-software",
+ "name": "Critical Software",
+ "baseUrl": "https://critical-software.breezy.hr/json?verbose=true",
+ "adapterId": "json",
+ "configJson": {
+  "maxPages": 1,
+  "expectedHost": "critical-software.breezy.hr",
+  "fieldMap": {
+   "title": "name",
+   "url": "url",
+   "externalId": "id",
+   "postedAt": "published_date",
+   "description": "description",
+   "location": "location.name"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

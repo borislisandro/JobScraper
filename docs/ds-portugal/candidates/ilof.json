@@ -1,0 +1,13 @@
+{
+ "id": "ilof",
+ "name": "iLoF",
+ "baseUrl": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",
+ "adapterId": "ilof",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

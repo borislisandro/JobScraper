@@ -1,0 +1,581 @@
+[
+ {
+  "id": "accenture",
+  "country": "IE",
+  "tags": [
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://www.accenture.com/pt-pt/careers"
+ },
+ {
+  "id": "act-digital",
+  "country": "PT",
+  "tags": [
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/AlterSolutions"
+ },
+ {
+  "id": "airapps",
+  "country": "PT",
+  "tags": [
+   "software",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.ashbyhq.com/airapps"
+ },
+ {
+  "id": "airbus",
+  "country": "FR",
+  "tags": [
+   "aerospace",
+   "data-ai-pt"
+  ],
+  "careers": "https://ag.wd3.myworkdayjobs.com/Airbus"
+ },
+ {
+  "id": "bitsight",
+  "country": "US",
+  "tags": [
+   "security",
+   "data-ai-pt"
+  ],
+  "careers": "https://bitsight.wd1.myworkdayjobs.com/bitsight"
+ },
+ {
+  "id": "bosch",
+  "country": "DE",
+  "tags": [
+   "automotive",
+   "manufacturing",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/BoschGroup"
+ },
+ {
+  "id": "celfocus",
+  "country": "PT",
+  "tags": [
+   "telecom",
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://careers.celfocus.com/en-GB/jobs"
+ },
+ {
+  "id": "datacamp",
+  "country": "US",
+  "tags": [
+   "education",
+   "data",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/datacamp"
+ },
+ {
+  "id": "dbservices-portugal",
+  "country": "PT",
+  "tags": [
+   "consulting",
+   "data",
+   "data-ai-pt"
+  ],
+  "careers": "https://careers.smartrecruiters.com/DBServicesPortugal"
+ },
+ {
+  "id": "devoteam",
+  "country": "FR",
+  "tags": [
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/Devoteam"
+ },
+ {
+  "id": "emma-sleep",
+  "country": "DE",
+  "tags": [
+   "e-commerce",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.lever.co/emma-sleep"
+ },
+ {
+  "id": "farfetch-ashby",
+  "country": "PT",
+  "tags": [
+   "e-commerce",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.ashbyhq.com/farfetch"
+ },
+ {
+  "id": "farfetch-lever",
+  "country": "PT",
+  "tags": [
+   "e-commerce",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.lever.co/farfetch"
+ },
+ {
+  "id": "feedzai",
+  "country": "PT",
+  "tags": [
+   "fintech",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/feedzai"
+ },
+ {
+  "id": "finom",
+  "country": "NL",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.eu.lever.co/pnlfin"
+ },
+ {
+  "id": "flix",
+  "country": "DE",
+  "tags": [
+   "mobility",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/flix"
+ },
+ {
+  "id": "hiire",
+  "country": "PT",
+  "tags": [
+   "recruitment",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://hiire.teamtailor.com/jobs"
+ },
+ {
+  "id": "ilof",
+  "country": "PT",
+  "tags": [
+   "health-tech",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber"
+ },
+ {
+  "id": "inetum",
+  "country": "FR",
+  "tags": [
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/Inetum2"
+ },
+ {
+  "id": "iqvia",
+  "country": "US",
+  "tags": [
+   "health-tech",
+   "data-ai-pt"
+  ],
+  "careers": "https://iqvia.wd1.myworkdayjobs.com/IQVIA"
+ },
+ {
+  "id": "mercedes-benz-io",
+  "country": "DE",
+  "tags": [
+   "automotive",
+   "software",
+   "data-ai-pt"
+  ],
+  "careers": "https://mbio.recruitee.com"
+ },
+ {
+  "id": "metyis",
+  "country": "DE",
+  "tags": [
+   "consulting",
+   "data",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://metyisag.recruitee.com"
+ },
+ {
+  "id": "natixis-portugal",
+  "country": "FR",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/NatixisInPortugal"
+ },
+ {
+  "id": "olx",
+  "country": "NL",
+  "tags": [
+   "e-commerce",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.eu.lever.co/olx"
+ },
+ {
+  "id": "pagerduty",
+  "country": "US",
+  "tags": [
+   "software",
+   "observability",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/pagerduty"
+ },
+ {
+  "id": "santander",
+  "country": "ES",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://santander.wd3.myworkdayjobs.com/SantanderCareers"
+ },
+ {
+  "id": "superhuman",
+  "country": "US",
+  "tags": [
+   "software",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.ashbyhq.com/superhuman%20platform%20inc"
+ },
+ {
+  "id": "sword-health",
+  "country": "PT",
+  "tags": [
+   "health-tech",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/swordhealth"
+ },
+ {
+  "id": "talkdesk",
+  "country": "US",
+  "tags": [
+   "software",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/talkdesk2"
+ },
+ {
+  "id": "thorit",
+  "country": "DE",
+  "tags": [
+   "ai",
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.ashbyhq.com/thorit"
+ },
+ {
+  "id": "transperfect",
+  "country": "US",
+  "tags": [
+   "ai",
+   "language",
+   "data-ai-pt"
+  ],
+  "careers": "https://transperfect.recruitee.com"
+ },
+ {
+  "id": "ubiwhere",
+  "country": "PT",
+  "tags": [
+   "software",
+   "smart-cities",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/Ubiwhere"
+ },
+ {
+  "id": "veeva",
+  "country": "US",
+  "tags": [
+   "health-tech",
+   "software",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.lever.co/veeva"
+ },
+ {
+  "id": "vwgds",
+  "country": "DE",
+  "tags": [
+   "automotive",
+   "software",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.eu.lever.co/vwgds"
+ },
+ {
+  "id": "axians",
+  "country": "FR",
+  "tags": [
+   "consulting",
+   "telecom",
+   "data-ai-pt"
+  ],
+  "careers": "https://axiansgroup.teamtailor.com/jobs"
+ },
+ {
+  "id": "bearingpoint-portugal",
+  "country": "NL",
+  "tags": [
+   "consulting",
+   "data",
+   "data-ai-pt"
+  ],
+  "careers": "https://bearingpointportugal.teamtailor.com/jobs"
+ },
+ {
+  "id": "gocardless",
+  "country": "GB",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/gocardless"
+ },
+ {
+  "id": "indicium-ai",
+  "country": "BR",
+  "tags": [
+   "ai",
+   "data",
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/indiciumai"
+ },
+ {
+  "id": "critical-software",
+  "country": "PT",
+  "tags": [
+   "software",
+   "aerospace",
+   "automotive",
+   "data-ai-pt"
+  ],
+  "careers": "https://critical-software.breezy.hr"
+ },
+ {
+  "id": "usercentrics",
+  "country": "DE",
+  "tags": [
+   "software",
+   "privacy",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/usercentrics"
+ },
+ {
+  "id": "knok",
+  "country": "PT",
+  "tags": [
+   "health-tech",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/knok"
+ },
+ {
+  "id": "greenvolt",
+  "country": "PT",
+  "tags": [
+   "energy",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/greenvolt"
+ },
+ {
+  "id": "payabl",
+  "country": "CY",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/payabl"
+ },
+ {
+  "id": "joom",
+  "country": "LU",
+  "tags": [
+   "e-commerce",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/joom"
+ },
+ {
+  "id": "gerodigital",
+  "country": "PT",
+  "tags": [
+   "health-tech",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/gerodigital"
+ },
+ {
+  "id": "bnberry",
+  "country": "PT",
+  "tags": [
+   "travel",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/bnberry"
+ },
+ {
+  "id": "trade-nation",
+  "country": "GB",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/trade-nation"
+ },
+ {
+  "id": "deblock",
+  "country": "FR",
+  "tags": [
+   "fintech",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/deblock"
+ },
+ {
+  "id": "covergo",
+  "country": "HK",
+  "tags": [
+   "insurtech",
+   "software",
+   "data-ai-pt"
+  ],
+  "careers": "https://apply.workable.com/covergo"
+ },
+ {
+  "id": "sixt",
+  "country": "DE",
+  "tags": [
+   "mobility",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.smartrecruiters.com/SIXT"
+ },
+ {
+  "id": "zego",
+  "country": "GB",
+  "tags": [
+   "insurtech",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://jobs.ashbyhq.com/zego"
+ },
+ {
+  "id": "loka",
+  "country": "US",
+  "tags": [
+   "ai",
+   "consulting",
+   "data-ai-pt"
+  ],
+  "careers": "https://job-boards.greenhouse.io/lokainc"
+ },
+ {
+  "id": "intermedia",
+  "country": "US",
+  "tags": [
+   "software",
+   "ai",
+   "data-ai-pt"
+  ],
+  "careers": "https://intermedia.pinpointhq.com"
+ },
+ {
+  "id": "igh",
+  "country": "NL",
+  "tags": [
+   "consulting",
+   "data",
+   "data-ai-pt"
+  ],
+  "careers": "https://igh.recruitee.com"
+ },
+ {
+  "id": "mobilab",
+  "country": "DE",
+  "tags": [
+   "software",
+   "cloud",
+   "data-ai-pt"
+  ],
+  "careers": "https://mobilab-solutions-gmbh.jobs.personio.com"
+ },
+ {
+  "id": "smartex",
+  "country": "PT",
+  "tags": [
+   "ai",
+   "manufacturing",
+   "data-ai-pt"
+  ],
+  "careers": "https://odoo.smartex.ai/jobs"
+ },
+ {
+  "id": "itjobs-ai",
+  "country": "PT",
+  "tags": [
+   "job-board",
+   "portugal-board",
+   "data-ai-pt"
+  ],
+  "careers": "https://www.itjobs.pt/emprego/ai"
+ },
+ {
+  "id": "landingjobs-data-scientist",
+  "country": "PT",
+  "tags": [
+   "job-board",
+   "portugal-board",
+   "data-ai-pt"
+  ],
+  "careers": "https://landing.jobs/jobs/in/portugal/for/data-scientist"
+ },
+ {
+  "id": "landingjobs-machine-learning",
+  "country": "PT",
+  "tags": [
+   "job-board",
+   "portugal-board",
+   "data-ai-pt"
+  ],
+  "careers": "https://landing.jobs/jobs/in/portugal/for/machine-learning"
+ },
+ {
+  "id": "landingjobs-artificial-intelligence",
+  "country": "PT",
+  "tags": [
+   "job-board",
+   "portugal-board",
+   "data-ai-pt"
+  ],
+  "careers": "https://landing.jobs/jobs/in/portugal/for/artificial-intelligence"
+ }
+]

@@ -1,0 +1,14 @@
+{
+ "id": "olx",
+ "name": "OLX",
+ "baseUrl": "https://jobs.eu.lever.co/olx",
+ "adapterId": "lever",
+ "configJson": {
+  "token": "olx",
+  "maxPages": 500,
+  "expectedHost": "api.eu.lever.co"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

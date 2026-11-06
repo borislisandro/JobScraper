@@ -1,0 +1,14 @@
+{
+ "id": "airapps",
+ "name": "Air Apps",
+ "baseUrl": "https://jobs.ashbyhq.com/airapps",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "airapps",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

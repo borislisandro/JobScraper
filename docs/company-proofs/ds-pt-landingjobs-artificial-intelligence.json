@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "name": "Landing.jobs - Artificial Intelligence",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T21:56:39.606Z",
+  "finishedAt": "2026-10-30T21:56:49.567Z",
+  "source": {
+    "id": "landingjobs-artificial-intelligence",
+    "name": "Landing.jobs - Artificial Intelligence",
+    "baseUrl": "https://landing.jobs/jobs/in/portugal/for/artificial-intelligence",
+    "adapterId": "static-css",
+    "configJson": {
+      "itemSelector": "article.lj-jobcard-static",
+      "titleSelector": ".lj-jobcard-static__link",
+      "urlSelector": ".lj-jobcard-static__link",
+      "companySelector": ".lj-jobcard-static__company",
+      "locationSelector": ".lj-jobcard-static__location",
+      "maxPages": 1,
+      "expectedHost": "landing.jobs",
+      "detailSelector": "#job-summary-content"
+    },
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "51bf60178fa12cdd3a7177cda53152b1f870aac7da119f333b5dc8a6cf15d9fb",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "fd17dc6b69336d89379bb5c650d6457bfa6c1e4e9794d6157492f05fa60acc33",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "landingjobs-artificial-intelligence",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 6,
+        "persisted": 6,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": 6,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 2300,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2300,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 1542,
+              "backoff": 0,
+              "response": 477,
+              "body": 38,
+              "browser": 0,
+              "adapterOther": 231,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 174,
+                "bodyMs": 6
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 1542,
+                "backoffMs": 0,
+                "responseMs": 304,
+                "bodyMs": 32
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 6,
+    "uniqueIdentities": 6,
+    "uniqueHashes": 6,
+    "samples": [
+      {
+        "externalId": "6263d0172f85efb2cf049c023071874b6e8d40060082d05e1dd6fe2653d953e0",
+        "title": "Agentic AI Engineer",
+        "company": "Swisscom",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/swisscom/agentic-ai-engineer",
+        "applyUrl": "https://landing.jobs/at/swisscom/agentic-ai-engineer",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "06bd757b22f8603674dfc04b27aa26268bf2ee825f64bfde424678f629355d01",
+        "title": "Data Solutions Consultant",
+        "company": "Damia",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/damia/data-solutions-consultant",
+        "applyUrl": "https://landing.jobs/at/damia/data-solutions-consultant",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "e222193e4f99750d9653099eb946a018af196fd41e10bc2ea5dc1fe974c61800",
+        "title": "AI Solutions Consultant",
+        "company": "Damia",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/damia/ai-solutions-consultant",
+        "applyUrl": "https://landing.jobs/at/damia/ai-solutions-consultant",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "landingjobs-artificial-intelligence",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 4443,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 4444,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 3455,
+              "backoff": 0,
+              "response": 675,
+              "body": 19,
+              "browser": 0,
+              "adapterOther": 282,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 146,
+                "bodyMs": 5
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 3455,
+                "backoffMs": 0,
+                "responseMs": 529,
+                "bodyMs": 14
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "6263d0172f85efb2cf049c023071874b6e8d40060082d05e1dd6fe2653d953e0",
+        "title": "Agentic AI Engineer",
+        "company": "Swisscom",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/swisscom/agentic-ai-engineer",
+        "applyUrl": "https://landing.jobs/at/swisscom/agentic-ai-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5157
+      },
+      {
+        "externalId": "06bd757b22f8603674dfc04b27aa26268bf2ee825f64bfde424678f629355d01",
+        "title": "Data Solutions Consultant",
+        "company": "Damia",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/damia/data-solutions-consultant",
+        "applyUrl": "https://landing.jobs/at/damia/data-solutions-consultant",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3835
+      },
+      {
+        "externalId": "e222193e4f99750d9653099eb946a018af196fd41e10bc2ea5dc1fe974c61800",
+        "title": "AI Solutions Consultant",
+        "company": "Damia",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/damia/ai-solutions-consultant",
+        "applyUrl": "https://landing.jobs/at/damia/ai-solutions-consultant",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3808
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "landingjobs-artificial-intelligence",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 6,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 6,
+        "requests": 2,
+        "skipped": 6,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 2586,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2586,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 1951,
+              "backoff": 0,
+              "response": 369,
+              "body": 12,
+              "browser": 0,
+              "adapterOther": 243,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 171,
+                "bodyMs": 5
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 1951,
+                "backoffMs": 0,
+                "responseMs": 198,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

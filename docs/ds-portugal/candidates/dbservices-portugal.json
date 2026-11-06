@@ -1,0 +1,13 @@
+{
+ "id": "dbservices-portugal",
+ "name": "DBServices Portugal",
+ "baseUrl": "https://jobs.smartrecruiters.com/DBServicesPortugal",
+ "adapterId": "dbservices-portugal",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

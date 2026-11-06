@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // The "human" half of the audit: opens a company's real careers page in Chrome, searches a term in the page's own search box, loads the
 // whole result list (more/next/scroll), and counts the vacancy links it shows. Nothing here goes through the scraper.
 //   node scripts/audit-site.mjs [--concurrency 3] [--only "Name,Name"] [--terms engineer,verification]
