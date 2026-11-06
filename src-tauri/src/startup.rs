@@ -59,18 +59,21 @@ async fn start(
     // connected. The lazy pool has not, so this still runs before the first query.
     backup::apply_pending_restore(local)?;
     startup.set(app, "migrating", "Preparing the database");
+    // Each step that touches the database waits out a lock held by another JobScraper process —
+    // at sign-in the hidden app and the background check start together — rather than turning
+    // a passing collision into a screen that says the app cannot start.
     state.db.prepare().await?;
-    state.db.recover_interrupted_runs().await?;
+    db::retry_transient(|| state.db.recover_interrupted_runs()).await?;
     // Listings collected before the country resolver existed carry no codes, so the Jobs page
     // location filter would miss every one of them until they were next scraped.
-    let placed = db::backfill_location_countries(&state.db.pool).await?;
+    let placed = db::retry_transient(|| db::backfill_location_countries(&state.db.pool)).await?;
     if placed > 0 {
         startup.set(app, "migrating", "Working out where existing jobs are");
     }
     startup.set(app, "seeding", "Setting up job sources");
     // A new install holds no sources; the user picks a profile on the Sources tab. This only keeps the
     // sources an earlier version created in step with the catalog.
-    state.db.reconcile_catalog_sources().await?;
+    db::retry_transient(|| state.db.reconcile_catalog_sources()).await?;
     if !state.headless {
         startup.set(app, "scheduling", "Setting up reminders");
         // Scheduler failure is recorded on reminder rows and never blocks local application use.
@@ -109,7 +112,7 @@ pub fn spawn(app: &tauri::AppHandle, state: Arc<AppState>, local: std::path::Pat
     });
 }
 
-/// Headless startup performs the same migrations and starter-pack work, then exits after one
+/// Headless startup performs the same migrations and catalog reconciliation, then exits after one
 /// guarded batch. Reminder reconciliation is skipped because it adds no value to this process.
 pub fn spawn_headless(app: &tauri::AppHandle, state: Arc<AppState>, local: std::path::PathBuf) {
     let handle = app.clone();

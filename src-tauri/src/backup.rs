@@ -102,8 +102,13 @@ pub fn manifest(db: &[u8], schema_version: i64) -> Manifest {
 
 fn safe_archive_path(value: &str) -> Result<(), String> {
     let p = Path::new(value);
+    // A backup is a portable zip: one made on Windows must not be able to name a drive on a
+    // machine that, for its own path rules, would read "C:" as just another folder name.
+    let drive_prefix =
+        matches!(value.as_bytes(), [letter, b':', ..] if letter.is_ascii_alphabetic());
     if value.is_empty()
         || p.is_absolute()
+        || drive_prefix
         || value.contains('\\')
         || p.components().any(|c| {
             matches!(

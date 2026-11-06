@@ -7,9 +7,8 @@ on:
 
 jobs:
   frontend:
-    # The app ships Windows-only (WebView2, schtasks.exe, Edge); the Rust half in the
-    # other job below needs a Windows runner for the same reason, so this job matches
-    # it rather than running on a cheaper Linux runner.
+    # The app ships for Windows (WebView2, schtasks.exe, Edge) and Linux; the Windows jobs
+    # run on a Windows runner and the `linux` job below covers the other half.
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +37,40 @@ jobs:
         working-directory: src-tauri
       # Plain clippy, not -D warnings: there are pre-existing warnings (see repo notes)
       # that weren't mass-fixed as part of adding this gate. Surface them, don't block on them.
+      - run: cargo clippy --lib
+        working-directory: src-tauri
+      - run: cargo test --lib
+        working-directory: src-tauri
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev librsvg2-dev \
+            libayatana-appindicator3-dev libxdo-dev libdbus-1-dev libssl-dev patchelf
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm lint
+      - run: pnpm build
+      # src-tauri/sidecar is a build input the Rust crate refuses to compile without.
+      - run: scripts/prepare-release.sh
+      - run: pnpm test
+      - run: cargo fmt --check
+        working-directory: src-tauri
       - run: cargo clippy --lib
         working-directory: src-tauri
       - run: cargo test --lib

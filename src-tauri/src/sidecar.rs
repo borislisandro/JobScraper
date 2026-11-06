@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use std::{
     collections::{BTreeMap, HashMap, HashSet, VecDeque},
-    os::windows::process::CommandExt,
     path::PathBuf,
     sync::{Arc, Mutex},
     time::{Duration, Instant},
@@ -210,10 +209,7 @@ impl SidecarManager {
             .map(|worker| worker.pid)
             .collect();
         for pid in pids.iter().copied().filter(|pid| active.contains(pid)) {
-            let _ = std::process::Command::new("taskkill")
-                .args(["/PID", &pid.to_string(), "/T", "/F"])
-                .creation_flags(crate::notifications::CREATE_NO_WINDOW)
-                .status();
+            kill_process_tree(pid);
         }
     }
     pub fn cancel_all(&self) {
@@ -234,10 +230,7 @@ impl SidecarManager {
             .get(id)
             .map(|worker| worker.pid)
         {
-            let _ = std::process::Command::new("taskkill")
-                .args(["/PID", &pid.to_string(), "/T", "/F"])
-                .creation_flags(crate::notifications::CREATE_NO_WINDOW)
-                .status();
+            kill_process_tree(pid);
             true
         } else {
             false
@@ -342,6 +335,22 @@ pub fn adapter_manifests() -> Vec<AdapterManifest> {
         ("phenom", &["direct-json","pagination"][..], &[][..]),
     ].into_iter().map(|(id,modes,required_fields)| AdapterManifest { id,version:"1.1.0",modes,required_fields,config_schema:serde_json::json!({"type":"object","properties":{"urlTemplate":{"type":"string"},"query":{"type":"string"},"maxPages":{"type":"integer","minimum":1,"maximum":50}},"required":required_fields}) }).collect()
 }
+/// Ends a worker and everything it started: the browser a Playwright run drives outlives its
+/// parent unless it is taken down with it.
+fn kill_process_tree(pid: u32) {
+    #[cfg(windows)]
+    {
+        let _ = crate::notifications::quiet(std::process::Command::new("taskkill").args([
+            "/PID",
+            &pid.to_string(),
+            "/T",
+            "/F",
+        ]))
+        .status();
+    }
+    #[cfg(unix)]
+    crate::process_tree::kill(pid);
+}
 /// Tauri's `resource_dir()` returns a Windows verbatim path (`\\?\C:\...`). Rust and the OS accept
 /// it, but Node reads `\\?\C:\...` as a UNC share and tries to `lstat "C:"`, so every sidecar
 /// launch died before it could load worker.mjs. Strip the prefix before handing paths to Node.
@@ -366,7 +375,10 @@ fn worker_paths(app: &tauri::AppHandle) -> ApiResult<(PathBuf, PathBuf)> {
     let script = root.join("sidecar").join("worker.mjs");
     let node = std::env::var_os("JOBSCRAPER_NODE")
         .map(PathBuf::from)
-        .unwrap_or_else(|| root.join("sidecar").join("node.exe"));
+        .unwrap_or_else(|| {
+            root.join("sidecar")
+                .join(if cfg!(windows) { "node.exe" } else { "node" })
+        });
     if !script.exists() {
         return Err(format!(
             "Scraper worker is not bundled: {}",
@@ -493,15 +505,14 @@ async fn run(
     // Node caps response headers at 16KB and fetch() rejects the whole response past that with
     // an opaque UND_ERR_HEADERS_OVERFLOW. www.u-blox.com alone sends a 19KB content-security-policy
     // header, so its pages were unreadable for reasons no adapter could see or report.
-    let mut child = Command::new(node)
-        .arg("--max-http-header-size=65536")
-        .creation_flags(crate::notifications::CREATE_NO_WINDOW)
-        .arg(script)
-        .stdin(std::process::Stdio::piped())
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .spawn()
-        .map_err(|e| format!("Could not start isolated scraper: {e}"))?;
+    let mut child =
+        crate::notifications::quiet_async(Command::new(node).arg("--max-http-header-size=65536"))
+            .arg(script)
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .map_err(|e| format!("Could not start isolated scraper: {e}"))?;
     let spawned_at = Instant::now();
     let pid = child.id().ok_or("Worker did not return a PID")?;
     // Only a real scrape reuses what is already stored. A preview reads the board as it is, and a
@@ -1739,6 +1750,22 @@ async fn scrape_all_inner(
                             if let Ok(events) = &result {
                                 let count = events.last().and_then(|event| event.payload.get("requests")).and_then(|value| value.as_u64()).unwrap_or(0);
                                 requests.fetch_add(count as usize, std::sync::atomic::Ordering::Relaxed);
+                            }
+                            // A read that died on our side of the pipe leaves only a run marked
+                            // "ended before a terminal result"; the reason has to be written
+                            // down here or it is gone.
+                            if let Err(error) = &result {
+                                crate::db::log(
+                                    &state.db.pool,
+                                    "error",
+                                    Some(&source.source_id),
+                                    source.source.get("name").and_then(|name| name.as_str()),
+                                    "scrape_source",
+                                    Some("internal_error"),
+                                    error,
+                                    serde_json::json!({}),
+                                )
+                                .await;
                             }
                             match result {
                                 Ok(events)

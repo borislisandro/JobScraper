@@ -10,3 +10,12 @@ describe("document binary IPC",()=>{
  });
  it("accepts exactly 20 MB and rejects the next byte",()=>{expect(MAX_ATTACHMENT_BYTES).toBe(20*1024*1024);expect(()=>validateAttachmentSize(MAX_ATTACHMENT_BYTES)).not.toThrow();expect(()=>validateAttachmentSize(MAX_ATTACHMENT_BYTES+1)).toThrow("Attachment exceeds 20 MB")});
 });
+
+describe("refreshJobs", () => {
+  it("refreshes the country list together with the jobs it is counted from", async () => {
+    const { refreshJobs } = await import("./api");
+    const keys: unknown[][] = [];
+    refreshJobs({ invalidateQueries: ({ queryKey }) => keys.push([...queryKey]) });
+    expect(keys).toEqual([["jobs"], ["job-countries"]]);
+  });
+});

@@ -112,6 +112,7 @@ function Assert-PortableLayout {
     'sidecar\company-adapters.mjs',
     'sidecar\request-policy.mjs',
     'sidecar\browser-proxy.mjs',
+    'sidecar\browser-path.mjs',
     'sidecar\node_modules\playwright-core\package.json',
     'sidecar\node_modules\cheerio\package.json',
     'sidecar\node_modules\fast-xml-parser\package.json',

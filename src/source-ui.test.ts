@@ -39,6 +39,10 @@ describe("warm update summaries", () => {
     expect(describeUpdateSummary({ runId: "r", completedSources: 2, unchangedSources: 15, failedSources: 1, cancelledSources: 0 }))
       .toBe("Updated: 2 read, 15 unchanged, 1 failed.");
   });
+  it("says so when there was nothing to update, instead of a tally of zeros", () => {
+    expect(describeUpdateSummary({ runId: "r", completedSources: 0, unchangedSources: 0, failedSources: 0, cancelledSources: 0 }))
+      .toContain("No sources are switched on");
+  });
   it("never presents a failed or uncertain check as a changed source", () => {
     const message = describeCheckSummary([
       { sourceId: "a", name: "Arm", fresh: 2, stored: 10, changed: true, conclusive: true, requests: 1 },

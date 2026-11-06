@@ -1,6 +1,6 @@
 use crate::notifications::{
-    is_managed_task_path, run_scheduler_blocking, scoped_orphans, Reminder as ScheduledReminder,
-    Scheduler, WindowsTaskScheduler, SYNC_TASK,
+    current_scheduler, is_managed_task_path, run_scheduler_blocking, scoped_orphans,
+    Reminder as ScheduledReminder, Scheduler, SYNC_TASK,
 };
 use crate::{
     domain::{Application, Source, SourceInput, StageInput},
@@ -625,8 +625,7 @@ async fn background_sync_status_pool(pool: &SqlitePool) -> ApiResult<BackgroundS
         .await
         .map_err(|e| e.to_string())?
         .is_some_and(|value| value == "true");
-    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
-    let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    let scheduler = current_scheduler()?;
     let task = run_scheduler_blocking(move || scheduler.status(SYNC_TASK)).await?;
     Ok(BackgroundSyncStatus {
         enabled: task.enabled,
@@ -647,8 +646,7 @@ pub async fn set_background_sync(
     enabled: bool,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<BackgroundSyncStatus> {
-    let executable = std::env::current_exe().map_err(|e| e.to_string())?;
-    let scheduler = WindowsTaskScheduler::packaged(executable.to_string_lossy().into_owned());
+    let scheduler = current_scheduler()?;
     run_scheduler_blocking(move || {
         if enabled {
             scheduler.create_sync()?;
@@ -665,6 +663,18 @@ pub async fn set_background_sync(
     )
     .await?;
     background_sync_status_pool(&state.db.pool).await
+}
+/// Turns on what the toggles in Settings turn on — start at sign-in and the four-hourly background
+/// check — for `--setup-background`, so an installer can leave the app working the way the user
+/// expects without opening it first. Writes the same setting the UI reads, so the two never disagree.
+pub async fn enable_background_defaults(pool: &SqlitePool) -> ApiResult<()> {
+    let scheduler = current_scheduler()?;
+    run_scheduler_blocking(move || {
+        scheduler.create_startup()?;
+        scheduler.create_sync()
+    })
+    .await?;
+    write_setting(pool, SYNC_BACKGROUND, "true").await
 }
 pub fn normalize_canonical_url(value: &str) -> Option<String> {
     let mut url = Url::parse(value).ok()?;
@@ -756,6 +766,54 @@ pub fn migration_error(error: sqlx::migrate::MigrateError) -> String {
         other => other.to_string(),
     }
 }
+/// Whether a database error is the kind that passes by itself. Signing in starts several
+/// JobScraper processes at once — the hidden app, the background check, and whatever the user
+/// opens — and on Windows a process that is closing the database deletes its write-ahead files at
+/// the very moment another is opening it. That surfaces as "unable to open database file" or
+/// "database is locked" for a few hundred milliseconds, and the next attempt simply works.
+pub fn is_transient_database_error(message: &str) -> bool {
+    let message = message.to_ascii_lowercase();
+    [
+        "database is locked",
+        "database table is locked",
+        "database schema is locked",
+        "unable to open database",
+        "disk i/o error",
+        "used by another process",
+        "(code: 5)",
+        "(code: 6)",
+        "(code: 14)",
+        "(code: 10)",
+        "os error 5)",
+        "os error 32)",
+        "os error 33)",
+        "pool timed out",
+    ]
+    .iter()
+    .any(|marker| message.contains(marker))
+}
+/// Delays between attempts: about fifteen seconds in all, which outlasts any other JobScraper
+/// process finishing its work, while a database that is genuinely unreadable still reports
+/// itself within a splash screen's patience.
+const TRANSIENT_RETRY_DELAYS_MS: [u64; 10] =
+    [250, 500, 1000, 1000, 2000, 2000, 2000, 2000, 2000, 2000];
+/// Runs `operation`, trying again after a pause when it fails for a transient reason. Any other
+/// failure — a migration from a newer version, a corrupt file — is returned at once.
+pub async fn retry_transient<T, F, Fut>(mut operation: F) -> ApiResult<T>
+where
+    F: FnMut() -> Fut,
+    Fut: std::future::Future<Output = ApiResult<T>>,
+{
+    for delay in TRANSIENT_RETRY_DELAYS_MS {
+        match operation().await {
+            Err(error) if is_transient_database_error(&error) => {
+                tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
+            }
+            result => return result,
+        }
+    }
+    operation().await
+}
 impl Database {
     /// Builds the pool without touching the disk, so application startup can manage its state
     /// and paint a window before any I/O happens. Connecting and migrating is `prepare()`.
@@ -772,6 +830,14 @@ impl Database {
         }
     }
     pub async fn prepare(&self) -> ApiResult<()> {
+        // "Unable to open database file" is also what a missing folder reports, and waiting does
+        // not create one: only a folder that exists can be locked by someone else.
+        if !self.root.is_dir() {
+            return self.prepare_once().await;
+        }
+        retry_transient(|| self.prepare_once()).await
+    }
+    async fn prepare_once(&self) -> ApiResult<()> {
         sqlx::query("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;")
             .execute(&self.pool)
             .await
@@ -3561,11 +3627,7 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
         .fetch_all(pool)
         .await
         .map_err(|e| e.to_string())?;
-    let executable = std::env::current_exe()
-        .map_err(|e| e.to_string())?
-        .display()
-        .to_string();
-    let scheduler = WindowsTaskScheduler::packaged(executable);
+    let scheduler = current_scheduler()?;
     let mut scheduled = 0;
     let mut missed = 0;
     let mut errors = 0;
@@ -7270,5 +7332,58 @@ mod performance_history_tests {
         assert_eq!(run.jobs, 6);
         assert_eq!(run.slowest_phase.as_ref().unwrap().key, "work.scrape");
         assert!(run.source_name.is_none());
+    }
+}
+
+#[cfg(test)]
+mod transient_retry_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    #[test]
+    fn only_passing_lock_collisions_count_as_transient() {
+        for message in [
+            "error returned from database: (code: 14) unable to open database file",
+            "error returned from database: (code: 5) database is locked",
+            "The process cannot access the file because it is being used by another process. (os error 32)",
+            "pool timed out while waiting for an open connection",
+        ] {
+            assert!(is_transient_database_error(message), "{message}");
+        }
+        for message in [
+            "This database was created by a newer version of JobScraper (schema 30). Install the newer version to open it — your data is intact.",
+            "error returned from database: (code: 11) database disk image is malformed",
+            "error returned from database: (code: 1) no such table: jobs",
+        ] {
+            assert!(!is_transient_database_error(message), "{message}");
+        }
+    }
+    #[tokio::test]
+    async fn a_collision_that_clears_is_waited_out() {
+        let attempts = AtomicU32::new(0);
+        let result = retry_transient(|| async {
+            if attempts.fetch_add(1, Ordering::SeqCst) < 2 {
+                Err(
+                    "error returned from database: (code: 14) unable to open database file"
+                        .to_string(),
+                )
+            } else {
+                Ok("opened")
+            }
+        })
+        .await;
+        assert_eq!(result.unwrap(), "opened");
+        assert_eq!(attempts.load(Ordering::SeqCst), 3);
+    }
+    #[tokio::test]
+    async fn a_real_failure_is_reported_at_once() {
+        let attempts = AtomicU32::new(0);
+        let result: ApiResult<()> = retry_transient(|| async {
+            attempts.fetch_add(1, Ordering::SeqCst);
+            Err("This database was created by a newer version of JobScraper".to_string())
+        })
+        .await;
+        assert!(result.is_err());
+        assert_eq!(attempts.load(Ordering::SeqCst), 1);
     }
 }

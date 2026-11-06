@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import http from "node:http";
-import {existsSync} from "node:fs";
 import {test} from "node:test";
 import {createBrowserProxy} from "./browser-proxy.mjs";
+import {findBrowser} from "./browser-path.mjs";
 
 const listen=server=>new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
 const close=server=>new Promise(resolve=>server.close(resolve));
@@ -30,8 +30,8 @@ test("explicit local-network sources work through the proxy and retain their Hos
   assert.equal(await viaProxy(proxy,`http://fixture.example:${server.address().port}/jobs`),200);
  }finally{await proxy.close();await close(server)}
 });
-const executable=[process.env["ProgramFiles(x86)"],process.env.ProgramFiles].filter(Boolean).map(root=>`${root}/Microsoft/Edge/Application/msedge.exe`).find(existsSync);
-test("real Edge blocks private fetches, popup navigation and redirected traffic through the proxy",{skip:!executable,timeout:30000},async()=>{
+const executable=findBrowser();
+test("a real browser blocks private fetches, popup navigation and redirected traffic through the proxy",{skip:!executable,timeout:30000},async()=>{
  const {chromium}=await import("playwright-core");
  let hits=0;const server=http.createServer((_req,res)=>{hits++;res.end("private")});await listen(server);
  const proxy=await createBrowserProxy({});
