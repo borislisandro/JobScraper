@@ -6,7 +6,7 @@ Employers added for design-verification, DFT, RTL, ASIC and FPGA roles in PT, ES
 
 ## Admitted
 
-| Company | Adapter | Jobs | Role titles | In target | Default list |
+| Company | Adapter | Jobs | Role titles | In target | Semiconductor profile |
 | --- | --- | ---: | ---: | ---: | :---: |
 | Semidynamics | json | 38 | 13 | 12 | yes |
 | Bosch | bosch | 779 | 7 | 7 | no |
@@ -68,6 +68,6 @@ node docs/semiconductor-eu/make-candidates.mjs ... make-candidates-6.mjs   # can
 docs/semiconductor-eu/prove.sh <id>                                        # full proof
 node scripts/relevance-check.mjs docs/company-candidates/<id>.json --write # role counts
 docs/semiconductor-eu/admit.sh <id> "<Name>" <CC> <tags> <careersUrl>      # catalog + tracker
-node docs/semiconductor-eu/promote.mjs <version>                           # default list + version bump
-node docs/semiconductor-eu/starter-fixture.mjs                             # fixture without a Windows build
+node scripts/set-profile.mjs semiconductor "<Name>" --version <x>          # put it in the semiconductor profile
+scripts/rust-linux-check.sh test --lib                                     # Rust tests without a Windows machine
 ```

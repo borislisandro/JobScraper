@@ -9,7 +9,7 @@ import {catalogSource}from "./source-ui";
 vi.mock("./api",async original=>({...await original<typeof import("./api")>(),listCompanyCatalog:vi.fn(),sourceConfig:vi.fn()}));
 (globalThis as typeof globalThis&{IS_REACT_ACT_ENVIRONMENT:boolean}).IS_REACT_ACT_ENVIRONMENT=true;
 let container:HTMLDivElement,root:Root,client:QueryClient;
-const company:CatalogCompany={id:"catalog-id",name:"Chip Company",baseUrl:"https://jobs.ashbyhq.com/chip",adapterId:"ashby",country:"CA",tags:["semiconductor"],starter:false,kind:"active",config:{token:"chip",maxPages:500,requestDelayMs:400}};
+const company:CatalogCompany={id:"catalog-id",name:"Chip Company",baseUrl:"https://jobs.ashbyhq.com/chip",adapterId:"ashby",country:"CA",tags:["semiconductor"],kind:"active",config:{token:"chip",maxPages:500,requestDelayMs:400}};
 const saved:Source={id:"saved-id",name:company.name,baseUrl:company.baseUrl,adapterId:company.adapterId,adapterVersion:"1.1.0",kind:"active",enabled:true,robotsOverride:false,jobCount:0,closedCount:0};
 const settle=()=>act(async()=>{await new Promise(resolve=>setTimeout(resolve,10))});
 beforeEach(()=>{container=document.createElement("div");document.body.append(container);root=createRoot(container);client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});

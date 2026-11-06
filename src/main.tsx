@@ -8,11 +8,11 @@ import { aggregateRows, formatDuration, latestSummary, phaseRows, recentFailures
 import { COUNTRIES } from "./countries";
 import { describePreset, parsePresets, presetFrom, PRESETS_KEY, withoutPreset, withPreset, type FilterPreset } from "./presets";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { captureJob, jobCountries, listCompanyCatalog, newSince, REVIEWED_KEY, saveCapturedJob, setJobDismissed, type CapturedJob, type CatalogCompany } from "./api";
+import { applyProfile, captureJob, jobCountries, listCompanyCatalog, listProfiles, newSince, REVIEWED_KEY, saveCapturedJob, setJobDismissed, type CapturedJob, type CatalogCompany } from "./api";
 import { api, appLogs, backgroundSyncStatus, DEFAULT_POSTED_WINDOW, jobDescription, launchAtLoginStatus, POSTED_WINDOWS, purgeAllJobs, setBackgroundSync, setLaunchAtLogin, startupStatus, type StartupStatus, cancelScrape, cancelScrapeAll, captureSession, deleteBrowserSession, getSetting, setSetting, hasBrowserSession, scrapeAll, scrapePerformance, sourceConfig, startAutomaticSync, type Application, type Job, type JobDescription, type JobFilter, type Source, type WorkerEvent } from "./api";
 import { listenForApplyConfirmation } from "./apply-prompts";
 import { listenForScrapeEvents } from "./scrape-events";
-import { catalogSource, describeFailure, describeLogEvent, describeOutcome, describeUnsupported, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
+import { catalogSource, describeFailure, describeLogEvent, describeOutcome, describeProfileApplied, describeUnsupported, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
 import { BOARD_COLUMNS, boardColumn, isApplied, stageLabel, websiteUrl } from "./application-ui";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import "./styles.css";
@@ -115,7 +115,7 @@ function App(){
 function SourcePicker({sources,shown,onShow}:{sources:Source[];shown:Set<string>;onShow:(ids:string[])=>void}){
  const [pickerOpen,setPickerOpen]=useState(false);const [query,setQuery]=useState("");
  const scrapable=sources.filter(s=>s.kind!=="reference"&&s.enabled);
- if(!sources.some(s=>s.kind!=="reference"))return <p className="muted">No sources yet. Add one on the Sources page to start collecting jobs.</p>;
+ if(!sources.some(s=>s.kind!=="reference"))return <p className="muted">No sources yet. Choose a profile on the Sources page, or add companies yourself, to start collecting jobs.</p>;
  if(!scrapable.length)return <p className="muted">Every source is switched off. Turn one back on from the Sources page.</p>;
  const many=scrapable.length>10,selected=scrapable.filter(source=>shown.has(source.id));
  const visible=many?selected.slice(0,10):scrapable;
@@ -403,7 +403,7 @@ export function CompanyPicker({sources,onClose,onManual}:{sources:Source[];onClo
    disabledReason:null,robotsOverride:true,allowPrivateNetwork:false,configJson:{schemaVersion:"1.1.0",adapterVersion:"1.1.0",mode:"direct",...company.config}})},
   onMutate:()=>setStatus(""),onSuccess:async source=>{qc.setQueryData<Source[]>(["sources"],current=>[...(current||[]).filter(item=>item.id!==source.id),source]);setStatus(`${source.name} is selected for automatic updates.`);await qc.invalidateQueries({queryKey:["sources"]})}});
  const countryName=(code:string)=>COUNTRIES.find(country=>country.code===code)?.name||code;
- const words=search.toLowerCase().trim().split(/\s+/).filter(Boolean),visible=companies.filter(company=>words.every(word=>`${company.name} ${company.country} ${countryName(company.country)} ${company.tags.join(" ")}`.toLowerCase().includes(word))).sort((a,b)=>a.name.localeCompare(b.name));
+ const words=search.toLowerCase().trim().split(/\s+/).filter(Boolean),visible=companies.filter(company=>words.every(word=>`${company.name} ${company.country} ${countryName(company.country)} ${company.tags.join(" ")} ${(company.profiles||[]).join(" ").replaceAll("-"," ")}`.toLowerCase().includes(word))).sort((a,b)=>a.name.localeCompare(b.name));
  return <dialog ref={dialog} className="company-picker" aria-labelledby="company-picker-title" onCancel={onClose}><div className="sheet">
   <header><h3 id="company-picker-title">Browse companies</h3><button type="button" className="link" onClick={onClose}>Close</button></header>
   <div className="dialog-body"><p className="hint">Choose a company to follow. Its jobs board and settings are ready to use. Companies are listed by home country; openings may be worldwide.</p>
@@ -417,6 +417,37 @@ export function CompanyPicker({sources,onClose,onManual}:{sources:Source[];onClo
   </div><footer><button className="link" onClick={onManual}>Add source manually</button><output role="status">{add.error?String(add.error):status}</output></footer>
  </div></dialog>
 }
+// The profile switcher: one choice that sets the whole Sources tab to a kind of job search. Picking a profile adds
+// its companies, switches them on and reads the ones never read; picking another switches off what the first one
+// turned on (their jobs stay). Companies the user added or switched on themselves are never touched, and
+// "Browse companies" still adds anything the app supports on top of whichever profile is active.
+export function ProfileSwitcher({onStatus}:{onStatus:(text:string)=>void}){
+ const qc=useQueryClient();
+ const {data,error}=useQuery({queryKey:["profiles"],queryFn:listProfiles});
+ const profiles=data?.profiles??[],active=data?.active??"",current=profiles.find(profile=>profile.id===active);
+ const choose=useMutation({mutationFn:(id:string)=>applyProfile(id||null),
+  onSuccess:async(applied,id)=>{
+   const name=profiles.find(profile=>profile.id===id)?.name,summary=describeProfileApplied(name,applied);
+   onStatus(summary);
+   await Promise.all([qc.invalidateQueries({queryKey:["sources"]}),qc.invalidateQueries({queryKey:["profiles"]}),qc.invalidateQueries({queryKey:["jobs"]})]);
+   if(!applied.readNow.length)return;
+   // Reading is the point of choosing a profile, so it starts now rather than at the next automatic update.
+   try{const result=await scrapeAll(crypto.randomUUID(),applied.readNow,false);onStatus(`${name||"Profile"}: ${describeUpdateSummary(result)}`)}
+   catch(failure){onStatus(String(failure))}
+   await Promise.all([qc.invalidateQueries({queryKey:["sources"]}),qc.invalidateQueries({queryKey:["profiles"]}),qc.invalidateQueries({queryKey:["jobs"]})])},
+  onError:failure=>onStatus(String(failure))});
+ const change=(id:string)=>{
+  const leaving=profiles.find(profile=>profile.id===active);
+  if(leaving&&id&&id!==active&&!confirm(`Switch to ${profiles.find(profile=>profile.id===id)?.name}? Companies that ${leaving.name} switched on are switched off unless you turned them on yourself. Their jobs are kept.`))return;
+  choose.mutate(id)};
+ if(error)return <p className="error" role="alert">Could not load profiles. {String(error)}</p>;
+ if(!profiles.length)return null;
+ return <section className="profile-bar" aria-label="Profile">
+  <label><span>Profile</span><select value={active} disabled={choose.isPending} onChange={event=>change(event.target.value)}>
+   <option value="">No profile — I choose my own sources</option>
+   {profiles.map(profile=><option key={profile.id} value={profile.id}>{profile.name} · {profile.companies} companies</option>)}</select></label>
+  <p className="hint" aria-live="polite">{choose.isPending?"Setting up sources…":current?`${current.description} ${current.on} of ${current.companies} are switched on.`:"Pick a profile for a ready-made set of employers, or use Browse companies to choose your own. You can change it at any time."}</p>
+ </section>}
 function Sources(){
  const qc=useQueryClient(); const {data:sources=[],isLoading,error}=useQuery({queryKey:["sources"],queryFn:api.listSources});
  const [selected,setSelected]=useState<Source|undefined>(); const [result,setResult]=useState(""); const [notices,setNotices]=useState<string[]>([]); const [paused,setPaused]=useState<WorkerEvent>(); const [preview,setPreview]=useState<ReturnType<typeof previewFromEvents>>();
@@ -467,13 +498,15 @@ function Sources(){
     <div className="actions">{!logShown&&<button onClick={()=>setLogShown(true)}>Show run log</button>}<button disabled={rebuilding} onClick={rebuild}>{rebuilding?"Re-scrubbing…":"Re-scrub all"}</button>
      <button onClick={manualSource}>Add source manually</button><button className="primary" onClick={()=>setBrowsing(true)}>Browse companies</button></div></header>
    <div className="scroll">
+    <ProfileSwitcher onStatus={setResult}/>
     {paused&&<aside className="paused" aria-live="polite"><span className="tag">PAUSED</span>
      <span className="text">Login or CAPTCHA needs your action in headed Edge.</span>
      <button onClick={()=>cancelScrape(paused.runId)}>Cancel</button>
      <button className="primary" onClick={()=>api.resumeScrape(paused.runId)}>Resume &amp; save session</button></aside>}
     {result&&<output className="status">{result}</output>}
     {notices.map(text=><output className="status warning" key={text}>{text}</output>)}
-    {isLoading?<p className="muted">Loading…</p>:<div className="source-table">
+    {isLoading?<p className="muted">Loading…</p>:!sources.length?<div className="empty"><strong>No sources yet</strong>
+     <span>Choose a profile above for a ready-made set of employers, or use Browse companies to pick them one by one.</span></div>:<div className="source-table">
      <div className="source-head"><span>Source</span><span className="adapter">Adapter</span><span className="num">Jobs</span><span>Last read</span><span>On</span><span>Actions</span></div>
      {sources.map(s=><article className={s.disabledReason&&!s.enabled?"source-row attention":"source-row"} key={s.id}>
       <div><div className="source-name"><strong>{s.name}</strong>

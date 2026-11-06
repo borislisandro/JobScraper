@@ -1,7 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 export type Source={id:string;name:string;baseUrl:string;adapterId:string;adapterVersion:string;enabled:boolean;kind:string;disabledReason?:string;robotsOverride:boolean;lastSuccessAt?:string;jobCount:number;closedCount:number};
-export type CatalogCompany={id:string;name:string;country:string;tags:string[];adapterId:string;baseUrl:string;config:Record<string,unknown>;starter:boolean;kind:string;disabledReason?:string|null;verified?:{at:string;jobs:number}|null};
+export type CatalogCompany={id:string;name:string;country:string;tags:string[];adapterId:string;baseUrl:string;config:Record<string,unknown>;profiles?:string[];kind:string;verified?:{at:string;jobs:number}|null};
 export const listCompanyCatalog=()=>invoke<CatalogCompany[]>("list_company_catalog");
+// A profile is a named set of catalog companies (semiconductor, data science, ...). Choosing one adds those
+// companies, switches them on and reads the ones never read; "no profile" (null) changes no source.
+export type ProfileSummary={id:string;name:string;description:string;companies:number;on:number};
+export type ProfilesState={active?:string|null;profiles:ProfileSummary[]};
+export type ProfileApplied={profile?:string|null;added:number;switchedOn:number;switchedOff:number;alreadyFollowing:number;readNow:string[]};
+export const listProfiles=()=>invoke<ProfilesState>("list_profiles");
+export const applyProfile=(profileId:string|null)=>invoke<ProfileApplied>("apply_profile",{profileId});
 export type Job={id:string;sourceId:string;dismissedAt?:string;title:string;company:string;location?:string;workMode?:string;canonicalUrl?:string;applyUrl?:string;descriptionText:string;descriptionStatus:"complete"|"pending"|"failed";postedAt?:string;salaryMin?:number;salaryMax?:number;salaryCurrency?:string;seniority?:string;availability:"active"|"possibly_closed"|"closed"|"archived";applicationStage?:string};
 export type JobPage={items:Job[];total:number;offset:number;hasMore:boolean};
 export type JobDescription={text:string;status:"complete"|"pending"|"failed";error?:string};

@@ -1,6 +1,6 @@
-import type { CatalogCompany, ScrapeAllResult, Source, SourceCheck, WorkerEvent } from "./api";
+import type { CatalogCompany, ProfileApplied, ScrapeAllResult, Source, SourceCheck, WorkerEvent } from "./api";
 
-// Mirror save_source's same_board comparison. An existing disabled starter can be enabled in
+// Mirror save_source's same_board comparison. An existing disabled catalog source can be enabled in
 // place, while renamed sources still count as added. The backend remains the duplicate guard.
 export function catalogSource(company: CatalogCompany, sources: Source[]) {
   const board = (value: string) => {
@@ -113,6 +113,17 @@ export function describeOutcome(events: WorkerEvent[], sourceName: string) {
   return `${sourceName}: ${describeFailure(payload.code as string | undefined)}`;
 }
 
+// What choosing a profile did, in the words the Sources tab shows. `reading` is how many of the new
+// companies are about to be read, because the first read is what turns a list of names into jobs.
+export function describeProfileApplied(name: string | undefined, applied: ProfileApplied) {
+  if (!applied.profile) return "No profile selected. Your sources stay exactly as they are.";
+  const label = name || applied.profile, on = applied.added + applied.switchedOn;
+  const parts = [on ? `${on} ${on === 1 ? "company" : "companies"} switched on` : "nothing new to switch on"];
+  if (applied.switchedOff) parts.push(`${applied.switchedOff} from the previous profile switched off, their jobs kept`);
+  if (applied.alreadyFollowing) parts.push(`${applied.alreadyFollowing} already followed`);
+  const reading = applied.readNow.length;
+  return `${label}: ${parts.join(", ")}.${reading ? ` Reading ${reading} ${reading === 1 ? "company" : "companies"} now.` : ""}`;
+}
 export function describeUpdateSummary(result: ScrapeAllResult) {
   const parts = [
     `${result.completedSources} read`,

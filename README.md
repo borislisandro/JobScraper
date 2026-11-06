@@ -18,70 +18,31 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 
 ## Supported sites
 
-190 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json) — browse and enable them from the Sources page. Fresh installs seed only the semiconductor starter list below (49 entries), and every one of them starts switched off until you enable it or accept the installer's opt-in.
+240 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json). A new install starts with **no sources**: on the Sources tab, pick a **profile** and the app sets itself up for that kind of job search, or use **Browse companies** to add any of the 240 yourself.
 
-**Original starters**
+### Profiles
 
-| Employer | Careers site | Adapter |
-| --- | --- | --- |
-| Microchip | `wd5.myworkdaysite.com` | Workday |
-| Analog Devices | `analogdevices.wd1.myworkdayjobs.com` | Workday |
-| Broadcom | `broadcom.wd1.myworkdayjobs.com` | Workday |
-| Intel | `intel.wd1.myworkdayjobs.com` | Workday |
-| Marvell | `marvell.wd1.myworkdayjobs.com` | Workday |
-| NVIDIA | `nvidia.wd5.myworkdayjobs.com` | Workday (facet splitting) |
-| Micron | `micron.wd1.myworkdayjobs.com` | Workday |
-| NXP | `nxp.wd3.myworkdayjobs.com` | Workday |
-| STMicroelectronics | `stmicroelectronics.eightfold.ai` | Eightfold legacy API |
-| GlobalFoundries | `careers.gf.com` | Eightfold PCSX API |
-| Qualcomm | `careers.qualcomm.com` | Eightfold PCSX API |
-| Ericsson | `jobs.ericsson.com` | Eightfold PCSX API |
-| Apple | `jobs.apple.com` | Apple search API |
-| Arm | `careers.arm.com` | Employer-specific |
-| AMD | `careers.amd.com` | Employer-specific |
-| Cisco | `careers.cisco.com` | Employer-specific |
-| Google | `google.com/about/careers` | Employer-specific |
-| MediaTek | `careers.mediatek.com` | Employer-specific |
-| ASML | `asml.com/en/careers/find-your-job` | Sitecore search API |
-| u-blox | `u-blox.com/en/job-openings` | Algolia API |
-| SK hynix | `talent.skhynix.com` | SK Careers + Greenhouse |
+A profile is a named set of catalog companies. Choosing one from the drop-down at the top of the Sources tab:
 
-**Added to the default list for design-verification, DFT and RTL roles** (chosen from live counts of those titles in Portugal, Spain, France, the Netherlands, Ireland, Austria, Germany, the UK and Switzerland)
+- adds the profile's companies, switches them on, and reads the ones that have never been read;
+- when you switch from one profile to another, switches off the companies the first one turned on (their stored jobs stay) and leaves alone anything you switched on or added yourself, including companies added through Browse companies;
+- is remembered, and choosing the same profile again only adds what is new;
+- "No profile" forgets the choice and changes no source.
 
-| Employer | Careers site | Adapter |
-| --- | --- | --- |
-| Synopsys | `careers.synopsys.com` | Employer-specific |
-| Infineon | `jobs.infineon.com` | Eightfold |
-| Graphcore | `job-boards.greenhouse.io` | Greenhouse |
-| Cirrus Logic | `jobs.eu.lever.co` | Lever |
-| Tenstorrent | `job-boards.greenhouse.io` | Greenhouse |
-| Siemens | `jobs.sw.siemens.com` | Employer-specific |
-| Monolithic Power Systems | `monolithicpower.wd12.myworkdayjobs.com` | Workday |
-| Rambus | `careers-rambus.icims.com` | Employer-specific |
-| Imagination Technologies | `careers.pageuppeople.com` | Public JSON API |
-| Renesas | `jobs.renesas.com` | Employer-specific |
-| Nordic Semiconductor | `careers.nordicsemi.com` | Teamtailor JSON feed |
-| SiPearl | `careers.sipearl.com` | Teamtailor JSON feed |
-| Cadence | `cadence.wd1.myworkdayjobs.com` | Workday |
-| Semidynamics | `careers.semidynamics.com` | Teamtailor JSON feed |
-| Fractile | `jobs.ashbyhq.com` | Ashby |
-| Arago | `jobs.ashbyhq.com` | Ashby |
-| Baya Systems | `job-boards.greenhouse.io` | Greenhouse |
-| Riverlane | `job-boards.greenhouse.io` | Greenhouse |
-| Olix | `jobs.ashbyhq.com` | Ashby |
-| Pragmatic Semiconductor | `talent.pragmaticsemi.com` | Teamtailor JSON feed |
-| Dolphin Semiconductor | `careers.dolphin-semiconductor.com` | Teamtailor JSON feed |
-| Prophesee | `careers.prophesee.ai` | Teamtailor JSON feed |
-| Openchip | `openchip.factorialhr.com` | Employer-specific |
-| Codasip | `codasip.bamboohr.com` | BambooHR |
-| Raspberry Pi | `apply.workable.com` | Workable |
-| Axiomise | `axiomise.jobs.personio.de` | Personio |
-| Racyics | `racyics.de` | Employer-specific |
-| Arteris | `jobs.jobvite.com` | Employer-specific |
+Browse companies keeps working under any profile, so a data-science profile can still follow Arm or Apple.
 
-Also in the catalog, not in the default list because their boards are mostly non-chip roles: IonQ, Teledyne, Philips, Bosch, CERN, plus CSEM, Elmos, Kalray, Quantum Motion, SEMRON and Universal Quantum. Employers whose careers sites cannot be read yet (onsemi, Melexis, imec, Rohde & Schwarz, ams OSRAM and others) are recorded as blocked in [`docs/company-support-tracker.json`](docs/company-support-tracker.json) with what was found.
+| Profile | Companies | Covers |
+| --- | ---: | --- |
+| Semiconductor | 48 | Chipmakers, EDA and chip-IP employers across the US, Europe and the UK, for design verification, DFT, RTL and ASIC roles |
+| Data science | 51 | Data and AI employers and Portuguese job boards that hire in Portugal |
 
-The rest of the catalog is mostly Greenhouse (68), Ashby (35), Workday (30), Eightfold (8), Lever (6), and Oracle Recruiting (5) boards — Infineon, Texas Instruments, KLA, Lam Research, Renesas, Siemens, Synopsys, Cerebras, Tenstorrent and more.
+**Semiconductor:** AMD, Analog Devices, Apple, Arago, Arm, Arteris, Axiomise, Baya Systems, Broadcom, Cadence, Cirrus Logic, Cisco, Codasip, Dolphin Semiconductor, Ericsson, Fractile, GlobalFoundries, Google, Graphcore, Imagination Technologies, Infineon, Intel, Marvell, MediaTek, Microchip, Micron, Monolithic Power Systems, Nordic Semiconductor, NVIDIA, NXP, Olix, Openchip, Pragmatic Semiconductor, Prophesee, Qualcomm, Racyics, Rambus, Raspberry Pi, Renesas, Riverlane, Semidynamics, Siemens, SiPearl, SK hynix, STMicroelectronics, Synopsys, Tenstorrent, u-blox.
+
+**Data science:** Accenture (Portugal), act digital, Air Apps, Airbus (Portugal), Axians Portugal, BearingPoint Portugal, Bitsight (Portugal), Bosch (Portugal), Celfocus, Critical Software, DataCamp, DBServices Portugal, Devoteam, Emma Sleep, Farfetch (Ashby), Farfetch (Lever), Feedzai, Finom, Flix, GoCardless, Hiire, IG&H Portugal, iLoF, Indicium AI, Inetum, Intermedia, IQVIA (Portugal), ITJobs.pt - AI, Landing.jobs - Artificial Intelligence, Landing.jobs - Data, Landing.jobs - Machine Learning, Loka, Mercedes-Benz.io, Metyis, MobiLab Solutions, Natixis in Portugal, OLX, PagerDuty, Santander (Portugal), SIXT (Portugal), Smartex.ai, Superhuman, Sword Health, Talkdesk, TEKEVER, Thorit, TransPerfect (Unbabel), Ubiwhere, Veeva Systems, Volkswagen Digital Solutions, Zego.
+
+Adding a profile means giving each company a `profiles` entry in the catalog and listing the profile at the top of `company-catalog.json`; `scripts/set-profile.mjs` edits the membership and bumps the catalog version.
+
+The rest of the catalog is mostly Greenhouse (76), Ashby (40), Workday (35), Eightfold (8), Lever (13) and Oracle Recruiting (5) boards.
 
 ### Adapter coverage beyond the catalog
 

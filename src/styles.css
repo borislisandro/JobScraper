@@ -500,3 +500,10 @@ main.splash p{margin:0;font-size:13px;color:var(--n500)}
 .new-since .on{color:var(--fg);border-bottom:1px solid var(--accent)}
 .row-actions .quiet{color:var(--n500)}
 .row-actions .quiet:hover{color:var(--n200)}
+
+/* Profile switcher at the top of the Sources page. */
+.profile-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet)}
+.profile-bar label{display:flex;align-items:center;gap:10px;margin:0}
+.profile-bar label>span{font-weight:600}
+.profile-bar select{min-width:260px}
+.profile-bar .hint{flex:1 1 280px;margin:0}

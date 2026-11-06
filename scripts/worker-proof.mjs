@@ -22,7 +22,7 @@ const sample=job=>({externalId:job.externalId,title:job.title,company:job.compan
 const httpUrl=value=>{try{return["http:","https:"].includes(new URL(value).protocol)}catch{return false}};
 export async function proveSource(source,{full=false,timeoutMs=600_000}={}){
  // Candidate files may carry convenient development flags. They are forbidden in evidence.
- // robots enforcement is deliberately NOT one of them: install_starter_pack seeds every catalog
+ // robots enforcement is deliberately NOT one of them: the catalog seeding (db.rs sync_catalog_company) gives every catalog
  // source with robots_override=1, so a proof that ran with enforcement on would be certifying a
  // stricter run than the app actually performs. The URL guard and normal pacing stay required —
  // those are the SSRF defence and the politeness the boards actually feel.

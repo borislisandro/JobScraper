@@ -8,7 +8,7 @@ const url=new URL("../sidecar/company-catalog.json",import.meta.url),catalog=JSO
 if(!catalog.profiles.some(entry=>entry.id===profile))throw Error(`Unknown profile ${profile}; known: ${catalog.profiles.map(entry=>entry.id).join(", ")}`);
 for(const name of names){const company=catalog.companies.find(entry=>entry.name===name);if(!company)throw Error(`Not in the catalog: ${name}`);
  if(company.kind!=="active")throw Error(`${name} is not an active board`);
- const next=new Set(company.profiles||[]);remove?next.delete(profile):next.add(profile);
+ const next=new Set(company.profiles||[]);if(remove)next.delete(profile);else next.add(profile);
  if(next.size)company.profiles=[...next];else delete company.profiles}
 if(version)catalog.version=version;
 writeFileSync(url,JSON.stringify(catalog,null,1)+"\n");

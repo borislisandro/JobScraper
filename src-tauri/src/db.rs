@@ -1017,16 +1017,15 @@ impl Database {
         );
         let t = now();
         if create {
-        sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,1,0,?,?)")
+            sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?,0,?,?,1,0,?,?)")
 .bind(source_id).bind(name).bind(url).bind(adapter).bind("1.1.0").bind(kind).bind(None::<&str>).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
         }
         let mut config = serde_json::json!({"schemaVersion":"1.1.0","starterPackVersion":starter_pack_version(),"adapterVersion":"1.1.0","mode":"direct"});
-        if let (Some(base), Some(extra)) = (config.as_object_mut(), company.config.as_object())
-        {
+        if let (Some(base), Some(extra)) = (config.as_object_mut(), company.config.as_object()) {
             base.extend(extra.clone());
         }
         if create {
-        sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
+            sqlx::query("INSERT OR IGNORE INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?)")
             .bind(id()).bind(source_id).bind(config.to_string()).bind(&t).bind(&t).execute(&self.pool).await.map_err(|e| e.to_string())?;
         }
         // INSERT OR IGNORE cannot fix a row an earlier version already wrote, so the fields the
@@ -2049,9 +2048,17 @@ async fn read_managed(pool: &SqlitePool) -> ApiResult<std::collections::BTreeSet
         .into_iter()
         .collect())
 }
-async fn write_managed(pool: &SqlitePool, managed: &std::collections::BTreeSet<String>) -> ApiResult<()> {
+async fn write_managed(
+    pool: &SqlitePool,
+    managed: &std::collections::BTreeSet<String>,
+) -> ApiResult<()> {
     let ids: Vec<&String> = managed.iter().collect();
-    write_setting(pool, PROFILE_MANAGED, &serde_json::to_string(&ids).map_err(|e| e.to_string())?).await
+    write_setting(
+        pool,
+        PROFILE_MANAGED,
+        &serde_json::to_string(&ids).map_err(|e| e.to_string())?,
+    )
+    .await
 }
 /// The user took this source over (switched it by hand): profile changes leave it alone from now on.
 async fn forget_managed(pool: &SqlitePool, source_id: &str) -> ApiResult<()> {
@@ -2120,8 +2127,10 @@ impl Database {
             }
             None => Vec::new(),
         };
-        let wanted: std::collections::BTreeSet<&str> =
-            companies.iter().map(|company| company.id.as_str()).collect();
+        let wanted: std::collections::BTreeSet<&str> = companies
+            .iter()
+            .map(|company| company.id.as_str())
+            .collect();
         let mut managed = read_managed(&self.pool).await?;
         let mut applied = ProfileApplied {
             profile: profile_id.map(str::to_string),
@@ -2150,8 +2159,12 @@ impl Database {
                 applied.already_following += 1;
                 continue;
             }
-            let was_live: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources WHERE id=? AND deleted_at IS NULL")
-                .bind(company.id.as_str()).fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            let was_live: Option<i64> =
+                sqlx::query_scalar("SELECT 1 FROM sources WHERE id=? AND deleted_at IS NULL")
+                    .bind(company.id.as_str())
+                    .fetch_optional(&self.pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
             self.sync_catalog_company(company, true).await?;
             // Choosing a profile is a decision made now, so it outranks a board that was switched off or removed
             // earlier: that board comes back.
@@ -2177,7 +2190,11 @@ impl Database {
         match profile_id {
             Some(id) => write_setting(&self.pool, PROFILE_ACTIVE, id).await?,
             None => {
-                sqlx::query("DELETE FROM settings WHERE key=?").bind(PROFILE_ACTIVE).execute(&self.pool).await.map_err(|e| e.to_string())?;
+                sqlx::query("DELETE FROM settings WHERE key=?")
+                    .bind(PROFILE_ACTIVE)
+                    .execute(&self.pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
             }
         }
         log(
@@ -2206,7 +2223,10 @@ impl Database {
             .filter(|id| catalog.profiles.iter().any(|profile| &profile.id == id));
         let mut profiles = Vec::new();
         for profile in &catalog.profiles {
-            let ids: Vec<&str> = profile_companies(&profile.id).iter().map(|company| company.id.as_str()).collect();
+            let ids: Vec<&str> = profile_companies(&profile.id)
+                .iter()
+                .map(|company| company.id.as_str())
+                .collect();
             let on: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL AND id IN (SELECT value FROM json_each(?))")
                 .bind(serde_json::to_string(&ids).map_err(|e| e.to_string())?)
                 .fetch_one(&self.pool).await.map_err(|e| e.to_string())?;
@@ -5766,7 +5786,10 @@ mod matching_persistence_tests {
         sqlx::query_scalar(sql).fetch_one(&db.pool).await.unwrap()
     }
     fn profile_ids(profile: &str) -> Vec<String> {
-        profile_companies(profile).iter().map(|company| company.id.clone()).collect()
+        profile_companies(profile)
+            .iter()
+            .map(|company| company.id.clone())
+            .collect()
     }
     // A new install has nothing in it: the old starter pack put dozens of employers on screen before the
     // person had said what they were looking for.
@@ -5777,9 +5800,16 @@ mod matching_persistence_tests {
         assert_eq!(count(&db, "SELECT count(*) FROM sources").await, 0);
         let state = db.profiles_state().await.unwrap();
         assert_eq!(state.active, None);
-        let ids: Vec<&str> = state.profiles.iter().map(|profile| profile.id.as_str()).collect();
+        let ids: Vec<&str> = state
+            .profiles
+            .iter()
+            .map(|profile| profile.id.as_str())
+            .collect();
         assert_eq!(ids, ["semiconductor", "data-science"]);
-        assert!(state.profiles.iter().all(|profile| profile.companies > 10 && profile.on == 0));
+        assert!(state
+            .profiles
+            .iter()
+            .all(|profile| profile.companies > 10 && profile.on == 0));
         db.pool.close().await;
     }
     #[tokio::test]
@@ -5789,21 +5819,59 @@ mod matching_persistence_tests {
         let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
         assert_eq!(applied.profile.as_deref(), Some("semiconductor"));
         assert_eq!(applied.added as usize, wanted.len());
-        assert_eq!((applied.switched_on, applied.switched_off, applied.already_following), (0, 0, 0));
+        assert_eq!(
+            (
+                applied.switched_on,
+                applied.switched_off,
+                applied.already_following
+            ),
+            (0, 0, 0)
+        );
         let mut read_now = applied.read_now.clone();
         read_now.sort();
         let mut expected = wanted.clone();
         expected.sort();
-        assert_eq!(read_now, expected, "every new company is read straight away");
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL").await as usize, wanted.len());
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE disabled_reason IS NOT NULL").await, 0);
+        assert_eq!(
+            read_now, expected,
+            "every new company is read straight away"
+        );
+        assert_eq!(
+            count(
+                &db,
+                "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL"
+            )
+            .await as usize,
+            wanted.len()
+        );
+        assert_eq!(
+            count(
+                &db,
+                "SELECT count(*) FROM sources WHERE disabled_reason IS NOT NULL"
+            )
+            .await,
+            0
+        );
         let state = db.profiles_state().await.unwrap();
         assert_eq!(state.active.as_deref(), Some("semiconductor"));
-        let semiconductor = state.profiles.iter().find(|profile| profile.id == "semiconductor").unwrap();
-        let data_science = state.profiles.iter().find(|profile| profile.id == "data-science").unwrap();
-        assert_eq!((semiconductor.on as usize, data_science.on), (wanted.len(), 0));
+        let semiconductor = state
+            .profiles
+            .iter()
+            .find(|profile| profile.id == "semiconductor")
+            .unwrap();
+        let data_science = state
+            .profiles
+            .iter()
+            .find(|profile| profile.id == "data-science")
+            .unwrap();
+        assert_eq!(
+            (semiconductor.on as usize, data_science.on),
+            (wanted.len(), 0)
+        );
         // Companies the profile has never heard of are not in it.
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE name='Anthropic'").await, 0);
+        assert_eq!(
+            count(&db, "SELECT count(*) FROM sources WHERE name='Anthropic'").await,
+            0
+        );
         db.pool.close().await;
     }
     #[tokio::test]
@@ -5822,16 +5890,36 @@ mod matching_persistence_tests {
         assert_eq!(applied.added as usize, data_science.len());
         assert_eq!(applied.switched_off as usize, semiconductor.len() - 1);
         for id in &semiconductor {
-            let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id=?").bind(id).fetch_one(&db.pool).await.unwrap();
+            let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id=?")
+                .bind(id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
             assert_eq!(enabled, i64::from(*id == kept), "{id}");
         }
-        assert_eq!(count(&db, "SELECT enabled FROM sources WHERE id='mine'").await, 1);
+        assert_eq!(
+            count(&db, "SELECT enabled FROM sources WHERE id='mine'").await,
+            1
+        );
         // Switched off is not removed: the sources and their stored jobs are all still there.
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize, semiconductor.len() + data_science.len() + 1);
+        assert_eq!(
+            count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize,
+            semiconductor.len() + data_science.len() + 1
+        );
         // Going back brings the first set back without adding anything twice.
         let back = db.apply_profile(Some("semiconductor")).await.unwrap();
-        assert_eq!((back.added, back.switched_on as usize, back.switched_off as usize), (0, semiconductor.len() - 1, data_science.len()));
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize, semiconductor.len() + data_science.len() + 1);
+        assert_eq!(
+            (
+                back.added,
+                back.switched_on as usize,
+                back.switched_off as usize
+            ),
+            (0, semiconductor.len() - 1, data_science.len())
+        );
+        assert_eq!(
+            count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize,
+            semiconductor.len() + data_science.len() + 1
+        );
         db.pool.close().await;
     }
     #[tokio::test]
@@ -5839,11 +5927,22 @@ mod matching_persistence_tests {
         let db = fresh_database("again").await;
         let wanted = profile_ids("data-science");
         db.apply_profile(Some("data-science")).await.unwrap();
-        sqlx::query("UPDATE sources SET last_success_at='2026-11-07T00:00:00Z' WHERE id<>?").bind(&wanted[0]).execute(&db.pool).await.unwrap();
+        sqlx::query("UPDATE sources SET last_success_at='2026-11-07T00:00:00Z' WHERE id<>?")
+            .bind(&wanted[0])
+            .execute(&db.pool)
+            .await
+            .unwrap();
         let again = db.apply_profile(Some("data-science")).await.unwrap();
-        assert_eq!((again.added, again.switched_on, again.switched_off), (0, 0, 0));
+        assert_eq!(
+            (again.added, again.switched_on, again.switched_off),
+            (0, 0, 0)
+        );
         assert_eq!(again.already_following as usize, wanted.len());
-        assert_eq!(again.read_now, vec![wanted[0].clone()], "only the board that was never read is read again");
+        assert_eq!(
+            again.read_now,
+            vec![wanted[0].clone()],
+            "only the board that was never read is read again"
+        );
         db.pool.close().await;
     }
     #[tokio::test]
@@ -5851,12 +5950,27 @@ mod matching_persistence_tests {
         let db = fresh_database("revive").await;
         let wanted = profile_ids("semiconductor");
         db.apply_profile(Some("semiconductor")).await.unwrap();
-        sqlx::query("UPDATE sources SET enabled=0 WHERE id=?").bind(&wanted[0]).execute(&db.pool).await.unwrap();
-        sqlx::query("UPDATE sources SET deleted_at='2026-11-01T00:00:00Z',enabled=0 WHERE id=?").bind(&wanted[1]).execute(&db.pool).await.unwrap();
+        sqlx::query("UPDATE sources SET enabled=0 WHERE id=?")
+            .bind(&wanted[0])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("UPDATE sources SET deleted_at='2026-11-01T00:00:00Z',enabled=0 WHERE id=?")
+            .bind(&wanted[1])
+            .execute(&db.pool)
+            .await
+            .unwrap();
         let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
         assert_eq!(applied.switched_on, 1);
         assert_eq!(applied.added, 1, "a removed board counts as added back");
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL").await as usize, wanted.len());
+        assert_eq!(
+            count(
+                &db,
+                "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL"
+            )
+            .await as usize,
+            wanted.len()
+        );
         db.pool.close().await;
     }
     #[tokio::test]
@@ -5865,10 +5979,19 @@ mod matching_persistence_tests {
         db.apply_profile(Some("semiconductor")).await.unwrap();
         let before = count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await;
         let cleared = db.apply_profile(None).await.unwrap();
-        assert_eq!((cleared.profile, cleared.added, cleared.switched_off), (None, 0, 0));
+        assert_eq!(
+            (cleared.profile, cleared.added, cleared.switched_off),
+            (None, 0, 0)
+        );
         assert_eq!(db.profiles_state().await.unwrap().active, None);
-        assert_eq!(count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await, before);
-        assert!(db.apply_profile(Some("astronaut")).await.is_err(), "a profile that does not exist is refused");
+        assert_eq!(
+            count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await,
+            before
+        );
+        assert!(
+            db.apply_profile(Some("astronaut")).await.is_err(),
+            "a profile that does not exist is refused"
+        );
         db.pool.close().await;
     }
     // Reconciliation keeps rows an earlier version created in step with the catalog, and clears the
@@ -5876,16 +5999,30 @@ mod matching_persistence_tests {
     #[tokio::test]
     async fn reconciling_only_repairs_existing_rows_and_clears_the_old_disabled_note() {
         let db = fresh_database("reconcile").await;
-        let cadence = profile_companies("semiconductor").into_iter().find(|company| company.name == "Cadence").unwrap();
+        let cadence = profile_companies("semiconductor")
+            .into_iter()
+            .find(|company| company.name == "Cadence")
+            .unwrap();
         sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Cadence old name','https://old.example.test/','workday','1.1.0',0,'active','Starter source is disabled until you review and enable it.',1,0,'t','t')")
             .bind(&cadence.id).execute(&db.pool).await.unwrap();
         sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES('c1',?,'{\"starterPackVersion\":\"old\"}','t','t')")
             .bind(&cadence.id).execute(&db.pool).await.unwrap();
         db.reconcile_catalog_sources().await.unwrap();
-        let (name, url, reason): (String, String, Option<String>) = sqlx::query_as("SELECT name,base_url,disabled_reason FROM sources WHERE id=?")
-            .bind(&cadence.id).fetch_one(&db.pool).await.unwrap();
-        assert_eq!((name.as_str(), url.as_str(), reason), ("Cadence", cadence.base_url.as_str(), None));
-        assert_eq!(count(&db, "SELECT count(*) FROM sources").await, 1, "nothing else is created");
+        let (name, url, reason): (String, String, Option<String>) =
+            sqlx::query_as("SELECT name,base_url,disabled_reason FROM sources WHERE id=?")
+                .bind(&cadence.id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(
+            (name.as_str(), url.as_str(), reason),
+            ("Cadence", cadence.base_url.as_str(), None)
+        );
+        assert_eq!(
+            count(&db, "SELECT count(*) FROM sources").await,
+            1,
+            "nothing else is created"
+        );
         db.pool.close().await;
     }
     // Adding a company from the picker gives it a generated ID, so when a profile later includes that
@@ -5906,15 +6043,36 @@ mod matching_persistence_tests {
                 .bind(format!("config-{source}")).bind(source).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
         }
         let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
-        assert_eq!(applied.already_following, 1, "their own copy counts as followed");
+        assert_eq!(
+            applied.already_following, 1,
+            "their own copy counts as followed"
+        );
         let live_copies = count(&db, &format!("SELECT count(*) FROM sources WHERE base_url='{}' AND adapter_id='{}' AND deleted_at IS NULL", kept.base_url, kept.adapter_id)).await;
-        assert_eq!(live_copies, 1, "the user's copy is the only copy of that board");
-        let seeded: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=?").bind(&kept.id).fetch_one(&db.pool).await.unwrap();
+        assert_eq!(
+            live_copies, 1,
+            "the user's copy is the only copy of that board"
+        );
+        let seeded: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=?")
+            .bind(&kept.id)
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
         assert_eq!(seeded, 0, "the catalog row is not seeded beside it");
-        let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id='user-copy'").fetch_one(&db.pool).await.unwrap();
+        let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id='user-copy'")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
         assert_eq!(enabled, 1, "the user's copy is left exactly as they had it");
-        let revived: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=? AND deleted_at IS NULL").bind(&deleted.id).fetch_one(&db.pool).await.unwrap();
-        assert_eq!(revived, 1, "a copy the user deleted does not block the profile");
+        let revived: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=? AND deleted_at IS NULL")
+                .bind(&deleted.id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(
+            revived, 1,
+            "a copy the user deleted does not block the profile"
+        );
         db.pool.close().await;
     }
 
