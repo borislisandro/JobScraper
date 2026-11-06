@@ -405,7 +405,7 @@ async function smartRecruiters(site,context){
  const {request,maxPages}=context,token=encodeURIComponent(site.smartRecruitersToken),jobs=[],ids=new Set();
  let offset=0,pages=0,total=null,unstable=false;
  do{
-  const data=await json(request,`https://api.smartrecruiters.com/v1/companies/${token}/postings?limit=100&offset=${offset}`);
+  const data=await json(request,`https://api.smartrecruiters.com/v1/companies/${token}/postings?limit=100&offset=${offset}${site.smartRecruitersCountry?`&country=${encodeURIComponent(site.smartRecruitersCountry)}`:""}`);
   if(!Number.isInteger(data.totalFound)||data.totalFound<0||data.offset!==offset)throw Error("parse_error: SmartRecruiters pagination is missing or repeated");
   if(total!==null&&total!==data.totalFound)unstable=true;
   total=data.totalFound;
