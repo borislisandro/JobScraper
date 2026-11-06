@@ -15,7 +15,7 @@ test("every catalog company has a supported, fully configured request",()=>{
  assert.ok(catalog.companies.length>=134,"the original catalog must remain available as new boards are added");
  assert.equal(new Set(catalog.companies.map(company=>company.id)).size,catalog.companies.length,"catalog IDs must stay unique");
  assert.equal(new Set(catalog.companies.map(company=>company.baseUrl)).size,catalog.companies.length,"catalog boards must stay unique");
- assert.equal(catalog.companies.filter(company=>company.starter).length,21);
+ assert.equal(catalog.companies.filter(company=>company.starter).length,49);
  for(const company of catalog.companies){
   if(company.kind==="reference"){assert.equal(company.adapterId,"reference");assert.equal(company.starter,true);continue}
   assert.ok(adapters[company.adapterId]&&!adapters[company.adapterId].unsupported,`${company.name}: unsupported adapter`);
@@ -63,7 +63,7 @@ test("expansion entries have a full live proof matching their shipped configurat
 });
 
 test("every seeded starter source builds a request or throws a declared incomplete",()=>{
- assert.equal(fixture.length,21,"starter pack should still seed all 21 sources");
+ assert.equal(fixture.length,49,"starter pack should still seed all 49 sources");
  for(const s of fixture){
   const a=adapters[s.adapterId];
   // Company adapters build their own URLs instead of going through requestFor(), so the
@@ -74,6 +74,9 @@ test("every seeded starter source builds a request or throws a declared incomple
   // that is the "disabled with an accurate reason" outcome for the five custom-api
   // sources and the one reference-only source, not a silent wrong URL.
   if(!a||a.unsupported){assert.ok(!a||a.unsupported,`${s.name}: adapter ${s.adapterId} should be a known, declared-unsupported adapter`);continue}
+  // The generic json/rss/css adapters fetch the seeded base URL itself and have no platform request to build; the https check
+  // on the catalog entry already covers them. Only the platform families that derive a request from their settings are built here.
+  if(!a.capabilities.includes("direct-json"))continue;
   try{const built=requestFor(s.adapterId,s.baseUrl,s.configJson);assert.ok(built.url,`${s.name}: requestFor produced no url`)}
   catch(e){assert.match(String(e.message||e),/^incomplete/,`${s.name}: requestFor threw an undeclared error: ${e.message||e}`)}
  }

@@ -18,7 +18,9 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 
 ## Supported sites
 
-164 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json) — browse and enable them from the Sources page. Fresh installs enable only the 21 starters below.
+190 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json) — browse and enable them from the Sources page. Fresh installs seed only the semiconductor starter list below (49 entries), and every one of them starts switched off until you enable it or accept the installer's opt-in.
+
+**Original starters**
 
 | Employer | Careers site | Adapter |
 | --- | --- | --- |
@@ -44,11 +46,46 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 | u-blox | `u-blox.com/en/job-openings` | Algolia API |
 | SK hynix | `talent.skhynix.com` | SK Careers + Greenhouse |
 
-The rest of the catalog is mostly Greenhouse (65), Ashby (32), Workday (28), Eightfold (8), Lever (6), and Oracle Recruiting (5) boards — Infineon, Texas Instruments, KLA, Lam Research, Renesas, Siemens, Synopsys, Cerebras, Tenstorrent and more.
+**Added to the default list for design-verification, DFT and RTL roles** (chosen from live counts of those titles in Portugal, Spain, France, the Netherlands, Ireland, Austria, Germany, the UK and Switzerland)
+
+| Employer | Careers site | Adapter |
+| --- | --- | --- |
+| Synopsys | `careers.synopsys.com` | Employer-specific |
+| Infineon | `jobs.infineon.com` | Eightfold |
+| Graphcore | `job-boards.greenhouse.io` | Greenhouse |
+| Cirrus Logic | `jobs.eu.lever.co` | Lever |
+| Tenstorrent | `job-boards.greenhouse.io` | Greenhouse |
+| Siemens | `jobs.sw.siemens.com` | Employer-specific |
+| Monolithic Power Systems | `monolithicpower.wd12.myworkdayjobs.com` | Workday |
+| Rambus | `careers-rambus.icims.com` | Employer-specific |
+| Imagination Technologies | `careers.pageuppeople.com` | Public JSON API |
+| Renesas | `jobs.renesas.com` | Employer-specific |
+| Nordic Semiconductor | `careers.nordicsemi.com` | Teamtailor JSON feed |
+| SiPearl | `careers.sipearl.com` | Teamtailor JSON feed |
+| Cadence | `cadence.wd1.myworkdayjobs.com` | Workday |
+| Semidynamics | `careers.semidynamics.com` | Teamtailor JSON feed |
+| Fractile | `jobs.ashbyhq.com` | Ashby |
+| Arago | `jobs.ashbyhq.com` | Ashby |
+| Baya Systems | `job-boards.greenhouse.io` | Greenhouse |
+| Riverlane | `job-boards.greenhouse.io` | Greenhouse |
+| Olix | `jobs.ashbyhq.com` | Ashby |
+| Pragmatic Semiconductor | `talent.pragmaticsemi.com` | Teamtailor JSON feed |
+| Dolphin Semiconductor | `careers.dolphin-semiconductor.com` | Teamtailor JSON feed |
+| Prophesee | `careers.prophesee.ai` | Teamtailor JSON feed |
+| Openchip | `openchip.factorialhr.com` | Employer-specific |
+| Codasip | `codasip.bamboohr.com` | BambooHR |
+| Raspberry Pi | `apply.workable.com` | Workable |
+| Axiomise | `axiomise.jobs.personio.de` | Personio |
+| Racyics | `racyics.de` | Employer-specific |
+| Arteris | `jobs.jobvite.com` | Employer-specific |
+
+Also in the catalog, not in the default list because their boards are mostly non-chip roles: IonQ, Teledyne, Philips, Bosch, CERN, plus CSEM, Elmos, Kalray, Quantum Motion, SEMRON and Universal Quantum. Employers whose careers sites cannot be read yet (onsemi, Melexis, imec, Rohde & Schwarz, ams OSRAM and others) are recorded as blocked in [`docs/company-support-tracker.json`](docs/company-support-tracker.json) with what was found.
+
+The rest of the catalog is mostly Greenhouse (68), Ashby (35), Workday (30), Eightfold (8), Lever (6), and Oracle Recruiting (5) boards — Infineon, Texas Instruments, KLA, Lam Research, Renesas, Siemens, Synopsys, Cerebras, Tenstorrent and more.
 
 ### Adapter coverage beyond the catalog
 
-Workday · Eightfold · Greenhouse · Ashby · Lever · Oracle Recruiting · iCIMS · TalentBrew/Jibe/Radancy · Phenom · RSS/Atom feeds · public JSON APIs (auto-discovered) · server-rendered HTML (inferred CSS selectors, or manual CSS/XPath) · JavaScript-rendered HTML via Playwright + Edge · authenticated boards via encrypted session capture.
+Workday · Eightfold · Greenhouse · Ashby · Lever · Workable · BambooHR · Personio · SmartRecruiters · Oracle Recruiting · iCIMS · TalentBrew/Jibe/Radancy · Phenom · RSS/Atom feeds · public JSON APIs (auto-discovered) · server-rendered HTML (inferred CSS selectors, or manual CSS/XPath) · JavaScript-rendered HTML via Playwright + Edge · authenticated boards via encrypted session capture.
 
 Adding a URL is verified, not optimistic: automatic setup saves an adapter only after a probe returns recognizable listing rows. Unsupported pages are reported rather than silently accepted.
 

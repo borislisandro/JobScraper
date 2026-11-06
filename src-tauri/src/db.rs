@@ -68,8 +68,8 @@ pub struct CatalogCompany {
     pub adapter_id: String,
     pub base_url: String,
     pub config: serde_json::Value,
-    /// Seeded into a fresh database (the twenty-one the pack has always installed). The rest are
-    /// offered in the app and added on request, so a new install does not open on 134 sources.
+    /// Seeded into a fresh database: the default semiconductor list (49 as of 2026-11-06.1). The rest are
+    /// offered in the app and added on request, so a new install does not open on every catalog source.
     #[serde(default)]
     pub starter: bool,
     #[serde(default = "active_kind")]
@@ -832,6 +832,17 @@ impl Database {
             .filter(|company| company.starter)
             .collect();
         for company in starters {
+            // A board the user already added from the picker has a generated ID, not this catalog ID,
+            // so seeding it again would put a second copy of the same board on the Sources tab and read
+            // it twice. Their copy stays exactly as they left it. Rows an older pack wrote carry a
+            // starter-pack version in their config and are not the user's: those are still reconciled
+            // (and the untouched legacy ones retired) below.
+            let user_copy: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources s WHERE s.id<>? AND s.deleted_at IS NULL AND s.base_url=? AND s.adapter_id=? AND NOT EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=s.id AND c.config_json LIKE '%starterPackVersion%') LIMIT 1")
+                .bind(company.id.as_str()).bind(company.base_url.as_str()).bind(company.adapter_id.as_str())
+                .fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
+            if user_copy.is_some() {
+                continue;
+            }
             let (source_id, name, url, adapter, kind) = (
                 company.id.as_str(),
                 company.name.as_str(),
@@ -5688,6 +5699,75 @@ mod matching_persistence_tests {
             "an unknown host is never reassigned"
         );
         assert_eq!(other_config["itemSelector"], "li");
+        db.pool.close().await;
+    }
+
+    // Adding a company from the picker gives it a generated ID, so when a later pack promotes that
+    // company to a starter the same board would otherwise exist twice and be read twice.
+    #[tokio::test]
+    async fn a_board_the_user_already_added_is_not_seeded_a_second_time() {
+        let root = std::env::temp_dir().join(format!("jobscraper-usercopy-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let stamp = "2026-10-01T00:00:00Z";
+        let starters: Vec<&CatalogCompany> = company_catalog()
+            .companies
+            .iter()
+            .filter(|company| company.starter && company.kind == "active")
+            .collect();
+        let (kept, deleted) = (starters[0], starters[1]);
+        for (source, company, deleted_at, enabled) in [
+            ("user-copy", kept, None, 1),
+            ("user-deleted", deleted, Some("2026-10-02T00:00:00Z"), 0),
+        ] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at,deleted_at) VALUES(?,?,?,?,'1.1.0',?,'active',1,0,?,?,?)")
+                .bind(source).bind(&company.name).bind(&company.base_url).bind(&company.adapter_id).bind(enabled).bind(stamp).bind(stamp).bind(deleted_at).execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,'{\"mode\":\"direct\"}',?,?)")
+                .bind(format!("config-{source}")).bind(source).bind(stamp).bind(stamp).execute(&db.pool).await.unwrap();
+        }
+        db.install_starter_pack().await.unwrap();
+        let live_copies: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM sources WHERE base_url=? AND adapter_id=? AND deleted_at IS NULL",
+        )
+        .bind(&kept.base_url)
+        .bind(&kept.adapter_id)
+        .fetch_one(&db.pool)
+        .await
+        .unwrap();
+        assert_eq!(
+            live_copies, 1,
+            "the user's copy is the only copy of that board"
+        );
+        let seeded: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=?")
+            .bind(&kept.id)
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(seeded, 0, "the catalog row is not seeded beside it");
+        let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id='user-copy'")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(enabled, 1, "the user's copy is left exactly as they had it");
+        let reseeded: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE id=? AND deleted_at IS NULL")
+                .bind(&deleted.id)
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert_eq!(
+            reseeded, 1,
+            "a copy the user deleted does not block the starter"
+        );
+        let others: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE id LIKE '00000000-%'")
+                .fetch_one(&db.pool)
+                .await
+                .unwrap();
+        assert!(
+            others >= 40,
+            "every other starter is still seeded, got {others}"
+        );
         db.pool.close().await;
     }
 

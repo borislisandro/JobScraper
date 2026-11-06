@@ -3,26 +3,28 @@
   "name": "Shield AI",
   "level": "full",
   "ok": true,
-  "startedAt": "2026-09-02T15:03:12.467Z",
-  "finishedAt": "2026-09-02T15:03:14.681Z",
+  "startedAt": "2026-11-06T20:01:53.485Z",
+  "finishedAt": "2026-11-06T20:02:13.842Z",
   "source": {
     "id": "shield-ai",
     "name": "Shield AI",
-    "baseUrl": "https://jobs.ashbyhq.com/shield-ai",
-    "adapterId": "ashby",
-    "kind": "active",
-    "robotsOverride": false,
-    "allowPrivateNetwork": false,
+    "baseUrl": "https://jobs.lever.co/shieldai",
+    "adapterId": "lever",
     "configJson": {
-      "token": "shield-ai",
+      "token": "shieldai",
       "maxPages": 500,
-      "expectedHost": "api.ashbyhq.com"
-    }
+      "expectedHost": "api.lever.co"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
   },
   "codeHashes": {
-    "worker.mjs": "5c9db9c2a75c1e437516b136cb2586357a6a5cf567fbbf158bd844895ea64c0c",
-    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
-    "company-adapters.mjs": "fc1e54e3966aaf8b8428859c56ca56c3380a1e885f0e385ad35317b9a1a24f5d"
+    "worker.mjs": "f0ff28dc1b8666effa57a906460f92252a72b410d9127521c98b171d5695e56b",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "294e74ef25ebdfb8fc6a03d835e8a10c09f5e22da2c2f7ecff5b71fffb5965e5",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
   },
   "listing": {
     "terminal": {
@@ -32,46 +34,46 @@
       "payload": {
         "command": "scrape_source",
         "complete": true,
-        "discovered": 445,
-        "persisted": 445,
+        "discovered": 662,
+        "persisted": 662,
         "skipped": 0,
         "filtered": 0,
-        "requests": 3,
-        "boardTotal": 445,
-        "boardTotalExact": true,
+        "requests": 7,
+        "boardTotal": null,
+        "boardTotalExact": false,
         "mode": "direct-platform",
         "warnings": [],
-        "timingMs": 1250,
-        "pages": 1,
+        "timingMs": 17867,
+        "pages": 7,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 1251,
+            "totalMs": 17867,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 14,
-              "pacing": 239,
+              "urlGuard": 18,
+              "pacing": 0,
               "backoff": 0,
-              "response": 818,
-              "body": 60,
+              "response": 14552,
+              "body": 3046,
               "browser": 0,
-              "adapterOther": 70,
-              "emit": 48
+              "adapterOther": 171,
+              "emit": 78
             },
             "requestsByKind": {
               "robots": {
-                "count": 2,
+                "count": 0,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 472,
-                "bodyMs": 4
+                "responseMs": 0,
+                "bodyMs": 0
               },
               "listing": {
-                "count": 1,
-                "pacingMs": 239,
+                "count": 7,
+                "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 346,
-                "bodyMs": 56
+                "responseMs": 14552,
+                "bodyMs": 3046
               },
               "detail": {
                 "count": 0,
@@ -108,48 +110,48 @@
         }
       }
     },
-    "jobs": 445,
-    "uniqueIdentities": 445,
-    "uniqueHashes": 445,
+    "jobs": 662,
+    "uniqueIdentities": 662,
+    "uniqueHashes": 662,
     "samples": [
       {
-        "externalId": "c37a86ed-37bf-4b14-9a09-60bdc9c49ffb",
-        "title": "Mission Systems Software Engineer - BlueSky (R5199)",
+        "externalId": "ba945088-38ec-4e58-8f66-01c0497a3bd3",
+        "title": "Administrative Assistant (6189)",
+        "company": "Shield AI",
+        "location": "Abu Dhabi",
+        "postedAt": "2026-10-15",
+        "canonicalUrl": "https://jobs.lever.co/shieldai/ba945088-38ec-4e58-8f66-01c0497a3bd3",
+        "applyUrl": "https://jobs.lever.co/shieldai/ba945088-38ec-4e58-8f66-01c0497a3bd3",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4279
+      },
+      {
+        "externalId": "00e419e1-cd8b-47c3-9c82-40b07d51bf87",
+        "title": "Senior Propulsion Test Engineer (R4639)",
         "company": "Shield AI",
         "location": "Seattle, Washington",
-        "postedAt": "2026-08-27",
-        "canonicalUrl": "https://jobs.ashbyhq.com/shield-ai/c37a86ed-37bf-4b14-9a09-60bdc9c49ffb",
-        "applyUrl": "https://jobs.ashbyhq.com/shield-ai/c37a86ed-37bf-4b14-9a09-60bdc9c49ffb",
+        "postedAt": "2026-03-16",
+        "canonicalUrl": "https://jobs.lever.co/shieldai/00e419e1-cd8b-47c3-9c82-40b07d51bf87",
+        "applyUrl": "https://jobs.lever.co/shieldai/00e419e1-cd8b-47c3-9c82-40b07d51bf87",
         "descriptionStatus": "complete",
-        "descriptionChars": 7684
+        "descriptionChars": 4515
       },
       {
-        "externalId": "6d47a056-8e71-4ffc-80d1-2ac8206325f1",
-        "title": "Software Engineer II, Autonomy Behaviors (R5202)",
+        "externalId": "a4ca6614-e302-48f9-800c-fc9903ea5b5a",
+        "title": "X-BAT Business Development Director, Middle East (R4949)",
         "company": "Shield AI",
-        "location": "Boston, MA",
-        "postedAt": "2026-09-01",
-        "canonicalUrl": "https://jobs.ashbyhq.com/shield-ai/6d47a056-8e71-4ffc-80d1-2ac8206325f1",
-        "applyUrl": "https://jobs.ashbyhq.com/shield-ai/6d47a056-8e71-4ffc-80d1-2ac8206325f1",
+        "location": "Abu Dhabi",
+        "postedAt": "2026-05-19",
+        "canonicalUrl": "https://jobs.lever.co/shieldai/a4ca6614-e302-48f9-800c-fc9903ea5b5a",
+        "applyUrl": "https://jobs.lever.co/shieldai/a4ca6614-e302-48f9-800c-fc9903ea5b5a",
         "descriptionStatus": "complete",
-        "descriptionChars": 6422
-      },
-      {
-        "externalId": "2ca49848-af0f-441b-94a0-fd4dfb85d34f",
-        "title": "Reliability Analyst (R5728)",
-        "company": "Shield AI",
-        "location": "Dallas, Texas",
-        "postedAt": "2026-09-02",
-        "canonicalUrl": "https://jobs.ashbyhq.com/shield-ai/2ca49848-af0f-441b-94a0-fd4dfb85d34f",
-        "applyUrl": "https://jobs.ashbyhq.com/shield-ai/2ca49848-af0f-441b-94a0-fd4dfb85d34f",
-        "descriptionStatus": "complete",
-        "descriptionChars": 8596
+        "descriptionChars": 3937
       }
     ],
     "warnings": [
       {
-        "code": "host_drift",
-        "message": "Responses now come from jobs.ashbyhq.com, not the configured expectedHost api.ashbyhq.com."
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
       }
     ]
   },
@@ -162,44 +164,44 @@
       "payload": {
         "complete": true,
         "mode": "check",
-        "boardTotal": 445,
-        "boardTotalExact": true,
+        "boardTotal": null,
+        "boardTotalExact": false,
         "fresh": 0,
-        "discovered": 445,
-        "requests": 3,
-        "skipped": 445,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
         "filtered": 0,
         "warnings": [],
-        "timingMs": 776,
+        "timingMs": 2087,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 777,
+            "totalMs": 2087,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 10,
-              "pacing": 145,
+              "urlGuard": 7,
+              "pacing": 0,
               "backoff": 0,
-              "response": 454,
-              "body": 139,
+              "response": 1006,
+              "body": 1057,
               "browser": 0,
-              "adapterOther": 27,
+              "adapterOther": 16,
               "emit": 0
             },
             "requestsByKind": {
               "robots": {
-                "count": 2,
+                "count": 0,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 410,
-                "bodyMs": 3
+                "responseMs": 0,
+                "bodyMs": 0
               },
               "listing": {
                 "count": 1,
-                "pacingMs": 145,
+                "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 44,
-                "bodyMs": 136
+                "responseMs": 1006,
+                "bodyMs": 1057
               },
               "detail": {
                 "count": 0,

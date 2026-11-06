@@ -105,7 +105,8 @@ const asmlPage=(offset,total,ids)=>({widgets:[{rfk_id:"asml_job_search",offset,t
 test("ASML traverses the published Sitecore widget and keeps inline descriptions and stable IDs",async()=>{
  const offsets=[];
  const result=await scrapeCompany("asml",{maxPages:3,request:async(url,options)=>{
-  assert.equal(url,"https://discover-euc1.sitecorecloud.io/discover/v2/126200477");
+  if(url==="https://www.asml.com/api/search-token")return{text:JSON.stringify({accessToken:"token-1"})};
+  assert.equal(url,"https://discover-euc1.sitecorecloud.io/discover/v2/126200477");assert.equal(options.headers.authorization,"Bearer token-1");
   const search=options.body.widget.items[0].search;offsets.push(search.offset);assert.equal(search.limit,100);
   return{text:JSON.stringify(search.offset===0?asmlPage(0,3,["J-1","J-2"]):asmlPage(2,3,["J-3"]))};}});
  assert.deepEqual(offsets,[0,2]);assert.equal(result.complete,true);assert.equal(result.total,3);
@@ -113,9 +114,10 @@ test("ASML traverses the published Sitecore widget and keeps inline descriptions
  assert.equal(result.jobs[0].descriptionHtml,"<p>Design lithography systems.</p>");
 });
 test("ASML capped, early-empty and changing-total reads cannot report completion",async()=>{
- const capped=await scrape("asml",{"/discover/v2/":asmlPage(0,3,["J-1"])});assert.equal(capped.complete,false);
+ const capped=await scrape("asml",{"/api/search-token":{accessToken:"t"},"/discover/v2/":asmlPage(0,3,["J-1"])});assert.equal(capped.complete,false);
  for(const changing of[false,true]){
-  const result=await scrapeCompany("asml",{request:async(_url,options)=>{
+  const result=await scrapeCompany("asml",{request:async(url,options)=>{
+   if(url.endsWith("/api/search-token"))return{text:JSON.stringify({accessToken:"t"})};
    const offset=options.body.widget.items[0].search.offset;
    return{text:JSON.stringify(offset===0?asmlPage(0,3,["J-1"]):asmlPage(offset,changing?2:3,changing?["J-2"]:[]))};}});
   assert.equal(result.complete,false);if(changing)assert.equal(result.totalExact,false);
@@ -123,9 +125,10 @@ test("ASML capped, early-empty and changing-total reads cannot report completion
 });
 test("ASML rejects repeated pages, invalid totals, non-job records and search errors",async()=>{
  for(const alter of[page=>delete page.widgets[0].total_item,page=>page.widgets[0].content[0].type="editorial",page=>page.widgets[0].errors=[{type:"invalid_query"}]]){
-  const page=asmlPage(0,1,["J-1"]);alter(page);await assert.rejects(scrape("asml",{"/discover/v2/":page}),/parse_error/);
+  const page=asmlPage(0,1,["J-1"]);alter(page);await assert.rejects(scrape("asml",{"/api/search-token":{accessToken:"t"},"/discover/v2/":page}),/parse_error/);
  }
- for(const repeatOffset of[false,true])await assert.rejects(scrapeCompany("asml",{request:async(_url,options)=>{
+ for(const repeatOffset of[false,true])await assert.rejects(scrapeCompany("asml",{request:async(url,options)=>{
+  if(url.endsWith("/api/search-token"))return{text:JSON.stringify({accessToken:"t"})};
   const offset=options.body.widget.items[0].search.offset;
   return{text:JSON.stringify(asmlPage(repeatOffset?0:offset,2,["J-1"]))};}}),/parse_error/);
 });
@@ -422,4 +425,16 @@ test("Arteris reads Jobvite's plain board, hides location counts and names every
  assert.equal(verification.url,"https://jobs.jobvite.com/arteris/job/oAAA");
  const deferred=await scrape("arteris",{"arteris/jobs":listing},{fetchDetail:false});assert.equal(deferred.jobs.find(job=>job.externalId==="oBBB").location,null);
  await assert.rejects(scrape("arteris",{"arteris/jobs":"<html><body>no table</body></html>"}),/parse_error/);
+});
+
+test("ASML replaces a search token Sitecore refuses once, and gives up when the new one is refused too",async()=>{
+ const tokens=[],seen=[];
+ const result=await scrapeCompany("asml",{request:async(url,options)=>{
+  if(url.endsWith("/api/search-token")){tokens.push(options.body.force);return{text:JSON.stringify({accessToken:`token-${tokens.length}`})}}
+  seen.push(options.headers.authorization);
+  if(options.headers.authorization==="Bearer token-1")throw Error("auth_required: HTTP 401");
+  return{text:JSON.stringify(asmlPage(0,1,["J-1"]))}}});
+ assert.deepEqual(tokens,[false,true]);assert.deepEqual(seen,["Bearer token-1","Bearer token-2"]);assert.equal(result.jobs.length,1);assert.equal(result.complete,true);
+ await assert.rejects(scrapeCompany("asml",{request:async url=>{if(url.endsWith("/api/search-token"))return{text:JSON.stringify({accessToken:"x"})};throw Error("auth_required: HTTP 401")}}),/auth_required/);
+ await assert.rejects(scrapeCompany("asml",{request:async()=>({text:JSON.stringify({})})}),/auth_required: ASML did not issue a search token/);
 });

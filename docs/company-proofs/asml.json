@@ -3,73 +3,75 @@
   "name": "ASML",
   "level": "full",
   "ok": true,
-  "startedAt": "2026-09-02T13:14:52.878Z",
-  "finishedAt": "2026-09-02T13:14:57.356Z",
+  "startedAt": "2026-11-06T20:04:45.783Z",
+  "finishedAt": "2026-11-06T20:04:50.354Z",
   "source": {
-    "id": "asml-proof",
+    "id": "00000000-0000-4000-8000-000000000135",
     "name": "ASML",
-    "adapterId": "asml",
     "baseUrl": "https://www.asml.com/en/careers/find-your-job",
+    "adapterId": "asml",
     "kind": "active",
-    "robotsOverride": false,
+    "robotsOverride": true,
     "allowPrivateNetwork": false,
     "configJson": {
       "maxPages": 500
     }
   },
   "codeHashes": {
-    "worker.mjs": "7a1cff69cb4d1e3079268e3592a5ad3fe70be10bd5cfad4664f9df84751566de",
-    "adapters.mjs": "02fa8e893d73d747138eadccba4633647a7b25b7a549e77d873a4f75363786f2",
-    "company-adapters.mjs": "d4f26eb09f07d5fa3ace11b96f00456dad274247f52f0e5b4962736f164aae18"
+    "worker.mjs": "f0ff28dc1b8666effa57a906460f92252a72b410d9127521c98b171d5695e56b",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "f9a2b81dca7a1e7bb720ac5d0bad96f77805df45dfebd0011fdb2e819fc5f072",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
   },
   "listing": {
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "asml-proof",
+      "runId": "00000000-0000-4000-8000-000000000135",
       "payload": {
         "command": "scrape_source",
         "complete": true,
-        "discovered": 591,
-        "persisted": 591,
+        "discovered": 775,
+        "persisted": 775,
         "skipped": 0,
         "filtered": 0,
-        "requests": 8,
-        "boardTotal": 591,
+        "requests": 9,
+        "boardTotal": 775,
         "boardTotalExact": true,
         "mode": "direct-company",
         "warnings": [],
-        "timingMs": 3302,
-        "pages": 6,
+        "timingMs": 3562,
+        "pages": 8,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 3302,
+            "totalMs": 3562,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 51,
-              "pacing": 926,
+              "urlGuard": 21,
+              "pacing": 1085,
               "backoff": 0,
-              "response": 1851,
-              "body": 340,
+              "response": 1850,
+              "body": 412,
               "browser": 0,
-              "adapterOther": 87,
-              "emit": 46
+              "adapterOther": 133,
+              "emit": 60
             },
             "requestsByKind": {
               "robots": {
-                "count": 2,
+                "count": 0,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 416,
-                "bodyMs": 2
+                "responseMs": 0,
+                "bodyMs": 0
               },
               "listing": {
-                "count": 6,
-                "pacingMs": 926,
+                "count": 9,
+                "pacingMs": 1085,
                 "backoffMs": 0,
-                "responseMs": 1435,
-                "bodyMs": 338
+                "responseMs": 1850,
+                "bodyMs": 412
               },
               "detail": {
                 "count": 0,
@@ -106,93 +108,98 @@
         }
       }
     },
-    "jobs": 591,
-    "uniqueIdentities": 591,
-    "uniqueHashes": 591,
+    "jobs": 775,
+    "uniqueIdentities": 775,
+    "uniqueHashes": 775,
     "samples": [
       {
-        "externalId": "J-00336767",
-        "title": "Motion assembler",
+        "externalId": "J-00341781",
+        "title": "Material Handler, Alternate 1st Shift (10am-6:30pm)",
         "company": "ASML",
-        "location": "Oirschot, Netherlands",
-        "postedAt": "2026-09-02",
-        "canonicalUrl": "https://www.asml.com/en/careers/find-your-job/motion-assembler-j00336767",
-        "applyUrl": "https://www.asml.com/en/careers/find-your-job/motion-assembler-j00336767",
+        "location": "Wilton, CT, US",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://www.asml.com/en/careers/find-your-job/material-handler-alternate-1st-shift-10am-630pm-j00341781",
+        "applyUrl": "https://www.asml.com/en/careers/find-your-job/material-handler-alternate-1st-shift-10am-630pm-j00341781",
         "descriptionStatus": "complete",
-        "descriptionChars": 9263
+        "descriptionChars": 5891
       },
       {
-        "externalId": "J-00348859",
-        "title": "Manufacturing- Build Operation Group Leader- Tainan",
+        "externalId": "J-00334839",
+        "title": "CS - Upgrade Install and Relocation Associate Engineer - Hsinchu",
         "company": "ASML",
-        "location": "Tainan, Taiwan",
-        "postedAt": "2026-08-04",
-        "canonicalUrl": "https://www.asml.com/en/careers/find-your-job/manufacturing-build-operation-group-leader-tainan-j00348859",
-        "applyUrl": "https://www.asml.com/en/careers/find-your-job/manufacturing-build-operation-group-leader-tainan-j00348859",
+        "location": "Hsinchu, Taiwan",
+        "postedAt": "2026-10-15",
+        "canonicalUrl": "https://www.asml.com/en/careers/find-your-job/cs-upgrade-install-and-relocation-associate-engineer-hsinchu-j00334839",
+        "applyUrl": "https://www.asml.com/en/careers/find-your-job/cs-upgrade-install-and-relocation-associate-engineer-hsinchu-j00334839",
         "descriptionStatus": "complete",
-        "descriptionChars": 4313
+        "descriptionChars": 1992
       },
       {
-        "externalId": "J-00313494",
-        "title": "Manufacturing - Assembly Engineer - Linkou",
+        "externalId": "J-00298443",
+        "title": "Customer Support Engineer",
         "company": "ASML",
-        "location": "Linkou, Taiwan",
-        "postedAt": "2024-12-26",
-        "canonicalUrl": "https://www.asml.com/en/careers/find-your-job/manufacturing-assembly-engineer-linkou-j00313494",
-        "applyUrl": "https://www.asml.com/en/careers/find-your-job/manufacturing-assembly-engineer-linkou-j00313494",
+        "location": "Shenzhen, China",
+        "postedAt": "2025-01-17",
+        "canonicalUrl": "https://www.asml.com/en/careers/find-your-job/customer-support-engineer-j00298443",
+        "applyUrl": "https://www.asml.com/en/careers/find-your-job/customer-support-engineer-j00298443",
         "descriptionStatus": "complete",
-        "descriptionChars": 1788
+        "descriptionChars": 2713
       }
     ],
-    "warnings": []
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
   },
   "details": null,
   "warm": {
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "asml-proof",
+      "runId": "00000000-0000-4000-8000-000000000135",
       "payload": {
         "complete": true,
         "mode": "check",
-        "boardTotal": 591,
+        "boardTotal": 775,
         "boardTotalExact": true,
         "fresh": 0,
         "discovered": 100,
-        "requests": 3,
+        "requests": 2,
         "skipped": 100,
         "filtered": 0,
         "warnings": [],
-        "timingMs": 981,
+        "timingMs": 583,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 981,
+            "totalMs": 583,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 15,
-              "pacing": 161,
+              "urlGuard": 10,
+              "pacing": 0,
               "backoff": 0,
-              "response": 711,
-              "body": 74,
+              "response": 475,
+              "body": 70,
               "browser": 0,
-              "adapterOther": 20,
+              "adapterOther": 27,
               "emit": 0
             },
             "requestsByKind": {
               "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
                 "count": 2,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 510,
-                "bodyMs": 2
-              },
-              "listing": {
-                "count": 1,
-                "pacingMs": 161,
-                "backoffMs": 0,
-                "responseMs": 200,
-                "bodyMs": 72
+                "responseMs": 475,
+                "bodyMs": 70
               },
               "detail": {
                 "count": 0,

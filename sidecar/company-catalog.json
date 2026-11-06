@@ -1,5 +1,5 @@
 {
- "version": "2026-09-02.3",
+ "version": "2026-11-06.1",
  "companies": [
   {
    "id": "00000000-0000-4000-8000-000000000001",
@@ -456,7 +456,7 @@
     "maxPages": 500,
     "expectedHost": "monolithicpower.wd12.myworkdayjobs.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 254
@@ -620,7 +620,7 @@
     "retryForbidden": true,
     "expectedHost": "jobs.infineon.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 1353
@@ -692,7 +692,7 @@
     "maxPages": 500,
     "expectedHost": "boards-api.greenhouse.io"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 130
@@ -2065,19 +2065,21 @@
     "ai",
     "automotive"
    ],
-   "adapterId": "greenhouse",
-   "baseUrl": "https://job-boards.greenhouse.io/wayve",
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/wayve",
    "kind": "active",
    "disabledReason": "Starter source is disabled until you review and enable it.",
    "config": {
     "token": "wayve",
     "maxPages": 500,
-    "expectedHost": "boards-api.greenhouse.io"
+    "expectedHost": "api.ashbyhq.com"
    },
    "starter": false,
    "verified": {
-    "at": "2026-09-02",
-    "jobs": 156
+    "at": "2026-11-06",
+    "jobs": 171,
+    "level": "full",
+    "evidence": "docs/company-proofs/wayve.json"
    }
   },
   {
@@ -2097,7 +2099,7 @@
     "maxPages": 500,
     "expectedHost": "boards-api.greenhouse.io"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 186
@@ -2968,8 +2970,8 @@
    },
    "starter": false,
    "verified": {
-    "at": "2026-09-02",
-    "jobs": 591,
+    "at": "2026-11-06",
+    "jobs": 775,
     "level": "full",
     "evidence": "docs/company-proofs/asml.json"
    }
@@ -3126,7 +3128,7 @@
     "maxPages": 500,
     "expectedHost": "cadence.wd1.myworkdayjobs.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 562,
@@ -3151,7 +3153,7 @@
     "maxPages": 500,
     "expectedHost": "careers.synopsys.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 391,
@@ -3168,19 +3170,19 @@
     "autonomy",
     "ai-hardware"
    ],
-   "adapterId": "ashby",
-   "baseUrl": "https://jobs.ashbyhq.com/shield-ai",
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/shieldai",
    "kind": "active",
    "disabledReason": "Starter source is disabled until you review and enable it.",
    "config": {
-    "token": "shield-ai",
+    "token": "shieldai",
     "maxPages": 500,
-    "expectedHost": "api.ashbyhq.com"
+    "expectedHost": "api.lever.co"
    },
    "starter": false,
    "verified": {
-    "at": "2026-09-02",
-    "jobs": 445,
+    "at": "2026-11-06",
+    "jobs": 662,
     "level": "full",
     "evidence": "docs/company-proofs/shield-ai.json"
    }
@@ -3467,6 +3469,7 @@
    "tags": [
     "gpu",
     "ip",
+    "semiconductor",
     "verification"
    ],
    "adapterId": "json",
@@ -3487,7 +3490,7 @@
      "postedAt": "OpeningDateUtc"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 14,
@@ -3523,7 +3526,7 @@
      "location": "_jobposting.jobLocation.0.address"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 19,
@@ -3551,8 +3554,8 @@
    },
    "starter": false,
    "verified": {
-    "at": "2026-09-02",
-    "jobs": 9,
+    "at": "2026-11-06",
+    "jobs": 10,
     "level": "full",
     "evidence": "docs/company-proofs/axelera-ai.json"
    }
@@ -3611,7 +3614,7 @@
      "location": "_jobposting.jobLocation.0.address"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 15,
@@ -3638,7 +3641,7 @@
     "requestDelayMs": 1000,
     "expectedHost": "api.eu.lever.co"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 113,
@@ -3663,7 +3666,7 @@
     "maxPages": 500,
     "expectedHost": "jobs.renesas.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 898,
@@ -3740,7 +3743,7 @@
     "maxPages": 500,
     "expectedHost": "jobs.sw.siemens.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 753,
@@ -3765,7 +3768,7 @@
     "maxPages": 500,
     "expectedHost": "careers-rambus.icims.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-09-02",
     "jobs": 64,
@@ -3826,7 +3829,7 @@
      "location": "_jobposting.jobLocation.0.address"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 38,
@@ -3852,7 +3855,7 @@
     "maxPages": 500,
     "expectedHost": "api.ashbyhq.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 25,
@@ -3878,7 +3881,7 @@
     "maxPages": 500,
     "expectedHost": "api.ashbyhq.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 15,
@@ -3904,7 +3907,7 @@
     "maxPages": 500,
     "expectedHost": "boards-api.greenhouse.io"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 37,
@@ -3930,7 +3933,7 @@
     "maxPages": 500,
     "expectedHost": "boards-api.greenhouse.io"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 23,
@@ -3982,7 +3985,7 @@
     "maxPages": 500,
     "expectedHost": "api.ashbyhq.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 22,
@@ -4018,7 +4021,7 @@
      "location": "_jobposting.jobLocation.0.address"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 4,
@@ -4054,7 +4057,7 @@
      "location": "_jobposting.jobLocation.0.address"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 9,
@@ -4090,7 +4093,7 @@
      "location": "_jobposting.jobLocation.0.address"
     }
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 15,
@@ -4169,7 +4172,7 @@
     "maxPages": 5,
     "expectedHost": "axiomise.jobs.personio.de"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 4,
@@ -4247,7 +4250,7 @@
     "maxPages": 5,
     "expectedHost": "apply.workable.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 7,
@@ -4299,7 +4302,7 @@
     "maxPages": 5,
     "expectedHost": "codasip.bamboohr.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 9,
@@ -4441,7 +4444,7 @@
     "maxPages": 500,
     "expectedHost": "openchip.factorialhr.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 24,
@@ -4466,7 +4469,7 @@
     "maxPages": 500,
     "expectedHost": "racyics.de"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 22,
@@ -4515,7 +4518,7 @@
     "maxPages": 500,
     "expectedHost": "jobs.jobvite.com"
    },
-   "starter": false,
+   "starter": true,
    "verified": {
     "at": "2026-11-06",
     "jobs": 27,

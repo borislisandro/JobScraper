@@ -3,10 +3,10 @@
   "name": "Axelera AI",
   "level": "full",
   "ok": true,
-  "startedAt": "2026-09-02T15:56:23.839Z",
-  "finishedAt": "2026-09-02T15:56:24.545Z",
+  "startedAt": "2026-11-06T20:04:58.061Z",
+  "finishedAt": "2026-11-06T20:04:58.875Z",
   "source": {
-    "id": "axelera-ai",
+    "id": "00000000-0000-4000-8000-00000000014a",
     "name": "Axelera AI",
     "baseUrl": "https://jobs.ashbyhq.com/axelera",
     "adapterId": "ashby",
@@ -17,67 +17,48 @@
       "token": "axelera",
       "maxPages": 500,
       "expectedHost": "api.ashbyhq.com"
-    },
-    "onboardingEvidence": {
-      "observedAt": "2026-09-02",
-      "officialCareersUrl": "https://axelera.ai/careers",
-      "boardUrl": "https://jobs.ashbyhq.com/axelera",
-      "provenanceEvidence": "The official careers page links eight specific vacancies under jobs.ashbyhq.com/axelera, including 07605701-fef5-47d3-aef3-2897e59fee20 and 76a02d45-2560-4d08-8289-02c8f7efb24e. The unfiltered hosted board also includes UKESF.",
-      "publishedTotal": 9,
-      "countEvidence": "The hosted board's window.__appData.jobBoard.jobPostings contains nine published postings, with the same nine identities as the posting API. No separate scalar total was exposed; this is the complete published array count, not a count inferred from source.company.",
-      "listingEndpoint": "https://api.ashbyhq.com/posting-api/job-board/axelera",
-      "pagination": "GET with Accept: application/json; top-level keys jobs and apiVersion. The public posting endpoint returns the full board in one response, with all nine isListed values true. Descriptions are inline in descriptionPlain/descriptionHtml.",
-      "identityEvidence": "Director - Silicon Logical Design: Hybrid/Remote - Europe (incl. UK). Director - Silicon Product & Test Engineering: Bristol (on-site). Finance Manager: Eindhoven (hybrid). Their IDs match the employer's own careers links.",
-      "country": "NL",
-      "countrySource": "https://axelera.ai/careers",
-      "countryEvidence": "The official careers page explicitly identifies headquarters at High Tech Campus, Eindhoven, and gives the Netherlands address.",
-      "tags": [
-        "semiconductor",
-        "ai",
-        "accelerator"
-      ],
-      "tagsSource": "https://axelera.ai/our-story",
-      "robotsEvidence": "https://jobs.ashbyhq.com/robots.txt returns 200 and disallows /meeting/, /b/ and /api/. https://api.ashbyhq.com/robots.txt returns 401 Unauthorized, while the public posting API returns 200. Override remains enabled."
     }
   },
   "codeHashes": {
-    "worker.mjs": "0ea3fc599f6990af2d9af4f594b7f07e30625901309b7d04810d8a7398af11fd",
-    "adapters.mjs": "52572af07d2a473bf4d85626b4dce25804f1e87ae421c69b47a2bca2272a58f6",
-    "company-adapters.mjs": "d178b17f14dee1d471afe1affd53fad163b6d429e195b45550133c4dba5e2c5c"
+    "worker.mjs": "f0ff28dc1b8666effa57a906460f92252a72b410d9127521c98b171d5695e56b",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "f9a2b81dca7a1e7bb720ac5d0bad96f77805df45dfebd0011fdb2e819fc5f072",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
   },
   "listing": {
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "axelera-ai",
+      "runId": "00000000-0000-4000-8000-00000000014a",
       "payload": {
         "command": "scrape_source",
         "complete": true,
-        "discovered": 9,
-        "persisted": 9,
+        "discovered": 10,
+        "persisted": 10,
         "skipped": 0,
         "filtered": 0,
         "requests": 1,
-        "boardTotal": 9,
+        "boardTotal": 10,
         "boardTotalExact": true,
         "mode": "direct-platform",
         "warnings": [],
-        "timingMs": 297,
+        "timingMs": 225,
         "pages": 1,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 297,
+            "totalMs": 225,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 10,
+              "urlGuard": 8,
               "pacing": 0,
               "backoff": 0,
-              "response": 272,
-              "body": 7,
+              "response": 192,
+              "body": 12,
               "browser": 0,
-              "adapterOther": 7,
-              "emit": 1
+              "adapterOther": 9,
+              "emit": 2
             },
             "requestsByKind": {
               "robots": {
@@ -91,8 +72,8 @@
                 "count": 1,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 272,
-                "bodyMs": 7
+                "responseMs": 192,
+                "bodyMs": 12
               },
               "detail": {
                 "count": 0,
@@ -129,42 +110,42 @@
         }
       }
     },
-    "jobs": 9,
-    "uniqueIdentities": 9,
-    "uniqueHashes": 9,
+    "jobs": 10,
+    "uniqueIdentities": 10,
+    "uniqueHashes": 10,
     "samples": [
       {
-        "externalId": "07605701-fef5-47d3-aef3-2897e59fee20",
-        "title": "Director - Silicon Logical Design",
+        "externalId": "f3749590-0c0a-424b-a714-19bb82d1e321",
+        "title": "Developer Relations and Community Manager",
         "company": "Axelera AI",
-        "location": "Hybrid/Remote - Europe (incl. UK), Estonia (remote), Switzerland (remote), Bulgaria (remote), Serbia (remote), Luxembourg (remote) (+41 more)",
-        "postedAt": "2026-02-05",
-        "canonicalUrl": "https://jobs.ashbyhq.com/axelera/07605701-fef5-47d3-aef3-2897e59fee20",
-        "applyUrl": "https://jobs.ashbyhq.com/axelera/07605701-fef5-47d3-aef3-2897e59fee20",
+        "location": "Albania (remote), Amsterdam (hybrid), Athens (on-site), Austria (remote), Belgium (remote), Bristol (on-site), Bulgaria (remote), Croatia (remote), Czechia (remote), Denmark (remote), EU (remote), Eindhoven (hybrid), England (remote), Estonia (remote), Finland (remote), Florence (on-site), France (remote), Germany (remote), Greece (remote), Hungary (remote), Hybrid/Remote - Europe (incl. UK), Ireland (remote), Italy (remote), Latvia (remote), Leuven (on-site), Lithuania (remote), Luxembourg (remote), Milan (on-site), Moldova (remote), Netherlands (hybrid), Northern Ireland (remote), Norway (remote), Paris (on-site), Poland (remote), Portugal (remote), Romania (remote), Scotland (remote), Serbia (remote), Slovakia (remote), Slovenia (remote), Spain (remote), Sweden (remote), UK (remote), Ukraine (remote), Wales (remote)",
+        "postedAt": "2026-09-21",
+        "canonicalUrl": "https://jobs.ashbyhq.com/axelera/f3749590-0c0a-424b-a714-19bb82d1e321",
+        "applyUrl": "https://jobs.ashbyhq.com/axelera/f3749590-0c0a-424b-a714-19bb82d1e321",
         "descriptionStatus": "complete",
-        "descriptionChars": 4859
+        "descriptionChars": 7654
       },
       {
-        "externalId": "b8d96401-e843-4a36-8a4d-57ebcbcc87cd",
-        "title": "Advanced Packaging & Power Delivery Senior Engineer",
+        "externalId": "cac5f1c7-2eb7-4bfe-b67f-dfc23dc59c16",
+        "title": "Hardware Lab Engineer Intern",
         "company": "Axelera AI",
-        "location": "Hybrid/Remote - Europe (incl. UK), Estonia (remote), Switzerland (remote), Bulgaria (remote), Serbia (remote), Luxembourg (remote) (+41 more)",
-        "postedAt": "2026-06-17",
-        "canonicalUrl": "https://jobs.ashbyhq.com/axelera/b8d96401-e843-4a36-8a4d-57ebcbcc87cd",
-        "applyUrl": "https://jobs.ashbyhq.com/axelera/b8d96401-e843-4a36-8a4d-57ebcbcc87cd",
+        "location": "Florence (on-site)",
+        "postedAt": "2026-11-02",
+        "canonicalUrl": "https://jobs.ashbyhq.com/axelera/cac5f1c7-2eb7-4bfe-b67f-dfc23dc59c16",
+        "applyUrl": "https://jobs.ashbyhq.com/axelera/cac5f1c7-2eb7-4bfe-b67f-dfc23dc59c16",
         "descriptionStatus": "complete",
-        "descriptionChars": 5068
+        "descriptionChars": 4654
       },
       {
-        "externalId": "7f6172b1-76d9-4289-9e79-b935ef753d33",
-        "title": "UK Electronics Skills Foundation (UKESF)",
+        "externalId": "460f2f71-652a-4360-b034-ea290b4120aa",
+        "title": "Director of Marketing, Asia-Pacific & Japan",
         "company": "Axelera AI",
-        "location": "UK (remote)",
-        "postedAt": "2026-09-01",
-        "canonicalUrl": "https://jobs.ashbyhq.com/axelera/7f6172b1-76d9-4289-9e79-b935ef753d33",
-        "applyUrl": "https://jobs.ashbyhq.com/axelera/7f6172b1-76d9-4289-9e79-b935ef753d33",
+        "location": "India (remote)",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://jobs.ashbyhq.com/axelera/460f2f71-652a-4360-b034-ea290b4120aa",
+        "applyUrl": "https://jobs.ashbyhq.com/axelera/460f2f71-652a-4360-b034-ea290b4120aa",
         "descriptionStatus": "complete",
-        "descriptionChars": 232
+        "descriptionChars": 7229
       }
     ],
     "warnings": [
@@ -179,32 +160,32 @@
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "axelera-ai",
+      "runId": "00000000-0000-4000-8000-00000000014a",
       "payload": {
         "complete": true,
         "mode": "check",
-        "boardTotal": 9,
+        "boardTotal": 10,
         "boardTotalExact": true,
         "fresh": 0,
-        "discovered": 9,
+        "discovered": 10,
         "requests": 1,
-        "skipped": 9,
+        "skipped": 10,
         "filtered": 0,
         "warnings": [],
-        "timingMs": 157,
+        "timingMs": 114,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 157,
+            "totalMs": 114,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 10,
+              "urlGuard": 8,
               "pacing": 0,
               "backoff": 0,
-              "response": 136,
-              "body": 7,
+              "response": 88,
+              "body": 11,
               "browser": 0,
-              "adapterOther": 4,
+              "adapterOther": 6,
               "emit": 0
             },
             "requestsByKind": {
@@ -219,8 +200,8 @@
                 "count": 1,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 136,
-                "bodyMs": 7
+                "responseMs": 88,
+                "bodyMs": 11
               },
               "detail": {
                 "count": 0,

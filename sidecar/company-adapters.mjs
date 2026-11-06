@@ -21,7 +21,7 @@ export const companyAdapters={
  amd:{name:"AMD",host:"careers.amd.com",base:"https://careers.amd.com"},
  // Public search credentials and widget ID published by ASML's careers page JavaScript.
  asml:{name:"ASML",host:"www.asml.com",base:"https://www.asml.com",listing:"https://www.asml.com/en/careers/find-your-job",
-  searchUrl:"https://discover-euc1.sitecorecloud.io/discover/v2/126200477",searchKey:"01-967712c8-5a349c1760436ea6dccfd7bb02bfbe4dc2ccc36c"},
+  searchUrl:"https://discover-euc1.sitecorecloud.io/discover/v2/126200477",tokenUrl:"https://www.asml.com/api/search-token"},
  mediatek:{name:"MediaTek",host:"careers.mediatek.com",base:"https://careers.mediatek.com"},
  google:{name:"Google",host:"www.google.com",base:"https://www.google.com/about/careers/applications/",listing:"https://www.google.com/about/careers/applications/jobs/results/"},
  cisco:{name:"Cisco",host:"careers.cisco.com",base:"https://careers.cisco.com",listing:"https://careers.cisco.com/global/en/search-results"},
@@ -215,11 +215,21 @@ async function amd(site,{request,maxPages}){
   jobs.push(...pageJobs);if(!pageJobs.length)break;page+=1}
   return{jobs,pages:page-1,complete:jobs.length>=total,total,totalExact:true,warnings:[]}}
 
+// ASML's search used to take one static key; it now hands the page a short-lived bearer token from its own endpoint, which is what the
+// careers page itself requests before every search. The token is fetched once per read and replaced once if Sitecore refuses it.
+async function asmlToken(site,request,force){
+ const data=await json(request,site.tokenUrl,{method:"POST",headers:{accept:"application/json","content-type":"application/json"},body:{force}});
+ if(typeof data?.accessToken!=="string"||!data.accessToken)throw Error("auth_required: ASML did not issue a search token");
+ return data.accessToken}
 async function asml(site,{request,maxPages}){
- const jobs=[],ids=new Set();let offset=0,pages=0,total=null,changed=false;
- do{
-  const payload=await json(request,site.searchUrl,{method:"POST",headers:{accept:"application/json","content-type":"application/json",authorization:site.searchKey},
+ const jobs=[],ids=new Set();let offset=0,pages=0,total=null,changed=false,token=await asmlToken(site,request,false);
+ const search=async()=>json(request,site.searchUrl,{method:"POST",headers:{accept:"application/json","content-type":"application/json",authorization:`Bearer ${token}`},
    body:{context:{page:{uri:site.listing},locale:{country:"us",language:"en"}},widget:{items:[{entity:"content",rfk_id:"asml_job_search",search:{limit:100,offset,content:{}}}]}}});
+ do{
+  let payload;
+  try{payload=await search()}catch(error){
+   if(!/^auth_required/.test(String(error?.message||error)))throw error;
+   token=await asmlToken(site,request,true);payload=await search()}
   const widget=payload?.widgets?.find(item=>item.rfk_id==="asml_job_search");
   if(!Number.isInteger(widget?.total_item)||widget.total_item<0||widget.offset!==offset)
    throw Error("parse_error: Structure changed: ASML search total or offset is invalid");

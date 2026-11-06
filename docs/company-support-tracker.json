@@ -13,11 +13,11 @@
       "officialCareersUrl": "https://www.asml.com/en/careers/find-your-job",
       "adapterId": "asml",
       "catalogId": "00000000-0000-4000-8000-000000000135",
-      "lastAttemptAt": "2026-09-02T13:14:57.356Z",
+      "lastAttemptAt": "2026-11-06T20:05:12.634254Z",
       "evidence": [
         "company-proofs/asml.json"
       ],
-      "notes": "Global ASML Sitecore search: all 591 unique vacancies, six pages, full inline descriptions; warm check found zero fresh rows. Custom adapter rejects duplicate pages and changing totals.",
+      "notes": "Sitecore search now needs a bearer token that www.asml.com/api/search-token issues per visit; the old static key returned 401. Re-proved 2026-11-06: all 775 unique vacancies with inline descriptions; warm check found zero fresh rows.",
       "nextAction": "Complete; revalidate if ASML changes its board.",
       "inScope": true
     },
@@ -513,13 +513,13 @@
       "priority": "P2",
       "status": "supported",
       "officialCareersUrl": "https://shield.ai/careers/",
-      "adapterId": "ashby",
+      "adapterId": "lever",
       "catalogId": "00000000-0000-4000-8000-00000000013d",
-      "lastAttemptAt": "2026-09-02T15:03:14.681Z",
+      "lastAttemptAt": "2026-11-06T20:05:12.634290Z",
       "evidence": [
         "company-proofs/shield-ai.json"
       ],
-      "notes": "Ashby token shield-ai. Whole board in one response with inline descriptions (445 openings); warm check clean.",
+      "notes": "Moved from Ashby to Lever token shieldai on 2026-11-06 (the Ashby token now 404s). Whole board in pages of 100 with inline descriptions (662 openings at proof time).",
       "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true
     },
@@ -1845,11 +1845,11 @@
       "officialCareersUrl": "https://www.axelera.ai/careers",
       "adapterId": "ashby",
       "catalogId": "00000000-0000-4000-8000-00000000014a",
-      "lastAttemptAt": "2026-09-02T15:56:24.545Z",
+      "lastAttemptAt": "2026-11-06T20:05:12.634331Z",
       "evidence": [
         "company-proofs/axelera-ai.json"
       ],
-      "notes": "Ashby token axelera. 9 openings.",
+      "notes": "Ashby token axelera, 10 openings on 2026-11-06. Checked for a move: the official careers page still links jobs.ashbyhq.com/axelera, so the board has not changed.",
       "nextAction": "Complete; revalidate if this employer changes its board.",
       "inScope": true,
       "focus": true,

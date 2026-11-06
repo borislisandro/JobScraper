@@ -1,0 +1,14 @@
+{
+ "id": "wayve",
+ "name": "Wayve",
+ "baseUrl": "https://jobs.ashbyhq.com/wayve",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "wayve",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

@@ -9,7 +9,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "microchiphr"
     },
     "name": "Microchip"
@@ -24,7 +24,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "analogdevices"
     },
     "name": "Analog Devices"
@@ -39,7 +39,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External_Career",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "broadcom"
     },
     "name": "Broadcom"
@@ -54,7 +54,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "intel"
     },
     "name": "Intel"
@@ -69,7 +69,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "MarvellCareers",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "marvell"
     },
     "name": "Marvell"
@@ -87,7 +87,7 @@
       "requestDelayMs": 800,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "STMicroelectronics"
   },
@@ -103,7 +103,7 @@
       "site": "NVIDIAExternalCareerSite",
       "splitFacet": "jobFamilyGroup",
       "splitThreshold": 2000,
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "nvidia"
     },
     "name": "NVIDIA"
@@ -121,7 +121,7 @@
       "requestDelayMs": 800,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "GlobalFoundries"
   },
@@ -135,7 +135,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "micron"
     },
     "name": "Micron"
@@ -153,7 +153,7 @@
       "requestDelayMs": 800,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Qualcomm"
   },
@@ -166,7 +166,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Arm"
   },
@@ -179,7 +179,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "AMD"
   },
@@ -192,7 +192,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Cisco"
   },
@@ -207,7 +207,7 @@
       "mode": "direct",
       "requestDelayMs": 250,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Apple"
   },
@@ -220,7 +220,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "MediaTek"
   },
@@ -232,7 +232,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "u-blox"
   },
@@ -245,7 +245,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Google"
   },
@@ -257,7 +257,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "SK hynix"
   },
@@ -269,7 +269,7 @@
       "expectedHost": "www.marvell.com",
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Marvell (reference)"
   },
@@ -283,7 +283,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "careers",
-      "starterPackVersion": "2026-09-02.3",
+      "starterPackVersion": "2026-11-06.1",
       "tenant": "nxp"
     },
     "name": "NXP"
@@ -301,8 +301,468 @@
       "requestDelayMs": 400,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-09-02.3"
+      "starterPackVersion": "2026-11-06.1"
     },
     "name": "Ericsson"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://monolithicpower.wd12.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "monolithicpower.wd12.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "MPS_Careers",
+      "starterPackVersion": "2026-11-06.1",
+      "tenant": "monolithicpower"
+    },
+    "name": "Monolithic Power Systems"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://jobs.infineon.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "infineon.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "jobs.infineon.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Infineon"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/tenstorrent",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "tenstorrent"
+    },
+    "name": "Tenstorrent"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/graphcore",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "graphcore"
+    },
+    "name": "Graphcore"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://cadence.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "cadence.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External_Careers",
+      "starterPackVersion": "2026-11-06.1",
+      "tenant": "cadence"
+    },
+    "name": "Cadence"
+  },
+  {
+    "adapterId": "synopsys",
+    "baseUrl": "https://careers.synopsys.com",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.synopsys.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Synopsys"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.pageuppeople.com/774/cw/en/listing",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.pageuppeople.com",
+      "fieldMap": {
+        "description": "Overview",
+        "externalId": "Id",
+        "location": "Locations",
+        "postedAt": "OpeningDateUtc",
+        "title": "Title",
+        "url": "ApplyUrl"
+      },
+      "itemsPath": "",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "urlTemplate": "https://careers.pageuppeople.com/774/cw/en/jobs.json"
+    },
+    "name": "Imagination Technologies"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.sipearl.com/fr/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.sipearl.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "SiPearl"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.nordicsemi.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.nordicsemi.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Nordic Semiconductor"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.eu.lever.co/cirrus",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.eu.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 1000,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "cirrus"
+    },
+    "name": "Cirrus Logic"
+  },
+  {
+    "adapterId": "renesas",
+    "baseUrl": "https://jobs.renesas.com/jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.renesas.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Renesas"
+  },
+  {
+    "adapterId": "siemens",
+    "baseUrl": "https://jobs.sw.siemens.com/jobs/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.sw.siemens.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Siemens"
+  },
+  {
+    "adapterId": "rambus",
+    "baseUrl": "https://careers-rambus.icims.com",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers-rambus.icims.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Rambus"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.semidynamics.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.semidynamics.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Semidynamics"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/fractile",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "fractile"
+    },
+    "name": "Fractile"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/arago",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "arago"
+    },
+    "name": "Arago"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/riverlane",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "riverlane"
+    },
+    "name": "Riverlane"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/bayasystems",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "bayasystems"
+    },
+    "name": "Baya Systems"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/olix",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "olix"
+    },
+    "name": "Olix"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.dolphin-semiconductor.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.dolphin-semiconductor.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Dolphin Semiconductor"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.prophesee.ai/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.prophesee.ai",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Prophesee"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://talent.pragmaticsemi.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "talent.pragmaticsemi.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Pragmatic Semiconductor"
+  },
+  {
+    "adapterId": "personio",
+    "baseUrl": "https://axiomise.jobs.personio.de/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "axiomise.jobs.personio.de",
+      "maxPages": 5,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "axiomise"
+    },
+    "name": "Axiomise"
+  },
+  {
+    "adapterId": "workable",
+    "baseUrl": "https://apply.workable.com/raspberrypi/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "apply.workable.com",
+      "maxPages": 5,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "raspberrypi"
+    },
+    "name": "Raspberry Pi"
+  },
+  {
+    "adapterId": "bamboohr",
+    "baseUrl": "https://codasip.bamboohr.com/careers",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "codasip.bamboohr.com",
+      "maxPages": 5,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1",
+      "token": "codasip"
+    },
+    "name": "Codasip"
+  },
+  {
+    "adapterId": "openchip",
+    "baseUrl": "https://openchip.factorialhr.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "openchip.factorialhr.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Openchip"
+  },
+  {
+    "adapterId": "racyics",
+    "baseUrl": "https://racyics.de/career/jobs/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "racyics.de",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Racyics"
+  },
+  {
+    "adapterId": "arteris",
+    "baseUrl": "https://jobs.jobvite.com/arteris/jobs?nl=1",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.jobvite.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-06.1"
+    },
+    "name": "Arteris"
   }
 ]
