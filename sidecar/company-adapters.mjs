@@ -447,7 +447,7 @@ async function singlePageBoard(site,context,{list,detail,label}){
  return{jobs:enriched,seen,filtered,pages:1,complete:true,total:jobs.length,totalExact:false,warnings}}
 
 // Openchip (Factorial HR): offices are headings, each followed by the vacancies open there.
-const openchipList=(html,site)=>{const $=cheerio.load(html);
+const openchipList=html=>{const $=cheerio.load(html);
  return $("li.job-offer-item").map((_,el)=>{const li=$(el),url=clean(li.attr("data-job-postings-url"));
   return{title:clean(li.find("div.factorial__headingFontFamily").first().text()),url,externalId:url?.match(/-(\d+)\/?$/)?.[1]||url,
    location:clean(li.closest("div.mb-12").find("h3").first().text()),description:clean(li.find("div.text-gray-350").first().text()),
@@ -475,7 +475,7 @@ const csemList=(html,site)=>{const $=cheerio.load(html);
    location:clean(card.find(".tag").last().text())}}).get()};
 const csemDetail=(html,current)=>{const $=cheerio.load(html);let posting=null;
  $("script[type='application/ld+json']").each((_,el)=>{if(posting)return;try{const data=JSON.parse($(el).text()),graph=Array.isArray(data["@graph"])?data["@graph"]:[],nodes=[data,...graph,...graph.flatMap(node=>Object.values(node||{}))];
-  posting=nodes.find(node=>node&&typeof node==="object"&&node["@type"]==="JobPosting")||null}catch{}});
+  posting=nodes.find(node=>node&&typeof node==="object"&&node["@type"]==="JobPosting")||null}catch{/* a script that is not JSON is not the posting */}});
  if(!posting||!clean(posting.description))throw Error("parse_error: CSEM vacancy page has no JobPosting");
  const place=posting.jobLocation?.address;
  return{...current,title:clean(posting.title)||current.title,postedAt:posting.datePosted||current.postedAt,
