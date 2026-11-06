@@ -1,0 +1,16 @@
+{
+ "id": "accenture",
+ "name": "Accenture (Portugal)",
+ "baseUrl": "https://accenture.wd103.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "configJson": {
+  "maxPages": 500,
+  "site": "AccentureCareers",
+  "tenant": "accenture",
+  "query": "Portugal",
+  "expectedHost": "accenture.wd103.myworkdayjobs.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

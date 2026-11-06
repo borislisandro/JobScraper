@@ -1,0 +1,14 @@
+{
+ "id": "flix",
+ "name": "Flix",
+ "baseUrl": "https://job-boards.greenhouse.io/flix",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "flix",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

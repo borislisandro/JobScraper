@@ -91,7 +91,7 @@ function require_hash(){
 // Hosted APIs cannot be redirected with listingPath. Replace only the transport in a child
 // process: the real worker still parses the protocol, enforces robots and normalizes each row.
 function hostedRun(adapter,config,routes,extra={}){
- const preload=`const routes=${JSON.stringify(routes)};globalThis.fetch=async raw=>{const url=String(raw);if(url.endsWith('/robots.txt'))return new Response(routes[url]??'User-agent: *\\nAllow: /\\n');if(!(url in routes))throw Error('Unexpected fixture request: '+url);return new Response(JSON.stringify(routes[url]),{headers:{'content-type':'application/json'}})};`;
+ const preload=`const routes=${JSON.stringify(routes)};globalThis.fetch=async raw=>{const url=String(raw);if(url.endsWith('/robots.txt'))return new Response(routes[url]??'User-agent: *\\nAllow: /\\n');if(!(url in routes))throw Error('Unexpected fixture request: '+url);return typeof routes[url]==='string'?new Response(routes[url],{headers:{'content-type':'application/xml'}}):new Response(JSON.stringify(routes[url]),{headers:{'content-type':'application/json'}})};`;
  return new Promise((resolve,reject)=>{const child=spawn(process.execPath,["--import",`data:text/javascript,${encodeURIComponent(preload)}`,"sidecar/worker.mjs"]);let stdout="",stderr="";
   child.stdout.on("data",data=>stdout+=data);child.stderr.on("data",data=>stderr+=data);child.on("error",reject);child.on("close",code=>code?reject(Error(stderr)):resolve(stdout.trim().split("\n").map(JSON.parse)));
   const {enrichmentJobs,...options}=extra;
@@ -280,4 +280,57 @@ test("a feed read is not a complete board unless the source says its feed is the
   assert.equal(declared.complete,true,"a source may declare that its feed carries every opening");
   assert.equal(declared.discovered,3);
  }finally{await new Promise(resolve=>board.close(resolve))}
+});
+
+test("Workable reads the whole widget board in one request with inline descriptions and every office",async()=>{
+ const url="https://apply.workable.com/api/v1/widget/accounts/fixture?details=true";
+ const jobs=[{title:"DFT Engineer",shortcode:"AAA111",url:"https://apply.workable.com/j/AAA111",published_on:"2026-06-30",city:"Cambridge",state:"England",country:"United Kingdom",description:"<p>Insert scan chains.</p>",telecommuting:false},
+  {title:"FPGA Engineer",shortcode:"BBB222",url:"https://apply.workable.com/j/BBB222",locations:[{city:"Hamburg",country:"Germany"},{city:"Haywards Heath",region:"England",country:"United Kingdom"}],description:"<p>Build firmware.</p>",telecommuting:true}];
+ const events=await hostedRun("workable",{},{[url]:{name:"Fixture",jobs}}),stored=events.filter(event=>event.event==="job").map(event=>event.payload),final=events.at(-1);
+ assert.equal(final.event,"completed",JSON.stringify(final));assert.equal(final.payload.complete,true);assert.equal(final.payload.boardTotal,2);assert.equal(final.payload.boardTotalExact,true);
+ assert.equal(stored[0].externalId,"AAA111");assert.equal(stored[0].descriptionText,"Insert scan chains.");assert.match(String(stored[0].location),/Cambridge/);
+ assert.match(String(stored[1].location),/Hamburg/);assert.match(String(stored[1].location),/Haywards Heath/);
+ const twoOffices=[{...jobs[0],city:"Haywards Heath",country:"United Kingdom",locations:[{city:"Haywards Heath",country:"United Kingdom"}]},{...jobs[0],city:"Hamburg",country:"Germany",locations:[{city:"Hamburg",country:"Germany"}]}];
+ const merged=await hostedRun("workable",{},{[url]:{jobs:twoOffices}}),mergedJobs=merged.filter(event=>event.event==="job");
+ assert.equal(mergedJobs.length,1,"one vacancy open in two offices is one job");assert.equal(merged.at(-1).payload.complete,true);assert.equal(merged.at(-1).payload.boardTotal,1);
+ assert.match(String(mergedJobs[0].payload.location),/Haywards Heath/);assert.match(String(mergedJobs[0].payload.location),/Hamburg/);
+ const empty=await hostedRun("workable",{},{[url]:{jobs:[]}});assert.equal(empty.at(-1).payload.complete,false);
+});
+test("BambooHR reads the list, fetches each detail and refuses a total it cannot reach",async()=>{
+ const list="https://fixture.bamboohr.com/careers/list",detail=id=>`https://fixture.bamboohr.com/careers/${id}/detail`;
+ const rows=[{id:"227",jobOpeningName:"Verification Manager",location:{city:"Cambridge",state:"Cambridgeshire"},isRemote:null},{id:"232",jobOpeningName:"Verification Engineer",location:{city:"Bristol",state:null}}];
+ const body=id=>({result:{jobOpening:{jobOpeningName:"Verification "+id,description:`<p>Own the UVM env ${id}.</p>`,datePosted:"2026-10-01",location:{city:"Cambridge",state:"Cambridgeshire",addressCountry:"United Kingdom"}}}});
+ const routes={[list]:{meta:{totalCount:2},result:rows},[detail("227")]:body("227"),[detail("232")]:body("232")};
+ const events=await hostedRun("bamboohr",{},routes),stored=events.filter(event=>event.event==="job").map(event=>event.payload),final=events.at(-1);
+ assert.equal(final.event,"completed",JSON.stringify(final));assert.equal(final.payload.complete,true);assert.equal(final.payload.boardTotal,2);
+ assert.equal(stored[0].externalId,"227");assert.equal(stored[0].canonicalUrl,"https://fixture.bamboohr.com/careers/227");assert.match(stored[0].descriptionText,/UVM env 227/);assert.match(String(stored[0].location),/United Kingdom/);
+ const deferred=await hostedRun("bamboohr",{},routes,{deferDetails:true}),pending=deferred.find(event=>event.event==="job").payload;
+ assert.equal(pending.descriptionStatus,"pending");assert.equal(pending.detailUrl,detail("227"));
+ const short=await hostedRun("bamboohr",{},{...routes,[list]:{meta:{totalCount:5},result:rows}});assert.equal(short.at(-1).payload.complete,false,"a board that claims more rows than it listed is unfinished");
+});
+test("Personio parses the XML feed into descriptions and offices, and rejects anything else",async()=>{
+ const url="https://fixture.jobs.personio.de/xml";
+ const position=(id,name,office)=>`<position><id>${id}</id><office>${office}</office><additionalOffices><office>Hybrid</office></additionalOffices><department>Engineering</department><name>${name}</name><jobDescriptions><jobDescription><name>Job overview</name><value><![CDATA[<p>Prove it formally.</p>]]></value></jobDescription><jobDescription><name>Requirements</name><value><![CDATA[<ul><li>SVA</li></ul>]]></value></jobDescription></jobDescriptions><createdAt>2026-09-01T10:00:00+00:00</createdAt></position>`;
+ const feed=`<?xml version="1.0" encoding="UTF-8"?><workzag-jobs>${position(1,"Formal Verification Engineer","Hemel Hempstead")}${position(2,"Digital Design Engineer","Dresden, DE")}</workzag-jobs>`;
+ const events=await hostedRun("personio",{},{[url]:feed}),stored=events.filter(event=>event.event==="job").map(event=>event.payload),final=events.at(-1);
+ assert.equal(final.event,"completed",JSON.stringify(final));assert.equal(final.payload.complete,true);assert.equal(final.payload.boardTotal,2);assert.equal(final.payload.boardTotalExact,true);
+ assert.equal(stored[0].title,"Formal Verification Engineer");assert.equal(stored[0].externalId,"1");assert.equal(stored[0].canonicalUrl,"https://fixture.jobs.personio.de/job/1");
+ assert.match(stored[0].descriptionText,/Prove it formally/);assert.match(stored[0].descriptionText,/SVA/);assert.match(String(stored[0].location),/Hemel Hempstead/);
+ const single=await hostedRun("personio",{},{[url]:`<workzag-jobs>${position(9,"Only","Porto")}</workzag-jobs>`});assert.equal(single.at(-1).payload.boardTotal,1,"one position is still a list");
+ const duplicate=await hostedRun("personio",{},{[url]:`<workzag-jobs>${position(1,"A","X")}${position(1,"A","X")}</workzag-jobs>`});assert.equal(duplicate.at(-1).payload.complete,false);
+ const html=await hostedRun("personio",{},{[url]:"<html><body>Page Not Found</body></html>"});assert.equal(html.at(-1).event,"failed");assert.equal(html.at(-1).payload.code,"parse_error");
+});
+
+test("Personio positions without an inline description defer to the vacancy page and read it",async()=>{
+ const url="https://fixture.jobs.personio.de/xml",page="https://fixture.jobs.personio.de/job/3";
+ const feed=`<workzag-jobs><position><id>3</id><office>Dresden, DE</office><name>NPU Architect</name><jobDescriptions></jobDescriptions><createdAt>2026-09-01T10:00:00+00:00</createdAt></position></workzag-jobs>`;
+ const html='<html><body><main><div><div class="page_jobContainer_x"><div class="page_jobHeader_x"><h1>NPU Architect</h1><a>Apply for this job</a></div><div><p>Architect the accelerator datapath.</p><ul><li>RTL</li></ul></div></div></div></main></body></html>';
+ const routes={[url]:feed,[page]:html};
+ const listed=await hostedRun("personio",{},routes,{deferDetails:true}),pending=listed.find(event=>event.event==="job").payload;
+ assert.equal(pending.descriptionStatus,"pending");assert.equal(pending.detailUrl,page);
+ const enriched=await hostedRun("personio",{},routes,{enrichmentJobs:[{...pending,jobId:"stored"}],command:"enrich_source"}),detail=enriched.find(event=>event.event==="enriched_job")?.payload;
+ assert.equal(detail?.descriptionStatus,"complete",JSON.stringify(enriched.at(-1)));assert.match(detail.descriptionText,/Architect the accelerator datapath/);
+ const inline=await hostedRun("personio",{},routes),job=inline.find(event=>event.event==="job").payload;
+ assert.equal(job.descriptionStatus,"complete");assert.match(job.descriptionText,/Architect the accelerator datapath/);assert.doesNotMatch(job.descriptionText,/Apply for this job/);
+ const broken=await hostedRun("personio",{},{[url]:feed,[page]:"<html><body><main><div><div><h1>NPU</h1></div></div></main></body></html>"});assert.equal(broken.at(-1).event,"failed");
 });

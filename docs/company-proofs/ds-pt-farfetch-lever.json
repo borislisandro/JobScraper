@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Farfetch (Lever)",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T17:30:57.442Z",
+  "finishedAt": "2026-10-30T17:31:08.565Z",
+  "source": {
+    "id": "farfetch-lever",
+    "name": "Farfetch (Lever)",
+    "baseUrl": "https://jobs.lever.co/farfetch",
+    "adapterId": "lever",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "token": "farfetch",
+      "maxPages": 500,
+      "expectedHost": "api.lever.co"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "318ab3511b786df19abe92cf2374bc1ac8a4e0c6c2e73f1a57ef50f1e2e1c494",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "farfetch-lever",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 43,
+        "persisted": 43,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 4806,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 4806,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 4054,
+              "body": 703,
+              "browser": 0,
+              "adapterOther": 29,
+              "emit": 8
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 4054,
+                "bodyMs": 703
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 43,
+    "uniqueIdentities": 43,
+    "uniqueHashes": 43,
+    "samples": [
+      {
+        "externalId": "0b01e28a-ab56-4a3b-a843-2795c3faad1c",
+        "title": "AI & Automation Engineer",
+        "company": "Farfetch (Lever)",
+        "location": "Porto",
+        "postedAt": "2026-10-19",
+        "canonicalUrl": "https://jobs.lever.co/farfetch/0b01e28a-ab56-4a3b-a843-2795c3faad1c",
+        "applyUrl": "https://jobs.lever.co/farfetch/0b01e28a-ab56-4a3b-a843-2795c3faad1c",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6611
+      },
+      {
+        "externalId": "5a82f09b-f9ca-4a42-9515-a8f55c61a592",
+        "title": "Legal Counsel - Regulatory",
+        "company": "Farfetch (Lever)",
+        "location": "UK London, United Kingdom",
+        "postedAt": "2026-10-07",
+        "canonicalUrl": "https://jobs.lever.co/farfetch/5a82f09b-f9ca-4a42-9515-a8f55c61a592",
+        "applyUrl": "https://jobs.lever.co/farfetch/5a82f09b-f9ca-4a42-9515-a8f55c61a592",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5372
+      },
+      {
+        "externalId": "66f49027-21ad-4659-8eb4-5aa004c94323",
+        "title": "Translator (Product Information) - Japanese",
+        "company": "Farfetch (Lever)",
+        "location": "UK London, United Kingdom",
+        "postedAt": "2026-08-14",
+        "canonicalUrl": "https://jobs.lever.co/farfetch/66f49027-21ad-4659-8eb4-5aa004c94323",
+        "applyUrl": "https://jobs.lever.co/farfetch/66f49027-21ad-4659-8eb4-5aa004c94323",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6111
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "farfetch-lever",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 43,
+        "requests": 1,
+        "skipped": 43,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 5775,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 5775,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 12,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 5046,
+              "body": 705,
+              "browser": 0,
+              "adapterOther": 10,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 5046,
+                "bodyMs": 705
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

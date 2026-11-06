@@ -1,0 +1,28 @@
+{
+ "id": "raspberry-pi",
+ "name": "Raspberry Pi",
+ "baseUrl": "https://apply.workable.com/raspberrypi/",
+ "adapterId": "workable",
+ "configJson": {
+  "token": "raspberrypi",
+  "maxPages": 5,
+  "expectedHost": "apply.workable.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 7,
+   "roleTitles": 4,
+   "roleTitlesInTargetCountries": 4,
+   "examples": [
+    "DFT Engineer — Cambridge, England, United Kingdom",
+    "Digital IC Implementation Engineer — Cambridge, England, United Kingdom",
+    "Experienced IC Design Engineer — Cambridge, England, United Kingdom",
+    "Senior FPGA Prototyping Engineer — Cambridge, England, United Kingdom"
+   ]
+  }
+ }
+}

@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "name": "Arteris",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:41:30.068Z",
+  "finishedAt": "2026-11-06T19:41:33.686Z",
+  "source": {
+    "id": "arteris",
+    "name": "Arteris",
+    "baseUrl": "https://jobs.jobvite.com/arteris/jobs?nl=1",
+    "adapterId": "arteris",
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.jobvite.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "b4195f0bd101fc2f5199cf2c6e9327914b57c75fe6f7ea35c2c34954ca25c932",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "651692d5e3e5faa1529cbca77c6ddc1d5c5141703e5c03af0c584ccd0bccb8a1",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arteris",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 27,
+        "persisted": 27,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 647,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 647,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 34,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 432,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 172,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 432,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 27,
+    "uniqueIdentities": 27,
+    "uniqueHashes": 27,
+    "samples": [
+      {
+        "externalId": "oknJzfwJ",
+        "title": "Sales Application Engineer H/F",
+        "company": "Arteris",
+        "location": null,
+        "postedAt": null,
+        "canonicalUrl": "https://jobs.jobvite.com/arteris/job/oknJzfwJ",
+        "applyUrl": "https://jobs.jobvite.com/arteris/job/oknJzfwJ",
+        "descriptionStatus": "pending",
+        "descriptionChars": 23
+      },
+      {
+        "externalId": "ovLmAfwW",
+        "title": "Principal Design Verification Engineer",
+        "company": "Arteris",
+        "location": "Biot, France",
+        "postedAt": null,
+        "canonicalUrl": "https://jobs.jobvite.com/arteris/job/ovLmAfwW",
+        "applyUrl": "https://jobs.jobvite.com/arteris/job/ovLmAfwW",
+        "descriptionStatus": "pending",
+        "descriptionChars": 11
+      },
+      {
+        "externalId": "oS6dvfwq",
+        "title": "Technical Domain Engineer",
+        "company": "Arteris",
+        "location": "Kraków, Poland",
+        "postedAt": null,
+        "canonicalUrl": "https://jobs.jobvite.com/arteris/job/oS6dvfwq",
+        "applyUrl": "https://jobs.jobvite.com/arteris/job/oS6dvfwq",
+        "descriptionStatus": "pending",
+        "descriptionChars": 9
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arteris",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1831,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1831,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 1136,
+              "backoff": 0,
+              "response": 469,
+              "body": 15,
+              "browser": 0,
+              "adapterOther": 201,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 1136,
+                "backoffMs": 0,
+                "responseMs": 469,
+                "bodyMs": 15
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "oknJzfwJ",
+        "title": "Sales Application Engineer H/F",
+        "company": "Arteris",
+        "location": "Paris, France; Montigny le Bretonneux, Paris; Biot, France",
+        "postedAt": null,
+        "canonicalUrl": "https://jobs.jobvite.com/arteris/job/oknJzfwJ",
+        "applyUrl": "https://jobs.jobvite.com/arteris/job/oknJzfwJ",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3213
+      },
+      {
+        "externalId": "ovLmAfwW",
+        "title": "Principal Design Verification Engineer",
+        "company": "Arteris",
+        "location": "Biot, France",
+        "postedAt": null,
+        "canonicalUrl": "https://jobs.jobvite.com/arteris/job/ovLmAfwW",
+        "applyUrl": "https://jobs.jobvite.com/arteris/job/ovLmAfwW",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2357
+      },
+      {
+        "externalId": "oS6dvfwq",
+        "title": "Technical Domain Engineer",
+        "company": "Arteris",
+        "location": "Kraków, Poland",
+        "postedAt": null,
+        "canonicalUrl": "https://jobs.jobvite.com/arteris/job/oS6dvfwq",
+        "applyUrl": "https://jobs.jobvite.com/arteris/job/oS6dvfwq",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3719
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "arteris",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 27,
+        "requests": 1,
+        "skipped": 27,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 553,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 553,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 366,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 172,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 366,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

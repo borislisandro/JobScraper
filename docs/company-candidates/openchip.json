@@ -1,0 +1,13 @@
+{
+ "id": "openchip",
+ "name": "Openchip",
+ "baseUrl": "https://openchip.factorialhr.com/",
+ "adapterId": "openchip",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "openchip.factorialhr.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

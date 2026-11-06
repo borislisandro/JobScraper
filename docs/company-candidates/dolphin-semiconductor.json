@@ -1,0 +1,36 @@
+{
+ "id": "dolphin-semiconductor",
+ "name": "Dolphin Semiconductor",
+ "baseUrl": "https://careers.dolphin-semiconductor.com/jobs.json?per_page=100",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "items",
+  "pageParam": "page",
+  "pageStart": 1,
+  "maxPages": 500,
+  "expectedHost": "careers.dolphin-semiconductor.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "url",
+   "externalId": "id",
+   "postedAt": "date_published",
+   "description": "content_html",
+   "location": "_jobposting.jobLocation.0.address"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 4,
+   "roleTitles": 2,
+   "roleTitlesInTargetCountries": 2,
+   "examples": [
+    "Verification Engineer (W/M) — Meylan, Rhone Alpes, FR",
+    "Digital Design Engineer (W/M) — Meylan, Rhone Alpes, FR"
+   ]
+  }
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "id": "olix",
+ "name": "Olix",
+ "baseUrl": "https://jobs.ashbyhq.com/olix",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "olix",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 22,
+   "roleTitles": 3,
+   "roleTitlesInTargetCountries": 3,
+   "examples": [
+    "Senior/Staff Digital Design Engineer — Austin, TX, Bristol, UK",
+    "Senior/Staff Design for Test Engineer — Austin, TX, Bristol, UK",
+    "Digital Design Verification Engineer — Austin, TX, Bristol, UK"
+   ]
+  }
+ }
+}

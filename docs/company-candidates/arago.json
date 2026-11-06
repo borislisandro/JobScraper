@@ -1,0 +1,30 @@
+{
+ "id": "arago",
+ "name": "Arago",
+ "baseUrl": "https://jobs.ashbyhq.com/arago",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "arago",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 15,
+   "roleTitles": 6,
+   "roleTitlesInTargetCountries": 6,
+   "examples": [
+    "Senior Analog IC Design Engineer — Paris Offices, Tel Aviv Offices",
+    "Senior ASIC Architect — Europe Remote, Paris Offices",
+    "Physical Design Engineer — Paris Offices, Tel Aviv Offices",
+    "Digital Verification Engineer — Paris Offices, Tel Aviv Offices",
+    "Mixed-signal Verification Engineer — Paris Offices, Tel Aviv Offices",
+    "Mixed-signal IC Design Engineer — Paris Offices, Tel Aviv Offices"
+   ]
+  }
+ }
+}

@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "name": "Philips",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:24:09.764Z",
+  "finishedAt": "2026-11-06T19:25:12.273Z",
+  "source": {
+    "id": "philips",
+    "name": "Philips",
+    "baseUrl": "https://philips.wd3.myworkdayjobs.com/",
+    "adapterId": "workday",
+    "configJson": {
+      "tenant": "philips",
+      "site": "jobs-and-careers",
+      "maxPages": 500,
+      "expectedHost": "philips.wd3.myworkdayjobs.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "philips",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 810,
+        "persisted": 810,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 41,
+        "boardTotal": 810,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 58738,
+        "pages": 41,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 58738,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 48,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 58371,
+              "body": 225,
+              "browser": 0,
+              "adapterOther": 77,
+              "emit": 16
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 41,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 58371,
+                "bodyMs": 225
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 810,
+    "uniqueIdentities": 810,
+    "uniqueHashes": 810,
+    "samples": [
+      {
+        "externalId": "589617",
+        "title": "Clinical Application Specialist- IGT- Remote, Eastern New York, New Jersey, Philadelphia and Delaware .",
+        "company": "Philips",
+        "location": "United States of America Home Based United States (+6 more)",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/United-States-of-America---Home-Based-United-States/Clinical-Solutions-Delivery-Consultant--New-York--New-Jersey--Philadelphia--Delaware-_589617",
+        "applyUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/United-States-of-America---Home-Based-United-States/Clinical-Solutions-Delivery-Consultant--New-York--New-Jersey--Philadelphia--Delaware-_589617",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "588467",
+        "title": "Chef de Projets Imagerie - Région Ouest",
+        "company": "Philips",
+        "location": "Nantes",
+        "postedAt": "2026-10-20",
+        "canonicalUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Nantes/Chef-de-Projets-Imagerie---Rgion-Ouest_588467-1",
+        "applyUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Nantes/Chef-de-Projets-Imagerie---Rgion-Ouest_588467-1",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "519544",
+        "title": "Banco de Talentos | Pessoas com Deficiência",
+        "company": "Philips",
+        "location": "Brazil Home Based (+3 more)",
+        "postedAt": "2026-10-07",
+        "canonicalUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Brazil---Home-Based/Banco-de-Talentos-PcD_519544",
+        "applyUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Brazil---Home-Based/Banco-de-Talentos-PcD_519544",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "philips",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1357,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1357,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1332,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1332,
+                "bodyMs": 10
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "589617",
+        "title": "Clinical Application Specialist- IGT- Remote, Eastern New York, New Jersey, Philadelphia and Delaware .",
+        "company": "Philips",
+        "location": "United States of America - Home Based, United States",
+        "postedAt": "2026-11-06",
+        "canonicalUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/United-States-of-America---Home-Based-United-States/Clinical-Solutions-Delivery-Consultant--New-York--New-Jersey--Philadelphia--Delaware-_589617",
+        "applyUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/United-States-of-America---Home-Based-United-States/Clinical-Solutions-Delivery-Consultant--New-York--New-Jersey--Philadelphia--Delaware-_589617",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6118
+      },
+      {
+        "externalId": "588467",
+        "title": "Chef de Projets Imagerie - Région Ouest",
+        "company": "Philips",
+        "location": "Nantes",
+        "postedAt": "2026-10-20",
+        "canonicalUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Nantes/Chef-de-Projets-Imagerie---Rgion-Ouest_588467-1",
+        "applyUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Nantes/Chef-de-Projets-Imagerie---Rgion-Ouest_588467-1",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5469
+      },
+      {
+        "externalId": "519544",
+        "title": "Banco de Talentos | Pessoas com Deficiência",
+        "company": "Philips",
+        "location": "Brazil - Home Based",
+        "postedAt": "2026-10-07",
+        "canonicalUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Brazil---Home-Based/Banco-de-Talentos-PcD_519544",
+        "applyUrl": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Brazil---Home-Based/Banco-de-Talentos-PcD_519544",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2871
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "philips",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 810,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 1,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1828,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1829,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 27,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1784,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1784,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

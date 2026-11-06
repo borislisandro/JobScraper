@@ -1,7 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 export type Source={id:string;name:string;baseUrl:string;adapterId:string;adapterVersion:string;enabled:boolean;kind:string;disabledReason?:string;robotsOverride:boolean;lastSuccessAt?:string;jobCount:number;closedCount:number};
-export type CatalogCompany={id:string;name:string;country:string;tags:string[];adapterId:string;baseUrl:string;config:Record<string,unknown>;starter:boolean;kind:string;disabledReason?:string|null;verified?:{at:string;jobs:number}|null};
+export type CatalogCompany={id:string;name:string;country:string;tags:string[];adapterId:string;baseUrl:string;config:Record<string,unknown>;profiles?:string[];kind:string;verified?:{at:string;jobs:number}|null};
 export const listCompanyCatalog=()=>invoke<CatalogCompany[]>("list_company_catalog");
+// A profile is a named set of catalog companies (semiconductor, data science, ...). Choosing one adds those
+// companies, switches them on and reads the ones never read; "no profile" (null) changes no source.
+export type ProfileSummary={id:string;name:string;description:string;companies:number;on:number};
+export type ProfilesState={active?:string|null;profiles:ProfileSummary[]};
+export type ProfileApplied={profile?:string|null;added:number;switchedOn:number;switchedOff:number;alreadyFollowing:number;readNow:string[]};
+export const listProfiles=()=>invoke<ProfilesState>("list_profiles");
+export const applyProfile=(profileId:string|null)=>invoke<ProfileApplied>("apply_profile",{profileId});
 export type Job={id:string;sourceId:string;dismissedAt?:string;title:string;company:string;location?:string;workMode?:string;canonicalUrl?:string;applyUrl?:string;descriptionText:string;descriptionStatus:"complete"|"pending"|"failed";postedAt?:string;salaryMin?:number;salaryMax?:number;salaryCurrency?:string;seniority?:string;availability:"active"|"possibly_closed"|"closed"|"archived";applicationStage?:string};
 export type JobPage={items:Job[];total:number;offset:number;hasMore:boolean};
 export type JobDescription={text:string;status:"complete"|"pending"|"failed";error?:string};
@@ -23,7 +30,7 @@ export const REVIEWED_KEY="jobs.reviewedAt";
 // How far back the Jobs list looks. Deliberately not persisted: every launch opens on a year.
 export const POSTED_WINDOWS=[{days:7,label:"Last 7 days"},{days:30,label:"Last 30 days"},{days:90,label:"Last 3 months"},{days:182,label:"Last 6 months"},{days:365,label:"Last year"},{days:null,label:"Any time"}] as const;
 export const DEFAULT_POSTED_WINDOW=365;
-export type Application={id:string;jobId:string;personaId?:string;currentStage:string;recruiterName?:string;recruiterEmail?:string;recruiterPhone?:string;sourceAttribution?:string;rejectionReason?:string;rejectionCategory?:string;withdrawnReason?:string;acceptedAt?:string;appliedAt?:string;title?:string;company?:string;pendingConfirmation:boolean};
+export type Application={id:string;jobId:string;personaId?:string;currentStage:string;recruiterName?:string;recruiterEmail?:string;recruiterPhone?:string;sourceAttribution?:string;rejectionReason?:string;rejectionCategory?:string;withdrawnReason?:string;acceptedAt?:string;appliedAt?:string;title?:string;company?:string;pendingConfirmation:boolean;canonicalUrl?:string;applyUrl?:string};
 export type ApplicationEvent={id:string;eventType:string;fromStage?:string;toStage?:string;reason?:string;occurredAt:string;payloadJson:string};export type ApplicationNote={id:string;body:string;createdAt:string;updatedAt?:string};export type ApplicationDocument={id:string;kind:string;documentType:string;filename:string;mimeType:string;sha256:string;size:number;eventId?:string;createdAt:string};export type ApplicationDetails={application:Application;sourceName?:string;sourceUrl?:string;firstResponseAt?:string;events:ApplicationEvent[];notes:ApplicationNote[];documents:ApplicationDocument[]};export type RestoreStatus={applied:boolean;restart_required:boolean;message:string};export type WorkerEvent={event:string;runId:string;payload:Record<string,unknown>};
 export type ApplicationDocumentInput={applicationId:string;documentType:string;filename:string;mimeType:string;eventId?:string};
 export const MAX_ATTACHMENT_BYTES=20*1024*1024;

@@ -1,0 +1,35 @@
+{
+ "id": "prophesee",
+ "name": "Prophesee",
+ "baseUrl": "https://careers.prophesee.ai/jobs.json?per_page=100",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "items",
+  "pageParam": "page",
+  "pageStart": 1,
+  "maxPages": 500,
+  "expectedHost": "careers.prophesee.ai",
+  "fieldMap": {
+   "title": "title",
+   "url": "url",
+   "externalId": "id",
+   "postedAt": "date_published",
+   "description": "content_html",
+   "location": "_jobposting.jobLocation.0.address"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 9,
+   "roleTitles": 1,
+   "roleTitlesInTargetCountries": 1,
+   "examples": [
+    "Digital IC Verification Engineer — Paris, FR"
+   ]
+  }
+ }
+}

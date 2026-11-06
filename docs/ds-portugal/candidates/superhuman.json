@@ -1,0 +1,14 @@
+{
+ "id": "superhuman",
+ "name": "Superhuman",
+ "baseUrl": "https://jobs.ashbyhq.com/superhuman%20platform%20inc",
+ "adapterId": "ashby",
+ "configJson": {
+  "token": "superhuman platform inc",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

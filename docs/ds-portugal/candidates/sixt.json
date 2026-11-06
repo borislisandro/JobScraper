@@ -1,0 +1,13 @@
+{
+ "id": "sixt",
+ "name": "SIXT (Portugal)",
+ "baseUrl": "https://jobs.smartrecruiters.com/SIXT",
+ "adapterId": "sixt",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

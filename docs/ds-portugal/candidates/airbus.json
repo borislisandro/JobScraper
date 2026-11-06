@@ -1,0 +1,16 @@
+{
+ "id": "airbus",
+ "name": "Airbus (Portugal)",
+ "baseUrl": "https://ag.wd3.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "configJson": {
+  "maxPages": 500,
+  "site": "Airbus",
+  "tenant": "ag",
+  "query": "Portugal",
+  "expectedHost": "ag.wd3.myworkdayjobs.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

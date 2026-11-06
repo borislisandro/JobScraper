@@ -1,0 +1,31 @@
+{
+ "id": "kalray",
+ "name": "Kalray",
+ "baseUrl": "https://www.kalrayinc.com/wp-json/wp/v2/jobs?per_page=100&_embed=1",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "",
+  "maxPages": 5,
+  "expectedHost": "www.kalrayinc.com",
+  "fieldMap": {
+   "title": "title.rendered",
+   "url": "link",
+   "externalId": "id",
+   "postedAt": "date",
+   "description": "content.rendered",
+   "location": "_embedded.wp:term.1.0.name"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 15,
+   "roleTitles": 2,
+   "roleTitlesInTargetCountries": 0,
+   "examples": []
+  }
+ }
+}

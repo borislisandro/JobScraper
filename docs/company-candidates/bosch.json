@@ -1,0 +1,29 @@
+{
+ "id": "bosch",
+ "name": "Bosch",
+ "baseUrl": "https://jobs.smartrecruiters.com/BoschGroup",
+ "adapterId": "bosch",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 779,
+   "roleTitles": 7,
+   "roleTitlesInTargetCountries": 7,
+   "examples": [
+    "ASIC Analog Designer (f/m/div.) — München, BY, DE",
+    "ASIC Digital Lead - ATPG & Methodology (f/m/div.) — Reutlingen, BW, DE",
+    "ASIC Digital Design Engineer (f/m/div.) — München, DE",
+    "Lead Engineer Analog ASIC Design (f/m/div.) — Reutlingen, BW, DE",
+    "Digital SoC ASIC Physical Implementation Engineer (f/m/div.) — Dresden, SN, DE",
+    "PhD – Agentische KI zur Beschleunigung der ASIC-Entwicklung (w/m/div.) — Dresden, SN, DE"
+   ]
+  }
+ }
+}

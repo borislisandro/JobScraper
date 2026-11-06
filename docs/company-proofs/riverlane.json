@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "name": "Riverlane",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:23:22.413Z",
+  "finishedAt": "2026-11-06T19:23:24.615Z",
+  "source": {
+    "id": "riverlane",
+    "name": "Riverlane",
+    "baseUrl": "https://job-boards.greenhouse.io/riverlane",
+    "adapterId": "greenhouse",
+    "configJson": {
+      "token": "riverlane",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "riverlane",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 37,
+        "persisted": 37,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 37,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 280,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 280,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 71,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 192,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 192,
+                "bodyMs": 6
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 37,
+    "uniqueIdentities": 37,
+    "uniqueHashes": 37,
+    "samples": [
+      {
+        "externalId": "5019307101",
+        "title": "AI/ML Engineer",
+        "company": "Riverlane",
+        "location": "Delft, NL",
+        "postedAt": "2026-10-28",
+        "canonicalUrl": "https://www.riverlane.com/jobs?gh_jid=5019307101#vacancies",
+        "applyUrl": "https://www.riverlane.com/jobs?gh_jid=5019307101#vacancies",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "4878402101",
+        "title": "Quantum Error Correction Researcher (qLDPC)",
+        "company": "Riverlane",
+        "location": "Cambridge, UK",
+        "postedAt": "2026-05-29",
+        "canonicalUrl": "https://www.riverlane.com/jobs?gh_jid=4878402101#vacancies",
+        "applyUrl": "https://www.riverlane.com/jobs?gh_jid=4878402101#vacancies",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "4772973101",
+        "title": "Verification / Senior Verification Engineer",
+        "company": "Riverlane",
+        "location": "Cambridge, UK",
+        "postedAt": "2026-02-04",
+        "canonicalUrl": "https://www.riverlane.com/jobs?gh_jid=4772973101#vacancies",
+        "applyUrl": "https://www.riverlane.com/jobs?gh_jid=4772973101#vacancies",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "riverlane",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1067,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1066,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 535,
+              "backoff": 0,
+              "response": 500,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 535,
+                "backoffMs": 0,
+                "responseMs": 500,
+                "bodyMs": 10
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "5019307101",
+        "title": "AI/ML Engineer",
+        "company": "Riverlane",
+        "location": "Delft, NL",
+        "postedAt": "2026-10-28",
+        "canonicalUrl": "https://www.riverlane.com/jobs?gh_jid=5019307101#vacancies",
+        "applyUrl": "https://www.riverlane.com/jobs?gh_jid=5019307101#vacancies",
+        "descriptionStatus": "complete",
+        "descriptionChars": 10251
+      },
+      {
+        "externalId": "4878402101",
+        "title": "Quantum Error Correction Researcher (qLDPC)",
+        "company": "Riverlane",
+        "location": "Cambridge, UK",
+        "postedAt": "2026-05-29",
+        "canonicalUrl": "https://www.riverlane.com/jobs?gh_jid=4878402101#vacancies",
+        "applyUrl": "https://www.riverlane.com/jobs?gh_jid=4878402101#vacancies",
+        "descriptionStatus": "complete",
+        "descriptionChars": 19960
+      },
+      {
+        "externalId": "4772973101",
+        "title": "Verification / Senior Verification Engineer",
+        "company": "Riverlane",
+        "location": "Cambridge, UK",
+        "postedAt": "2026-02-04",
+        "canonicalUrl": "https://www.riverlane.com/jobs?gh_jid=4772973101#vacancies",
+        "applyUrl": "https://www.riverlane.com/jobs?gh_jid=4772973101#vacancies",
+        "descriptionStatus": "complete",
+        "descriptionChars": 11937
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "riverlane",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 37,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 37,
+        "requests": 1,
+        "skipped": 37,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 217,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 217,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 195,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 195,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

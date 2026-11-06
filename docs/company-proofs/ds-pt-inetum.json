@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "name": "Inetum",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:38:53.435Z",
+  "finishedAt": "2026-10-30T20:38:56.930Z",
+  "source": {
+    "id": "inetum",
+    "name": "Inetum",
+    "baseUrl": "https://jobs.smartrecruiters.com/Inetum2",
+    "adapterId": "inetum",
+    "configJson": {
+      "maxPages": 500,
+      "expectedHost": "jobs.smartrecruiters.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "inetum",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 455,
+        "persisted": 455,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 5,
+        "boardTotal": 455,
+        "boardTotalExact": true,
+        "mode": "direct-company",
+        "warnings": [],
+        "timingMs": 1745,
+        "pages": 5,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1746,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 986,
+              "backoff": 0,
+              "response": 700,
+              "body": 18,
+              "browser": 0,
+              "adapterOther": 25,
+              "emit": 6
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 5,
+                "pacingMs": 986,
+                "backoffMs": 0,
+                "responseMs": 700,
+                "bodyMs": 18
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 455,
+    "uniqueIdentities": 455,
+    "uniqueHashes": 455,
+    "samples": [
+      {
+        "externalId": "744000158797217",
+        "title": "Telecommunications & Cybersecurity Operations | Internship Program",
+        "company": "Inetum",
+        "location": "Açores, Aveiro District, PT",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Inetum2/744000158797217",
+        "applyUrl": "https://jobs.smartrecruiters.com/Inetum2/744000158797217",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000126301419",
+        "title": "SAP BTP Senior consultant (Lisbon or Porto)",
+        "company": "Inetum",
+        "location": "Lisbon, Lisbon, PT",
+        "postedAt": "2026-05-13",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Inetum2/744000126301419",
+        "applyUrl": "https://jobs.smartrecruiters.com/Inetum2/744000126301419",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "744000035181092",
+        "title": "SAP SF Employee Central Consultant",
+        "company": "Inetum",
+        "location": "Portugal, PORTUGAL, PT",
+        "postedAt": "2025-01-07",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Inetum2/744000035181092",
+        "applyUrl": "https://jobs.smartrecruiters.com/Inetum2/744000035181092",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.smartrecruiters.com."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "inetum",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 962,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 962,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 317,
+              "backoff": 0,
+              "response": 483,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 143,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 317,
+                "backoffMs": 0,
+                "responseMs": 483,
+                "bodyMs": 9
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "744000158797217",
+        "title": "Telecommunications & Cybersecurity Operations | Internship Program",
+        "company": "Inetum",
+        "location": "Açores, Aveiro District, PT",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Inetum2/744000158797217",
+        "applyUrl": "https://jobs.smartrecruiters.com/Inetum2/744000158797217",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2151
+      },
+      {
+        "externalId": "744000126301419",
+        "title": "SAP BTP Senior consultant (Lisbon or Porto)",
+        "company": "Inetum",
+        "location": "Lisbon, Lisbon, PT",
+        "postedAt": "2026-05-13",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Inetum2/744000126301419",
+        "applyUrl": "https://jobs.smartrecruiters.com/Inetum2/744000126301419",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2786
+      },
+      {
+        "externalId": "744000035181092",
+        "title": "SAP SF Employee Central Consultant",
+        "company": "Inetum",
+        "location": "Portugal, PORTUGAL, PT",
+        "postedAt": "2025-01-07",
+        "canonicalUrl": "https://jobs.smartrecruiters.com/Inetum2/744000035181092",
+        "applyUrl": "https://jobs.smartrecruiters.com/Inetum2/744000035181092",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1090
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      },
+      {
+        "code": "host_drift",
+        "message": "Responses now come from api.smartrecruiters.com, not the configured expectedHost jobs.smartrecruiters.com."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "inetum",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 455,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 196,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 196,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 172,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 172,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

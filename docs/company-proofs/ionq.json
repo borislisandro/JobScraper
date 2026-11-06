@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "name": "IonQ",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:23:27.770Z",
+  "finishedAt": "2026-11-06T19:23:29.848Z",
+  "source": {
+    "id": "ionq",
+    "name": "IonQ",
+    "baseUrl": "https://job-boards.greenhouse.io/ionq",
+    "adapterId": "greenhouse",
+    "configJson": {
+      "token": "ionq",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ionq",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 120,
+        "persisted": 120,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 120,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 218,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 218,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 187,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 14,
+              "emit": 2
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 187,
+                "bodyMs": 6
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 120,
+    "uniqueIdentities": 120,
+    "uniqueHashes": 120,
+    "samples": [
+      {
+        "externalId": "6228533004",
+        "title": "Account Executive, NRO & Combatant Commands",
+        "company": "IonQ",
+        "location": "College Park, Maryland, United States",
+        "postedAt": "2026-10-20",
+        "canonicalUrl": "https://ionq.com/job?gh_jid=6228533004",
+        "applyUrl": "https://ionq.com/job?gh_jid=6228533004",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "6210596004",
+        "title": "Senior Quantum Field Engineer - Singapore",
+        "company": "IonQ",
+        "location": "Singapore",
+        "postedAt": "2026-10-06",
+        "canonicalUrl": "https://ionq.com/job?gh_jid=6210596004",
+        "applyUrl": "https://ionq.com/job?gh_jid=6210596004",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "6192752004",
+        "title": "Technical Programme Manager, System Delivery",
+        "company": "IonQ",
+        "location": "Oxford, England, United Kingdom",
+        "postedAt": "2026-09-29",
+        "canonicalUrl": "https://ionq.com/job?gh_jid=6192752004",
+        "applyUrl": "https://ionq.com/job?gh_jid=6192752004",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ionq",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1018,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1017,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 479,
+              "backoff": 0,
+              "response": 509,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 479,
+                "backoffMs": 0,
+                "responseMs": 509,
+                "bodyMs": 9
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "6228533004",
+        "title": "Account Executive, NRO & Combatant Commands",
+        "company": "IonQ",
+        "location": "College Park, Maryland, United States",
+        "postedAt": "2026-10-20",
+        "canonicalUrl": "https://ionq.com/job?gh_jid=6228533004",
+        "applyUrl": "https://ionq.com/job?gh_jid=6228533004",
+        "descriptionStatus": "complete",
+        "descriptionChars": 11489
+      },
+      {
+        "externalId": "6210596004",
+        "title": "Senior Quantum Field Engineer - Singapore",
+        "company": "IonQ",
+        "location": "Singapore",
+        "postedAt": "2026-10-06",
+        "canonicalUrl": "https://ionq.com/job?gh_jid=6210596004",
+        "applyUrl": "https://ionq.com/job?gh_jid=6210596004",
+        "descriptionStatus": "complete",
+        "descriptionChars": 11333
+      },
+      {
+        "externalId": "6192752004",
+        "title": "Technical Programme Manager, System Delivery",
+        "company": "IonQ",
+        "location": "Oxford, England, United Kingdom",
+        "postedAt": "2026-09-29",
+        "canonicalUrl": "https://ionq.com/job?gh_jid=6192752004",
+        "applyUrl": "https://ionq.com/job?gh_jid=6192752004",
+        "descriptionStatus": "complete",
+        "descriptionChars": 9305
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "ionq",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 120,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 120,
+        "requests": 1,
+        "skipped": 120,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 219,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 219,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 196,
+              "body": 8,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 196,
+                "bodyMs": 8
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

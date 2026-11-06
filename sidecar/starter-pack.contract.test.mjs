@@ -1,26 +1,25 @@
-// R5: nothing connected the starter pack to the adapter layer, so a seeded source
-// could crash requestFor() or silently build a wrong URL and no test would notice
-// until a live run failed (this is exactly how Workday's missing "site" segment and
-// the pre-fix Eightfold/iCIMS/Phenom defaults shipped undetected). This fixture is
-// generated from install_starter_pack itself — see
-// src-tauri/src/db.rs::starter_pack_matches_the_checked_in_adapter_contract_fixture,
-// which fails if db.rs's seed ever diverges from the checked-in file below. Reading
-// the real seeded shape here, rather than a hand-copied one, is what keeps this test
-// from silently drifting off the Rust source of truth.
+// R5: nothing connected the catalog to the adapter layer, so a seeded source could crash requestFor()
+// or silently build a wrong URL and no test would notice until a live run failed (this is exactly how
+// Workday's missing "site" segment and the pre-fix Eightfold/iCIMS/Phenom defaults shipped undetected).
+// The fixture holds every source a profile can seed. It is generated from the app itself — see
+// src-tauri/src/db.rs::profile_sources_match_the_checked_in_adapter_contract_fixture, which fails if what
+// the profiles seed ever diverges from the checked-in file — so this test reads the real seeded shape
+// rather than a hand-copied one and cannot drift from the Rust source of truth.
 import assert from "node:assert/strict";import {readFileSync}from "node:fs";import {test}from "node:test";
 import {requestFor}from "./adapters.mjs";import {adapters}from "./worker.mjs";import {companyAdapters}from "./company-adapters.mjs";
-const fixture=JSON.parse(readFileSync(new URL("./starter-pack.fixture.json",import.meta.url),"utf8"));
+const fixture=JSON.parse(readFileSync(new URL("./profile-sources.fixture.json",import.meta.url),"utf8"));
 const catalog=JSON.parse(readFileSync(new URL("./company-catalog.json",import.meta.url),"utf8"));
+// The 20 employers the app shipped with before boards were verified one by one. Everything added since carries a recorded live read.
+const ORIGINAL_UNVERIFIED=new Set(["Microchip","Analog Devices","Broadcom","Intel","Marvell","STMicroelectronics","NVIDIA","GlobalFoundries","Micron","Qualcomm","Arm","AMD","Cisco","Apple","MediaTek","u-blox","Google","SK hynix","NXP","Ericsson"]);
 test("every catalog company has a supported, fully configured request",()=>{
  assert.ok(catalog.companies.length>=134,"the original catalog must remain available as new boards are added");
  assert.equal(new Set(catalog.companies.map(company=>company.id)).size,catalog.companies.length,"catalog IDs must stay unique");
  assert.equal(new Set(catalog.companies.map(company=>company.baseUrl)).size,catalog.companies.length,"catalog boards must stay unique");
- assert.equal(catalog.companies.filter(company=>company.starter).length,21);
  for(const company of catalog.companies){
-  if(company.kind==="reference"){assert.equal(company.adapterId,"reference");assert.equal(company.starter,true);continue}
+  if(company.kind==="reference"){assert.equal(company.adapterId,"reference");assert.equal(company.profiles,undefined,"a reference bookmark is never part of a profile");continue}
   assert.ok(adapters[company.adapterId]&&!adapters[company.adapterId].unsupported,`${company.name}: unsupported adapter`);
   assert.equal(new URL(company.baseUrl).protocol,"https:");
-  if(!company.starter){assert.match(company.verified?.at||"",/^\d{4}-\d{2}-\d{2}$/);assert.ok(company.verified.jobs>0,`${company.name}: no live verification recorded`)}
+  if(!ORIGINAL_UNVERIFIED.has(company.name)){assert.match(company.verified?.at||"",/^\d{4}-\d{2}-\d{2}$/);assert.ok(company.verified.jobs>0,`${company.name}: no live verification recorded`)}
   const board=companyAdapters[company.adapterId];
   if(board){assert.equal(new URL(company.baseUrl).host,board.host,company.name);continue}
   // The generic adapters (json, rss, static-css, static-xpath) fetch the source's own base URL
@@ -32,13 +31,32 @@ test("every catalog company has a supported, fully configured request",()=>{
   const built=requestFor(company.adapterId,company.baseUrl,{...company.config,...(company.adapterId==="apple"?{token:"runtime-csrf"}:{})});
   assert.equal(new URL(built.url).protocol,"https:",company.name);assert.equal(typeof built.next,"function",company.name);
  }
- for(const starter of fixture)assert.equal(starter.configJson.starterPackVersion,catalog.version,starter.name);
+ for(const seeded of fixture)assert.equal(seeded.configJson.starterPackVersion,catalog.version,seeded.name);
+});
+
+test("profiles are well formed and every company in one is a real, active board",()=>{
+ assert.ok(Array.isArray(catalog.profiles)&&catalog.profiles.length>=2);
+ const ids=catalog.profiles.map(profile=>profile.id);
+ assert.equal(new Set(ids).size,ids.length,"profile ids are unique");
+ for(const profile of catalog.profiles){assert.match(profile.id,/^[a-z][a-z0-9-]*$/);assert.ok(profile.name&&profile.description,profile.id);
+  assert.ok(catalog.companies.filter(company=>company.profiles?.includes(profile.id)).length>=10,`${profile.id}: a profile needs companies`)}
+ for(const company of catalog.companies){
+  assert.equal("starter" in company,false,`${company.name}: the starter flag is replaced by profiles`);
+  assert.equal("disabledReason" in company,false,`${company.name}: a catalog entry carries no disabled note`);
+  for(const id of company.profiles||[])assert.ok(ids.includes(id),`${company.name}: unknown profile ${id}`);
+  if(company.profiles?.length)assert.equal(company.kind,"active",`${company.name}: only active boards are in a profile`);
+ }
+ const inAProfile=catalog.companies.filter(company=>company.profiles?.length).length;
+ assert.equal(fixture.length,inAProfile,"the fixture holds exactly what the profiles can seed");
 });
 test("expansion entries have a full live proof matching their shipped configuration",()=>{
  const tracker=JSON.parse(readFileSync(new URL("../docs/company-support-tracker.json",import.meta.url),"utf8"));
- assert.equal(tracker.companies.length,269);
- assert.equal(new Set(tracker.companies.map(company=>company.id)).size,269);
- assert.deepEqual(tracker.companies.map(company=>company.sequence),Array.from({length:269},(_,index)=>index+1));
+ // The tracker grows as employers are admitted; what must hold is that it never shrinks below the
+ // original 269 and that ids and sequence numbers stay unique and contiguous.
+ const total=tracker.companies.length;
+ assert.ok(total>=269);
+ assert.equal(new Set(tracker.companies.map(company=>company.id)).size,total);
+ assert.deepEqual(tracker.companies.map(company=>company.sequence),Array.from({length:total},(_,index)=>index+1));
  for(const row of tracker.companies){
   const company=catalog.companies.find(company=>company.name===row.name);
   if(row.status!=="supported"){assert.equal(company,undefined,`${row.name}: unfinished work entered the catalog`);continue}
@@ -49,7 +67,7 @@ test("expansion entries have a full live proof matching their shipped configurat
   assert.equal(proof.source.name,company.name);assert.equal(proof.source.adapterId,company.adapterId);
   assert.equal(proof.source.baseUrl,company.baseUrl);assert.deepEqual(proof.source.configJson,company.config);
   // Only the URL guard is asserted here. Robots enforcement is off by choice for this tool, and
-  // matching what install_starter_pack seeds, so a proof either way is valid evidence. The guard is
+  // matching what the profiles seed, so a proof either way is valid evidence. The guard is
   // asserted as "not enabled" rather than "=== false" because that is what the worker itself tests:
   // an omitted flag is off, and a proof is evidence about the run, not about the candidate's style.
   assert.notEqual(proof.source.allowPrivateNetwork,true);
@@ -59,8 +77,7 @@ test("expansion entries have a full live proof matching their shipped configurat
  }
 });
 
-test("every seeded starter source builds a request or throws a declared incomplete",()=>{
- assert.equal(fixture.length,21,"starter pack should still seed all 21 sources");
+test("every profile-seeded source builds a request or throws a declared incomplete",()=>{
  for(const s of fixture){
   const a=adapters[s.adapterId];
   // Company adapters build their own URLs instead of going through requestFor(), so the
@@ -71,6 +88,9 @@ test("every seeded starter source builds a request or throws a declared incomple
   // that is the "disabled with an accurate reason" outcome for the five custom-api
   // sources and the one reference-only source, not a silent wrong URL.
   if(!a||a.unsupported){assert.ok(!a||a.unsupported,`${s.name}: adapter ${s.adapterId} should be a known, declared-unsupported adapter`);continue}
+  // The generic json/rss/css adapters fetch the seeded base URL itself and have no platform request to build; the https check
+  // on the catalog entry already covers them. Only the platform families that derive a request from their settings are built here.
+  if(!a.capabilities.includes("direct-json"))continue;
   try{const built=requestFor(s.adapterId,s.baseUrl,s.configJson);assert.ok(built.url,`${s.name}: requestFor produced no url`)}
   catch(e){assert.match(String(e.message||e),/^incomplete/,`${s.name}: requestFor threw an undeclared error: ${e.message||e}`)}
  }

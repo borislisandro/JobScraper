@@ -1,0 +1,14 @@
+{
+ "id": "vwgds",
+ "name": "Volkswagen Digital Solutions",
+ "baseUrl": "https://jobs.eu.lever.co/vwgds",
+ "adapterId": "lever",
+ "configJson": {
+  "token": "vwgds",
+  "maxPages": 500,
+  "expectedHost": "api.eu.lever.co"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

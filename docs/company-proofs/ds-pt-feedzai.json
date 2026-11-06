@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "name": "Feedzai",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T17:30:50.152Z",
+  "finishedAt": "2026-10-30T17:30:52.526Z",
+  "source": {
+    "id": "feedzai",
+    "name": "Feedzai",
+    "baseUrl": "https://job-boards.greenhouse.io/feedzai",
+    "adapterId": "greenhouse",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "token": "feedzai",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "318ab3511b786df19abe92cf2374bc1ac8a4e0c6c2e73f1a57ef50f1e2e1c494",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "656606450cc28d758308b93e722f9f209b8822febc62620e3a8287ee54b129a7",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "feedzai",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 15,
+        "persisted": 15,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 15,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 230,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 230,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 201,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 10,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 201,
+                "bodyMs": 7
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 15,
+    "uniqueIdentities": 15,
+    "uniqueHashes": 15,
+    "samples": [
+      {
+        "externalId": "7978882",
+        "title": "Advanced Product Manager - Digital Trust",
+        "company": "Feedzai",
+        "location": "Portugal",
+        "postedAt": "2026-06-03",
+        "canonicalUrl": "https://careers.feedzai.com/job_description?gh_jid=7978882",
+        "applyUrl": "https://careers.feedzai.com/job_description?gh_jid=7978882",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "4645410",
+        "title": "Join our Internship Community",
+        "company": "Feedzai",
+        "location": "US Remote",
+        "postedAt": "2022-10-19",
+        "canonicalUrl": "https://careers.feedzai.com/job_description?gh_jid=4645410",
+        "applyUrl": "https://careers.feedzai.com/job_description?gh_jid=4645410",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "7412899",
+        "title": "Software Engineer - Customer Success",
+        "company": "Feedzai",
+        "location": "Portugal",
+        "postedAt": "2025-12-03",
+        "canonicalUrl": "https://careers.feedzai.com/job_description?gh_jid=7412899",
+        "applyUrl": "https://careers.feedzai.com/job_description?gh_jid=7412899",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "feedzai",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1046,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1047,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 14,
+              "pacing": 362,
+              "backoff": 0,
+              "response": 647,
+              "body": 13,
+              "browser": 0,
+              "adapterOther": 10,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 362,
+                "backoffMs": 0,
+                "responseMs": 647,
+                "bodyMs": 13
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "7978882",
+        "title": "Advanced Product Manager - Digital Trust",
+        "company": "Feedzai",
+        "location": "Portugal",
+        "postedAt": "2026-06-03",
+        "canonicalUrl": "https://careers.feedzai.com/job_description?gh_jid=7978882",
+        "applyUrl": "https://careers.feedzai.com/job_description?gh_jid=7978882",
+        "descriptionStatus": "complete",
+        "descriptionChars": 9012
+      },
+      {
+        "externalId": "4645410",
+        "title": "Join our Internship Community",
+        "company": "Feedzai",
+        "location": "US Remote",
+        "postedAt": "2022-10-19",
+        "canonicalUrl": "https://careers.feedzai.com/job_description?gh_jid=4645410",
+        "applyUrl": "https://careers.feedzai.com/job_description?gh_jid=4645410",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3609
+      },
+      {
+        "externalId": "7412899",
+        "title": "Software Engineer - Customer Success",
+        "company": "Feedzai",
+        "location": "Portugal",
+        "postedAt": "2025-12-03",
+        "canonicalUrl": "https://careers.feedzai.com/job_description?gh_jid=7412899",
+        "applyUrl": "https://careers.feedzai.com/job_description?gh_jid=7412899",
+        "descriptionStatus": "complete",
+        "descriptionChars": 7098
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "feedzai",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 15,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 15,
+        "requests": 1,
+        "skipped": 15,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 232,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 232,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 207,
+              "body": 8,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 207,
+                "bodyMs": 8
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

@@ -2,18 +2,23 @@
 // still-being-worked row has to keep its findings, or the next pass rediscovers the same wall.
 // Refuses "supported" outright — that goes through admit-company.mjs, which requires a proof.
 //
-// node scripts/mark-company.mjs <trackerId> blocked --notes "..." [--careers URL] [--adapter id] [--next "..."]
+// node scripts/mark-company.mjs <trackerId> blocked --notes "..." [--careers URL] [--adapter id] [--next "..."] [--create-row --name "Company"]
 import {readFile,writeFile}from "node:fs/promises";
 const statuses=["queued","discovering","implementing","validating","blocked","covered_by_parent"];
 const args=process.argv.slice(2),positional=[],options={};
-for(let i=0;i<args.length;i++)if(args[i].startsWith("--")){const key=args[i].slice(2),value=args[++i];if(value===undefined||value.startsWith("--"))throw Error(`Missing value for --${key}`);options[key]=value}else positional.push(args[i]);
+for(let i=0;i<args.length;i++)if(args[i]==="--create-row")options["create-row"]="";else if(args[i].startsWith("--")){const key=args[i].slice(2),value=args[++i];if(value===undefined||value.startsWith("--"))throw Error(`Missing value for --${key}`);options[key]=value}else positional.push(args[i]);
 const [trackerId,status]=positional;
 if(!statuses.includes(status))throw Error(`Status must be one of: ${statuses.join(", ")}`);
 if(!options.notes)throw Error("--notes is required: record what was observed, not just that it failed");
 const url=new URL("../docs/company-support-tracker.json",import.meta.url);
 const tracker=JSON.parse(await readFile(url,"utf8"));
-const row=tracker.companies.find(company=>company.id===trackerId);
-if(!row)throw Error(`Unknown tracker id: ${trackerId}`);
+let row=tracker.companies.find(company=>company.id===trackerId);
+if(!row&&options["create-row"]!==undefined){
+ if(!options.name)throw Error("--create-row needs --name");
+ row={sequence:tracker.companies.length+1,id:trackerId,name:options.name,category:options.category||"Semiconductor employers in Europe",priority:"P1",status:"queued",
+  officialCareersUrl:options.careers||"",adapterId:null,catalogId:null,lastAttemptAt:null,evidence:[],notes:"",nextAction:"",batch:options.batch||"semiconductor-eu",inScope:true};
+ tracker.companies.push(row)}
+if(!row)throw Error(`Unknown tracker id: ${trackerId} (pass --create-row --name to add it)`);
 if(row.status==="supported")throw Error(`${row.name} is already supported; remove its catalog entry first`);
 const now=new Date().toISOString();
 Object.assign(row,{status,notes:options.notes,lastAttemptAt:now,

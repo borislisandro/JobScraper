@@ -7,6 +7,19 @@ const loadCheerio=()=>cheerioPromise??=import("cheerio").then(module=>cheerio=mo
 export const companyAdapters={
  siemens:{name:"Siemens",host:"jobs.sw.siemens.com",base:"https://jobs.sw.siemens.com"},
  renesas:{name:"Renesas",host:"jobs.renesas.com",base:"https://jobs.renesas.com",smartRecruitersToken:"RenesasElectronics"},
+ // Multinational SmartRecruiters tenants are read through the API's own country filter, so a source aimed at one
+ // country does not page through thousands of unrelated vacancies (Bosch lists 5,000+ worldwide, 779 in Germany).
+ cern:{name:"CERN",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/CERN",smartRecruitersToken:"CERN",smartRecruitersCountry:"ch"},
+ bosch:{name:"Bosch",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/BoschGroup",smartRecruitersToken:"BoschGroup",smartRecruitersCountry:"de"},
+ devoteam:{name:"Devoteam",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Devoteam",smartRecruitersToken:"Devoteam",smartRecruitersCountry:"pt"},
+ "bosch-portugal":{name:"Bosch Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/BoschGroup",smartRecruitersToken:"BoschGroup",smartRecruitersCountry:"pt"},
+ "natixis-portugal":{name:"Natixis in Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/NatixisInPortugal",smartRecruitersToken:"NatixisInPortugal",smartRecruitersCountry:"pt"},
+ inetum:{name:"Inetum",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Inetum2",smartRecruitersToken:"Inetum2",smartRecruitersCountry:"pt"},
+ "act-digital":{name:"act digital",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/AlterSolutions",smartRecruitersToken:"AlterSolutions",smartRecruitersCountry:"pt"},
+ ilof:{name:"iLoF",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",smartRecruitersToken:"ILoF-IntelligentLabOnFiber",smartRecruitersCountry:"pt"},
+ "dbservices-portugal":{name:"DBServices Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/DBServicesPortugal",smartRecruitersToken:"DBServicesPortugal",smartRecruitersCountry:"pt"},
+ sixt:{name:"SIXT",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/SIXT",smartRecruitersToken:"SIXT",smartRecruitersCountry:"pt"},
+ ubiwhere:{name:"Ubiwhere",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Ubiwhere",smartRecruitersToken:"Ubiwhere"},
  "arista-networks":{name:"Arista Networks",host:"www.arista.com",base:"https://www.arista.com",smartRecruitersToken:"AristaNetworks"},
  rambus:{name:"Rambus",host:"careers-rambus.icims.com",base:"https://careers-rambus.icims.com",listing:"https://careers-rambus.icims.com/jobs/search?in_iframe=1",datesOnDetailOnly:true},
  ceva:{name:"CEVA",host:"www.ceva-ip.com",base:"https://www.ceva-ip.com",listing:"https://www.comeet.co/careers-api/2.0/company/76.005/positions?token=67526BE6752D332D33026BE135F033A8&details=true"},
@@ -17,7 +30,7 @@ export const companyAdapters={
  amd:{name:"AMD",host:"careers.amd.com",base:"https://careers.amd.com"},
  // Public search credentials and widget ID published by ASML's careers page JavaScript.
  asml:{name:"ASML",host:"www.asml.com",base:"https://www.asml.com",listing:"https://www.asml.com/en/careers/find-your-job",
-  searchUrl:"https://discover-euc1.sitecorecloud.io/discover/v2/126200477",searchKey:"01-967712c8-5a349c1760436ea6dccfd7bb02bfbe4dc2ccc36c"},
+  searchUrl:"https://discover-euc1.sitecorecloud.io/discover/v2/126200477",tokenUrl:"https://www.asml.com/api/search-token"},
  mediatek:{name:"MediaTek",host:"careers.mediatek.com",base:"https://careers.mediatek.com"},
  google:{name:"Google",host:"www.google.com",base:"https://www.google.com/about/careers/applications/",listing:"https://www.google.com/about/careers/applications/jobs/results/"},
  cisco:{name:"Cisco",host:"careers.cisco.com",base:"https://careers.cisco.com",listing:"https://careers.cisco.com/global/en/search-results"},
@@ -36,7 +49,13 @@ export const companyAdapters={
  // credentials that page hands the browser, read from its own bundle, and the index name is the
  // one its "Job Openings" widget is configured with. Vacancy detail lives on Salesforce Recruit.
  "u-blox":{name:"u-blox",host:"www.u-blox.com",base:"https://www.u-blox.com",
-  algolia:{appId:"L87M8KNOMJ",apiKey:"b5a0aca646f3378b36d8758634d16954",index:"open_positions_en-US"}}
+  algolia:{appId:"L87M8KNOMJ",apiKey:"b5a0aca646f3378b36d8758634d16954",index:"open_positions_en-US"}},
+ // Chip employers on boards whose listing is server-rendered HTML with no JSON behind it. Each one is read from the
+ // page a visitor sees, then enriched from the vacancy page, and none of them publishes a total to reconcile against.
+ openchip:{name:"Openchip",host:"openchip.factorialhr.com",base:"https://openchip.factorialhr.com",listing:"https://openchip.factorialhr.com/"},
+ racyics:{name:"Racyics",host:"racyics.de",base:"https://racyics.de",listing:"https://racyics.de/career/jobs/"},
+ csem:{name:"CSEM",host:"www.csem.ch",base:"https://www.csem.ch",listing:"https://www.csem.ch/en/jobs/"},
+ arteris:{name:"Arteris",host:"jobs.jobvite.com",base:"https://jobs.jobvite.com",listing:"https://jobs.jobvite.com/arteris/jobs?nl=1"}
 };
 export const companyAdapterIds=Object.keys(companyAdapters);
 // Boards whose listing pages publish no posting date. A scrape defers detail pages for speed,
@@ -205,11 +224,21 @@ async function amd(site,{request,maxPages}){
   jobs.push(...pageJobs);if(!pageJobs.length)break;page+=1}
   return{jobs,pages:page-1,complete:jobs.length>=total,total,totalExact:true,warnings:[]}}
 
+// ASML's search used to take one static key; it now hands the page a short-lived bearer token from its own endpoint, which is what the
+// careers page itself requests before every search. The token is fetched once per read and replaced once if Sitecore refuses it.
+async function asmlToken(site,request,force){
+ const data=await json(request,site.tokenUrl,{method:"POST",headers:{accept:"application/json","content-type":"application/json"},body:{force}});
+ if(typeof data?.accessToken!=="string"||!data.accessToken)throw Error("auth_required: ASML did not issue a search token");
+ return data.accessToken}
 async function asml(site,{request,maxPages}){
- const jobs=[],ids=new Set();let offset=0,pages=0,total=null,changed=false;
- do{
-  const payload=await json(request,site.searchUrl,{method:"POST",headers:{accept:"application/json","content-type":"application/json",authorization:site.searchKey},
+ const jobs=[],ids=new Set();let offset=0,pages=0,total=null,changed=false,token=await asmlToken(site,request,false);
+ const search=async()=>json(request,site.searchUrl,{method:"POST",headers:{accept:"application/json","content-type":"application/json",authorization:`Bearer ${token}`},
    body:{context:{page:{uri:site.listing},locale:{country:"us",language:"en"}},widget:{items:[{entity:"content",rfk_id:"asml_job_search",search:{limit:100,offset,content:{}}}]}}});
+ do{
+  let payload;
+  try{payload=await search()}catch(error){
+   if(!/^auth_required/.test(String(error?.message||error)))throw error;
+   token=await asmlToken(site,request,true);payload=await search()}
   const widget=payload?.widgets?.find(item=>item.rfk_id==="asml_job_search");
   if(!Number.isInteger(widget?.total_item)||widget.total_item<0||widget.offset!==offset)
    throw Error("parse_error: Structure changed: ASML search total or offset is invalid");
@@ -405,7 +434,7 @@ async function smartRecruiters(site,context){
  const {request,maxPages}=context,token=encodeURIComponent(site.smartRecruitersToken),jobs=[],ids=new Set();
  let offset=0,pages=0,total=null,unstable=false;
  do{
-  const data=await json(request,`https://api.smartrecruiters.com/v1/companies/${token}/postings?limit=100&offset=${offset}`);
+  const data=await json(request,`https://api.smartrecruiters.com/v1/companies/${token}/postings?limit=100&offset=${offset}${site.smartRecruitersCountry?`&country=${encodeURIComponent(site.smartRecruitersCountry)}`:""}`);
   if(!Number.isInteger(data.totalFound)||data.totalFound<0||data.offset!==offset)throw Error("parse_error: SmartRecruiters pagination is missing or repeated");
   if(total!==null&&total!==data.totalFound)unstable=true;
   total=data.totalFound;
@@ -426,12 +455,74 @@ async function smartRecruiters(site,context){
   warnings:[...warnings,...(unstable?["SmartRecruiters changed its total or repeated a posting while paging; this run cannot close stored jobs."]:[])]};
 }
 
-const scrapers={rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
+// ---- Chip employers read from server-rendered HTML --------------------------------------------------------------
+const hostedJob=(rows,site,label)=>{const byUrl=new Map;for(const row of rows)if(row.url&&row.title&&!byUrl.has(row.url))byUrl.set(row.url,row);
+ if(!byUrl.size)throw Error(`parse_error: Structure changed: ${label} listing has no vacancies`);return[...byUrl.values()]};
+// A board with no total cannot prove it was read to the end, but a listing page that parsed into rows is the whole board for every
+// employer here, so a successful parse is complete; zero rows is a parse_error above, never an empty board.
+async function singlePageBoard(site,context,{list,detail,label}){
+ const jobs=hostedJob(list(await markup(context.request,site.listing),site),site,label);
+ const {enriched,seen,filtered,warnings}=await enrichListings(jobs,context,detail,`${label} vacancy page`);
+ return{jobs:enriched,seen,filtered,pages:1,complete:true,total:jobs.length,totalExact:false,warnings}}
+
+// Openchip (Factorial HR): offices are headings, each followed by the vacancies open there.
+const openchipList=html=>{const $=cheerio.load(html);
+ return $("li.job-offer-item").map((_,el)=>{const li=$(el),url=clean(li.attr("data-job-postings-url"));
+  return{title:clean(li.find("div.factorial__headingFontFamily").first().text()),url,externalId:url?.match(/-(\d+)\/?$/)?.[1]||url,
+   location:clean(li.closest("div.mb-12").find("h3").first().text()),description:clean(li.find("div.text-gray-350").first().text()),
+   workMode:li.attr("data-is-remote")==="true"?"remote":null}}).get()};
+const openchipDetail=(html,current)=>{const $=cheerio.load(html),body=$("div.styledText").first();
+ if(!clean(body.text()))throw Error("selector_broken: Openchip vacancy page has no description");
+ return{...current,description:clean(body.text()),descriptionHtml:body.html()}};
+const openchip=(site,context)=>singlePageBoard(site,context,{list:openchipList,detail:openchipDetail,label:"Openchip"});
+
+// Racyics: a WordPress table of "> Title | places" rows, one vacancy page each.
+const racyicsList=(html,site)=>{const $=cheerio.load(html);
+ return $("tr").map((_,el)=>{const row=$(el),link=row.find("a[href*='/career/jobs/']").first(),url=absolute(link.attr("href"),site.base);
+  if(!url||url.replace(/\/$/,"")===site.listing.replace(/\/$/,""))return null;
+  return{title:clean(link.text())?.replace(/^>\s*/,""),url,externalId:new URL(url).pathname.split("/").filter(Boolean).pop(),
+   location:clean(row.find("td").eq(1).text())}}).get().filter(Boolean)};
+const racyicsDetail=(html,current)=>{const $=cheerio.load(html),body=$("main .entry-content").first().clone();body.find("h1, hr, script, style").remove();
+ if(!clean(body.text()))throw Error("selector_broken: Racyics vacancy page has no description");
+ return{...current,description:clean(body.text()),descriptionHtml:body.html()}};
+const racyics=(site,context)=>singlePageBoard(site,context,{list:racyicsList,detail:racyicsDetail,label:"Racyics"});
+
+// CSEM: teasers link to /en/jobs/{id}; the vacancy page carries a schema.org JobPosting with title, place, date and text.
+const csemList=(html,site)=>{const $=cheerio.load(html);
+ return $("a.job-teaser").map((_,el)=>{const card=$(el),href=card.attr("href"),url=absolute(href,site.base);
+  return{title:clean(card.find("h2, h3, h4, [class*=title]").first().text())||"CSEM vacancy",url,externalId:href?.match(/(\d+)\/?$/)?.[1],
+   location:clean(card.find(".tag").last().text())}}).get()};
+const csemDetail=(html,current)=>{const $=cheerio.load(html);let posting=null;
+ $("script[type='application/ld+json']").each((_,el)=>{if(posting)return;try{const data=JSON.parse($(el).text()),graph=Array.isArray(data["@graph"])?data["@graph"]:[],nodes=[data,...graph,...graph.flatMap(node=>Object.values(node||{}))];
+  posting=nodes.find(node=>node&&typeof node==="object"&&node["@type"]==="JobPosting")||null}catch{/* a script that is not JSON is not the posting */}});
+ if(!posting||!clean(posting.description))throw Error("parse_error: CSEM vacancy page has no JobPosting");
+ const place=posting.jobLocation?.address;
+ return{...current,title:clean(posting.title)||current.title,postedAt:posting.datePosted||current.postedAt,
+  location:[place?.addressLocality,place?.addressCountry].map(clean).filter(Boolean).join(", ")||current.location,
+  description:clean(cheerio.load(`<div>${posting.description}</div>`)("div").text()),descriptionHtml:posting.description}};
+const csem=(site,context)=>singlePageBoard(site,context,{list:csemList,detail:csemDetail,label:"CSEM"});
+
+// Arteris (Jobvite): the ?nl=1 pages are the plain-HTML job board the company site frames; without it Jobvite redirects.
+const arterisList=(html,site)=>{const $=cheerio.load(html);
+ return $("table.jv-job-list tr").map((_,el)=>{const row=$(el),link=row.find("td.jv-job-list-name a").first(),href=link.attr("href");
+  if(!href)return null;const id=href.split("/").filter(Boolean).pop();
+  return{title:clean(link.text()),url:absolute(href,site.base),detailUrl:absolute(`${href}?nl=1`,site.base),externalId:id,
+   // "3 Locations" is a count, not a place; the vacancy page names them.
+   location:(()=>{const place=clean(row.find("td.jv-job-list-location").text());return place&&!/^\d+\s+locations?$/i.test(place)?place:null})(),
+   description:clean(row.closest("table").prevAll("h3").first().text())}}).get().filter(Boolean)};
+const arterisDetail=(html,current)=>{const $=cheerio.load(html),body=$(".jv-job-detail-description").first(),meta=$(".jv-job-detail-meta").first().clone();
+ if(!clean(body.text()))throw Error("selector_broken: Arteris vacancy page has no description");
+ meta.find(".jv-inline-separator").replaceWith("|");
+ const parts=clean(meta.text())?.split("|").map(clean).filter(Boolean)||[];
+ return{...current,location:parts.slice(1).join("; ")||current.location,description:clean(body.text()),descriptionHtml:body.html()}};
+const arteris=(site,context)=>singlePageBoard(site,context,{list:arterisList,detail:arterisDetail,label:"Arteris"});
+
+const scrapers={openchip,racyics,csem,arteris,rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,cern:smartRecruiters,bosch:smartRecruiters,"bosch-portugal":smartRecruiters,devoteam:smartRecruiters,ubiwhere:smartRecruiters,sixt:smartRecruiters,"natixis-portugal":smartRecruiters,inetum:smartRecruiters,"act-digital":smartRecruiters,ilof:smartRecruiters,"dbservices-portugal":smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
 export const companyNeedsCheerio=(adapterId,fetchDetail=true)=>
- ["rambus","arm","google","sk-hynix","synopsys","l3harris"].includes(adapterId)||(adapterId==="u-blox"&&fetchDetail);
+ ["rambus","arm","google","sk-hynix","synopsys","l3harris","openchip","racyics","csem","arteris"].includes(adapterId)||(adapterId==="u-blox"&&fetchDetail);
 
 export async function enrichCompany(adapterId,item,request){
- const enrichers={rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
+ const enrichers={openchip:openchipDetail,racyics:racyicsDetail,csem:csemDetail,arteris:arterisDetail,rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,cern:smartRecruitersDetail,bosch:smartRecruitersDetail,"bosch-portugal":smartRecruitersDetail,devoteam:smartRecruitersDetail,ubiwhere:smartRecruitersDetail,sixt:smartRecruitersDetail,"natixis-portugal":smartRecruitersDetail,inetum:smartRecruitersDetail,"act-digital":smartRecruitersDetail,ilof:smartRecruitersDetail,"dbservices-portugal":smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
  const detail=enrichers[adapterId];
  if(!detail)throw Error(`incomplete: ${adapterId} has no detail enricher`);
  await loadCheerio();

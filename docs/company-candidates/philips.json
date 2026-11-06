@@ -1,0 +1,24 @@
+{
+ "id": "philips",
+ "name": "Philips",
+ "baseUrl": "https://philips.wd3.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "configJson": {
+  "tenant": "philips",
+  "site": "jobs-and-careers",
+  "maxPages": 500,
+  "expectedHost": "philips.wd3.myworkdayjobs.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 810,
+   "roleTitles": 5,
+   "roleTitlesInTargetCountries": 0,
+   "examples": []
+  }
+ }
+}

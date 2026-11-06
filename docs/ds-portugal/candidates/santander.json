@@ -1,0 +1,16 @@
+{
+ "id": "santander",
+ "name": "Santander (Portugal)",
+ "baseUrl": "https://santander.wd3.myworkdayjobs.com/",
+ "adapterId": "workday",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "maxPages": 500,
+  "site": "SantanderCareers",
+  "tenant": "santander",
+  "query": "Portugal",
+  "expectedHost": "santander.wd3.myworkdayjobs.com"
+ }
+}

@@ -1,0 +1,18 @@
+{"name":"DataCamp","level":"full","ok":true,"jobs":40,"boardTotal":40,"complete":true,"errors":[]}
+{"name":"PagerDuty","level":"full","ok":true,"jobs":47,"boardTotal":47,"complete":true,"errors":[]}
+{"name":"Air Apps","level":"full","ok":true,"jobs":499,"boardTotal":499,"complete":true,"errors":[]}
+{"name":"Superhuman","level":"full","ok":true,"jobs":72,"boardTotal":72,"complete":true,"errors":[]}
+{"name":"Thorit","level":"full","ok":true,"jobs":12,"boardTotal":12,"complete":true,"errors":[]}
+{"name":"Veeva Systems","level":"full","ok":true,"jobs":892,"boardTotal":null,"complete":true,"errors":[]}
+{"name":"Emma Sleep","level":"full","ok":true,"jobs":74,"boardTotal":null,"complete":true,"errors":[]}
+{"name":"OLX","level":"full","ok":true,"jobs":58,"boardTotal":null,"complete":true,"errors":[]}
+{"name":"Volkswagen Digital Solutions","level":"full","ok":true,"jobs":9,"boardTotal":null,"complete":true,"errors":[]}
+{"name":"Natixis in Portugal","level":"full","ok":true,"jobs":46,"boardTotal":46,"complete":true,"errors":[]}
+{"name":"Inetum","level":"full","ok":true,"jobs":455,"boardTotal":455,"complete":true,"errors":[]}
+{"name":"act digital","level":"full","ok":true,"jobs":64,"boardTotal":64,"complete":true,"errors":[]}
+{"name":"iLoF","level":"full","ok":true,"jobs":4,"boardTotal":4,"complete":true,"errors":[]}
+{"name":"DBServices Portugal","level":"full","ok":true,"jobs":3,"boardTotal":3,"complete":true,"errors":[]}
+{"name":"Mercedes-Benz.io","level":"full","ok":true,"jobs":4,"boardTotal":4,"complete":true,"errors":[]}
+{"name":"TransPerfect (Unbabel)","level":"full","ok":true,"jobs":686,"boardTotal":686,"complete":true,"errors":[]}
+{"name":"Hiire","level":"full","ok":true,"jobs":26,"boardTotal":26,"complete":true,"errors":[]}
+finished

@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "name": "Baya Systems",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:23:25.149Z",
+  "finishedAt": "2026-11-06T19:23:27.227Z",
+  "source": {
+    "id": "baya-systems",
+    "name": "Baya Systems",
+    "baseUrl": "https://job-boards.greenhouse.io/bayasystems",
+    "adapterId": "greenhouse",
+    "configJson": {
+      "token": "bayasystems",
+      "maxPages": 500,
+      "expectedHost": "boards-api.greenhouse.io"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "baya-systems",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 23,
+        "persisted": 23,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 23,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 211,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 211,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 184,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 184,
+                "bodyMs": 6
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 23,
+    "uniqueIdentities": 23,
+    "uniqueHashes": 23,
+    "samples": [
+      {
+        "externalId": "5290255008",
+        "title": "Director of Field Applications Engineering- Europe and APAC",
+        "company": "Baya Systems",
+        "location": "Cambridge, England, United Kingdom; Remote - Europe",
+        "postedAt": "2026-07-02",
+        "canonicalUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/5290255008",
+        "applyUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/5290255008",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "4550546008",
+        "title": "Performance Architecture",
+        "company": "Baya Systems",
+        "location": "Austin, Texas, United States; Bengaluru, Karnataka, India; Cambridge, England, United Kingdom; Santa Clara, California, United States",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4550546008",
+        "applyUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4550546008",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "4543175008",
+        "title": "Sr. Field Applications Engineer",
+        "company": "Baya Systems",
+        "location": "Bengaluru, Karnataka, India",
+        "postedAt": "2025-02-14",
+        "canonicalUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4543175008",
+        "applyUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4543175008",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "baya-systems",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1012,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1013,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 494,
+              "backoff": 0,
+              "response": 493,
+              "body": 7,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 494,
+                "backoffMs": 0,
+                "responseMs": 493,
+                "bodyMs": 7
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "5290255008",
+        "title": "Director of Field Applications Engineering- Europe and APAC",
+        "company": "Baya Systems",
+        "location": "Cambridge, England, United Kingdom; Remote - Europe",
+        "postedAt": "2026-07-02",
+        "canonicalUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/5290255008",
+        "applyUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/5290255008",
+        "descriptionStatus": "complete",
+        "descriptionChars": 8546
+      },
+      {
+        "externalId": "4550546008",
+        "title": "Performance Architecture",
+        "company": "Baya Systems",
+        "location": "Austin, Texas, United States; Bengaluru, Karnataka, India; Cambridge, England, United Kingdom; Santa Clara, California, United States",
+        "postedAt": "2026-09-01",
+        "canonicalUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4550546008",
+        "applyUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4550546008",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2946
+      },
+      {
+        "externalId": "4543175008",
+        "title": "Sr. Field Applications Engineer",
+        "company": "Baya Systems",
+        "location": "Bengaluru, Karnataka, India",
+        "postedAt": "2025-02-14",
+        "canonicalUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4543175008",
+        "applyUrl": "https://job-boards.greenhouse.io/bayasystems/jobs/4543175008",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3744
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "baya-systems",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 23,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 23,
+        "requests": 1,
+        "skipped": 23,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 215,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 215,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 194,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 194,
+                "bodyMs": 6
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

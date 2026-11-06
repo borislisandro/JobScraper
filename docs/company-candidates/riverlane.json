@@ -1,0 +1,26 @@
+{
+ "id": "riverlane",
+ "name": "Riverlane",
+ "baseUrl": "https://job-boards.greenhouse.io/riverlane",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "riverlane",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 37,
+   "roleTitles": 2,
+   "roleTitlesInTargetCountries": 2,
+   "examples": [
+    "Senior FPGA Engineer - Systems Team — Cambridge, UK",
+    "Verification / Senior Verification Engineer — Cambridge, UK"
+   ]
+  }
+ }
+}

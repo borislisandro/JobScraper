@@ -1,0 +1,13 @@
+{
+ "id": "act-digital",
+ "name": "act digital",
+ "baseUrl": "https://jobs.smartrecruiters.com/AlterSolutions",
+ "adapterId": "act-digital",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

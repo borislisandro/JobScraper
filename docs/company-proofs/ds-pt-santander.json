@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "name": "Santander (Portugal)",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T17:34:03.760Z",
+  "finishedAt": "2026-10-30T17:34:09.288Z",
+  "source": {
+    "id": "santander",
+    "name": "Santander (Portugal)",
+    "baseUrl": "https://santander.wd3.myworkdayjobs.com/",
+    "adapterId": "workday",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
+    "configJson": {
+      "maxPages": 500,
+      "site": "SantanderCareers",
+      "tenant": "santander",
+      "query": "Portugal",
+      "expectedHost": "santander.wd3.myworkdayjobs.com"
+    }
+  },
+  "codeHashes": {
+    "worker.mjs": "855c4070873baf1c0c7fdcfe1e9cc46ba27360840df7ab9fd0cc73005364a3c8",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "8ac866442b7a0394636b0645bf3d2fc8dd946eb1d1f04aec48e1b1fc3dd0b283",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "santander",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 30,
+        "persisted": 30,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": 30,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 1893,
+        "pages": 2,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1894,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 12,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1850,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 18,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 2,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1850,
+                "bodyMs": 11
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 30,
+    "uniqueIdentities": 30,
+    "uniqueHashes": 30,
+    "samples": [
+      {
+        "externalId": "Req1027052",
+        "title": "Programa de Estágios - Candidaturas Espontâneas",
+        "company": "Santander (Portugal)",
+        "location": "Lisboa Rua da Mesquita",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Lisboa-Rua-da-Mesquita/Internship-Santander---PORTUGAL_Req1027052",
+        "applyUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Lisboa-Rua-da-Mesquita/Internship-Santander---PORTUGAL_Req1027052",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "Req1630378",
+        "title": "PGX ANL ATENDIMENTO BILINGUE JR",
+        "company": "Santander (Portugal)",
+        "location": "PGX Campo Bom",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/PGX-Campo-Bom/PGX-ANL-ATENDIMENTO-BILINGUE-JR_Req1630378",
+        "applyUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/PGX-Campo-Bom/PGX-ANL-ATENDIMENTO-BILINGUE-JR_Req1630378",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "Req1553318",
+        "title": "Programa de Estágios | Candidaturas Espontâneas",
+        "company": "Santander (Portugal)",
+        "location": "Programa de Estgios Candidaturas Espontneas Req1553318",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Programa-de-Estgios---Candidaturas-Espontneas_Req1553318",
+        "applyUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Programa-de-Estgios---Candidaturas-Espontneas_Req1553318",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "santander",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1546,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1546,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 14,
+              "pacing": 23,
+              "backoff": 0,
+              "response": 1480,
+              "body": 20,
+              "browser": 0,
+              "adapterOther": 8,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 23,
+                "backoffMs": 0,
+                "responseMs": 1480,
+                "bodyMs": 20
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "Req1027052",
+        "title": "Programa de Estágios - Candidaturas Espontâneas",
+        "company": "Santander (Portugal)",
+        "location": "Lisboa-Rua da Mesquita",
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Lisboa-Rua-da-Mesquita/Internship-Santander---PORTUGAL_Req1027052",
+        "applyUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Lisboa-Rua-da-Mesquita/Internship-Santander---PORTUGAL_Req1027052",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3021
+      },
+      {
+        "externalId": "Req1630378",
+        "title": "PGX ANL ATENDIMENTO BILINGUE JR",
+        "company": "Santander (Portugal)",
+        "location": "PGX Campo Bom",
+        "postedAt": "2026-10-30",
+        "canonicalUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/PGX-Campo-Bom/PGX-ANL-ATENDIMENTO-BILINGUE-JR_Req1630378",
+        "applyUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/PGX-Campo-Bom/PGX-ANL-ATENDIMENTO-BILINGUE-JR_Req1630378",
+        "descriptionStatus": "complete",
+        "descriptionChars": 418
+      },
+      {
+        "externalId": "Req1553318",
+        "title": "Programa de Estágios | Candidaturas Espontâneas",
+        "company": "Santander (Portugal)",
+        "location": null,
+        "postedAt": "2026-09-30",
+        "canonicalUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Programa-de-Estgios---Candidaturas-Espontneas_Req1553318",
+        "applyUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers/job/Programa-de-Estgios---Candidaturas-Espontneas_Req1553318",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3010
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "santander",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 30,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 20,
+        "requests": 1,
+        "skipped": 20,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 1208,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1208,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 1177,
+              "body": 9,
+              "browser": 0,
+              "adapterOther": 10,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 1177,
+                "bodyMs": 9
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

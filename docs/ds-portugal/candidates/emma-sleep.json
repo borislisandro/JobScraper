@@ -1,0 +1,14 @@
+{
+ "id": "emma-sleep",
+ "name": "Emma Sleep",
+ "baseUrl": "https://jobs.lever.co/emma-sleep",
+ "adapterId": "lever",
+ "configJson": {
+  "token": "emma-sleep",
+  "maxPages": 500,
+  "expectedHost": "api.lever.co"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

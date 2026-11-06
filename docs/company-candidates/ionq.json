@@ -1,0 +1,26 @@
+{
+ "id": "ionq",
+ "name": "IonQ",
+ "baseUrl": "https://job-boards.greenhouse.io/ionq",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "ionq",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 120,
+   "roleTitles": 3,
+   "roleTitlesInTargetCountries": 2,
+   "examples": [
+    "Senior  FPGA Verification Engineer — Oxford, England, United Kingdom",
+    "Senior Silicon Validation Engineer — Oxford, England, United Kingdom"
+   ]
+  }
+ }
+}

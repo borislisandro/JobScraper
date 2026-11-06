@@ -1,0 +1,13 @@
+{
+ "id": "racyics",
+ "name": "Racyics",
+ "baseUrl": "https://racyics.de/career/jobs/",
+ "adapterId": "racyics",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "racyics.de"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

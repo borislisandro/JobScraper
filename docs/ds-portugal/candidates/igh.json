@@ -1,0 +1,22 @@
+{
+ "id": "igh",
+ "name": "IG&H Portugal",
+ "baseUrl": "https://igh.recruitee.com/api/offers/",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "offers",
+  "maxPages": 500,
+  "expectedHost": "igh.recruitee.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "careers_url",
+   "externalId": "id",
+   "postedAt": "published_at",
+   "description": "description",
+   "location": "location"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

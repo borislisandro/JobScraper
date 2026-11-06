@@ -1,0 +1,28 @@
+{
+ "id": "codasip",
+ "name": "Codasip",
+ "baseUrl": "https://codasip.bamboohr.com/careers",
+ "adapterId": "bamboohr",
+ "configJson": {
+  "token": "codasip",
+  "maxPages": 5,
+  "expectedHost": "codasip.bamboohr.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 9,
+   "roleTitles": 6,
+   "roleTitlesInTargetCountries": 4,
+   "examples": [
+    "Verification Manager — Cambridge, Cambridgeshire",
+    "Verification Engineer — Bristol, Bristol, City of",
+    "Design Verification Engineer — Munich, *",
+    "Product Compliance & Assurance Manager – Semiconductor / SoC — Bristol, Bristol, City of"
+   ]
+  }
+ }
+}

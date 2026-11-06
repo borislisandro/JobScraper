@@ -1,0 +1,13 @@
+{
+ "id": "devoteam",
+ "name": "Devoteam",
+ "baseUrl": "https://jobs.smartrecruiters.com/Devoteam",
+ "adapterId": "devoteam",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ }
+}

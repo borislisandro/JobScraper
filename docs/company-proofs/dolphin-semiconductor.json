@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "name": "Dolphin Semiconductor",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:23:31.615Z",
+  "finishedAt": "2026-11-06T19:23:32.990Z",
+  "source": {
+    "id": "dolphin-semiconductor",
+    "name": "Dolphin Semiconductor",
+    "baseUrl": "https://careers.dolphin-semiconductor.com/jobs.json?per_page=100",
+    "adapterId": "json",
+    "configJson": {
+      "itemsPath": "items",
+      "pageParam": "page",
+      "pageStart": 1,
+      "maxPages": 500,
+      "expectedHost": "careers.dolphin-semiconductor.com",
+      "fieldMap": {
+        "title": "title",
+        "url": "url",
+        "externalId": "id",
+        "postedAt": "date_published",
+        "description": "content_html",
+        "location": "_jobposting.jobLocation.0.address"
+      }
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "d927433e5b9587087707a32891d1943191deb67caf83b16d61f91715a3b836f3",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "dolphin-semiconductor",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 4,
+        "persisted": 4,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": 4,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 794,
+        "pages": 2,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 795,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 13,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 724,
+              "body": 49,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 2,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 724,
+                "bodyMs": 49
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 4,
+    "uniqueIdentities": 4,
+    "uniqueHashes": 4,
+    "samples": [
+      {
+        "externalId": "7e2d3d5e-6cce-44b7-ae00-21e87f8fff65",
+        "title": "Verification Engineer (W/M)",
+        "company": "Dolphin Semiconductor",
+        "location": "Meylan, Rhone Alpes, FR",
+        "postedAt": "2026-09-11",
+        "canonicalUrl": "https://careers.dolphin-semiconductor.com/jobs/8367565-verification-engineer-w-m",
+        "applyUrl": "https://careers.dolphin-semiconductor.com/jobs/8367565-verification-engineer-w-m",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6540
+      },
+      {
+        "externalId": "71eff7a9-902c-4f9c-8608-cafa6160076c",
+        "title": "Chief Project Officer (W/M)",
+        "company": "Dolphin Semiconductor",
+        "location": "Montréal, CA",
+        "postedAt": "2026-07-30",
+        "canonicalUrl": "https://careers.dolphin-semiconductor.com/jobs/8148930-chief-project-officer-w-m",
+        "applyUrl": "https://careers.dolphin-semiconductor.com/jobs/8148930-chief-project-officer-w-m",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5258
+      },
+      {
+        "externalId": "50091861-77e3-4cdb-941d-5c7c1d0ebb37",
+        "title": "Digital Design Engineer (W/M)",
+        "company": "Dolphin Semiconductor",
+        "location": "Meylan, Rhone Alpes, FR",
+        "postedAt": "2023-05-24",
+        "canonicalUrl": "https://careers.dolphin-semiconductor.com/jobs/2854265-digital-design-engineer-w-m",
+        "applyUrl": "https://careers.dolphin-semiconductor.com/jobs/2854265-digital-design-engineer-w-m",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3493
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "dolphin-semiconductor",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 4,
+        "requests": 1,
+        "skipped": 4,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 218,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 217,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 154,
+              "body": 48,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 154,
+                "bodyMs": 48
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

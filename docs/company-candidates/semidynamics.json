@@ -1,0 +1,40 @@
+{
+ "id": "semidynamics",
+ "name": "Semidynamics",
+ "baseUrl": "https://careers.semidynamics.com/jobs.json?per_page=100",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "items",
+  "pageParam": "page",
+  "pageStart": 1,
+  "maxPages": 500,
+  "expectedHost": "careers.semidynamics.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "url",
+   "externalId": "id",
+   "postedAt": "date_published",
+   "description": "content_html",
+   "location": "_jobposting.jobLocation.0.address"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 38,
+   "roleTitles": 13,
+   "roleTitlesInTargetCountries": 12,
+   "examples": [
+    "Verification Lead for 4-Core Coherent System — Barcelona, Spain, ES",
+    "SoC Top RTL Integration Engineer — Barcelona, Spain, ES",
+    "SoC Top RTL Lead — Barcelona, Spain, ES",
+    "Senior Verification -  LSU (Load/Store Unit) and Data Cache — Barcelona, Spain, ES",
+    "Lead Design Verification Engineer – High‑Speed Interface Protocols — Barcelona, Spain, ES",
+    "Formal Verification Lead — Barcelona, Spain, ES"
+   ]
+  }
+ }
+}

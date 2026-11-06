@@ -1,0 +1,13 @@
+{
+ "id": "ubiwhere",
+ "name": "Ubiwhere",
+ "baseUrl": "https://jobs.smartrecruiters.com/Ubiwhere",
+ "adapterId": "ubiwhere",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ }
+}

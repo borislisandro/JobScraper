@@ -1,0 +1,1595 @@
+[
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://wd5.myworkdaysite.com/en-US/recruiting/microchiphr/External",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "wd5.myworkdaysite.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "microchiphr"
+    },
+    "name": "Microchip"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://analogdevices.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "analogdevices.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "analogdevices"
+    },
+    "name": "Analog Devices"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://broadcom.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "broadcom.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External_Career",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "broadcom"
+    },
+    "name": "Broadcom"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://intel.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "intel.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "intel"
+    },
+    "name": "Intel"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://marvell.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "marvell.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "MarvellCareers",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "marvell"
+    },
+    "name": "Marvell"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://stmicroelectronics.eightfold.ai/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "stmicroelectronics.com",
+      "eightfoldApi": "legacy",
+      "expectedHost": "stmicroelectronics.eightfold.ai",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "STMicroelectronics"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://nvidia.wd5.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "nvidia.wd5.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "NVIDIAExternalCareerSite",
+      "splitFacet": "jobFamilyGroup",
+      "splitThreshold": 2000,
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "nvidia"
+    },
+    "name": "NVIDIA"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://careers.gf.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "globalfoundries.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "careers.gf.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "GlobalFoundries"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://micron.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "micron.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "micron"
+    },
+    "name": "Micron"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://careers.qualcomm.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "qualcomm.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "careers.qualcomm.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Qualcomm"
+  },
+  {
+    "adapterId": "arm",
+    "baseUrl": "https://careers.arm.com/search-jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.arm.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Arm"
+  },
+  {
+    "adapterId": "amd",
+    "baseUrl": "https://careers.amd.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.amd.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "AMD"
+  },
+  {
+    "adapterId": "cisco",
+    "baseUrl": "https://careers.cisco.com/global/en/search-results",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.cisco.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Cisco"
+  },
+  {
+    "adapterId": "apple",
+    "baseUrl": "https://jobs.apple.com/en-us/search?location=",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.apple.com",
+      "locale": "en-us",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 250,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Apple"
+  },
+  {
+    "adapterId": "mediatek",
+    "baseUrl": "https://careers.mediatek.com/en/jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.mediatek.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "MediaTek"
+  },
+  {
+    "adapterId": "u-blox",
+    "baseUrl": "https://www.u-blox.com/en/job-openings",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "u-blox"
+  },
+  {
+    "adapterId": "google",
+    "baseUrl": "https://www.google.com/about/careers/applications/jobs/results/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "www.google.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Google"
+  },
+  {
+    "adapterId": "sk-hynix",
+    "baseUrl": "https://talent.skhynix.com/hub/en/apply/job",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "SK hynix"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://nxp.wd3.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "nxp.wd3.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "careers",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "nxp"
+    },
+    "name": "NXP"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://jobs.ericsson.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "ericsson.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "jobs.ericsson.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Ericsson"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://monolithicpower.wd12.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "monolithicpower.wd12.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "MPS_Careers",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "monolithicpower"
+    },
+    "name": "Monolithic Power Systems"
+  },
+  {
+    "adapterId": "eightfold",
+    "baseUrl": "https://jobs.infineon.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "domain": "infineon.com",
+      "eightfoldApi": "pcsx",
+      "expectedHost": "jobs.infineon.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 400,
+      "retryForbidden": true,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Infineon"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/tenstorrent",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "tenstorrent"
+    },
+    "name": "Tenstorrent"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/graphcore",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "graphcore"
+    },
+    "name": "Graphcore"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://cadence.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "cadence.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "site": "External_Careers",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "cadence"
+    },
+    "name": "Cadence"
+  },
+  {
+    "adapterId": "synopsys",
+    "baseUrl": "https://careers.synopsys.com",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.synopsys.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Synopsys"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.tekever.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.tekever.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "TEKEVER"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.pageuppeople.com/774/cw/en/listing",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.pageuppeople.com",
+      "fieldMap": {
+        "description": "Overview",
+        "externalId": "Id",
+        "location": "Locations",
+        "postedAt": "OpeningDateUtc",
+        "title": "Title",
+        "url": "ApplyUrl"
+      },
+      "itemsPath": "",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "urlTemplate": "https://careers.pageuppeople.com/774/cw/en/jobs.json"
+    },
+    "name": "Imagination Technologies"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.sipearl.com/fr/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.sipearl.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "SiPearl"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.nordicsemi.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.nordicsemi.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Nordic Semiconductor"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.eu.lever.co/cirrus",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.eu.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "requestDelayMs": 1000,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "cirrus"
+    },
+    "name": "Cirrus Logic"
+  },
+  {
+    "adapterId": "renesas",
+    "baseUrl": "https://jobs.renesas.com/jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.renesas.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Renesas"
+  },
+  {
+    "adapterId": "siemens",
+    "baseUrl": "https://jobs.sw.siemens.com/jobs/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.sw.siemens.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Siemens"
+  },
+  {
+    "adapterId": "rambus",
+    "baseUrl": "https://careers-rambus.icims.com",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers-rambus.icims.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Rambus"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.semidynamics.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.semidynamics.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Semidynamics"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/fractile",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "fractile"
+    },
+    "name": "Fractile"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/arago",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "arago"
+    },
+    "name": "Arago"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/riverlane",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "riverlane"
+    },
+    "name": "Riverlane"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/bayasystems",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "bayasystems"
+    },
+    "name": "Baya Systems"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/olix",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "olix"
+    },
+    "name": "Olix"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.dolphin-semiconductor.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.dolphin-semiconductor.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Dolphin Semiconductor"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://careers.prophesee.ai/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "careers.prophesee.ai",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Prophesee"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://talent.pragmaticsemi.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "talent.pragmaticsemi.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Pragmatic Semiconductor"
+  },
+  {
+    "adapterId": "personio",
+    "baseUrl": "https://axiomise.jobs.personio.de/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "axiomise.jobs.personio.de",
+      "maxPages": 5,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "axiomise"
+    },
+    "name": "Axiomise"
+  },
+  {
+    "adapterId": "workable",
+    "baseUrl": "https://apply.workable.com/raspberrypi/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "apply.workable.com",
+      "maxPages": 5,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "raspberrypi"
+    },
+    "name": "Raspberry Pi"
+  },
+  {
+    "adapterId": "bamboohr",
+    "baseUrl": "https://codasip.bamboohr.com/careers",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "codasip.bamboohr.com",
+      "maxPages": 5,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "codasip"
+    },
+    "name": "Codasip"
+  },
+  {
+    "adapterId": "openchip",
+    "baseUrl": "https://openchip.factorialhr.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "openchip.factorialhr.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Openchip"
+  },
+  {
+    "adapterId": "racyics",
+    "baseUrl": "https://racyics.de/career/jobs/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "racyics.de",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Racyics"
+  },
+  {
+    "adapterId": "arteris",
+    "baseUrl": "https://jobs.jobvite.com/arteris/jobs?nl=1",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.jobvite.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Arteris"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://accenture.wd103.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "accenture.wd103.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "query": "Portugal",
+      "schemaVersion": "1.1.0",
+      "site": "AccentureCareers",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "accenture"
+    },
+    "name": "Accenture (Portugal)"
+  },
+  {
+    "adapterId": "act-digital",
+    "baseUrl": "https://jobs.smartrecruiters.com/AlterSolutions",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "act digital"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/airapps",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "airapps"
+    },
+    "name": "Air Apps"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://ag.wd3.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "ag.wd3.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "query": "Portugal",
+      "schemaVersion": "1.1.0",
+      "site": "Airbus",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "ag"
+    },
+    "name": "Airbus (Portugal)"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://bitsight.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "bitsight.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "query": "Portugal",
+      "schemaVersion": "1.1.0",
+      "site": "bitsight",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "bitsight"
+    },
+    "name": "Bitsight (Portugal)"
+  },
+  {
+    "adapterId": "bosch-portugal",
+    "baseUrl": "https://jobs.smartrecruiters.com/BoschGroup?country=pt",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Bosch (Portugal)"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://celfocus.teamtailor.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "celfocus.teamtailor.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Celfocus"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/datacamp",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "datacamp"
+    },
+    "name": "DataCamp"
+  },
+  {
+    "adapterId": "dbservices-portugal",
+    "baseUrl": "https://jobs.smartrecruiters.com/DBServicesPortugal",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "DBServices Portugal"
+  },
+  {
+    "adapterId": "devoteam",
+    "baseUrl": "https://jobs.smartrecruiters.com/Devoteam",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Devoteam"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.lever.co/emma-sleep",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "emma-sleep"
+    },
+    "name": "Emma Sleep"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/farfetch",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "farfetch"
+    },
+    "name": "Farfetch (Ashby)"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.lever.co/farfetch",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "farfetch"
+    },
+    "name": "Farfetch (Lever)"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/feedzai",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "feedzai"
+    },
+    "name": "Feedzai"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.eu.lever.co/pnlfin",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.eu.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "pnlfin"
+    },
+    "name": "Finom"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/flix",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "flix"
+    },
+    "name": "Flix"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://hiire.teamtailor.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "hiire.teamtailor.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Hiire"
+  },
+  {
+    "adapterId": "ilof",
+    "baseUrl": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "iLoF"
+  },
+  {
+    "adapterId": "inetum",
+    "baseUrl": "https://jobs.smartrecruiters.com/Inetum2",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Inetum"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://iqvia.wd1.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "iqvia.wd1.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "query": "Portugal",
+      "schemaVersion": "1.1.0",
+      "site": "IQVIA",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "iqvia"
+    },
+    "name": "IQVIA (Portugal)"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://mbio.recruitee.com/api/offers/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "mbio.recruitee.com",
+      "fieldMap": {
+        "description": "description",
+        "externalId": "id",
+        "location": "location",
+        "postedAt": "published_at",
+        "title": "title",
+        "url": "careers_url"
+      },
+      "itemsPath": "offers",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Mercedes-Benz.io"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://metyisag.recruitee.com/api/offers/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "metyisag.recruitee.com",
+      "fieldMap": {
+        "description": "description",
+        "externalId": "id",
+        "location": "location",
+        "postedAt": "published_at",
+        "title": "title",
+        "url": "careers_url"
+      },
+      "itemsPath": "offers",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Metyis"
+  },
+  {
+    "adapterId": "natixis-portugal",
+    "baseUrl": "https://jobs.smartrecruiters.com/NatixisInPortugal",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Natixis in Portugal"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.eu.lever.co/olx",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.eu.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "olx"
+    },
+    "name": "OLX"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/pagerduty",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "pagerduty"
+    },
+    "name": "PagerDuty"
+  },
+  {
+    "adapterId": "workday",
+    "baseUrl": "https://santander.wd3.myworkdayjobs.com/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "santander.wd3.myworkdayjobs.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "query": "Portugal",
+      "schemaVersion": "1.1.0",
+      "site": "SantanderCareers",
+      "starterPackVersion": "2026-11-07.1",
+      "tenant": "santander"
+    },
+    "name": "Santander (Portugal)"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/superhuman%20platform%20inc",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "superhuman platform inc"
+    },
+    "name": "Superhuman"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/swordhealth",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "swordhealth"
+    },
+    "name": "Sword Health"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/talkdesk2",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "talkdesk2"
+    },
+    "name": "Talkdesk"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/thorit",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "thorit"
+    },
+    "name": "Thorit"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://transperfect.recruitee.com/api/offers/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "transperfect.recruitee.com",
+      "fieldMap": {
+        "description": "description",
+        "externalId": "id",
+        "location": "location",
+        "postedAt": "published_at",
+        "title": "title",
+        "url": "careers_url"
+      },
+      "itemsPath": "offers",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "TransPerfect (Unbabel)"
+  },
+  {
+    "adapterId": "ubiwhere",
+    "baseUrl": "https://jobs.smartrecruiters.com/Ubiwhere",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Ubiwhere"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.lever.co/veeva",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "veeva"
+    },
+    "name": "Veeva Systems"
+  },
+  {
+    "adapterId": "lever",
+    "baseUrl": "https://jobs.eu.lever.co/vwgds",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.eu.lever.co",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "vwgds"
+    },
+    "name": "Volkswagen Digital Solutions"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://axiansgroup.teamtailor.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "axiansgroup.teamtailor.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Axians Portugal"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://bearingpointportugal.teamtailor.com/jobs.json?per_page=100",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "bearingpointportugal.teamtailor.com",
+      "fieldMap": {
+        "description": "content_html",
+        "externalId": "id",
+        "location": "_jobposting.jobLocation.0.address",
+        "postedAt": "date_published",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "items",
+      "maxPages": 500,
+      "mode": "direct",
+      "pageParam": "page",
+      "pageStart": 1,
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "BearingPoint Portugal"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/gocardless",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "gocardless"
+    },
+    "name": "GoCardless"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/indiciumai",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "indiciumai"
+    },
+    "name": "Indicium AI"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://critical-software.breezy.hr/json?verbose=true",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "critical-software.breezy.hr",
+      "fieldMap": {
+        "description": "description",
+        "externalId": "id",
+        "location": "location.name",
+        "postedAt": "published_date",
+        "title": "name",
+        "url": "url"
+      },
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Critical Software"
+  },
+  {
+    "adapterId": "sixt",
+    "baseUrl": "https://jobs.smartrecruiters.com/SIXT",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "jobs.smartrecruiters.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "SIXT (Portugal)"
+  },
+  {
+    "adapterId": "ashby",
+    "baseUrl": "https://jobs.ashbyhq.com/zego",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "api.ashbyhq.com",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "zego"
+    },
+    "name": "Zego"
+  },
+  {
+    "adapterId": "greenhouse",
+    "baseUrl": "https://job-boards.greenhouse.io/lokainc",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "boards-api.greenhouse.io",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "token": "lokainc"
+    },
+    "name": "Loka"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://intermedia.pinpointhq.com/postings.json",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "intermedia.pinpointhq.com",
+      "fieldMap": {
+        "description": "description",
+        "externalId": "id",
+        "location": "location",
+        "title": "title",
+        "url": "url"
+      },
+      "itemsPath": "data",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "Intermedia"
+  },
+  {
+    "adapterId": "json",
+    "baseUrl": "https://igh.recruitee.com/api/offers/",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "expectedHost": "igh.recruitee.com",
+      "fieldMap": {
+        "description": "description",
+        "externalId": "id",
+        "location": "location",
+        "postedAt": "published_at",
+        "title": "title",
+        "url": "careers_url"
+      },
+      "itemsPath": "offers",
+      "maxPages": 500,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1"
+    },
+    "name": "IG&H Portugal"
+  },
+  {
+    "adapterId": "static-xpath",
+    "baseUrl": "https://mobilab-solutions-gmbh.jobs.personio.com/xml",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "detailSelector": "main#main-content",
+      "expectedHost": "mobilab-solutions-gmbh.jobs.personio.com",
+      "itemXPath": "//position",
+      "locationXPath": "./office",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "titleXPath": "./name",
+      "urlXPath": "concat('https://mobilab-solutions-gmbh.jobs.personio.com/job/', ./id, '?language=en')"
+    },
+    "name": "MobiLab Solutions"
+  },
+  {
+    "adapterId": "static-css",
+    "baseUrl": "https://odoo.smartex.ai/jobs",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "detailSelector": "#wrap",
+      "expectedHost": "odoo.smartex.ai",
+      "itemSelector": "div.card",
+      "locationSelector": "address",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "titleSelector": "h3",
+      "urlSelector": "a[href^=\"/jobs/\"]"
+    },
+    "name": "Smartex.ai"
+  },
+  {
+    "adapterId": "static-css",
+    "baseUrl": "https://www.itjobs.pt/emprego/ai",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "companySelector": ".list-name a",
+      "detailSelector": ".content-block",
+      "expectedHost": "www.itjobs.pt",
+      "itemSelector": "ul.listing > li",
+      "locationSelector": ".list-details",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "titleSelector": "a.title",
+      "urlSelector": "a.title"
+    },
+    "name": "ITJobs.pt - AI"
+  },
+  {
+    "adapterId": "static-css",
+    "baseUrl": "https://landing.jobs/jobs/in/portugal/for/data-scientist",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "companySelector": ".lj-jobcard-static__company",
+      "detailSelector": "#job-summary-content",
+      "expectedHost": "landing.jobs",
+      "itemSelector": "article.lj-jobcard-static",
+      "locationSelector": ".lj-jobcard-static__location",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "titleSelector": ".lj-jobcard-static__link",
+      "urlSelector": ".lj-jobcard-static__link"
+    },
+    "name": "Landing.jobs - Data"
+  },
+  {
+    "adapterId": "static-css",
+    "baseUrl": "https://landing.jobs/jobs/in/portugal/for/machine-learning",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "companySelector": ".lj-jobcard-static__company",
+      "detailSelector": "#job-summary-content",
+      "expectedHost": "landing.jobs",
+      "itemSelector": "article.lj-jobcard-static",
+      "locationSelector": ".lj-jobcard-static__location",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "titleSelector": ".lj-jobcard-static__link",
+      "urlSelector": ".lj-jobcard-static__link"
+    },
+    "name": "Landing.jobs - Machine Learning"
+  },
+  {
+    "adapterId": "static-css",
+    "baseUrl": "https://landing.jobs/jobs/in/portugal/for/artificial-intelligence",
+    "configJson": {
+      "adapterVersion": "1.1.0",
+      "companySelector": ".lj-jobcard-static__company",
+      "detailSelector": "#job-summary-content",
+      "expectedHost": "landing.jobs",
+      "itemSelector": "article.lj-jobcard-static",
+      "locationSelector": ".lj-jobcard-static__location",
+      "maxPages": 1,
+      "mode": "direct",
+      "schemaVersion": "1.1.0",
+      "starterPackVersion": "2026-11-07.1",
+      "titleSelector": ".lj-jobcard-static__link",
+      "urlSelector": ".lj-jobcard-static__link"
+    },
+    "name": "Landing.jobs - Artificial Intelligence"
+  }
+]

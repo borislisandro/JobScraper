@@ -1,0 +1,13 @@
+{
+ "id": "bosch",
+ "name": "Bosch (Portugal)",
+ "baseUrl": "https://jobs.smartrecruiters.com/BoschGroup",
+ "adapterId": "bosch",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ }
+}

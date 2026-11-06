@@ -1,12 +1,16 @@
 #!/usr/bin/env node
-import readline from "node:readline";import {createHash}from "node:crypto";import {existsSync}from "node:fs";import {readFile}from "node:fs/promises";import {performance as clock}from "node:perf_hooks";import {requestFor,normalizeItem} from "./adapters.mjs";import {companyAdapters,companyAdapterIds,companyDatesNeedDetail,enrichCompany,scrapeCompany} from "./company-adapters.mjs";
+import readline from "node:readline";import {createHash}from "node:crypto";import {existsSync}from "node:fs";import {readFile}from "node:fs/promises";import {performance as clock}from "node:perf_hooks";import {requestFor,normalizeItem,parsePersonioXml} from "./adapters.mjs";import {companyAdapters,companyAdapterIds,companyDatesNeedDetail,enrichCompany,scrapeCompany} from "./company-adapters.mjs";
 import {cookieHeader,scopedHeaders,allowed} from "./request-policy.mjs";
 import {createBrowserProxy} from "./browser-proxy.mjs";
 const V=1,R=2,emit=(event,runId,payload={})=>process.stdout.write(`${JSON.stringify({protocolVersion:V,event,runId,payload})}\n`),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const edge=[process.env.ProgramFiles&&`${process.env.ProgramFiles}/Microsoft/Edge/Application/msedge.exe`,process.env["ProgramFiles(x86)"]&&`${process.env["ProgramFiles(x86)"]}/Microsoft/Edge/Application/msedge.exe`].filter(Boolean);
-export const adapters={"static-css":{version:"1.1.0",capabilities:["direct","css","pagination"]},"static-xpath":{version:"1.1.0",capabilities:["direct","xpath","pagination"]},json:{version:"1.1.0",capabilities:["direct","pagination"]},rss:{version:"1.1.0",capabilities:["direct"]},playwright:{version:"1.1.0",capabilities:["browser","headed","session"]},apple:{version:"1.1.0",capabilities:["direct-json","pagination"]},workday:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},eightfold:{version:"1.1.0",capabilities:["direct-json","cursor","detail","playwright-fallback"]},icims:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},"talentbrew-jibe":{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},phenom:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},greenhouse:{version:"1.1.0",capabilities:["direct-json","detail"]},ashby:{version:"1.1.0",capabilities:["direct-json"]},lever:{version:"1.1.0",capabilities:["direct-json","pagination"]},oracle:{version:"1.1.0",capabilities:["direct-json","pagination","detail"]},"custom-api":{version:"1.1.0",capabilities:[],unsupported:true},reference:{version:"1.1.0",capabilities:[],unsupported:true},
+// Edge first on Windows, where the app ships; JOBSCRAPER_BROWSER overrides everything, and the Linux and macOS paths let the same
+// Chromium-driven code run on a developer machine. Playwright drives any Chromium build through executablePath.
+const edge=[process.env.JOBSCRAPER_BROWSER,process.env.ProgramFiles&&`${process.env.ProgramFiles}/Microsoft/Edge/Application/msedge.exe`,process.env["ProgramFiles(x86)"]&&`${process.env["ProgramFiles(x86)"]}/Microsoft/Edge/Application/msedge.exe`,
+ "/usr/bin/microsoft-edge","/usr/bin/microsoft-edge-stable","/usr/bin/google-chrome","/usr/bin/google-chrome-stable","/usr/bin/chromium","/usr/bin/chromium-browser","/snap/bin/chromium",
+ "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge","/Applications/Google Chrome.app/Contents/MacOS/Google Chrome","/Applications/Chromium.app/Contents/MacOS/Chromium"].filter(Boolean);
+export const adapters={"static-css":{version:"1.1.0",capabilities:["direct","css","pagination"]},"static-xpath":{version:"1.1.0",capabilities:["direct","xpath","pagination"]},json:{version:"1.1.0",capabilities:["direct","pagination"]},rss:{version:"1.1.0",capabilities:["direct"]},playwright:{version:"1.1.0",capabilities:["browser","headed","session"]},apple:{version:"1.1.0",capabilities:["direct-json","pagination"]},workday:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},eightfold:{version:"1.1.0",capabilities:["direct-json","cursor","detail","playwright-fallback"]},icims:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},"talentbrew-jibe":{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},phenom:{version:"1.1.0",capabilities:["direct-json","pagination","detail","playwright-fallback"]},greenhouse:{version:"1.1.0",capabilities:["direct-json","detail"]},ashby:{version:"1.1.0",capabilities:["direct-json"]},lever:{version:"1.1.0",capabilities:["direct-json","pagination"]},workable:{version:"1.1.0",capabilities:["direct-json"]},bamboohr:{version:"1.1.0",capabilities:["direct-json","detail"]},personio:{version:"1.1.0",capabilities:["direct-xml"]},oracle:{version:"1.1.0",capabilities:["direct-json","pagination","detail"]},"custom-api":{version:"1.1.0",capabilities:[],unsupported:true},reference:{version:"1.1.0",capabilities:[],unsupported:true},
  // One adapter per employer whose board no generic ATS adapter reads; see company-adapters.mjs.
- ...Object.fromEntries(companyAdapterIds.map(id=>[id,{version:"1.1.0",capabilities:["direct-company","pagination",...(["rambus","renesas","arista-networks","arm","u-blox","synopsys","l3harris"].includes(id)?["detail"]:[])]}]))};
+ ...Object.fromEntries(companyAdapterIds.map(id=>[id,{version:"1.1.0",capabilities:["direct-company","pagination",...(["rambus","renesas","arista-networks","cern","bosch","devoteam","bosch-portugal","ubiwhere","sixt","natixis-portugal","inetum","act-digital","ilof","dbservices-portugal","openchip","racyics","csem","arteris","arm","u-blox","synopsys","l3harris"].includes(id)?["detail"]:[])]}]))};
 export {privateAddress,makeUrlGuard,allowed} from "./request-policy.mjs";
 export const retryAfterMs=(header,nowMs=Date.now(),cap=30_000)=>{if(!header)return 0;const seconds=Number(header);const raw=Number.isFinite(seconds)?Math.ceil(seconds*1000):Math.max(0,Date.parse(header)-nowMs);return Math.min(cap,Math.max(0,raw||0))};
 export const jitterMs=(random=Math.random)=>1500+Math.floor(random()*1501);
@@ -80,7 +84,7 @@ export const toIsoDate=(v,nowMs=Date.now())=>{if(v==null)return null;const raw=S
  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`};
 // ponytail: structured compensation fields only (salaryMin/Max/currency/period from ATS JSON); no
 // free-text "$120k-$150k DOE" parser here — add one if a source only ever exposes salary as prose.
-function job(x,s){const title=String(x.title||x.name||x.jobTitle||"").trim(),company=String(x.company||x.companyName||s.name||"").trim(),url=x.applyUrl||x.url||x.canonicalUrl||s.baseUrl,canonicalUrl=String(x.canonicalUrl||url),location=toLocation(x.location??x.locationName??x.locationsText??x.city),postedAt=toIsoDate(x.postedAt??x.postedDate??x.postedOn??x.datePosted??x.publishedAt),descriptionText=decodeEntities(String(x.descriptionText||x.description||x.summary||x.jobDescription||"").replace(/<[^>]*>/g," ")).replace(/\s+/g," ").trim(),externalId=x.externalId||x.id||x.requisitionId||x.jobReqId||x.jobId||createHash("sha256").update(`${s.baseUrl}|${title}|${company}|${url}`).digest("hex"),comp=x.compensation||x.payRange||x.salary||{},salaryMin=num(x.salaryMin??x.minSalary??x.payRangeMinimum??comp.min??comp.minimum),salaryMax=num(x.salaryMax??x.maxSalary??x.payRangeMaximum??comp.max??comp.maximum),detailUrl=x.detailUrl?String(x.detailUrl):null,descriptionStatus=["complete","pending","failed"].includes(x.descriptionStatus)?x.descriptionStatus:(detailUrl&&!descriptionText?"pending":"complete");return{jobId:x.jobId||null,externalId:String(externalId),canonicalUrl,applyUrl:String(x.applyUrl||url),title,company,location,workMode:x.workMode||null,descriptionText,descriptionHtml:String(x.descriptionHtml||x.description||"").slice(0,250000),detailUrl,descriptionStatus,descriptionError:x.descriptionError||null,postedAt,closingAt:x.closingAt||null,skills:Array.isArray(x.skills)?x.skills.map(String):[],seniority:x.seniority||x.seniorityLevel||x.jobLevel||null,salaryMin,salaryMax,salaryCurrency:x.salaryCurrency||x.currency||comp.currency||null,salaryPeriod:x.salaryPeriod||x.payPeriod||comp.period||null,salaryConfidence:salaryMin!=null||salaryMax!=null?"structured":null,adapterVersion:adapters[s.adapterId]?.version||"1.0.0",contentHash:createHash("sha256").update(`${title}\n${company}\n${descriptionText}`).digest("hex"),listingHash:x.listingHash||listingHash(canonicalUrl,title,location),provenance:{adapter:s.adapterId,adapterVersion:adapters[s.adapterId]?.version||"1.0.0",sourceUrl:s.baseUrl}}}
+function job(x,s){const title=decodeEntities(String(x.title||x.name||x.jobTitle||"")).trim(),company=String(x.company||x.companyName||s.name||"").trim(),url=x.applyUrl||x.url||x.canonicalUrl||s.baseUrl,canonicalUrl=String(x.canonicalUrl||url),location=toLocation(x.location??x.locationName??x.locationsText??x.city),postedAt=toIsoDate(x.postedAt??x.postedDate??x.postedOn??x.datePosted??x.publishedAt),descriptionText=decodeEntities(String(x.descriptionText||x.description||x.summary||x.jobDescription||"").replace(/<[^>]*>/g," ")).replace(/\s+/g," ").trim(),externalId=x.externalId||x.id||x.requisitionId||x.jobReqId||x.jobId||createHash("sha256").update(`${s.baseUrl}|${title}|${company}|${url}`).digest("hex"),comp=x.compensation||x.payRange||x.salary||{},salaryMin=num(x.salaryMin??x.minSalary??x.payRangeMinimum??comp.min??comp.minimum),salaryMax=num(x.salaryMax??x.maxSalary??x.payRangeMaximum??comp.max??comp.maximum),detailUrl=x.detailUrl?String(x.detailUrl):null,descriptionStatus=["complete","pending","failed"].includes(x.descriptionStatus)?x.descriptionStatus:(detailUrl&&!descriptionText?"pending":"complete");return{jobId:x.jobId||null,externalId:String(externalId),canonicalUrl,applyUrl:String(x.applyUrl||url),title,company,location,workMode:x.workMode||null,descriptionText,descriptionHtml:String(x.descriptionHtml||x.description||"").slice(0,250000),detailUrl,descriptionStatus,descriptionError:x.descriptionError||null,postedAt,closingAt:x.closingAt||null,skills:Array.isArray(x.skills)?x.skills.map(String):[],seniority:x.seniority||x.seniorityLevel||x.jobLevel||null,salaryMin,salaryMax,salaryCurrency:x.salaryCurrency||x.currency||comp.currency||null,salaryPeriod:x.salaryPeriod||x.payPeriod||comp.period||null,salaryConfidence:salaryMin!=null||salaryMax!=null?"structured":null,adapterVersion:adapters[s.adapterId]?.version||"1.0.0",contentHash:createHash("sha256").update(`${title}\n${company}\n${descriptionText}`).digest("hex"),listingHash:x.listingHash||listingHash(canonicalUrl,title,location),provenance:{adapter:s.adapterId,adapterVersion:adapters[s.adapterId]?.version||"1.0.0",sourceUrl:s.baseUrl}}}
 // A run that recognises a listing it already stored skips the detail fetch entirely, so the
 // count of requests actually issued is the honest measure of what a run cost.
 export const counters={requests:0,skipped:0,filtered:0};
@@ -134,7 +138,7 @@ const keep=(s,item)=>{
 // them by seconds bought nothing and cost hours — Apple has run at 250 ms all along with no
 // complaint from Apple. An HTML listing page is far heavier for a server to render, so it keeps
 // the original spacing. Any source can still override both with requestDelayMs.
-const jsonAdapters=new Set(["ceva","siemens","renesas","arista-networks","apple","workday","eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","oracle","json","rss","amd","asml","mediatek","sk-hynix"]);
+const jsonAdapters=new Set(["ceva","siemens","renesas","arista-networks","cern","bosch","devoteam","bosch-portugal","ubiwhere","sixt","natixis-portugal","inetum","act-digital","ilof","dbservices-portugal","apple","workday","eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","workable","bamboohr","personio","oracle","json","rss","amd","asml","mediatek","sk-hynix"]);
 // A listing page is a search the site runs; a detail page is one static document it already has.
 // Charging both the same 1.5-3s is most of what Arm's read now costs, because its posting dates
 // only exist on those detail pages: 219 of them at listing pace is seven minutes of sleeping.
@@ -189,7 +193,14 @@ async function get(url,s,redirects=0,request={},skipRobots=false){let last;const
 // a denied source fails before any listing request is issued.
 async function robots(s){if(s.robotsOverride){emit("warning",s.__runId,{code:"robots_override",message:"Saved per-source robots override is active."});return}const u=await guarded(urlFor(s),s);const rules=await robotsPolicy(s,`${u.protocol}//${u.host}`);if(!robotsAllows(rules,`${u.pathname}${u.search}`))throw Error("robots_denied")}
 const path=(v,p)=>p.split(".").filter(Boolean).reduce((x,k)=>x?.[k],v);
-function collection(data,s){const a=s.adapterId,c=a==="workday"?data.jobPostings:a==="eightfold"?data.positions||data.data?.positions:a==="icims"||a==="talentbrew-jibe"?data.jobs||data.searchResults:a==="phenom"?data.jobs||data.data?.jobs:a==="greenhouse"||a==="ashby"?data.jobs:a==="oracle"?data.items?.[0]?.requisitionList:Array.isArray(data)?data:path(data,s.configJson?.itemsPath||"jobs")||data.results;if(!Array.isArray(c))throw Error("parse_error: adapter response has no job array");return c}
+// Workable's widget repeats a vacancy once per office, all under one shortcode and one link. That is one job in several
+// places, so the rows are folded together and their offices combined rather than reported as a repeated identity.
+function mergeWorkableOffices(jobs){if(!Array.isArray(jobs))return jobs;const byCode=new Map;
+ for(const row of jobs){const code=row?.shortcode;if(!code||!byCode.has(code)){byCode.set(code||Symbol(),{...row});continue}
+  const kept=byCode.get(code),offices=[...(kept.locations||[]),...(row.locations||[])];
+  if(offices.length)kept.locations=offices.filter((office,index)=>offices.findIndex(other=>other.city===office.city&&other.country===office.country)===index)}
+ return[...byCode.values()]}
+function collection(data,s){const a=s.adapterId,c=a==="workday"?data.jobPostings:a==="eightfold"?data.positions||data.data?.positions:a==="icims"||a==="talentbrew-jibe"?data.jobs||data.searchResults:a==="phenom"?data.jobs||data.data?.jobs:a==="greenhouse"||a==="ashby"?data.jobs:a==="workable"?mergeWorkableOffices(data.jobs):a==="bamboohr"?data.result:a==="personio"?data.positions:a==="oracle"?data.items?.[0]?.requisitionList:Array.isArray(data)?data:path(data,s.configJson?.itemsPath||"jobs")||data.results;if(!Array.isArray(c))throw Error("parse_error: adapter response has no job array");return c}
 // A generated config names the keys of an arbitrary endpoint explicitly; platform and
 // hand-written configs rely on the aliases below. Mapped values win, and a relative link is
 // resolved against the endpoint that served it.
@@ -372,7 +383,7 @@ export function captureFromHtml(html,url){
  }}
 // Detection needs the rendered DOM for JS-only job boards. browser() returns jobs; this returns
 // markup, so the same inference and parse run on the fetched and the rendered path alike.
-async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{browser:b,closeBrowser}=await guardedBrowser(exe,s,true);try{const ctx=await b.newContext({serviceWorkers:"block"});await installNavigationGuard(ctx,s);const p=await ctx.newPage();
+async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: no Chromium browser (Edge, Chrome or Chromium) was found; set JOBSCRAPER_BROWSER to its path");const{browser:b,closeBrowser}=await guardedBrowser(exe,s,true);try{const ctx=await b.newContext({serviceWorkers:"block"});await installNavigationGuard(ctx,s);const p=await ctx.newPage();
  // Whatever JSON the page fetches for itself is collected here: on a JS-only board the job list
  // arrives in one of these responses, and reading it directly beats scraping the DOM it builds.
  // Only plain GETs are kept, because those are the ones a saved source can replay without a browser.
@@ -383,7 +394,7 @@ async function renderedHtml(s,url){const metricStarted=clock.now();try{const exe
  const response=await p.goto(url,{waitUntil:"domcontentloaded",timeout:30000});await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});
  const html=await p.content();await Promise.allSettled(bodies);
  return{html,status:response?.status()??0,captures}}finally{await closeBrowser()}}finally{add("browserMs",metricStarted)}}
-async function page(url,s){const r=await get(url,s),cfg=s.configJson||{};if(r.type.includes("json")||["json","workday","eightfold","icims","talentbrew-jibe","phenom"].includes(s.adapterId)||cfg.mode==="json")return{jobs:rows(JSON.parse(r.text),s),next:null};if(r.type.includes("xml")||cfg.mode==="rss"){const{XMLParser}=await import("fast-xml-parser"),x=new XMLParser({ignoreAttributes:false}).parse(r.text),items=x?.rss?.channel?.item||x?.feed?.entry||[];return{feed:true,jobs:(Array.isArray(items)?items:[items]).map(i=>job({title:i.title,company:s.name,url:typeof i.link==="string"?i.link:i.link?.["@_href"],description:i.description||i.summary,postedAt:i.pubDate||i.updated,externalId:i.guid?.["#text"]||i.guid||i.id},s)),next:null}}if(cfg.itemXPath)return xpathPage(r.text,url,s,cfg);return cssPage(r.text,url,s,cfg)}
+async function page(url,s){const r=await get(url,s),cfg=s.configJson||{};if(r.type.includes("json")||["json","workday","eightfold","icims","talentbrew-jibe","phenom"].includes(s.adapterId)||cfg.mode==="json")return{jobs:rows(JSON.parse(r.text),s),next:null};if(!cfg.itemXPath&&(r.type.includes("xml")||cfg.mode==="rss")){const{XMLParser}=await import("fast-xml-parser"),x=new XMLParser({ignoreAttributes:false}).parse(r.text),items=x?.rss?.channel?.item||x?.feed?.entry||[];return{feed:true,jobs:(Array.isArray(items)?items:[items]).map(i=>job({title:i.title,company:s.name,url:typeof i.link==="string"?i.link:i.link?.["@_href"],description:i.description||i.summary,postedAt:i.pubDate||i.updated,externalId:i.guid?.["#text"]||i.guid||i.id},s)),next:null}}if(cfg.itemXPath)return xpathPage(r.text,url,s,cfg);return cssPage(r.text,url,s,cfg)}
 async function requestHeaders(s){
  if(!s.__credentials)s.__credentials=(async()=>{
   const cfg=s.configJson||{};let cookies=Array.isArray(cfg.sessionCookies)?cfg.sessionCookies:[];
@@ -441,7 +452,7 @@ export const platformLocation=(record,path)=>{
 // The Workday detail payload nests everything under jobPostingInfo.
 // Every board publishes how many openings it holds, each under its own name. It is one number on
 // the first page and the cheapest possible answer to "is there anything new here at all?".
-export const boardTotal=data=>{const n=Number(data?.items?.[0]?.TotalJobsCount??data?.total??data?.count??data?.data?.count??data?.totalCount??data?.totalHits??data?.res?.totalRecords??data?.meta?.total);
+export const boardTotal=data=>{const n=Number(data?.items?.[0]?.TotalJobsCount??data?.total??data?.count??data?.data?.count??data?.totalCount??data?.totalHits??data?.res?.totalRecords??data?.meta?.total??data?.meta?.totalCount);
  return Number.isInteger(n)&&n>=0?n:null};
 const workdayTotal=(data,cfg)=>{
  const total=boardTotal(data);
@@ -450,7 +461,7 @@ const workdayTotal=(data,cfg)=>{
  return values?.length&&values.every(v=>Number.isInteger(v.count)&&v.count>=0)
   ?Math.max(total??0,values.reduce((sum,v)=>sum+v.count,0)):total;
 };
-const unwrap=(data,adapterId)=>adapterId==="workday"&&data?.jobPostingInfo?data.jobPostingInfo:adapterId==="oracle"&&data?.items?.[0]?data.items[0]:adapterId==="eightfold"&&data?.data&&!Array.isArray(data.data)?data.data:data;
+const unwrap=(data,adapterId)=>adapterId==="workday"&&data?.jobPostingInfo?data.jobPostingInfo:adapterId==="oracle"&&data?.items?.[0]?data.items[0]:adapterId==="bamboohr"&&data?.result?.jobOpening?data.result.jobOpening:adapterId==="eightfold"&&data?.data&&!Array.isArray(data.data)?data.data:data;
 const appleLocale=s=>s.configJson?.locale||/^\/([a-z]{2}-[a-z]{2})(?:\/|$)/i.exec(new URL(s.baseUrl).pathname)?.[1]?.toLowerCase()||"en-us";
 const appleSlug=value=>String(value||"job").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"job";
 async function appleDirect(s){await robots(s);const cfg=s.configJson||{},locale=appleLocale(s),origin=new URL(s.baseUrl).origin,max=cfg.maxPages||500;s.__requestHeaders=await requestHeaders(s);
@@ -472,11 +483,11 @@ async function platformDirect(s){
   while(pages<max){
     const request=requestFor(s.adapterId,s.baseUrl,{...cfg,...state})
     const response=await get(request.url,s,0,{...request,metricKind:"listing"})
-    const data=JSON.parse(response.text),items=collection(data,s)
+    const data=s.adapterId==="personio"?await parsePersonioXml(response.text):JSON.parse(response.text),items=collection(data,s)
     // Ashby publishes the entire board without a count. Only this family can use its array
     // length as an exact total; a page from another family must never stand in for its board.
     const reported=s.adapterId==="workday"?workdayTotal(data,cfg):boardTotal(data),before=identities.size
-    if(total===null)total=s.adapterId==="ashby"?items.length:reported
+    if(total===null)total=["ashby","workable","personio"].includes(s.adapterId)?items.length:reported
     // Workday omits its total (or sends zero) after page one on some tenants.
     if(reported!==null&&reported!==total&&!(s.adapterId==="workday"&&reported===0))unstable=true
     for(const raw of items){
@@ -503,8 +514,9 @@ async function platformDirect(s){
       if(known){markSeen(lhash);continue}
       const detailUrl=detail?new URL(detail,response.url).toString():null
       if(detailUrl&&cfg.fetchDetail!==false){
-        const detailResponse=await get(detailUrl,s,0,{metricKind:"detail"})
-        full=normalizeItem(s.adapterId,{...raw,...unwrap(JSON.parse(detailResponse.text),s.adapterId)},cfg,s.baseUrl)
+        if(s.adapterId==="personio")full={...item,...await personioDetail(detailUrl,s)}
+        else{const detailResponse=await get(detailUrl,s,0,{metricKind:"detail"})
+        full=normalizeItem(s.adapterId,{...raw,...unwrap(JSON.parse(detailResponse.text),s.adapterId)},cfg,s.baseUrl)}
       }
       const normalized=job({...full,
         externalId:full.externalId||full.jobReqId||full.requisitionId||full.id||full.jobId||workdayRequisition(item),
@@ -566,7 +578,7 @@ async function workdayDirect(s){const cfg=s.configJson||{};if(!cfg.splitFacet)re
  if(seen.size!==expected)complete=false;
  if(!complete)warnings.push(`Read ${seen.size} unique vacancies against an expected total of ${expected}; this split read is unfinished and cannot close stored jobs.`);
  return{jobs,discovered:seen.size,complete,pages,total:expected,totalExact:true,mode:"direct-platform",warnings:[`Workday reported ${total} openings before splitting; checked ${seen.size} unique vacancies across ${values.length} ${facet.descriptor||cfg.splitFacet} slices.`,...warnings]}}
-async function direct(s){if(s.adapterId==="apple")return appleDirect(s);if(companyAdapters[s.adapterId])return companyDirect(s);if(s.adapterId==="workday")return workdayDirect(s);if(["eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","oracle"].includes(s.adapterId))return platformDirect(s);await robots(s);const c=s.configJson||{};let u=urlFor(s),out=[],pages=0,complete=true,discovered=0,feed=false;while(u&&pages<(c.maxPages||50)){const x=await page(u,s);if(x.feed)feed=true;for(const found of x.jobs){discovered++;if(keep(s,found))out.push(found)}pages++;if(c.pageParam){const n=new URL(urlFor(s));n.searchParams.set(c.pageParam,String(pages+(c.pageStart||0)));u=x.jobs.length?n.toString():null}else u=x.next}if(u)complete=false;
+async function direct(s){if(s.adapterId==="apple")return appleDirect(s);if(companyAdapters[s.adapterId])return companyDirect(s);if(s.adapterId==="workday")return workdayDirect(s);if(["eightfold","icims","talentbrew-jibe","phenom","greenhouse","ashby","lever","workable","bamboohr","personio","oracle"].includes(s.adapterId))return platformDirect(s);await robots(s);const c=s.configJson||{};let u=urlFor(s),out=[],pages=0,complete=true,discovered=0,feed=false;while(u&&pages<(c.maxPages||50)){const x=await page(u,s);if(x.feed)feed=true;for(const found of x.jobs){discovered++;if(c.detailSelector&&!found.descriptionText){found.detailUrl=found.applyUrl;found.descriptionStatus="pending"}if(keep(s,found))out.push(found)}pages++;if(c.pageParam){const n=new URL(urlFor(s));n.searchParams.set(c.pageParam,String(pages+(c.pageStart||0)));u=x.jobs.length?n.toString():null}else u=x.next}if(u)complete=false;
  // A feed publishes its most recent items, not its publisher's whole board, and it says nothing
  // about how many were left out: TEKEVER's careers page counts 123 openings and its RSS carries
  // 100. Reaching the end of the feed therefore is not reaching the end of the board, and treating
@@ -587,11 +599,21 @@ async function guardedBrowser(executablePath,s,headless){
 export async function installNavigationGuard(context,s){
  await context.route("**/*",async route=>{try{await allowed(route.request().url(),s);await route.continue()}catch{await route.abort("blockedbyclient")}});
 }
-async function browser(s,capture){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: Microsoft Edge was not found");const{browser:b,closeBrowser}=await guardedBrowser(exe,s,s.headless!==false);try{const ctx=await b.newContext({...s.sessionStatePath?{storageState:s.sessionStatePath}:{},serviceWorkers:"block"});await installNavigationGuard(ctx,s);const p=await ctx.newPage();await p.goto((await allowed(urlFor(s),s)).toString(),{waitUntil:"domcontentloaded",timeout:30000});cancelledError(s.__runId);if(s.headless===false){emit("needs_user_action",s.__runId,{kind:capture?"login_capture":"login_or_captcha",message:"Complete login or CAPTCHA in Edge, then choose Resume."});await waitForUser(s.__runId);cancelledError(s.__runId)}if(capture)return{jobs:[],discovered:0,complete:true,pages:1,capturedStorageStateBase64:Buffer.from(JSON.stringify(await ctx.storageState())).toString("base64")};await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});const markup=await p.content(),cfg=s.configJson?.itemSelector?s.configJson:(await inferSelectors(markup,p.url()))||{},found=(await cssPage(markup,p.url(),s,cfg)).jobs,jobs=found.filter(item=>keep(s,item));
+async function browser(s,capture){const metricStarted=clock.now();try{const exe=edge.find(existsSync);if(!exe)throw Error("browser_incompatible: no Chromium browser (Edge, Chrome or Chromium) was found; set JOBSCRAPER_BROWSER to its path");const{browser:b,closeBrowser}=await guardedBrowser(exe,s,s.headless!==false);try{const ctx=await b.newContext({...s.sessionStatePath?{storageState:s.sessionStatePath}:{},serviceWorkers:"block"});await installNavigationGuard(ctx,s);const p=await ctx.newPage();await p.goto((await allowed(urlFor(s),s)).toString(),{waitUntil:"domcontentloaded",timeout:30000});cancelledError(s.__runId);if(s.headless===false){emit("needs_user_action",s.__runId,{kind:capture?"login_capture":"login_or_captcha",message:"Complete login or CAPTCHA in Edge, then choose Resume."});await waitForUser(s.__runId);cancelledError(s.__runId)}if(capture)return{jobs:[],discovered:0,complete:true,pages:1,capturedStorageStateBase64:Buffer.from(JSON.stringify(await ctx.storageState())).toString("base64")};await p.waitForLoadState("networkidle",{timeout:15000}).catch(()=>{});const markup=await p.content(),cfg=s.configJson?.itemSelector?s.configJson:(await inferSelectors(markup,p.url()))||{},found=(await cssPage(markup,p.url(),s,cfg)).jobs,jobs=found.filter(item=>keep(s,item));
     // One rendered page, no paging and no vendor total — the same admission totalExact makes.
     // Claiming complete here told the database that everything not on this page had closed.
     return{jobs,discovered:found.length,complete:false,pages:1,total:null,totalExact:false}}finally{pauses.delete(s.__runId);await closeBrowser()}}finally{add("browserMs",metricStarted)}}
 async function scrape(s){try{return await direct(s)}catch(error){const declared=adapters[s.adapterId]?.capabilities.includes("playwright-fallback");if(s.configJson?.allowPlaywrightFallback&&declared&&/^(parse_error|selector_broken)/.test(String(error.message||error))){emit("warning",s.__runId,{code:"playwright_fallback",message:"Declared direct adapter fallback started after parse failure."});return{...(await browser(s,false)),mode:"playwright-fallback"}}throw error}}
+// A CSS or XPath listing carries no description of its own; detailSelector names where the vacancy page keeps it.
+// The listing marks each row pending against its own link, and this reads that page when the job is opened.
+async function htmlDetail(url,s){const response=await get(url,s,0,{metricKind:"detail"}),{load}=await import("cheerio"),found=load(response.text)(s.configJson.detailSelector).first();
+ if(!found.length)throw Error("selector_broken: detail selector matched nothing on the vacancy page");return{description:found.html()}}
+// A Personio vacancy page is server-rendered: the title heading sits in a header block, and the description is the rest of the
+// container that block lives in. Class names are build hashes, so the structure is what is matched, never a class.
+async function personioDetail(url,s){const response=await get(url,s,0,{metricKind:"detail"}),{load}=await import("cheerio"),$=load(response.text),heading=$("main h1").first(),header=heading.parent();
+ const body=header.parent().clone();body.children().filter((_,element)=>$(element).find("h1").length).remove();
+ if(!heading.length||!body.text().trim())throw Error("selector_broken: Personio vacancy page no longer carries a readable description");
+ return{description:body.html()}}
 async function enrichDirect(s){
  const items=Array.isArray(s.enrichmentJobs)?s.enrichmentJobs:[];let completed=0,failed=0,lastProgress=0;
  if(!items.length)return{completed,failed};
@@ -604,6 +626,8 @@ async function enrichDirect(s){
    if(companyAdapters[s.adapterId])full=await enrichCompany(s.adapterId,item,request);
     // Deferred reads need the same vendor mapping as inline detail reads, otherwise Greenhouse
     // content and Oracle description fields are discarded when someone opens the stored job.
+    else if(s.adapterId==="personio")full=await personioDetail(item.detailUrl,s);
+    else if(s.configJson?.detailSelector)full=await htmlDetail(item.detailUrl,s);
     else{const response=await get(item.detailUrl,s,0,{metricKind:"detail"});full=normalizeItem(s.adapterId,{...item,...unwrap(JSON.parse(response.text),s.adapterId)},s.configJson||{},s.baseUrl)}
    const normalized=job({...item,...full,jobId:item.jobId,listingHash:item.listingHash,detailUrl:item.detailUrl,
     // The stored listing row already carries a descriptionText (Arm's job category, u-blox's
@@ -619,7 +643,7 @@ async function enrichDirect(s){
  }
  return{completed,failed}
 }
-export const requiredFor=id=>id==="static-css"?["itemSelector","titleSelector"]:id==="static-xpath"?["itemXPath","titleXPath"]:id==="json"?["itemsPath"]:id==="workday"?["tenant","site"]:id==="eightfold"?["domain"]:["greenhouse","ashby","lever"].includes(id)?["token"]:id==="oracle"?["apiHost","siteNumber"]:[];
+export const requiredFor=id=>id==="static-css"?["itemSelector","titleSelector"]:id==="static-xpath"?["itemXPath","titleXPath"]:id==="json"?["itemsPath"]:id==="workday"?["tenant","site"]:id==="eightfold"?["domain"]:["greenhouse","ashby","lever","workable","bamboohr","personio"].includes(id)?["token"]:id==="oracle"?["apiHost","siteNumber"]:[];
 // Detection signals, verified against live tenants. Workday tenant is the subdomain and
 // the per-tenant site segment is published in that tenant's own robots.txt (Sitemap line,
 // else the first Allow directory) — the same trick that recovered all five live tenants.

@@ -1,0 +1,13 @@
+{
+ "id": "arteris",
+ "name": "Arteris",
+ "baseUrl": "https://jobs.jobvite.com/arteris/jobs?nl=1",
+ "adapterId": "arteris",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.jobvite.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

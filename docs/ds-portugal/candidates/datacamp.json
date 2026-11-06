@@ -1,0 +1,14 @@
+{
+ "id": "datacamp",
+ "name": "DataCamp",
+ "baseUrl": "https://job-boards.greenhouse.io/datacamp",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "datacamp",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

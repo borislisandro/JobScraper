@@ -1,0 +1,19 @@
+{
+ "id": "landingjobs-machine-learning",
+ "name": "Landing.jobs - Machine Learning",
+ "baseUrl": "https://landing.jobs/jobs/in/portugal/for/machine-learning",
+ "adapterId": "static-css",
+ "configJson": {
+  "itemSelector": "article.lj-jobcard-static",
+  "titleSelector": ".lj-jobcard-static__link",
+  "urlSelector": ".lj-jobcard-static__link",
+  "companySelector": ".lj-jobcard-static__company",
+  "locationSelector": ".lj-jobcard-static__location",
+  "maxPages": 1,
+  "expectedHost": "landing.jobs",
+  "detailSelector": "#job-summary-content"
+ },
+ "kind": "active",
+ "robotsOverride": false,
+ "allowPrivateNetwork": false
+}
