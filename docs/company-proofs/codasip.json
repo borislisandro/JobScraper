@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "name": "Codasip",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:30:33.942Z",
+  "finishedAt": "2026-11-06T19:30:36.542Z",
+  "source": {
+    "id": "codasip",
+    "name": "Codasip",
+    "baseUrl": "https://codasip.bamboohr.com/careers",
+    "adapterId": "bamboohr",
+    "configJson": {
+      "token": "codasip",
+      "maxPages": 5,
+      "expectedHost": "codasip.bamboohr.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "bf940d303f7a5356814767e7ed46ad605d8fbc2021ea20ea869708369a1f2d67",
+    "adapters.mjs": "53e34e9f26d2d18816a212fce6dda39c3293f864cfac4844fbb03e39c4f471b4",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "codasip",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 9,
+        "persisted": 9,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 9,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 396,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 396,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 373,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 373,
+                "bodyMs": 6
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 9,
+    "uniqueIdentities": 9,
+    "uniqueHashes": 9,
+    "samples": [
+      {
+        "externalId": "220",
+        "title": "Not finding the right role. Apply here and secure your place in our talent pool.",
+        "company": "Codasip",
+        "location": null,
+        "postedAt": null,
+        "canonicalUrl": "https://codasip.bamboohr.com/careers/220",
+        "applyUrl": "https://codasip.bamboohr.com/careers/220",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "237",
+        "title": "Design Verification Engineer",
+        "company": "Codasip",
+        "location": "Munich, *",
+        "postedAt": null,
+        "canonicalUrl": "https://codasip.bamboohr.com/careers/237",
+        "applyUrl": "https://codasip.bamboohr.com/careers/237",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "245",
+        "title": "HR Administrator",
+        "company": "Codasip",
+        "location": "Brno, *",
+        "postedAt": null,
+        "canonicalUrl": "https://codasip.bamboohr.com/careers/245",
+        "applyUrl": "https://codasip.bamboohr.com/careers/245",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "codasip",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 3,
+        "timingMs": 1123,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1123,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 94,
+              "backoff": 0,
+              "response": 1003,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 7,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 94,
+                "backoffMs": 0,
+                "responseMs": 1003,
+                "bodyMs": 10
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "proof-0",
+        "title": "Not finding the right role. Apply here and secure your place in our talent pool.",
+        "company": "Codasip",
+        "location": null,
+        "postedAt": "2025-11-03",
+        "canonicalUrl": "https://codasip.bamboohr.com/careers/220",
+        "applyUrl": "https://codasip.bamboohr.com/careers/220",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1367
+      },
+      {
+        "externalId": "proof-1",
+        "title": "Design Verification Engineer",
+        "company": "Codasip",
+        "location": "Munich, *, Germany",
+        "postedAt": "2026-07-28",
+        "canonicalUrl": "https://codasip.bamboohr.com/careers/237",
+        "applyUrl": "https://codasip.bamboohr.com/careers/237",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3822
+      },
+      {
+        "externalId": "proof-2",
+        "title": "HR Administrator",
+        "company": "Codasip",
+        "location": "Brno, *, Czech Republic",
+        "postedAt": "2026-10-23",
+        "canonicalUrl": "https://codasip.bamboohr.com/careers/245",
+        "applyUrl": "https://codasip.bamboohr.com/careers/245",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3613
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "codasip",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 9,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 9,
+        "requests": 1,
+        "skipped": 9,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 448,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 448,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 429,
+              "body": 6,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 429,
+                "bodyMs": 6
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

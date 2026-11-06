@@ -55,6 +55,19 @@ export const platformRequests={
    const host=new URL(base).hostname==="jobs.eu.lever.co"?"api.eu.lever.co":"api.lever.co";
    return{url:`https://${host}/v0/postings/${encodeURIComponent(token)}?mode=json&limit=${size}&skip=${skip}`,method:"GET",headers:{accept:"application/json"},
     next:r=>Array.isArray(r)&&r.length===size?{skip:skip+size}:null}},
+  // Workable's public widget answers the whole board in one response, descriptions included when
+  // details=true, so a scrape is a single request. The slug is the employer's apply.workable.com
+  // account; it is not always the company name ("universalquantum", "raspberrypi").
+  workable:(base,{token}={})=>{if(!token)throw Error("incomplete: Workable source requires token");
+   return{url:`https://apply.workable.com/api/v1/widget/accounts/${encodeURIComponent(token)}?details=true`,method:"GET",headers:{accept:"application/json"},next:()=>null}},
+  // BambooHR lists the whole board from /careers/list ({meta:{totalCount},result:[...]}). The list
+  // carries no description; /careers/{id}/detail does, and it is what fetchDetail reads.
+  bamboohr:(base,{token}={})=>{if(!token)throw Error("incomplete: BambooHR source requires token");
+   return{url:`https://${encodeURIComponent(token)}.bamboohr.com/careers/list`,method:"GET",headers:{accept:"application/json"},next:()=>null}},
+  // Personio publishes one XML document with every open position and its full description. The
+  // account lives on .de for most customers and .com for some; "domain" selects.
+  personio:(base,{token,domain="de"}={})=>{if(!token)throw Error("incomplete: Personio source requires token");
+   return{url:`https://${encodeURIComponent(token)}.jobs.personio.${domain==="com"?"com":"de"}/xml`,method:"GET",headers:{accept:"application/xml"},next:()=>null}},
   // Oracle Recruiting (ORC). The employer's careers page is a vanity host in front of an Oracle
   // Fusion pod, and both halves are needed: apiHost is the pod that answers, siteNumber is the
   // careers site on it. The vanity host is what job links are built from, so it stays the base URL.
@@ -73,6 +86,7 @@ export const platformRequests={
 // Applied to the listing row AND to the row merged with its detail payload, so a field that only
 // the detail page carries (Greenhouse's description) is mapped just the same.
 const ghDetail=(token,id)=>token&&id!=null?`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs/${encodeURIComponent(id)}`:null;
+const personioDescription=x=>[].concat(x.jobDescriptions?.jobDescription??[]).filter(part=>String(part?.value??"").trim()).map(part=>`${part.name?`<h3>${String(part.name).trim()}</h3>`:""}${part.value}`).join("\n");
 export const platformItems={
  // PCSX search omits descriptions and detail URLs. Its public frontend reads this endpoint
  // when a vacancy opens; legacy Eightfold and explicitly provided detail links retain theirs.
@@ -96,6 +110,29 @@ export const platformItems={
   description:[x.descriptionPlain||x.description,...(x.lists||[]).flatMap(section=>[section.text,section.content]),x.additionalPlain||x.additional].filter(Boolean).join("\n\n"),
   descriptionHtml:[x.description||x.descriptionPlain,...(x.lists||[]).flatMap(section=>[section.text,section.content]),x.additional||x.additionalPlain].filter(Boolean).join("\n\n"),
   workMode:x.workplaceType||null}),
+  // The widget's own place fields are city/state/country; "locations" repeats them per office and
+ // is preferred because a vacancy open in two countries lists both there.
+ workable:x=>({...x,externalId:String(x.shortcode??""),url:x.url,applyUrl:x.url,
+  location:(Array.isArray(x.locations)&&x.locations.length?x.locations.map(l=>[l.city,l.region,l.country].filter(Boolean).join(", ")):[[x.city,x.state,x.country].filter(Boolean).join(", ")]).filter(Boolean),
+  postedAt:x.published_on||x.created_at,description:x.description,workMode:x.telecommuting?"remote":null}),
+ // The list row and the detail record name things differently (location.city vs addressCountry),
+ // and the detail is merged over the row, so each field reads whichever is present.
+ bamboohr:(x,cfg={})=>({...x,externalId:String(x.id??""),title:x.jobOpeningName,
+  url:cfg.token&&x.id!=null?`https://${cfg.token}.bamboohr.com/careers/${x.id}`:x.jobOpeningShareUrl,
+  applyUrl:cfg.token&&x.id!=null?`https://${cfg.token}.bamboohr.com/careers/${x.id}`:x.jobOpeningShareUrl,
+  location:[x.location?.city,x.location?.state,x.location?.addressCountry||x.atsLocation?.country].filter(Boolean).join(", ")||null,
+  postedAt:x.datePosted||null,description:x.description,
+  workMode:x.isRemote?"remote":null,
+  detailUrl:cfg.token&&x.id!=null?`https://${cfg.token}.bamboohr.com/careers/${x.id}/detail`:null}),
+ personio:(x,cfg={})=>({...x,externalId:String(x.id??""),title:x.name,
+  url:cfg.token&&x.id!=null?`https://${cfg.token}.jobs.personio.${cfg.domain==="com"?"com":"de"}/job/${x.id}`:null,
+  applyUrl:cfg.token&&x.id!=null?`https://${cfg.token}.jobs.personio.${cfg.domain==="com"?"com":"de"}/job/${x.id}`:null,
+  location:[x.office,...[].concat(x.additionalOffices?.office??[])].filter(Boolean),
+  postedAt:x.createdAt,description:personioDescription(x),
+  // Some boards (SEMRON) publish positions with an empty jobDescriptions element while the vacancy page itself
+  // carries the text, so those rows defer to that page instead of being stored without a description.
+  detailUrl:cfg.token&&x.id!=null&&!personioDescription(x)?`https://${cfg.token}.jobs.personio.${cfg.domain==="com"?"com":"de"}/job/${x.id}`:null,
+  workMode:null}),
  oracle:(x,cfg={},base="")=>({...x,externalId:String(x.Id??""),
   url:base?new URL(`job/${encodeURIComponent(x.Id)}`,base.endsWith("/")?base:`${base}/`).toString():null,
   title:x.Title,location:[x.PrimaryLocation,...(x.secondaryLocations||[]).map(l=>l?.LocationName||l?.Name)].filter(Boolean),
@@ -104,5 +141,13 @@ export const platformItems={
   detailUrl:cfg.apiHost&&cfg.siteNumber&&x.Id!=null
    ?`https://${cfg.apiHost}/hcmRestApi/resources/latest/recruitingCEJobRequisitionDetails?onlyData=true&expand=all&finder=ById;Id=%22${encodeURIComponent(x.Id)}%22,siteNumber=${cfg.siteNumber}`:null})
 };
+// Personio answers XML. Parsed here so the worker's JSON paging loop sees {positions:[...]} like every other board;
+// a position, its description parts and its extra offices are always arrays, however many the board holds.
+export async function parsePersonioXml(text){
+ const {XMLParser}=await import("fast-xml-parser"),parser=new XMLParser({ignoreAttributes:true,parseTagValue:false,trimValues:true,isArray:name=>["position","jobDescription","office"].includes(name)}),
+  data=parser.parse(text);
+ if(!data||typeof data!=="object"||!("workzag-jobs" in data))throw Error("parse_error: Personio response is not a job feed");
+ const root=data["workzag-jobs"];
+ return{positions:root&&typeof root==="object"?root.position||[]:[]}}
 export const normalizeItem=(adapter,item,config={},base="")=>platformItems[adapter]?platformItems[adapter](item,config,base):item;
 export function requestFor(adapter,base,config){const build=platformRequests[adapter];if(!build)throw Error(`unsupported adapter request: ${adapter}`);return build(base,config)};

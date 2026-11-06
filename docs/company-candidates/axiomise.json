@@ -1,0 +1,23 @@
+{
+ "id": "axiomise",
+ "name": "Axiomise",
+ "baseUrl": "https://axiomise.jobs.personio.de/",
+ "adapterId": "personio",
+ "configJson": {
+  "token": "axiomise",
+  "maxPages": 5,
+  "expectedHost": "axiomise.jobs.personio.de"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 4,
+   "roleTitles": 4,
+   "roleTitlesInTargetCountries": 0,
+   "examples": []
+  }
+ }
+}

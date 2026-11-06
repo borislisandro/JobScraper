@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Quantum Motion",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:30:28.353Z",
+  "finishedAt": "2026-11-06T19:30:29.420Z",
+  "source": {
+    "id": "quantum-motion",
+    "name": "Quantum Motion",
+    "baseUrl": "https://quantummotion.jobs.personio.de/",
+    "adapterId": "personio",
+    "configJson": {
+      "token": "quantummotion",
+      "maxPages": 5,
+      "expectedHost": "quantummotion.jobs.personio.de"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "bf940d303f7a5356814767e7ed46ad605d8fbc2021ea20ea869708369a1f2d67",
+    "adapters.mjs": "53e34e9f26d2d18816a212fce6dda39c3293f864cfac4844fbb03e39c4f471b4",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "quantum-motion",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 19,
+        "persisted": 19,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 19,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 292,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 291,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 13,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 191,
+              "body": 44,
+              "browser": 0,
+              "adapterOther": 38,
+              "emit": 4
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 191,
+                "bodyMs": 44
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 19,
+    "uniqueIdentities": 19,
+    "uniqueHashes": 19,
+    "samples": [
+      {
+        "externalId": "2791761",
+        "title": "Communications & Events Manager",
+        "company": "Quantum Motion",
+        "location": "Hybrid, London, UK",
+        "postedAt": "2026-09-10",
+        "canonicalUrl": "https://quantummotion.jobs.personio.de/job/2791761",
+        "applyUrl": "https://quantummotion.jobs.personio.de/job/2791761",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5599
+      },
+      {
+        "externalId": "2696038",
+        "title": "Senior DevOps Engineer",
+        "company": "Quantum Motion",
+        "location": "London, UK, San Sebastián, ES",
+        "postedAt": "2026-07-02",
+        "canonicalUrl": "https://quantummotion.jobs.personio.de/job/2696038",
+        "applyUrl": "https://quantummotion.jobs.personio.de/job/2696038",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6959
+      },
+      {
+        "externalId": "2790119",
+        "title": "Technical Writer",
+        "company": "Quantum Motion",
+        "location": "Hybrid, London, UK",
+        "postedAt": "2026-09-09",
+        "canonicalUrl": "https://quantummotion.jobs.personio.de/job/2790119",
+        "applyUrl": "https://quantummotion.jobs.personio.de/job/2790119",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6095
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "quantum-motion",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 19,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 19,
+        "requests": 1,
+        "skipped": 19,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 384,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 385,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 214,
+              "body": 132,
+              "browser": 0,
+              "adapterOther": 30,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 214,
+                "bodyMs": 132
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

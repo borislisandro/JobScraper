@@ -1,0 +1,27 @@
+{
+ "id": "semron",
+ "name": "SEMRON",
+ "baseUrl": "https://semron.jobs.personio.de/",
+ "adapterId": "personio",
+ "configJson": {
+  "token": "semron",
+  "maxPages": 5,
+  "expectedHost": "semron.jobs.personio.de"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 11,
+   "roleTitles": 3,
+   "roleTitlesInTargetCountries": 3,
+   "examples": [
+    "Digital Design Engineer (IC Design) — Austin, TX, Dresden, DE (primary site)",
+    "Senior Analog IC Design Engineer — Austin, TX, Dresden, DE (primary site)",
+    "Senior SoC Architect — Austin, TX, Dresden, DE (primary site)"
+   ]
+  }
+ }
+}

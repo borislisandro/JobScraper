@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "name": "SEMRON",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:31:35.605Z",
+  "finishedAt": "2026-11-06T19:31:37.183Z",
+  "source": {
+    "id": "semron",
+    "name": "SEMRON",
+    "baseUrl": "https://semron.jobs.personio.de/",
+    "adapterId": "personio",
+    "configJson": {
+      "token": "semron",
+      "maxPages": 5,
+      "expectedHost": "semron.jobs.personio.de"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "5dc7d94bfb18c6e7359012b2bf2ccaf9e46d75be864931a3fbabae9d728ba148",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "semron",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 11,
+        "persisted": 11,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 11,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 291,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 291,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 31,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 198,
+              "body": 28,
+              "browser": 0,
+              "adapterOther": 31,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 198,
+                "bodyMs": 28
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 11,
+    "uniqueIdentities": 11,
+    "uniqueHashes": 11,
+    "samples": [
+      {
+        "externalId": "1369445",
+        "title": "Compiler Developer",
+        "company": "SEMRON",
+        "location": "Austin, TX, Dresden, DE (primary site)",
+        "postedAt": "2016-10-10",
+        "canonicalUrl": "https://semron.jobs.personio.de/job/1369445",
+        "applyUrl": "https://semron.jobs.personio.de/job/1369445",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "2385356",
+        "title": "NPU Architect",
+        "company": "SEMRON",
+        "location": "Austin, TX, Dresden, DE (primary site)",
+        "postedAt": "2025-10-14",
+        "canonicalUrl": "https://semron.jobs.personio.de/job/2385356",
+        "applyUrl": "https://semron.jobs.personio.de/job/2385356",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "2739370",
+        "title": "Werksstudent Finance & Accounting",
+        "company": "SEMRON",
+        "location": "Dresden, DE (primary site)",
+        "postedAt": "2026-08-03",
+        "canonicalUrl": "https://semron.jobs.personio.de/job/2739370",
+        "applyUrl": "https://semron.jobs.personio.de/job/2739370",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4197
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "semron",
+      "payload": {
+        "completed": 2,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 2,
+        "timingMs": 505,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 505,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 282,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 202,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 2,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 282,
+                "bodyMs": 10
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "1369445",
+        "title": "Compiler Developer",
+        "company": "SEMRON",
+        "location": "Austin, TX, Dresden, DE (primary site)",
+        "postedAt": "2016-10-10",
+        "canonicalUrl": "https://semron.jobs.personio.de/job/1369445",
+        "applyUrl": "https://semron.jobs.personio.de/job/1369445",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1296
+      },
+      {
+        "externalId": "2385356",
+        "title": "NPU Architect",
+        "company": "SEMRON",
+        "location": "Austin, TX, Dresden, DE (primary site)",
+        "postedAt": "2025-10-14",
+        "canonicalUrl": "https://semron.jobs.personio.de/job/2385356",
+        "applyUrl": "https://semron.jobs.personio.de/job/2385356",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1716
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "semron",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 11,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 11,
+        "requests": 1,
+        "skipped": 11,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 193,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 193,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 157,
+              "body": 4,
+              "browser": 0,
+              "adapterOther": 24,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 157,
+                "bodyMs": 4
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

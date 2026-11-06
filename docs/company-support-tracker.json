@@ -4611,6 +4611,120 @@
       "nextAction": "Complete; revalidate if this employer changes its board.",
       "batch": "semiconductor-eu",
       "inScope": true
+    },
+    {
+      "sequence": 277,
+      "id": "axiomise",
+      "name": "Axiomise",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://axiomise.jobs.personio.de/",
+      "adapterId": "personio",
+      "catalogId": "00000000-0000-4000-8000-000000000160",
+      "lastAttemptAt": "2026-11-06T19:30:27.820Z",
+      "evidence": [
+        "company-proofs/axiomise.json"
+      ],
+      "notes": "Semiconductor EU batch: 4 chip-design titles on 4 rows (0 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 278,
+      "id": "quantum-motion",
+      "name": "Quantum Motion",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://quantummotion.jobs.personio.de/",
+      "adapterId": "personio",
+      "catalogId": "00000000-0000-4000-8000-000000000161",
+      "lastAttemptAt": "2026-11-06T19:30:29.420Z",
+      "evidence": [
+        "company-proofs/quantum-motion.json"
+      ],
+      "notes": "Semiconductor EU batch: 2 chip-design titles on 19 rows (2 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 279,
+      "id": "semron",
+      "name": "SEMRON",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://semron.jobs.personio.de/",
+      "adapterId": "personio",
+      "catalogId": "00000000-0000-4000-8000-000000000162",
+      "lastAttemptAt": "2026-11-06T19:31:37.183Z",
+      "evidence": [
+        "company-proofs/semron.json"
+      ],
+      "notes": "Semiconductor EU batch: 3 chip-design titles on 11 rows (3 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 280,
+      "id": "raspberry-pi",
+      "name": "Raspberry Pi",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://apply.workable.com/raspberrypi/",
+      "adapterId": "workable",
+      "catalogId": "00000000-0000-4000-8000-000000000163",
+      "lastAttemptAt": "2026-11-06T19:30:32.313Z",
+      "evidence": [
+        "company-proofs/raspberry-pi.json"
+      ],
+      "notes": "Semiconductor EU batch: 4 chip-design titles on 7 rows (4 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 281,
+      "id": "universal-quantum",
+      "name": "Universal Quantum",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://apply.workable.com/universalquantum/",
+      "adapterId": "workable",
+      "catalogId": "00000000-0000-4000-8000-000000000164",
+      "lastAttemptAt": "2026-11-06T19:32:22.466Z",
+      "evidence": [
+        "company-proofs/universal-quantum.json"
+      ],
+      "notes": "Semiconductor EU batch: 4 chip-design titles on 37 rows (4 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
+    },
+    {
+      "sequence": 282,
+      "id": "codasip",
+      "name": "Codasip",
+      "category": "Semiconductor employers in Europe",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://codasip.bamboohr.com/careers",
+      "adapterId": "bamboohr",
+      "catalogId": "00000000-0000-4000-8000-000000000165",
+      "lastAttemptAt": "2026-11-06T19:30:36.542Z",
+      "evidence": [
+        "company-proofs/codasip.json"
+      ],
+      "notes": "Semiconductor EU batch: 6 chip-design titles on 9 rows (4 in target countries) on 2026-11-06.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "semiconductor-eu",
+      "inScope": true
     }
   ],
   "execution": {

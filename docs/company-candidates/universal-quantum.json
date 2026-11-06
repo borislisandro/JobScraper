@@ -1,0 +1,28 @@
+{
+ "id": "universal-quantum",
+ "name": "Universal Quantum",
+ "baseUrl": "https://apply.workable.com/universalquantum/",
+ "adapterId": "workable",
+ "configJson": {
+  "token": "universalquantum",
+  "maxPages": 5,
+  "expectedHost": "apply.workable.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 37,
+   "roleTitles": 4,
+   "roleTitlesInTargetCountries": 4,
+   "examples": [
+    "ASIC Layout Engineer — Haywards Heath, England, United Kingdom",
+    "Electronics Engineer - Design and Verification — Haywards Heath, England, United Kingdom",
+    "FPGA Development / System Integration Engineer (f/m/d) — Hamburg, Germany, Hamburg, Hamburg, Germany",
+    "FPGA Digital Design Engineer — Haywards Heath, England, United Kingdom"
+   ]
+  }
+ }
+}

@@ -35,7 +35,7 @@ test("a selector that matches nothing fails that job instead of storing an empty
  assert.equal(events.at(-1).payload.failed,1);
 });
 test("without a detailSelector nothing is deferred",async()=>{
- const {detailSelector,...plain}=css,jobs=(await send("scrape_source","/list",plain,{known:[]})).filter(e=>e.event==="job").map(e=>e.payload);
+ const plain={...css};delete plain.detailSelector;const jobs=(await send("scrape_source","/list",plain,{known:[]})).filter(e=>e.event==="job").map(e=>e.payload);
  assert.equal(jobs.length,2);assert.equal(jobs[0].detailUrl,null);
 });
 test("an XPath mapping reads an XML job feed instead of being taken for RSS",async()=>{

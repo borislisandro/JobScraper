@@ -4150,6 +4150,162 @@
     "level": "full",
     "evidence": "docs/company-proofs/philips.json"
    }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000160",
+   "name": "Axiomise",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "eda",
+    "verification"
+   ],
+   "adapterId": "personio",
+   "baseUrl": "https://axiomise.jobs.personio.de/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "axiomise",
+    "maxPages": 5,
+    "expectedHost": "axiomise.jobs.personio.de"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 4,
+    "level": "full",
+    "evidence": "docs/company-proofs/axiomise.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000161",
+   "name": "Quantum Motion",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "quantum",
+    "asic"
+   ],
+   "adapterId": "personio",
+   "baseUrl": "https://quantummotion.jobs.personio.de/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "quantummotion",
+    "maxPages": 5,
+    "expectedHost": "quantummotion.jobs.personio.de"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 19,
+    "level": "full",
+    "evidence": "docs/company-proofs/quantum-motion.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000162",
+   "name": "SEMRON",
+   "country": "DE",
+   "tags": [
+    "semiconductor",
+    "ai-hardware",
+    "asic"
+   ],
+   "adapterId": "personio",
+   "baseUrl": "https://semron.jobs.personio.de/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "semron",
+    "maxPages": 5,
+    "expectedHost": "semron.jobs.personio.de"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 11,
+    "level": "full",
+    "evidence": "docs/company-proofs/semron.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000163",
+   "name": "Raspberry Pi",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "asic",
+    "fpga"
+   ],
+   "adapterId": "workable",
+   "baseUrl": "https://apply.workable.com/raspberrypi/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "raspberrypi",
+    "maxPages": 5,
+    "expectedHost": "apply.workable.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 7,
+    "level": "full",
+    "evidence": "docs/company-proofs/raspberry-pi.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000164",
+   "name": "Universal Quantum",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "quantum",
+    "fpga"
+   ],
+   "adapterId": "workable",
+   "baseUrl": "https://apply.workable.com/universalquantum/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "universalquantum",
+    "maxPages": 5,
+    "expectedHost": "apply.workable.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 37,
+    "level": "full",
+    "evidence": "docs/company-proofs/universal-quantum.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000165",
+   "name": "Codasip",
+   "country": "GB",
+   "tags": [
+    "semiconductor",
+    "ip",
+    "verification"
+   ],
+   "adapterId": "bamboohr",
+   "baseUrl": "https://codasip.bamboohr.com/careers",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "codasip",
+    "maxPages": 5,
+    "expectedHost": "codasip.bamboohr.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-11-06",
+    "jobs": 9,
+    "level": "full",
+    "evidence": "docs/company-proofs/codasip.json"
+   }
   }
  ]
 }

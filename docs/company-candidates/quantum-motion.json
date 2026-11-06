@@ -1,0 +1,26 @@
+{
+ "id": "quantum-motion",
+ "name": "Quantum Motion",
+ "baseUrl": "https://quantummotion.jobs.personio.de/",
+ "adapterId": "personio",
+ "configJson": {
+  "token": "quantummotion",
+  "maxPages": 5,
+  "expectedHost": "quantummotion.jobs.personio.de"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "discovery": {
+  "relevance": {
+   "checkedAt": "2026-11-06",
+   "boardJobs": 19,
+   "roleTitles": 2,
+   "roleTitlesInTargetCountries": 2,
+   "examples": [
+    "R&D Project Manager - Analog/RF IC Design — London, UK",
+    "Senior Digital IC Design Engineer — London, UK"
+   ]
+  }
+ }
+}

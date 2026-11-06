@@ -1,7 +1,7 @@
 // Counts chip-design roles (DV, DFT, RTL, ASIC, FPGA, SoC...) on a candidate board, overall and in the target
 // countries, and records the result in the candidate's discovery.relevance. It decides starter promotion.
 //   node scripts/relevance-check.mjs docs/company-candidates/<id>.json [--write]
-import {readFile,writeFile,mkdir}from "node:fs/promises";
+import {readFile,writeFile}from "node:fs/promises";
 import {runWorker}from "./worker-proof.mjs";
 const [path,...flags]=process.argv.slice(2);if(!path)throw Error("Usage: relevance-check.mjs <candidate.json> [--write]");
 // "DV" alone also matches the UK security clearance "DV Cleared", so a clearance mention is excluded first.

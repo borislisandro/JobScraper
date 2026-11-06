@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Universal Quantum",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-11-06T19:32:21.335Z",
+  "finishedAt": "2026-11-06T19:32:22.466Z",
+  "source": {
+    "id": "universal-quantum",
+    "name": "Universal Quantum",
+    "baseUrl": "https://apply.workable.com/universalquantum/",
+    "adapterId": "workable",
+    "configJson": {
+      "token": "universalquantum",
+      "maxPages": 5,
+      "expectedHost": "apply.workable.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "a5cef6a1861a7e1d865bcb7653163cda2247d67305645f3ebeb588e0570ca7f3",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "3ac8d8376a4cf01e906c1ceddc6ec6c002cb1eb13ac646aa64d37b96bf6729dd",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "universal-quantum",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 37,
+        "persisted": 37,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 37,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 345,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 345,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 310,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 14,
+              "emit": 3
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 310,
+                "bodyMs": 11
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 37,
+    "uniqueIdentities": 37,
+    "uniqueHashes": 37,
+    "samples": [
+      {
+        "externalId": "B326446AFE",
+        "title": "Advanced Assembly Engineer (2.5-3D)",
+        "company": "Universal Quantum",
+        "location": "Singapore, Singapore, Singapore, Singapore",
+        "postedAt": "2026-08-05",
+        "canonicalUrl": "https://apply.workable.com/j/B326446AFE",
+        "applyUrl": "https://apply.workable.com/j/B326446AFE",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2415
+      },
+      {
+        "externalId": "06DA47FDF8",
+        "title": "open application pool for Electronics Engineers",
+        "company": "Universal Quantum",
+        "location": "Haywards Heath, England, United Kingdom",
+        "postedAt": "2024-05-31",
+        "canonicalUrl": "https://apply.workable.com/j/06DA47FDF8",
+        "applyUrl": "https://apply.workable.com/j/06DA47FDF8",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3873
+      },
+      {
+        "externalId": "BA2981A25B",
+        "title": "Systems Engineer",
+        "company": "Universal Quantum",
+        "location": "Haywards Heath, England, United Kingdom",
+        "postedAt": "2026-11-03",
+        "canonicalUrl": "https://apply.workable.com/j/BA2981A25B",
+        "applyUrl": "https://apply.workable.com/j/BA2981A25B",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5388
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "universal-quantum",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 37,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 37,
+        "requests": 1,
+        "skipped": 37,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 351,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 351,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 324,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 6,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 324,
+                "bodyMs": 11
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}
