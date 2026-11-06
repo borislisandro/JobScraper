@@ -3431,7 +3431,8 @@
    "tags": [
     "defense",
     "uav",
-    "embedded"
+    "embedded",
+    "data-ai-pt"
    ],
    "adapterId": "json",
    "baseUrl": "https://careers.tekever.com/jobs.json?per_page=100",
@@ -3796,6 +3797,1407 @@
     "jobs": 37,
     "level": "full",
     "evidence": "docs/company-proofs/ceva.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000154",
+   "name": "Accenture (Portugal)",
+   "country": "IE",
+   "tags": [
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://accenture.wd103.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "AccentureCareers",
+    "tenant": "accenture",
+    "query": "Portugal",
+    "expectedHost": "accenture.wd103.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 158,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-accenture.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000155",
+   "name": "act digital",
+   "country": "PT",
+   "tags": [
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "act-digital",
+   "baseUrl": "https://jobs.smartrecruiters.com/AlterSolutions",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 64,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-act-digital.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000156",
+   "name": "Air Apps",
+   "country": "PT",
+   "tags": [
+    "software",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/airapps",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "airapps",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 499,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-airapps.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000157",
+   "name": "Airbus (Portugal)",
+   "country": "FR",
+   "tags": [
+    "aerospace",
+    "data-ai-pt"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://ag.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "Airbus",
+    "tenant": "ag",
+    "query": "Portugal",
+    "expectedHost": "ag.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 70,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-airbus.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000158",
+   "name": "Bitsight (Portugal)",
+   "country": "US",
+   "tags": [
+    "security",
+    "data-ai-pt"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://bitsight.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "bitsight",
+    "tenant": "bitsight",
+    "query": "Portugal",
+    "expectedHost": "bitsight.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 6,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-bitsight.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000159",
+   "name": "Bosch (Portugal)",
+   "country": "DE",
+   "tags": [
+    "automotive",
+    "manufacturing",
+    "data-ai-pt"
+   ],
+   "adapterId": "bosch",
+   "baseUrl": "https://jobs.smartrecruiters.com/BoschGroup",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 220,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-bosch.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015a",
+   "name": "Celfocus",
+   "country": "PT",
+   "tags": [
+    "telecom",
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://celfocus.teamtailor.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "celfocus.teamtailor.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 6,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-celfocus.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015b",
+   "name": "DataCamp",
+   "country": "US",
+   "tags": [
+    "education",
+    "data",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/datacamp",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "datacamp",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 40,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-datacamp.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015c",
+   "name": "DBServices Portugal",
+   "country": "PT",
+   "tags": [
+    "consulting",
+    "data",
+    "data-ai-pt"
+   ],
+   "adapterId": "dbservices-portugal",
+   "baseUrl": "https://jobs.smartrecruiters.com/DBServicesPortugal",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 3,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-dbservices-portugal.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015d",
+   "name": "Devoteam",
+   "country": "FR",
+   "tags": [
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "devoteam",
+   "baseUrl": "https://jobs.smartrecruiters.com/Devoteam",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 218,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-devoteam.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015e",
+   "name": "Emma Sleep",
+   "country": "DE",
+   "tags": [
+    "e-commerce",
+    "data-ai-pt"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/emma-sleep",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "emma-sleep",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 74,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-emma-sleep.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000015f",
+   "name": "Farfetch (Ashby)",
+   "country": "PT",
+   "tags": [
+    "e-commerce",
+    "data-ai-pt"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/farfetch",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "farfetch",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 49,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-farfetch-ashby.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000160",
+   "name": "Farfetch (Lever)",
+   "country": "PT",
+   "tags": [
+    "e-commerce",
+    "data-ai-pt"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/farfetch",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "farfetch",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 43,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-farfetch-lever.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000161",
+   "name": "Feedzai",
+   "country": "PT",
+   "tags": [
+    "fintech",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/feedzai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "feedzai",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 15,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-feedzai.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000162",
+   "name": "Finom",
+   "country": "NL",
+   "tags": [
+    "fintech",
+    "data-ai-pt"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.eu.lever.co/pnlfin",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "pnlfin",
+    "maxPages": 500,
+    "expectedHost": "api.eu.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 89,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-finom.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000163",
+   "name": "Flix",
+   "country": "DE",
+   "tags": [
+    "mobility",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/flix",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "flix",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 128,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-flix.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000164",
+   "name": "Hiire",
+   "country": "PT",
+   "tags": [
+    "recruitment",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://hiire.teamtailor.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "hiire.teamtailor.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 26,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-hiire.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000165",
+   "name": "iLoF",
+   "country": "PT",
+   "tags": [
+    "health-tech",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "ilof",
+   "baseUrl": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 4,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-ilof.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000166",
+   "name": "Inetum",
+   "country": "FR",
+   "tags": [
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "inetum",
+   "baseUrl": "https://jobs.smartrecruiters.com/Inetum2",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 455,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-inetum.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000167",
+   "name": "IQVIA (Portugal)",
+   "country": "US",
+   "tags": [
+    "health-tech",
+    "data-ai-pt"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://iqvia.wd1.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "IQVIA",
+    "tenant": "iqvia",
+    "query": "Portugal",
+    "expectedHost": "iqvia.wd1.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 89,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-iqvia.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000168",
+   "name": "Mercedes-Benz.io",
+   "country": "DE",
+   "tags": [
+    "automotive",
+    "software",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://mbio.recruitee.com/api/offers/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "offers",
+    "maxPages": 500,
+    "expectedHost": "mbio.recruitee.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "careers_url",
+     "externalId": "id",
+     "postedAt": "published_at",
+     "description": "description",
+     "location": "location"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 4,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-mercedes-benz-io.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000169",
+   "name": "Metyis",
+   "country": "DE",
+   "tags": [
+    "consulting",
+    "data",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://metyisag.recruitee.com/api/offers/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "offers",
+    "maxPages": 500,
+    "expectedHost": "metyisag.recruitee.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "careers_url",
+     "externalId": "id",
+     "postedAt": "published_at",
+     "description": "description",
+     "location": "location"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 71,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-metyis.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016a",
+   "name": "Natixis in Portugal",
+   "country": "FR",
+   "tags": [
+    "fintech",
+    "data-ai-pt"
+   ],
+   "adapterId": "natixis-portugal",
+   "baseUrl": "https://jobs.smartrecruiters.com/NatixisInPortugal",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 46,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-natixis-portugal.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016b",
+   "name": "OLX",
+   "country": "NL",
+   "tags": [
+    "e-commerce",
+    "data-ai-pt"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.eu.lever.co/olx",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "olx",
+    "maxPages": 500,
+    "expectedHost": "api.eu.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 58,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-olx.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016c",
+   "name": "PagerDuty",
+   "country": "US",
+   "tags": [
+    "software",
+    "observability",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/pagerduty",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "pagerduty",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 47,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-pagerduty.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016d",
+   "name": "Santander (Portugal)",
+   "country": "ES",
+   "tags": [
+    "fintech",
+    "data-ai-pt"
+   ],
+   "adapterId": "workday",
+   "baseUrl": "https://santander.wd3.myworkdayjobs.com/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "site": "SantanderCareers",
+    "tenant": "santander",
+    "query": "Portugal",
+    "expectedHost": "santander.wd3.myworkdayjobs.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 30,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-santander.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016e",
+   "name": "Superhuman",
+   "country": "US",
+   "tags": [
+    "software",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/superhuman%20platform%20inc",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "superhuman platform inc",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 72,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-superhuman.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000016f",
+   "name": "Sword Health",
+   "country": "PT",
+   "tags": [
+    "health-tech",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/swordhealth",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "swordhealth",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 61,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-sword-health.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000170",
+   "name": "Talkdesk",
+   "country": "US",
+   "tags": [
+    "software",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/talkdesk2",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "talkdesk2",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 36,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-talkdesk.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000171",
+   "name": "Thorit",
+   "country": "DE",
+   "tags": [
+    "ai",
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/thorit",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "thorit",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 12,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-thorit.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000172",
+   "name": "TransPerfect (Unbabel)",
+   "country": "US",
+   "tags": [
+    "ai",
+    "language",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://transperfect.recruitee.com/api/offers/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "offers",
+    "maxPages": 500,
+    "expectedHost": "transperfect.recruitee.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "careers_url",
+     "externalId": "id",
+     "postedAt": "published_at",
+     "description": "description",
+     "location": "location"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 686,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-transperfect.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000173",
+   "name": "Ubiwhere",
+   "country": "PT",
+   "tags": [
+    "software",
+    "smart-cities",
+    "data-ai-pt"
+   ],
+   "adapterId": "ubiwhere",
+   "baseUrl": "https://jobs.smartrecruiters.com/Ubiwhere",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 1,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-ubiwhere.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000174",
+   "name": "Veeva Systems",
+   "country": "US",
+   "tags": [
+    "health-tech",
+    "software",
+    "data-ai-pt"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.lever.co/veeva",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "veeva",
+    "maxPages": 500,
+    "expectedHost": "api.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 892,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-veeva.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000175",
+   "name": "Volkswagen Digital Solutions",
+   "country": "DE",
+   "tags": [
+    "automotive",
+    "software",
+    "data-ai-pt"
+   ],
+   "adapterId": "lever",
+   "baseUrl": "https://jobs.eu.lever.co/vwgds",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "vwgds",
+    "maxPages": 500,
+    "expectedHost": "api.eu.lever.co"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 9,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-vwgds.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000176",
+   "name": "Axians Portugal",
+   "country": "FR",
+   "tags": [
+    "consulting",
+    "telecom",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://axiansgroup.teamtailor.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "axiansgroup.teamtailor.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 113,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-axians.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000177",
+   "name": "BearingPoint Portugal",
+   "country": "NL",
+   "tags": [
+    "consulting",
+    "data",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://bearingpointportugal.teamtailor.com/jobs.json?per_page=100",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "items",
+    "pageParam": "page",
+    "pageStart": 1,
+    "maxPages": 500,
+    "expectedHost": "bearingpointportugal.teamtailor.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "date_published",
+     "description": "content_html",
+     "location": "_jobposting.jobLocation.0.address"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 7,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-bearingpoint-portugal.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000178",
+   "name": "GoCardless",
+   "country": "GB",
+   "tags": [
+    "fintech",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/gocardless",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "gocardless",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 27,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-gocardless.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000179",
+   "name": "Indicium AI",
+   "country": "BR",
+   "tags": [
+    "ai",
+    "data",
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/indiciumai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "indiciumai",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 32,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-indicium-ai.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000017a",
+   "name": "Critical Software",
+   "country": "PT",
+   "tags": [
+    "software",
+    "aerospace",
+    "automotive",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://critical-software.breezy.hr/json?verbose=true",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 1,
+    "expectedHost": "critical-software.breezy.hr",
+    "fieldMap": {
+     "title": "name",
+     "url": "url",
+     "externalId": "id",
+     "postedAt": "published_date",
+     "description": "description",
+     "location": "location.name"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 11,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-critical-software.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000017b",
+   "name": "SIXT (Portugal)",
+   "country": "DE",
+   "tags": [
+    "mobility",
+    "data-ai-pt"
+   ],
+   "adapterId": "sixt",
+   "baseUrl": "https://jobs.smartrecruiters.com/SIXT",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 500,
+    "expectedHost": "jobs.smartrecruiters.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 24,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-sixt.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000017c",
+   "name": "Zego",
+   "country": "GB",
+   "tags": [
+    "insurtech",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "ashby",
+   "baseUrl": "https://jobs.ashbyhq.com/zego",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "zego",
+    "maxPages": 500,
+    "expectedHost": "api.ashbyhq.com"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 36,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-zego.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000017d",
+   "name": "Loka",
+   "country": "US",
+   "tags": [
+    "ai",
+    "consulting",
+    "data-ai-pt"
+   ],
+   "adapterId": "greenhouse",
+   "baseUrl": "https://job-boards.greenhouse.io/lokainc",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "token": "lokainc",
+    "maxPages": 500,
+    "expectedHost": "boards-api.greenhouse.io"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 15,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-loka.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000017e",
+   "name": "Intermedia",
+   "country": "US",
+   "tags": [
+    "software",
+    "ai",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://intermedia.pinpointhq.com/postings.json",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "data",
+    "maxPages": 1,
+    "expectedHost": "intermedia.pinpointhq.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "url",
+     "externalId": "id",
+     "description": "description",
+     "location": "location"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 53,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-intermedia.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-00000000017f",
+   "name": "IG&H Portugal",
+   "country": "NL",
+   "tags": [
+    "consulting",
+    "data",
+    "data-ai-pt"
+   ],
+   "adapterId": "json",
+   "baseUrl": "https://igh.recruitee.com/api/offers/",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemsPath": "offers",
+    "maxPages": 500,
+    "expectedHost": "igh.recruitee.com",
+    "fieldMap": {
+     "title": "title",
+     "url": "careers_url",
+     "externalId": "id",
+     "postedAt": "published_at",
+     "description": "description",
+     "location": "location"
+    }
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 61,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-igh.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000180",
+   "name": "MobiLab Solutions",
+   "country": "DE",
+   "tags": [
+    "software",
+    "cloud",
+    "data-ai-pt"
+   ],
+   "adapterId": "static-xpath",
+   "baseUrl": "https://mobilab-solutions-gmbh.jobs.personio.com/xml",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "maxPages": 1,
+    "expectedHost": "mobilab-solutions-gmbh.jobs.personio.com",
+    "itemXPath": "//position",
+    "titleXPath": "./name",
+    "locationXPath": "./office",
+    "urlXPath": "concat('https://mobilab-solutions-gmbh.jobs.personio.com/job/', ./id, '?language=en')",
+    "detailSelector": "main#main-content"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 7,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-mobilab.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000181",
+   "name": "Smartex.ai",
+   "country": "PT",
+   "tags": [
+    "ai",
+    "manufacturing",
+    "data-ai-pt"
+   ],
+   "adapterId": "static-css",
+   "baseUrl": "https://odoo.smartex.ai/jobs",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemSelector": "div.card",
+    "titleSelector": "h3",
+    "urlSelector": "a[href^=\"/jobs/\"]",
+    "locationSelector": "address",
+    "maxPages": 1,
+    "expectedHost": "odoo.smartex.ai",
+    "detailSelector": "#wrap"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 10,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-smartex.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000182",
+   "name": "ITJobs.pt - AI",
+   "country": "PT",
+   "tags": [
+    "job-board",
+    "portugal-board",
+    "data-ai-pt"
+   ],
+   "adapterId": "static-css",
+   "baseUrl": "https://www.itjobs.pt/emprego/ai",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemSelector": "ul.listing > li",
+    "titleSelector": "a.title",
+    "urlSelector": "a.title",
+    "companySelector": ".list-name a",
+    "locationSelector": ".list-details",
+    "maxPages": 1,
+    "expectedHost": "www.itjobs.pt",
+    "detailSelector": ".content-block"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 16,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-itjobs-ai.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000183",
+   "name": "Landing.jobs - Data",
+   "country": "PT",
+   "tags": [
+    "job-board",
+    "portugal-board",
+    "data-ai-pt"
+   ],
+   "adapterId": "static-css",
+   "baseUrl": "https://landing.jobs/jobs/in/portugal/for/data-scientist",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemSelector": "article.lj-jobcard-static",
+    "titleSelector": ".lj-jobcard-static__link",
+    "urlSelector": ".lj-jobcard-static__link",
+    "companySelector": ".lj-jobcard-static__company",
+    "locationSelector": ".lj-jobcard-static__location",
+    "maxPages": 1,
+    "expectedHost": "landing.jobs",
+    "detailSelector": "#job-summary-content"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 10,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-landingjobs-data-scientist.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000184",
+   "name": "Landing.jobs - Machine Learning",
+   "country": "PT",
+   "tags": [
+    "job-board",
+    "portugal-board",
+    "data-ai-pt"
+   ],
+   "adapterId": "static-css",
+   "baseUrl": "https://landing.jobs/jobs/in/portugal/for/machine-learning",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemSelector": "article.lj-jobcard-static",
+    "titleSelector": ".lj-jobcard-static__link",
+    "urlSelector": ".lj-jobcard-static__link",
+    "companySelector": ".lj-jobcard-static__company",
+    "locationSelector": ".lj-jobcard-static__location",
+    "maxPages": 1,
+    "expectedHost": "landing.jobs",
+    "detailSelector": "#job-summary-content"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 7,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-landingjobs-machine-learning.json"
+   }
+  },
+  {
+   "id": "00000000-0000-4000-8000-000000000185",
+   "name": "Landing.jobs - Artificial Intelligence",
+   "country": "PT",
+   "tags": [
+    "job-board",
+    "portugal-board",
+    "data-ai-pt"
+   ],
+   "adapterId": "static-css",
+   "baseUrl": "https://landing.jobs/jobs/in/portugal/for/artificial-intelligence",
+   "kind": "active",
+   "disabledReason": "Starter source is disabled until you review and enable it.",
+   "config": {
+    "itemSelector": "article.lj-jobcard-static",
+    "titleSelector": ".lj-jobcard-static__link",
+    "urlSelector": ".lj-jobcard-static__link",
+    "companySelector": ".lj-jobcard-static__company",
+    "locationSelector": ".lj-jobcard-static__location",
+    "maxPages": 1,
+    "expectedHost": "landing.jobs",
+    "detailSelector": "#job-summary-content"
+   },
+   "starter": false,
+   "verified": {
+    "at": "2026-10-30",
+    "jobs": 6,
+    "level": "full",
+    "evidence": "docs/company-proofs/ds-pt-landingjobs-artificial-intelligence.json"
    }
   }
  ]

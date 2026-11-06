@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "name": "Axians Portugal",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T21:19:49.022Z",
+  "finishedAt": "2026-10-30T21:19:51.237Z",
+  "source": {
+    "id": "axians",
+    "name": "Axians Portugal",
+    "baseUrl": "https://axiansgroup.teamtailor.com/jobs.json?per_page=100",
+    "adapterId": "json",
+    "configJson": {
+      "itemsPath": "items",
+      "pageParam": "page",
+      "pageStart": 1,
+      "maxPages": 500,
+      "expectedHost": "axiansgroup.teamtailor.com",
+      "fieldMap": {
+        "title": "title",
+        "url": "url",
+        "externalId": "id",
+        "postedAt": "date_published",
+        "description": "content_html",
+        "location": "_jobposting.jobLocation.0.address"
+      }
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "axians",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 113,
+        "persisted": 113,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 3,
+        "boardTotal": 113,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 1278,
+        "pages": 3,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 1278,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 367,
+              "backoff": 0,
+              "response": 600,
+              "body": 261,
+              "browser": 0,
+              "adapterOther": 33,
+              "emit": 6
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 3,
+                "pacingMs": 367,
+                "backoffMs": 0,
+                "responseMs": 600,
+                "bodyMs": 261
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 113,
+    "uniqueIdentities": 113,
+    "uniqueHashes": 113,
+    "samples": [
+      {
+        "externalId": "26500c70-ca07-4893-b49f-377d9a919eda",
+        "title": "APS Cloud Specialist",
+        "company": "Axians Portugal",
+        "location": "Lisboa, PT",
+        "postedAt": "2026-10-29",
+        "canonicalUrl": "https://axiansgroup.teamtailor.com/jobs/8635774-aps-cloud-specialist",
+        "applyUrl": "https://axiansgroup.teamtailor.com/jobs/8635774-aps-cloud-specialist",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5559
+      },
+      {
+        "externalId": "5a0d3a9c-298a-4a44-9bf0-5b49763b7454",
+        "title": "Technical Security Consultant (Cisco / Fortinet)",
+        "company": "Axians Portugal",
+        "location": "Braga, PT",
+        "postedAt": "2026-10-07",
+        "canonicalUrl": "https://axiansgroup.teamtailor.com/jobs/8513802-technical-security-consultant-cisco-fortinet",
+        "applyUrl": "https://axiansgroup.teamtailor.com/jobs/8513802-technical-security-consultant-cisco-fortinet",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3172
+      },
+      {
+        "externalId": "53ed9a4f-5b89-4b32-90cd-8392a9e389e4",
+        "title": "Administrador de Sistemas (Infraestrutura)",
+        "company": "Axians Portugal",
+        "location": "Lisbon, PT",
+        "postedAt": "2026-04-17",
+        "canonicalUrl": "https://axiansgroup.teamtailor.com/jobs/7584564-administrador-de-sistemas-infraestrutura",
+        "applyUrl": "https://axiansgroup.teamtailor.com/jobs/7584564-administrador-de-sistemas-infraestrutura",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3716
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "axians",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 100,
+        "requests": 1,
+        "skipped": 100,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 530,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 531,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 238,
+              "body": 258,
+              "browser": 0,
+              "adapterOther": 27,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 238,
+                "bodyMs": 258
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

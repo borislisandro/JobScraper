@@ -1,0 +1,242 @@
+
+### Alongside
+  (no hosted board answered)
+
+### Usercentrics
+  workable token=usercentrics total=48 PT=8 PT+data/AI=2
+     e.g. Senior Data Scientist [Lisbon, Lisbon, Portugal]
+          Senior Manager, Data Engineering (m/f/d) [Lisbon, Portugal]
+
+### knok
+  workable token=knok total=15 PT=15 PT+data/AI=3
+     e.g. Junior Healthcare Data Analyst [Porto, Porto District, Portugal]
+          Machine Learning Engineer [Matosinhos, Porto District, Portugal]
+          Senior Data Engineer [Matosinhos, Porto District, Portugal]
+
+### BOI Boi
+  (no hosted board answered)
+
+### Greenvolt
+  workable token=greenvolt total=79 PT=17 PT+data/AI=4
+     e.g. AI & Automation Developer [Lisbon, Lisbon, Portugal]
+          Financial Analyst [Venda do Pinheiro, Lisbon, Portugal]
+          Operational Asset Data & Reporting Analyst [Lisbon, Lisbon, Portugal]
+
+### Mindera
+  (no hosted board answered)
+
+### payabl
+  workable token=payabl total=76 PT=11 PT+data/AI=2
+     e.g. Data Engineer [Portugal]
+          Senior Data Analyst [Lisbon, Lisbon, Portugal]
+  personio token=payabl total=3 PT=0 PT+data/AI=0
+
+### Joom
+  workable token=joom total=20 PT=11 PT+data/AI=2
+     e.g. Senior Marketing Data Analyst (to Lisbon, Portugal) [Lisbon, Lisbon, Portugal]
+          Senior Product Manager at Joom AI [Lisbon, Lisbon, Portugal]
+
+### GeroDigital
+  workable token=gerodigital total=8 PT=8 PT+data/AI=1
+     e.g. Data Analyst [Porto, Porto District, Portugal]
+
+### Bnberry
+  workable token=bnberry total=48 PT=9 PT+data/AI=1
+     e.g. Data Analyst / BI Analyst (Part-Time) [Portugal]
+
+### Trade Nation
+  workable token=trade-nation total=67 PT=8 PT+data/AI=1
+     e.g. Head of Data & AI [Lisbon, Lisbon, Portugal]
+
+### RevoData
+  (no hosted board answered)
+
+### Intetics
+  (no hosted board answered)
+
+### Deblock
+  workable token=deblock total=15 PT=6 PT+data/AI=3
+     e.g. FinCrime Analyst (Junior) - Porto [Porto, Porto District, Portugal]
+          FinCrime Analyst - Night Shift - Porto [Porto, Porto District, Portugal]
+          FinCrime Analyst - Porto [Porto, Porto District, Portugal]
+
+### CoverGo
+  workable token=covergo total=233 PT=9 PT+data/AI=3
+     e.g. Senior Business Analyst - Health Insurance (Fully Remote) [Lisbon, Lisbon, Portugal]
+          Senior Full Stack Engineer, AI Builder [Lisbon, Lisbon, Portugal]
+          Senior Full Stack Engineer, AI Builder [Porto, Porto District, Portugal]
+
+### Omilia
+  (no hosted board answered)
+
+### SPD Technology
+  (no hosted board answered)
+
+### Zyte
+  (no hosted board answered)
+
+### Rydoo
+  (no hosted board answered)
+
+### Valis
+  (no hosted board answered)
+
+### Emerging Travel Group
+  (no hosted board answered)
+
+### Huzzle
+  (no hosted board answered)
+
+### 1GLOBAL
+  (no hosted board answered)
+
+### Trinetix
+  (no hosted board answered)
+
+### Triptease
+  (no hosted board answered)
+
+### Ocean Infinity
+  (no hosted board answered)
+
+### Adidas
+  (no hosted board answered)
+
+### BNP Paribas
+  (no hosted board answered)
+
+### Banco de Portugal
+  (no hosted board answered)
+
+### PrimeIT
+  (no hosted board answered)
+
+### Growin
+  (no hosted board answered)
+
+### Glintt
+  (no hosted board answered)
+
+### Avanade
+  (no hosted board answered)
+
+### Go IT Concept
+  (no hosted board answered)
+
+### Damia
+  (no hosted board answered)
+
+### Noesis
+  (no hosted board answered)
+
+### ITDS Portugal
+  (no hosted board answered)
+
+### Integer Consulting
+  (no hosted board answered)
+
+### Mind Source
+  (no hosted board answered)
+
+### Ageas
+  (no hosted board answered)
+
+### INEGI
+  (no hosted board answered)
+
+### Neotalent
+  (no hosted board answered)
+
+### TUI
+  (no hosted board answered)
+
+### Visual Thinking
+  (no hosted board answered)
+
+### Apgar
+  (no hosted board answered)
+
+### MCC Consulting
+  (no hosted board answered)
+
+### Fyllo
+  (no hosted board answered)
+
+### Acredius
+  (no hosted board answered)
+
+### Planicare
+  (no hosted board answered)
+
+### Iskaypet
+  (no hosted board answered)
+
+### Carglass
+  (no hosted board answered)
+
+### Mota-Engil
+  (no hosted board answered)
+
+### Knok Healthcare
+  (no hosted board answered)
+
+### Vestas
+  (no hosted board answered)
+
+### Deloitte
+  (no hosted board answered)
+
+### Fujitsu
+  (no hosted board answered)
+
+### Procter Gamble
+  (no hosted board answered)
+
+### Pepco
+  personio token=pepco total=87 PT=0 PT+data/AI=0
+
+### Aubay
+  recruitee token=aubay total=19 PT=0 PT+data/AI=0
+
+### Everis
+  (no hosted board answered)
+
+### NTT Data
+  (no hosted board answered)
+
+### Sogeti
+  (no hosted board answered)
+
+### Altran
+  (no hosted board answered)
+
+### Alten
+  (no hosted board answered)
+
+### Ness
+  (no hosted board answered)
+
+### Wavecom
+  (no hosted board answered)
+
+### Bold International
+  (no hosted board answered)
+
+### Glooma
+  (no hosted board answered)
+
+### Sonae IM
+  (no hosted board answered)
+
+### Cleverti
+  (no hosted board answered)
+
+### Zscaler
+  greenhouse token=zscaler total=365 PT=0 PT+data/AI=0
+
+### Cognizant
+  (no hosted board answered)
+
+### Wipro
+  (no hosted board answered)
+FINISHED

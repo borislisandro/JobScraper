@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "name": "Landing.jobs - Data",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T21:56:15.866Z",
+  "finishedAt": "2026-10-30T21:56:27.234Z",
+  "source": {
+    "id": "landingjobs-data-scientist",
+    "name": "Landing.jobs - Data",
+    "baseUrl": "https://landing.jobs/jobs/in/portugal/for/data-scientist",
+    "adapterId": "static-css",
+    "configJson": {
+      "itemSelector": "article.lj-jobcard-static",
+      "titleSelector": ".lj-jobcard-static__link",
+      "urlSelector": ".lj-jobcard-static__link",
+      "companySelector": ".lj-jobcard-static__company",
+      "locationSelector": ".lj-jobcard-static__location",
+      "maxPages": 1,
+      "expectedHost": "landing.jobs",
+      "detailSelector": "#job-summary-content"
+    },
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "51bf60178fa12cdd3a7177cda53152b1f870aac7da119f333b5dc8a6cf15d9fb",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "fd17dc6b69336d89379bb5c650d6457bfa6c1e4e9794d6157492f05fa60acc33",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "landingjobs-data-scientist",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 10,
+        "persisted": 10,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": 10,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 3163,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 3163,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 10,
+              "pacing": 2478,
+              "backoff": 0,
+              "response": 401,
+              "body": 36,
+              "browser": 0,
+              "adapterOther": 237,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 168,
+                "bodyMs": 5
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 2478,
+                "backoffMs": 0,
+                "responseMs": 233,
+                "bodyMs": 31
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 10,
+    "uniqueIdentities": 10,
+    "uniqueHashes": 10,
+    "samples": [
+      {
+        "externalId": "452697b0a813945e305b13f19a25ae85069eb6545f977a13707af9bfb15f46f3",
+        "title": "Data & Integration Architect",
+        "company": "Swisscom",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/swisscom/data-integration-architect",
+        "applyUrl": "https://landing.jobs/at/swisscom/data-integration-architect",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "5d3a3fd704d0d1a3d7e4a54fa1c9dc3c021c41a54d09f432b837b8d0ae451234",
+        "title": "Senior SQL Server DBA",
+        "company": "Accenture",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/accenture-pt/senior-sql-server-dba",
+        "applyUrl": "https://landing.jobs/at/accenture-pt/senior-sql-server-dba",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "d9db3e986f1f21b158d17566f80ccc9896639291eec740fe49ae488be2046361",
+        "title": "Senior Data Engineer",
+        "company": "INSCALE",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/inscale/senior-data-engineer-in-lisbon-2026-9",
+        "applyUrl": "https://landing.jobs/at/inscale/senior-data-engineer-in-lisbon-2026-9",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "landingjobs-data-scientist",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 4503,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 4503,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 3577,
+              "backoff": 0,
+              "response": 650,
+              "body": 17,
+              "browser": 0,
+              "adapterOther": 246,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 165,
+                "bodyMs": 5
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 3577,
+                "backoffMs": 0,
+                "responseMs": 485,
+                "bodyMs": 11
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "452697b0a813945e305b13f19a25ae85069eb6545f977a13707af9bfb15f46f3",
+        "title": "Data & Integration Architect",
+        "company": "Swisscom",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/swisscom/data-integration-architect",
+        "applyUrl": "https://landing.jobs/at/swisscom/data-integration-architect",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5593
+      },
+      {
+        "externalId": "5d3a3fd704d0d1a3d7e4a54fa1c9dc3c021c41a54d09f432b837b8d0ae451234",
+        "title": "Senior SQL Server DBA",
+        "company": "Accenture",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/accenture-pt/senior-sql-server-dba",
+        "applyUrl": "https://landing.jobs/at/accenture-pt/senior-sql-server-dba",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3654
+      },
+      {
+        "externalId": "d9db3e986f1f21b158d17566f80ccc9896639291eec740fe49ae488be2046361",
+        "title": "Senior Data Engineer",
+        "company": "INSCALE",
+        "location": "Lisbon, PT",
+        "postedAt": null,
+        "canonicalUrl": "https://landing.jobs/at/inscale/senior-data-engineer-in-lisbon-2026-9",
+        "applyUrl": "https://landing.jobs/at/inscale/senior-data-engineer-in-lisbon-2026-9",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3390
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "landingjobs-data-scientist",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 10,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 10,
+        "requests": 2,
+        "skipped": 10,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 3076,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 3076,
+            "bucketsMs": {
+              "setup": 2,
+              "urlGuard": 12,
+              "pacing": 2370,
+              "backoff": 0,
+              "response": 427,
+              "body": 36,
+              "browser": 0,
+              "adapterOther": 229,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 204,
+                "bodyMs": 5
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 2370,
+                "backoffMs": 0,
+                "responseMs": 223,
+                "bodyMs": 31
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

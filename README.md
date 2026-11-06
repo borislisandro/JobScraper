@@ -10,7 +10,7 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 
 **Search** — Filter by source, title, listing text, posting age, country, application status, and closed status. Sort by discovery or publish date, page through results, and open a reader view with description, work mode, seniority, salary, and status. Saved and applied jobs survive their source being disabled or deleted.
 
-**Sources** — Add any of 164 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login, and filter titles during scraping so unwanted roles are never stored.
+**Sources** — Add any of 214 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login, and filter titles during scraping so unwanted roles are never stored.
 
 **Applications** — Board with Saved, Applied, Screening, Interviewing, Offer, Accepted, Rejected, and Withdrawn stages. Stores recruiter details, notes with timestamps, an event timeline, and immutable document snapshots up to 20 MB. Schedules interview reminders (24 h and 1 h before) and ghosting reminders.
 
@@ -18,7 +18,7 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 
 ## Supported sites
 
-164 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json) — browse and enable them from the Sources page. Fresh installs enable only the 21 starters below.
+214 companies ship with verified settings in [`sidecar/company-catalog.json`](sidecar/company-catalog.json) — browse and enable them from the Sources page. Fresh installs enable only the 21 starters below.
 
 | Employer | Careers site | Adapter |
 | --- | --- | --- |
@@ -43,6 +43,8 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 | ASML | `asml.com/en/careers/find-your-job` | Sitecore search API |
 | u-blox | `u-blox.com/en/job-openings` | Algolia API |
 | SK hynix | `talent.skhynix.com` | SK Careers + Greenhouse |
+
+51 of them are data and AI employers or Portuguese job boards hiring in Portugal (tag `data-ai-pt`: Devoteam, Bosch, Inetum, Axians, Farfetch, Sword Health, Feedzai and more).
 
 The rest of the catalog is mostly Greenhouse (65), Ashby (32), Workday (28), Eightfold (8), Lever (6), and Oracle Recruiting (5) boards — Infineon, Texas Instruments, KLA, Lam Research, Renesas, Siemens, Synopsys, Cerebras, Tenstorrent and more.
 

@@ -1,0 +1,14 @@
+{
+ "id": "indicium-ai",
+ "name": "Indicium AI",
+ "baseUrl": "https://job-boards.greenhouse.io/indiciumai",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "indiciumai",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

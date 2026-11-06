@@ -1,0 +1,14 @@
+{
+ "id": "veeva",
+ "name": "Veeva Systems",
+ "baseUrl": "https://jobs.lever.co/veeva",
+ "adapterId": "lever",
+ "configJson": {
+  "token": "veeva",
+  "maxPages": 500,
+  "expectedHost": "api.lever.co"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

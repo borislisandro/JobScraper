@@ -1,0 +1,14 @@
+{
+ "id": "farfetch-ashby",
+ "name": "Farfetch (Ashby)",
+ "baseUrl": "https://jobs.ashbyhq.com/farfetch",
+ "adapterId": "ashby",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "token": "farfetch",
+  "maxPages": 500,
+  "expectedHost": "api.ashbyhq.com"
+ }
+}

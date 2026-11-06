@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "name": "Intermedia",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T21:37:31.153Z",
+  "finishedAt": "2026-10-30T21:37:33.059Z",
+  "source": {
+    "id": "intermedia",
+    "name": "Intermedia",
+    "baseUrl": "https://intermedia.pinpointhq.com/postings.json",
+    "adapterId": "json",
+    "configJson": {
+      "itemsPath": "data",
+      "maxPages": 1,
+      "expectedHost": "intermedia.pinpointhq.com",
+      "fieldMap": {
+        "title": "title",
+        "url": "url",
+        "externalId": "id",
+        "description": "description",
+        "location": "location"
+      }
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "4cab6cebe238ede1b602c890fcaaa1548341c9ac0bba82c07e71ec799ca75563",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "fd17dc6b69336d89379bb5c650d6457bfa6c1e4e9794d6157492f05fa60acc33",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "intermedia",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 53,
+        "persisted": 53,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 53,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 760,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 761,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 9,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 512,
+              "body": 216,
+              "browser": 0,
+              "adapterOther": 18,
+              "emit": 4
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 512,
+                "bodyMs": 216
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 53,
+    "uniqueIdentities": 53,
+    "uniqueHashes": 53,
+    "samples": [
+      {
+        "externalId": "403711",
+        "title": "Product Lead, Healthcare Software Solutions",
+        "company": "Intermedia",
+        "location": "United States",
+        "postedAt": null,
+        "canonicalUrl": "https://intermedia.pinpointhq.com/en/postings/3a7ab46a-6d34-42bc-84be-c8d885562d85",
+        "applyUrl": "https://intermedia.pinpointhq.com/en/postings/3a7ab46a-6d34-42bc-84be-c8d885562d85",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6792
+      },
+      {
+        "externalId": "576321",
+        "title": "Senior Frontend Engineer",
+        "company": "Intermedia",
+        "location": "Portugal",
+        "postedAt": null,
+        "canonicalUrl": "https://intermedia.pinpointhq.com/en/postings/75f69069-c6c3-464a-b30b-6b3378947e70",
+        "applyUrl": "https://intermedia.pinpointhq.com/en/postings/75f69069-c6c3-464a-b30b-6b3378947e70",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1759
+      },
+      {
+        "externalId": "610780",
+        "title": ".Net Developer - Senior",
+        "company": "Intermedia",
+        "location": "Georgia",
+        "postedAt": null,
+        "canonicalUrl": "https://intermedia.pinpointhq.com/en/postings/d16de08e-be7a-409b-a101-b54241b986ca",
+        "applyUrl": "https://intermedia.pinpointhq.com/en/postings/d16de08e-be7a-409b-a101-b54241b986ca",
+        "descriptionStatus": "complete",
+        "descriptionChars": 16
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "intermedia",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 53,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 53,
+        "requests": 1,
+        "skipped": 53,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 704,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 703,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 459,
+              "body": 221,
+              "browser": 0,
+              "adapterOther": 14,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 459,
+                "bodyMs": 221
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

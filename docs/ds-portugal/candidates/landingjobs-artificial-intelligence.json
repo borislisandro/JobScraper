@@ -1,0 +1,19 @@
+{
+ "id": "landingjobs-artificial-intelligence",
+ "name": "Landing.jobs - Artificial Intelligence",
+ "baseUrl": "https://landing.jobs/jobs/in/portugal/for/artificial-intelligence",
+ "adapterId": "static-css",
+ "configJson": {
+  "itemSelector": "article.lj-jobcard-static",
+  "titleSelector": ".lj-jobcard-static__link",
+  "urlSelector": ".lj-jobcard-static__link",
+  "companySelector": ".lj-jobcard-static__company",
+  "locationSelector": ".lj-jobcard-static__location",
+  "maxPages": 1,
+  "expectedHost": "landing.jobs",
+  "detailSelector": "#job-summary-content"
+ },
+ "kind": "active",
+ "robotsOverride": false,
+ "allowPrivateNetwork": false
+}

@@ -1,0 +1,18 @@
+{
+ "id": "mobilab",
+ "name": "MobiLab Solutions",
+ "baseUrl": "https://mobilab-solutions-gmbh.jobs.personio.com/xml",
+ "adapterId": "static-xpath",
+ "configJson": {
+  "maxPages": 1,
+  "expectedHost": "mobilab-solutions-gmbh.jobs.personio.com",
+  "itemXPath": "//position",
+  "titleXPath": "./name",
+  "locationXPath": "./office",
+  "urlXPath": "concat('https://mobilab-solutions-gmbh.jobs.personio.com/job/', ./id, '?language=en')",
+  "detailSelector": "main#main-content"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

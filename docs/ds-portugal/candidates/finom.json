@@ -1,0 +1,14 @@
+{
+ "id": "finom",
+ "name": "Finom",
+ "baseUrl": "https://jobs.eu.lever.co/pnlfin",
+ "adapterId": "lever",
+ "configJson": {
+  "token": "pnlfin",
+  "maxPages": 500,
+  "expectedHost": "api.eu.lever.co"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

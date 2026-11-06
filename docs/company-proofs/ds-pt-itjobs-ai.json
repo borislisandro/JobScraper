@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "name": "ITJobs.pt - AI",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T21:53:36.987Z",
+  "finishedAt": "2026-10-30T21:53:48.338Z",
+  "source": {
+    "id": "itjobs-ai",
+    "name": "ITJobs.pt - AI",
+    "baseUrl": "https://www.itjobs.pt/emprego/ai",
+    "adapterId": "static-css",
+    "configJson": {
+      "itemSelector": "ul.listing > li",
+      "titleSelector": "a.title",
+      "urlSelector": "a.title",
+      "companySelector": ".list-name a",
+      "locationSelector": ".list-details",
+      "maxPages": 1,
+      "expectedHost": "www.itjobs.pt",
+      "detailSelector": ".content-block"
+    },
+    "kind": "active",
+    "robotsOverride": false,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "51bf60178fa12cdd3a7177cda53152b1f870aac7da119f333b5dc8a6cf15d9fb",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "fd17dc6b69336d89379bb5c650d6457bfa6c1e4e9794d6157492f05fa60acc33",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "itjobs-ai",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 16,
+        "persisted": 16,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 2,
+        "boardTotal": 16,
+        "boardTotalExact": true,
+        "mode": "direct",
+        "warnings": [],
+        "timingMs": 3422,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 3422,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 2708,
+              "backoff": 0,
+              "response": 462,
+              "body": 12,
+              "browser": 0,
+              "adapterOther": 228,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 161,
+                "bodyMs": 7
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 2708,
+                "backoffMs": 0,
+                "responseMs": 301,
+                "bodyMs": 5
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 16,
+    "uniqueIdentities": 16,
+    "uniqueHashes": 16,
+    "samples": [
+      {
+        "externalId": "0625c7bcbc06b6f23b66c261793eed3b0fe43c0ea0a66ac463578eb5f0254521",
+        "title": "AI Engineer (Generative AI Specialist)",
+        "company": "Integer Consulting",
+        "location": "Híbrido",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
+        "applyUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "5de350fe8e41d9bdad267b8b68c9f8600a420adb0f092d5676ddb77463a743b2",
+        "title": "Machine Learning Engineer",
+        "company": "Neotalent Conclusion",
+        "location": "Lisboa, Porto Híbrido",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "401cbff36ef2687267f2d90993f368e41719746a6474146e4ebe95dc016957e1",
+        "title": "Senior AI Solution Engineer",
+        "company": "team.it",
+        "location": "Porto Presencial",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      }
+    ],
+    "warnings": []
+  },
+  "details": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "itjobs-ai",
+      "payload": {
+        "completed": 3,
+        "failed": 0,
+        "complete": true,
+        "mode": "enrichment",
+        "requests": 4,
+        "timingMs": 4354,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 4354,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 12,
+              "pacing": 3462,
+              "backoff": 0,
+              "response": 617,
+              "body": 14,
+              "browser": 0,
+              "adapterOther": 247,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 147,
+                "bodyMs": 6
+              },
+              "listing": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "detail": {
+                "count": 3,
+                "pacingMs": 3462,
+                "backoffMs": 0,
+                "responseMs": 470,
+                "bodyMs": 8
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "samples": [
+      {
+        "externalId": "0625c7bcbc06b6f23b66c261793eed3b0fe43c0ea0a66ac463578eb5f0254521",
+        "title": "AI Engineer (Generative AI Specialist)",
+        "company": "Integer Consulting",
+        "location": "Híbrido",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
+        "applyUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1626
+      },
+      {
+        "externalId": "5de350fe8e41d9bdad267b8b68c9f8600a420adb0f092d5676ddb77463a743b2",
+        "title": "Machine Learning Engineer",
+        "company": "Neotalent Conclusion",
+        "location": "Lisboa, Porto Híbrido",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3518
+      },
+      {
+        "externalId": "401cbff36ef2687267f2d90993f368e41719746a6474146e4ebe95dc016957e1",
+        "title": "Senior AI Solution Engineer",
+        "company": "team.it",
+        "location": "Porto Presencial",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4288
+      }
+    ],
+    "warnings": []
+  },
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "itjobs-ai",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 16,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 16,
+        "requests": 2,
+        "skipped": 16,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 2931,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 2931,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 11,
+              "pacing": 2194,
+              "backoff": 0,
+              "response": 480,
+              "body": 11,
+              "browser": 0,
+              "adapterOther": 234,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 152,
+                "bodyMs": 7
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 2194,
+                "backoffMs": 0,
+                "responseMs": 328,
+                "bodyMs": 4
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

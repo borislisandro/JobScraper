@@ -1,0 +1,14 @@
+{
+ "id": "pagerduty",
+ "name": "PagerDuty",
+ "baseUrl": "https://job-boards.greenhouse.io/pagerduty",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "pagerduty",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

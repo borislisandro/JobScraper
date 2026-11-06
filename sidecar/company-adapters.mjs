@@ -7,6 +7,17 @@ const loadCheerio=()=>cheerioPromise??=import("cheerio").then(module=>cheerio=mo
 export const companyAdapters={
  siemens:{name:"Siemens",host:"jobs.sw.siemens.com",base:"https://jobs.sw.siemens.com"},
  renesas:{name:"Renesas",host:"jobs.renesas.com",base:"https://jobs.renesas.com",smartRecruitersToken:"RenesasElectronics"},
+ // Multinational SmartRecruiters tenants are read through the API's own country filter, so a
+ // Portugal-focused source does not page through thousands of unrelated vacancies.
+ devoteam:{name:"Devoteam",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Devoteam",smartRecruitersToken:"Devoteam",smartRecruitersCountry:"pt"},
+ bosch:{name:"Bosch",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/BoschGroup",smartRecruitersToken:"BoschGroup",smartRecruitersCountry:"pt"},
+ "natixis-portugal":{name:"Natixis in Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/NatixisInPortugal",smartRecruitersToken:"NatixisInPortugal",smartRecruitersCountry:"pt"},
+ inetum:{name:"Inetum",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Inetum2",smartRecruitersToken:"Inetum2",smartRecruitersCountry:"pt"},
+ "act-digital":{name:"act digital",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/AlterSolutions",smartRecruitersToken:"AlterSolutions",smartRecruitersCountry:"pt"},
+ ilof:{name:"iLoF",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",smartRecruitersToken:"ILoF-IntelligentLabOnFiber",smartRecruitersCountry:"pt"},
+ "dbservices-portugal":{name:"DBServices Portugal",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/DBServicesPortugal",smartRecruitersToken:"DBServicesPortugal",smartRecruitersCountry:"pt"},
+ sixt:{name:"SIXT",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/SIXT",smartRecruitersToken:"SIXT",smartRecruitersCountry:"pt"},
+ ubiwhere:{name:"Ubiwhere",host:"jobs.smartrecruiters.com",base:"https://jobs.smartrecruiters.com/Ubiwhere",smartRecruitersToken:"Ubiwhere"},
  "arista-networks":{name:"Arista Networks",host:"www.arista.com",base:"https://www.arista.com",smartRecruitersToken:"AristaNetworks"},
  rambus:{name:"Rambus",host:"careers-rambus.icims.com",base:"https://careers-rambus.icims.com",listing:"https://careers-rambus.icims.com/jobs/search?in_iframe=1",datesOnDetailOnly:true},
  ceva:{name:"CEVA",host:"www.ceva-ip.com",base:"https://www.ceva-ip.com",listing:"https://www.comeet.co/careers-api/2.0/company/76.005/positions?token=67526BE6752D332D33026BE135F033A8&details=true"},
@@ -405,7 +416,7 @@ async function smartRecruiters(site,context){
  const {request,maxPages}=context,token=encodeURIComponent(site.smartRecruitersToken),jobs=[],ids=new Set();
  let offset=0,pages=0,total=null,unstable=false;
  do{
-  const data=await json(request,`https://api.smartrecruiters.com/v1/companies/${token}/postings?limit=100&offset=${offset}`);
+  const data=await json(request,`https://api.smartrecruiters.com/v1/companies/${token}/postings?limit=100&offset=${offset}${site.smartRecruitersCountry?`&country=${encodeURIComponent(site.smartRecruitersCountry)}`:""}`);
   if(!Number.isInteger(data.totalFound)||data.totalFound<0||data.offset!==offset)throw Error("parse_error: SmartRecruiters pagination is missing or repeated");
   if(total!==null&&total!==data.totalFound)unstable=true;
   total=data.totalFound;
@@ -426,12 +437,12 @@ async function smartRecruiters(site,context){
   warnings:[...warnings,...(unstable?["SmartRecruiters changed its total or repeated a posting while paging; this run cannot close stored jobs."]:[])]};
 }
 
-const scrapers={rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
+const scrapers={rambus,ceva,siemens,renesas:smartRecruiters,"arista-networks":smartRecruiters,devoteam:smartRecruiters,bosch:smartRecruiters,ubiwhere:smartRecruiters,sixt:smartRecruiters,"natixis-portugal":smartRecruiters,inetum:smartRecruiters,"act-digital":smartRecruiters,ilof:smartRecruiters,"dbservices-portugal":smartRecruiters,arm,amd,asml,mediatek,google,cisco:phenom,"bae-systems":phenom,thales:phenom,l3harris:radancy,"sk-hynix":skHynix,synopsys:radancy,"u-blox":ublox};
 export const companyNeedsCheerio=(adapterId,fetchDetail=true)=>
  ["rambus","arm","google","sk-hynix","synopsys","l3harris"].includes(adapterId)||(adapterId==="u-blox"&&fetchDetail);
 
 export async function enrichCompany(adapterId,item,request){
- const enrichers={rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
+ const enrichers={rambus:icimsDetail,renesas:smartRecruitersDetail,"arista-networks":smartRecruitersDetail,devoteam:smartRecruitersDetail,bosch:smartRecruitersDetail,ubiwhere:smartRecruitersDetail,sixt:smartRecruitersDetail,"natixis-portugal":smartRecruitersDetail,inetum:smartRecruitersDetail,"act-digital":smartRecruitersDetail,ilof:smartRecruitersDetail,"dbservices-portugal":smartRecruitersDetail,arm:talentBrewDetail,synopsys:talentBrewDetail,l3harris:talentBrewDetail,"u-blox":ubloxDetail};
  const detail=enrichers[adapterId];
  if(!detail)throw Error(`incomplete: ${adapterId} has no detail enricher`);
  await loadCheerio();

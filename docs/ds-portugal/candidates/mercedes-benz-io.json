@@ -1,0 +1,22 @@
+{
+ "id": "mercedes-benz-io",
+ "name": "Mercedes-Benz.io",
+ "baseUrl": "https://mbio.recruitee.com/api/offers/",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "offers",
+  "maxPages": 500,
+  "expectedHost": "mbio.recruitee.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "careers_url",
+   "externalId": "id",
+   "postedAt": "published_at",
+   "description": "description",
+   "location": "location"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

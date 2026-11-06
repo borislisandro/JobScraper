@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Volkswagen Digital Solutions",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:38:49.113Z",
+  "finishedAt": "2026-10-30T20:38:50.150Z",
+  "source": {
+    "id": "vwgds",
+    "name": "Volkswagen Digital Solutions",
+    "baseUrl": "https://jobs.eu.lever.co/vwgds",
+    "adapterId": "lever",
+    "configJson": {
+      "token": "vwgds",
+      "maxPages": 500,
+      "expectedHost": "api.eu.lever.co"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "vwgds",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 9,
+        "persisted": 9,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 364,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 365,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 8,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 287,
+              "body": 60,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 1
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 287,
+                "bodyMs": 60
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 9,
+    "uniqueIdentities": 9,
+    "uniqueHashes": 9,
+    "samples": [
+      {
+        "externalId": "650ddd74-3cda-45b9-a1f0-dc21c073d82b",
+        "title": "Agile Enabler",
+        "company": "Volkswagen Digital Solutions",
+        "location": "Lisbon",
+        "postedAt": "2023-02-17",
+        "canonicalUrl": "https://jobs.eu.lever.co/vwgds/650ddd74-3cda-45b9-a1f0-dc21c073d82b",
+        "applyUrl": "https://jobs.eu.lever.co/vwgds/650ddd74-3cda-45b9-a1f0-dc21c073d82b",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3455
+      },
+      {
+        "externalId": "e88161b4-9d87-49c8-91f3-7acf3bea0f28",
+        "title": "IT Service Analyst",
+        "company": "Volkswagen Digital Solutions",
+        "location": "Lisbon",
+        "postedAt": "2023-11-23",
+        "canonicalUrl": "https://jobs.eu.lever.co/vwgds/e88161b4-9d87-49c8-91f3-7acf3bea0f28",
+        "applyUrl": "https://jobs.eu.lever.co/vwgds/e88161b4-9d87-49c8-91f3-7acf3bea0f28",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3344
+      },
+      {
+        "externalId": "54cd9794-4f32-4bef-8553-7d4802ff3251",
+        "title": "ServiceNow Engineer",
+        "company": "Volkswagen Digital Solutions",
+        "location": "Lisbon/Porto",
+        "postedAt": "2023-03-03",
+        "canonicalUrl": "https://jobs.eu.lever.co/vwgds/54cd9794-4f32-4bef-8553-7d4802ff3251",
+        "applyUrl": "https://jobs.eu.lever.co/vwgds/54cd9794-4f32-4bef-8553-7d4802ff3251",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3268
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "vwgds",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": null,
+        "boardTotalExact": false,
+        "fresh": 0,
+        "discovered": 9,
+        "requests": 1,
+        "skipped": 9,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 317,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 317,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 213,
+              "body": 90,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 213,
+                "bodyMs": 90
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

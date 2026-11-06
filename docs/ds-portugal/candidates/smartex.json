@@ -1,0 +1,18 @@
+{
+ "id": "smartex",
+ "name": "Smartex.ai",
+ "baseUrl": "https://odoo.smartex.ai/jobs",
+ "adapterId": "static-css",
+ "configJson": {
+  "itemSelector": "div.card",
+  "titleSelector": "h3",
+  "urlSelector": "a[href^=\"/jobs/\"]",
+  "locationSelector": "address",
+  "maxPages": 1,
+  "expectedHost": "odoo.smartex.ai",
+  "detailSelector": "#wrap"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

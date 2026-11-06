@@ -1,0 +1,154 @@
+
+### Finom
+  lever-eu token=pnlfin total=89 PT=11 PT+data/AI=1
+     e.g. Senior Machine Learning Engineer [Portugal; Portugal; PT]
+
+### Jobgether
+  lever token=jobgether total=500 PT=11 PT+data/AI=3
+     e.g. AI Product Concept Designer & Interior Stylist – Home Décor (Part-/Full-time) [Portugal; Portugal; PT]
+          AI Research Scientist – Scientific Evaluation (ML/AI) [Portugal; Portugal; PT]
+          AI Support Operations Specialist [Portugal; Portugal; PT]
+
+### Cegid
+  (no hosted board answered)
+
+### Eurotux
+  (no hosted board answered)
+
+### Dellent Consulting
+  (no hosted board answered)
+
+### Logicalis Portugal
+  (no hosted board answered)
+
+### Planet Farms
+  (no hosted board answered)
+
+### NILG.AI
+  (no hosted board answered)
+
+### Upgraide
+  (no hosted board answered)
+
+### Datacentric
+  (no hosted board answered)
+
+### Mind Source
+  (no hosted board answered)
+
+### Flix
+  greenhouse token=flix total=128 PT=12 PT+data/AI=3
+     e.g. Senior Data Scientist – Marketing Measurement & Causal Inference (m/f/d) [Lisbon]
+          Senior Data Scientist (m/f/d) [Lisbon]
+          Senior Marketing Data Scientist (m/f/d) [Lisbon]
+
+### DareData
+  (no hosted board answered)
+
+### Twistag
+  (no hosted board answered)
+
+### Intelligent Algorithms
+  (no hosted board answered)
+
+### PrimeIT
+  (no hosted board answered)
+
+### Closer Consulting
+  (no hosted board answered)
+
+### Fyld
+  (no hosted board answered)
+
+### MobiLab Solutions
+  (no hosted board answered)
+
+### SISCOG
+  (no hosted board answered)
+
+### InterProlog
+  (no hosted board answered)
+
+### Smartex
+  (no hosted board answered)
+
+### Defined.ai
+  (no hosted board answered)
+
+### NDrive
+  (no hosted board answered)
+
+### Aptoide
+  (no hosted board answered)
+
+### Unbabel
+  (no hosted board answered)
+
+### Priberam
+  (no hosted board answered)
+
+### Outsystems
+  (no hosted board answered)
+
+### Glovo
+  (no hosted board answered)
+
+### Criteo
+  (no hosted board answered)
+
+### Bitsight
+  (no hosted board answered)
+
+### Hostelworld
+  (no hosted board answered)
+
+### Zendesk
+  (no hosted board answered)
+
+### Anchorage Digital
+  (no hosted board answered)
+
+### Blip.pt
+  greenhouse token=blip total=2 PT=0 PT+data/AI=0
+
+### Landing Jobs
+  (no hosted board answered)
+
+### Coverflex
+  teamtailor token=coverflex total=10 PT=4 PT+data/AI=0
+     e.g. FP&amp;A Manager [Europe, Braga, Portugal]
+          Marketing &amp; GTM Ops Specialist [Europe, Braga, Portugal]
+          (Founding) Business Development Representative - Germany [Portugal, Braga, Portugal]
+
+### Moey
+  (no hosted board answered)
+
+### Bold International
+  (no hosted board answered)
+
+### Wefox
+  (no hosted board answered)
+
+### Visma
+  (no hosted board answered)
+
+### Ctt
+  (no hosted board answered)
+
+### Sensei
+  greenhouse token=sensei total=7 PT=0 PT+data/AI=0
+
+### Toku
+  ashby token=toku total=25 PT=0 PT+data/AI=0
+  lever token=toku total=2 PT=0 PT+data/AI=0
+  recruitee token=toku total=22 PT=0 PT+data/AI=0
+
+### Kuantic
+  (no hosted board answered)
+
+### Magnum
+  (no hosted board answered)
+
+### Mimic
+  lever token=mimic total=1 PT=0 PT+data/AI=0
+FINISHED

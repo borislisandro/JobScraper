@@ -1,0 +1,13 @@
+{
+ "id": "inetum",
+ "name": "Inetum",
+ "baseUrl": "https://jobs.smartrecruiters.com/Inetum2",
+ "adapterId": "inetum",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

@@ -1,0 +1,13 @@
+{
+ "id": "natixis-portugal",
+ "name": "Natixis in Portugal",
+ "baseUrl": "https://jobs.smartrecruiters.com/NatixisInPortugal",
+ "adapterId": "natixis-portugal",
+ "configJson": {
+  "maxPages": 500,
+  "expectedHost": "jobs.smartrecruiters.com"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

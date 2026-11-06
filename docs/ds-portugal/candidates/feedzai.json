@@ -1,0 +1,14 @@
+{
+ "id": "feedzai",
+ "name": "Feedzai",
+ "baseUrl": "https://job-boards.greenhouse.io/feedzai",
+ "adapterId": "greenhouse",
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false,
+ "configJson": {
+  "token": "feedzai",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ }
+}

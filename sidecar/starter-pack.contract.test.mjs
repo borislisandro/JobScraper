@@ -36,9 +36,12 @@ test("every catalog company has a supported, fully configured request",()=>{
 });
 test("expansion entries have a full live proof matching their shipped configuration",()=>{
  const tracker=JSON.parse(readFileSync(new URL("../docs/company-support-tracker.json",import.meta.url),"utf8"));
- assert.equal(tracker.companies.length,269);
- assert.equal(new Set(tracker.companies.map(company=>company.id)).size,269);
- assert.deepEqual(tracker.companies.map(company=>company.sequence),Array.from({length:269},(_,index)=>index+1));
+ // The tracker grows as employers are admitted; what must hold is that it never shrinks below the
+ // original 269 and that ids and sequence numbers stay unique and contiguous.
+ const total=tracker.companies.length;
+ assert.ok(total>=269);
+ assert.equal(new Set(tracker.companies.map(company=>company.id)).size,total);
+ assert.deepEqual(tracker.companies.map(company=>company.sequence),Array.from({length:total},(_,index)=>index+1));
  for(const row of tracker.companies){
   const company=catalog.companies.find(company=>company.name===row.name);
   if(row.status!=="supported"){assert.equal(company,undefined,`${row.name}: unfinished work entered the catalog`);continue}

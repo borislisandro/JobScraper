@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-02",
+  "updatedAt": "2026-10-30",
   "objective": "Work the 14 focus employers first: they are the ones hiring digital design and verification engineers (HDL, RTL, ASIC) and are not in the catalog yet. Everything after them is the wider ASIC/embedded/hardware backlog, in priority order, with a complete live worker proof before each catalog admission. Rows outside that discipline stay recorded as out of scope rather than deleted.",
   "companies": [
     {
@@ -3928,15 +3928,18 @@
       "name": "Critical Software",
       "category": "Engineering services",
       "priority": "P6",
-      "status": "queued",
-      "officialCareersUrl": null,
-      "adapterId": null,
-      "catalogId": null,
-      "lastAttemptAt": null,
-      "evidence": [],
-      "notes": "",
-      "nextAction": "Discover the official careers board and confirm employer identity.",
-      "inScope": true
+      "status": "supported",
+      "officialCareersUrl": "https://critical-software.breezy.hr",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000017a",
+      "lastAttemptAt": "2026-10-30T21:27:38.377Z",
+      "evidence": [
+        "company-proofs/ds-pt-critical-software.json"
+      ],
+      "notes": "Breezy HR board (JSON feed with ?verbose=true carries descriptions). Portugal data/AI employer; 11 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "inScope": true,
+      "batch": "ds-portugal"
     },
     {
       "sequence": 238,
@@ -4467,6 +4470,937 @@
       "evidence": [],
       "notes": "",
       "nextAction": "Discover the official careers board and confirm employer identity.",
+      "inScope": true
+    },
+    {
+      "sequence": 270,
+      "id": "ds-pt-accenture",
+      "name": "Accenture (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://www.accenture.com/pt-pt/careers",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-000000000154",
+      "lastAttemptAt": "2026-10-30T20:54:09.856Z",
+      "evidence": [
+        "company-proofs/ds-pt-accenture.json"
+      ],
+      "notes": "Portugal data/AI employer; 158 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 271,
+      "id": "ds-pt-act-digital",
+      "name": "act digital",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/AlterSolutions",
+      "adapterId": "act-digital",
+      "catalogId": "00000000-0000-4000-8000-000000000155",
+      "lastAttemptAt": "2026-10-30T20:38:59.505Z",
+      "evidence": [
+        "company-proofs/ds-pt-act-digital.json"
+      ],
+      "notes": "Portugal data/AI employer; 64 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 272,
+      "id": "ds-pt-airapps",
+      "name": "Air Apps",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/airapps",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-000000000156",
+      "lastAttemptAt": "2026-10-30T20:38:21.276Z",
+      "evidence": [
+        "company-proofs/ds-pt-airapps.json"
+      ],
+      "notes": "Portugal data/AI employer; 499 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 273,
+      "id": "ds-pt-airbus",
+      "name": "Airbus (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://ag.wd3.myworkdayjobs.com/Airbus",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-000000000157",
+      "lastAttemptAt": "2026-10-30T20:53:49.896Z",
+      "evidence": [
+        "company-proofs/ds-pt-airbus.json"
+      ],
+      "notes": "Portugal data/AI employer; 70 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 274,
+      "id": "ds-pt-bitsight",
+      "name": "Bitsight (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://bitsight.wd1.myworkdayjobs.com/bitsight",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-000000000158",
+      "lastAttemptAt": "2026-10-30T20:39:51.908Z",
+      "evidence": [
+        "company-proofs/ds-pt-bitsight.json"
+      ],
+      "notes": "Portugal data/AI employer; 6 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 275,
+      "id": "ds-pt-bosch",
+      "name": "Bosch (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/BoschGroup",
+      "adapterId": "bosch",
+      "catalogId": "00000000-0000-4000-8000-000000000159",
+      "lastAttemptAt": "2026-10-30T17:32:35.506Z",
+      "evidence": [
+        "company-proofs/ds-pt-bosch.json"
+      ],
+      "notes": "Portugal data/AI employer; 220 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 276,
+      "id": "ds-pt-celfocus",
+      "name": "Celfocus",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://careers.celfocus.com/en-GB/jobs",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000015a",
+      "lastAttemptAt": "2026-10-30T17:31:45.342Z",
+      "evidence": [
+        "company-proofs/ds-pt-celfocus.json"
+      ],
+      "notes": "Portugal data/AI employer; 6 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 277,
+      "id": "ds-pt-datacamp",
+      "name": "DataCamp",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/datacamp",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-00000000015b",
+      "lastAttemptAt": "2026-10-30T20:38:17.367Z",
+      "evidence": [
+        "company-proofs/ds-pt-datacamp.json"
+      ],
+      "notes": "Portugal data/AI employer; 40 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 278,
+      "id": "ds-pt-dbservices-portugal",
+      "name": "DBServices Portugal",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://careers.smartrecruiters.com/DBServicesPortugal",
+      "adapterId": "dbservices-portugal",
+      "catalogId": "00000000-0000-4000-8000-00000000015c",
+      "lastAttemptAt": "2026-10-30T20:39:04.661Z",
+      "evidence": [
+        "company-proofs/ds-pt-dbservices-portugal.json"
+      ],
+      "notes": "Portugal data/AI employer; 3 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 279,
+      "id": "ds-pt-devoteam",
+      "name": "Devoteam",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/Devoteam",
+      "adapterId": "devoteam",
+      "catalogId": "00000000-0000-4000-8000-00000000015d",
+      "lastAttemptAt": "2026-10-30T17:32:31.708Z",
+      "evidence": [
+        "company-proofs/ds-pt-devoteam.json"
+      ],
+      "notes": "Portugal data/AI employer; 218 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 280,
+      "id": "ds-pt-emma-sleep",
+      "name": "Emma Sleep",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.lever.co/emma-sleep",
+      "adapterId": "lever",
+      "catalogId": "00000000-0000-4000-8000-00000000015e",
+      "lastAttemptAt": "2026-10-30T20:38:46.826Z",
+      "evidence": [
+        "company-proofs/ds-pt-emma-sleep.json"
+      ],
+      "notes": "Portugal data/AI employer; 74 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 281,
+      "id": "ds-pt-farfetch-ashby",
+      "name": "Farfetch (Ashby)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/farfetch",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-00000000015f",
+      "lastAttemptAt": "2026-10-30T17:30:56.858Z",
+      "evidence": [
+        "company-proofs/ds-pt-farfetch-ashby.json"
+      ],
+      "notes": "Portugal data/AI employer; 49 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 282,
+      "id": "ds-pt-farfetch-lever",
+      "name": "Farfetch (Lever)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.lever.co/farfetch",
+      "adapterId": "lever",
+      "catalogId": "00000000-0000-4000-8000-000000000160",
+      "lastAttemptAt": "2026-10-30T17:31:08.565Z",
+      "evidence": [
+        "company-proofs/ds-pt-farfetch-lever.json"
+      ],
+      "notes": "Portugal data/AI employer; 43 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 283,
+      "id": "ds-pt-feedzai",
+      "name": "Feedzai",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/feedzai",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000161",
+      "lastAttemptAt": "2026-10-30T17:30:52.526Z",
+      "evidence": [
+        "company-proofs/ds-pt-feedzai.json"
+      ],
+      "notes": "Portugal data/AI employer; 15 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 284,
+      "id": "ds-pt-finom",
+      "name": "Finom",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.eu.lever.co/pnlfin",
+      "adapterId": "lever",
+      "catalogId": "00000000-0000-4000-8000-000000000162",
+      "lastAttemptAt": "2026-10-30T20:50:21.806Z",
+      "evidence": [
+        "company-proofs/ds-pt-finom.json"
+      ],
+      "notes": "Portugal data/AI employer; 89 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 285,
+      "id": "ds-pt-flix",
+      "name": "Flix",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/flix",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000163",
+      "lastAttemptAt": "2026-10-30T20:50:19.963Z",
+      "evidence": [
+        "company-proofs/ds-pt-flix.json"
+      ],
+      "notes": "Portugal data/AI employer; 128 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 286,
+      "id": "ds-pt-hiire",
+      "name": "Hiire",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://hiire.teamtailor.com/jobs",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000164",
+      "lastAttemptAt": "2026-10-30T20:39:10.671Z",
+      "evidence": [
+        "company-proofs/ds-pt-hiire.json"
+      ],
+      "notes": "Portugal data/AI employer; 26 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 287,
+      "id": "ds-pt-ilof",
+      "name": "iLoF",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/ILoF-IntelligentLabOnFiber",
+      "adapterId": "ilof",
+      "catalogId": "00000000-0000-4000-8000-000000000165",
+      "lastAttemptAt": "2026-10-30T20:39:02.082Z",
+      "evidence": [
+        "company-proofs/ds-pt-ilof.json"
+      ],
+      "notes": "Portugal data/AI employer; 4 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 288,
+      "id": "ds-pt-inetum",
+      "name": "Inetum",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/Inetum2",
+      "adapterId": "inetum",
+      "catalogId": "00000000-0000-4000-8000-000000000166",
+      "lastAttemptAt": "2026-10-30T20:38:56.930Z",
+      "evidence": [
+        "company-proofs/ds-pt-inetum.json"
+      ],
+      "notes": "Portugal data/AI employer; 455 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 289,
+      "id": "ds-pt-iqvia",
+      "name": "IQVIA (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://iqvia.wd1.myworkdayjobs.com/IQVIA",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-000000000167",
+      "lastAttemptAt": "2026-10-30T20:53:42.175Z",
+      "evidence": [
+        "company-proofs/ds-pt-iqvia.json"
+      ],
+      "notes": "Portugal data/AI employer; 89 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 290,
+      "id": "ds-pt-mercedes-benz-io",
+      "name": "Mercedes-Benz.io",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://mbio.recruitee.com",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000168",
+      "lastAttemptAt": "2026-10-30T20:39:05.922Z",
+      "evidence": [
+        "company-proofs/ds-pt-mercedes-benz-io.json"
+      ],
+      "notes": "Portugal data/AI employer; 4 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 291,
+      "id": "ds-pt-metyis",
+      "name": "Metyis",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://metyisag.recruitee.com",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000169",
+      "lastAttemptAt": "2026-10-30T20:50:17.459Z",
+      "evidence": [
+        "company-proofs/ds-pt-metyis.json"
+      ],
+      "notes": "Portugal data/AI employer; 71 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 292,
+      "id": "ds-pt-natixis-portugal",
+      "name": "Natixis in Portugal",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/NatixisInPortugal",
+      "adapterId": "natixis-portugal",
+      "catalogId": "00000000-0000-4000-8000-00000000016a",
+      "lastAttemptAt": "2026-10-30T20:38:52.908Z",
+      "evidence": [
+        "company-proofs/ds-pt-natixis-portugal.json"
+      ],
+      "notes": "Portugal data/AI employer; 46 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 293,
+      "id": "ds-pt-olx",
+      "name": "OLX",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.eu.lever.co/olx",
+      "adapterId": "lever",
+      "catalogId": "00000000-0000-4000-8000-00000000016b",
+      "lastAttemptAt": "2026-10-30T20:38:48.579Z",
+      "evidence": [
+        "company-proofs/ds-pt-olx.json"
+      ],
+      "notes": "Portugal data/AI employer; 58 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 294,
+      "id": "ds-pt-pagerduty",
+      "name": "PagerDuty",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/pagerduty",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-00000000016c",
+      "lastAttemptAt": "2026-10-30T20:38:19.773Z",
+      "evidence": [
+        "company-proofs/ds-pt-pagerduty.json"
+      ],
+      "notes": "Portugal data/AI employer; 47 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 295,
+      "id": "ds-pt-santander",
+      "name": "Santander (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://santander.wd3.myworkdayjobs.com/SantanderCareers",
+      "adapterId": "workday",
+      "catalogId": "00000000-0000-4000-8000-00000000016d",
+      "lastAttemptAt": "2026-10-30T17:34:09.288Z",
+      "evidence": [
+        "company-proofs/ds-pt-santander.json"
+      ],
+      "notes": "Portugal data/AI employer; 30 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 296,
+      "id": "ds-pt-superhuman",
+      "name": "Superhuman",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/superhuman%20platform%20inc",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-00000000016e",
+      "lastAttemptAt": "2026-10-30T21:17:13.136Z",
+      "evidence": [
+        "company-proofs/ds-pt-superhuman.json"
+      ],
+      "notes": "Portugal data/AI employer; 72 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 297,
+      "id": "ds-pt-sword-health",
+      "name": "Sword Health",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/swordhealth",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-00000000016f",
+      "lastAttemptAt": "2026-10-30T17:30:49.573Z",
+      "evidence": [
+        "company-proofs/ds-pt-sword-health.json"
+      ],
+      "notes": "Portugal data/AI employer; 61 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 298,
+      "id": "ds-pt-talkdesk",
+      "name": "Talkdesk",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/talkdesk2",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000170",
+      "lastAttemptAt": "2026-10-30T17:30:55.345Z",
+      "evidence": [
+        "company-proofs/ds-pt-talkdesk.json"
+      ],
+      "notes": "Portugal data/AI employer; 36 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 299,
+      "id": "ds-pt-thorit",
+      "name": "Thorit",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/thorit",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-000000000171",
+      "lastAttemptAt": "2026-10-30T20:38:23.664Z",
+      "evidence": [
+        "company-proofs/ds-pt-thorit.json"
+      ],
+      "notes": "Portugal data/AI employer; 12 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 300,
+      "id": "ds-pt-transperfect",
+      "name": "TransPerfect (Unbabel)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://transperfect.recruitee.com",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000172",
+      "lastAttemptAt": "2026-10-30T20:39:08.851Z",
+      "evidence": [
+        "company-proofs/ds-pt-transperfect.json"
+      ],
+      "notes": "Portugal data/AI employer; 686 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 301,
+      "id": "ds-pt-ubiwhere",
+      "name": "Ubiwhere",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/Ubiwhere",
+      "adapterId": "ubiwhere",
+      "catalogId": "00000000-0000-4000-8000-000000000173",
+      "lastAttemptAt": "2026-10-30T17:32:38.068Z",
+      "evidence": [
+        "company-proofs/ds-pt-ubiwhere.json"
+      ],
+      "notes": "Portugal data/AI employer; 1 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 302,
+      "id": "ds-pt-veeva",
+      "name": "Veeva Systems",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.lever.co/veeva",
+      "adapterId": "lever",
+      "catalogId": "00000000-0000-4000-8000-000000000174",
+      "lastAttemptAt": "2026-10-30T20:38:38.046Z",
+      "evidence": [
+        "company-proofs/ds-pt-veeva.json"
+      ],
+      "notes": "Portugal data/AI employer; 892 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 303,
+      "id": "ds-pt-vwgds",
+      "name": "Volkswagen Digital Solutions",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.eu.lever.co/vwgds",
+      "adapterId": "lever",
+      "catalogId": "00000000-0000-4000-8000-000000000175",
+      "lastAttemptAt": "2026-10-30T20:38:50.150Z",
+      "evidence": [
+        "company-proofs/ds-pt-vwgds.json"
+      ],
+      "notes": "Portugal data/AI employer; 9 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 304,
+      "id": "ds-pt-axians",
+      "name": "Axians Portugal",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://axiansgroup.teamtailor.com/jobs",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000176",
+      "lastAttemptAt": "2026-10-30T21:19:51.237Z",
+      "evidence": [
+        "company-proofs/ds-pt-axians.json"
+      ],
+      "notes": "Portugal data/AI employer; 113 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 305,
+      "id": "ds-pt-bearingpoint-portugal",
+      "name": "BearingPoint Portugal",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://bearingpointportugal.teamtailor.com/jobs",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-000000000177",
+      "lastAttemptAt": "2026-10-30T21:19:53.248Z",
+      "evidence": [
+        "company-proofs/ds-pt-bearingpoint-portugal.json"
+      ],
+      "notes": "Portugal data/AI employer; 7 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 306,
+      "id": "ds-pt-gocardless",
+      "name": "GoCardless",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/gocardless",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000178",
+      "lastAttemptAt": "2026-10-30T21:19:55.720Z",
+      "evidence": [
+        "company-proofs/ds-pt-gocardless.json"
+      ],
+      "notes": "Portugal data/AI employer; 27 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 307,
+      "id": "ds-pt-indicium-ai",
+      "name": "Indicium AI",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/indiciumai",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-000000000179",
+      "lastAttemptAt": "2026-10-30T21:19:58.219Z",
+      "evidence": [
+        "company-proofs/ds-pt-indicium-ai.json"
+      ],
+      "notes": "Portugal data/AI employer; 32 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 308,
+      "id": "ds-pt-sixt",
+      "name": "SIXT (Portugal)",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.smartrecruiters.com/SIXT",
+      "adapterId": "sixt",
+      "catalogId": "00000000-0000-4000-8000-00000000017b",
+      "lastAttemptAt": "2026-10-30T21:37:26.767Z",
+      "evidence": [
+        "company-proofs/ds-pt-sixt.json"
+      ],
+      "notes": "Portugal data/AI employer; 24 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 309,
+      "id": "ds-pt-zego",
+      "name": "Zego",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://jobs.ashbyhq.com/zego",
+      "adapterId": "ashby",
+      "catalogId": "00000000-0000-4000-8000-00000000017c",
+      "lastAttemptAt": "2026-10-30T21:37:28.097Z",
+      "evidence": [
+        "company-proofs/ds-pt-zego.json"
+      ],
+      "notes": "Portugal data/AI employer; 36 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 310,
+      "id": "ds-pt-loka",
+      "name": "Loka",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://job-boards.greenhouse.io/lokainc",
+      "adapterId": "greenhouse",
+      "catalogId": "00000000-0000-4000-8000-00000000017d",
+      "lastAttemptAt": "2026-10-30T21:37:30.606Z",
+      "evidence": [
+        "company-proofs/ds-pt-loka.json"
+      ],
+      "notes": "Portugal data/AI employer; 15 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 311,
+      "id": "ds-pt-intermedia",
+      "name": "Intermedia",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://intermedia.pinpointhq.com",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000017e",
+      "lastAttemptAt": "2026-10-30T21:37:33.059Z",
+      "evidence": [
+        "company-proofs/ds-pt-intermedia.json"
+      ],
+      "notes": "Portugal data/AI employer; 53 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 312,
+      "id": "ds-pt-igh",
+      "name": "IG&H Portugal",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://igh.recruitee.com",
+      "adapterId": "json",
+      "catalogId": "00000000-0000-4000-8000-00000000017f",
+      "lastAttemptAt": "2026-10-30T21:37:34.557Z",
+      "evidence": [
+        "company-proofs/ds-pt-igh.json"
+      ],
+      "notes": "Portugal data/AI employer; 61 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 313,
+      "id": "ds-pt-mobilab",
+      "name": "MobiLab Solutions",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://mobilab-solutions-gmbh.jobs.personio.com",
+      "adapterId": "static-xpath",
+      "catalogId": "00000000-0000-4000-8000-000000000180",
+      "lastAttemptAt": "2026-10-30T21:40:10.705Z",
+      "evidence": [
+        "company-proofs/ds-pt-mobilab.json"
+      ],
+      "notes": "Portugal data/AI employer; 7 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 314,
+      "id": "ds-pt-smartex",
+      "name": "Smartex.ai",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://odoo.smartex.ai/jobs",
+      "adapterId": "static-css",
+      "catalogId": "00000000-0000-4000-8000-000000000181",
+      "lastAttemptAt": "2026-10-30T21:40:14.354Z",
+      "evidence": [
+        "company-proofs/ds-pt-smartex.json"
+      ],
+      "notes": "Portugal data/AI employer; 10 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 315,
+      "id": "ds-pt-itjobs-ai",
+      "name": "ITJobs.pt - AI",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://www.itjobs.pt/emprego/ai",
+      "adapterId": "static-css",
+      "catalogId": "00000000-0000-4000-8000-000000000182",
+      "lastAttemptAt": "2026-10-30T21:53:48.338Z",
+      "evidence": [
+        "company-proofs/ds-pt-itjobs-ai.json"
+      ],
+      "notes": "Portugal data/AI employer; 16 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 316,
+      "id": "ds-pt-landingjobs-data-scientist",
+      "name": "Landing.jobs - Data",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://landing.jobs/jobs/in/portugal/for/data-scientist",
+      "adapterId": "static-css",
+      "catalogId": "00000000-0000-4000-8000-000000000183",
+      "lastAttemptAt": "2026-10-30T21:56:27.234Z",
+      "evidence": [
+        "company-proofs/ds-pt-landingjobs-data-scientist.json"
+      ],
+      "notes": "Portugal data/AI employer; 10 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 317,
+      "id": "ds-pt-landingjobs-machine-learning",
+      "name": "Landing.jobs - Machine Learning",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://landing.jobs/jobs/in/portugal/for/machine-learning",
+      "adapterId": "static-css",
+      "catalogId": "00000000-0000-4000-8000-000000000184",
+      "lastAttemptAt": "2026-10-30T21:56:39.042Z",
+      "evidence": [
+        "company-proofs/ds-pt-landingjobs-machine-learning.json"
+      ],
+      "notes": "Portugal data/AI employer; 7 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
+      "inScope": true
+    },
+    {
+      "sequence": 318,
+      "id": "ds-pt-landingjobs-artificial-intelligence",
+      "name": "Landing.jobs - Artificial Intelligence",
+      "category": "Data and AI employers in Portugal",
+      "priority": "P1",
+      "status": "supported",
+      "officialCareersUrl": "https://landing.jobs/jobs/in/portugal/for/artificial-intelligence",
+      "adapterId": "static-css",
+      "catalogId": "00000000-0000-4000-8000-000000000185",
+      "lastAttemptAt": "2026-10-30T21:56:49.567Z",
+      "evidence": [
+        "company-proofs/ds-pt-landingjobs-artificial-intelligence.json"
+      ],
+      "notes": "Portugal data/AI employer; 6 rows on the board at proof time.",
+      "nextAction": "Complete; revalidate if this employer changes its board.",
+      "batch": "ds-portugal",
       "inScope": true
     }
   ],

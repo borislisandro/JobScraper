@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Air Apps",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:38:20.306Z",
+  "finishedAt": "2026-10-30T20:38:21.276Z",
+  "source": {
+    "id": "airapps",
+    "name": "Air Apps",
+    "baseUrl": "https://jobs.ashbyhq.com/airapps",
+    "adapterId": "ashby",
+    "configJson": {
+      "token": "airapps",
+      "maxPages": 500,
+      "expectedHost": "api.ashbyhq.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "airapps",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 499,
+        "persisted": 499,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 499,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 366,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 366,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 152,
+              "body": 49,
+              "browser": 0,
+              "adapterOther": 107,
+              "emit": 49
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 152,
+                "bodyMs": 49
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 499,
+    "uniqueIdentities": 499,
+    "uniqueHashes": 499,
+    "samples": [
+      {
+        "externalId": "6e89f68d-bad6-4755-950f-10b537c191d5",
+        "title": "Digital Marketing Manager",
+        "company": "Air Apps",
+        "location": "San Francisco",
+        "postedAt": "2025-03-28",
+        "canonicalUrl": "https://jobs.ashbyhq.com/airapps/6e89f68d-bad6-4755-950f-10b537c191d5",
+        "applyUrl": "https://jobs.ashbyhq.com/airapps/6e89f68d-bad6-4755-950f-10b537c191d5",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4700
+      },
+      {
+        "externalId": "0e48d66e-84c5-4bf5-baed-4fe0818a960d",
+        "title": "Social Media Manager",
+        "company": "Air Apps",
+        "location": "Berlin Metropolitain Area",
+        "postedAt": "2026-04-17",
+        "canonicalUrl": "https://jobs.ashbyhq.com/airapps/0e48d66e-84c5-4bf5-baed-4fe0818a960d",
+        "applyUrl": "https://jobs.ashbyhq.com/airapps/0e48d66e-84c5-4bf5-baed-4fe0818a960d",
+        "descriptionStatus": "complete",
+        "descriptionChars": 4858
+      },
+      {
+        "externalId": "bc967cad-decf-4486-9db0-39f0b5936f90",
+        "title": "DevOps Engineer Mobile",
+        "company": "Air Apps",
+        "location": "Zurich",
+        "postedAt": "2026-04-29",
+        "canonicalUrl": "https://jobs.ashbyhq.com/airapps/bc967cad-decf-4486-9db0-39f0b5936f90",
+        "applyUrl": "https://jobs.ashbyhq.com/airapps/bc967cad-decf-4486-9db0-39f0b5936f90",
+        "descriptionStatus": "complete",
+        "descriptionChars": 5143
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "airapps",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 499,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 499,
+        "requests": 1,
+        "skipped": 499,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 233,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 234,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 142,
+              "body": 51,
+              "browser": 0,
+              "adapterOther": 31,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 142,
+                "bodyMs": 51
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

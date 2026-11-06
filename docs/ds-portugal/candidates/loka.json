@@ -1,0 +1,14 @@
+{
+ "id": "loka",
+ "name": "Loka",
+ "baseUrl": "https://job-boards.greenhouse.io/lokainc",
+ "adapterId": "greenhouse",
+ "configJson": {
+  "token": "lokainc",
+  "maxPages": 500,
+  "expectedHost": "boards-api.greenhouse.io"
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

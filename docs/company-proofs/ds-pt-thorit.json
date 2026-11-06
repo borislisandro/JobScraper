@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "name": "Thorit",
+  "level": "full",
+  "ok": true,
+  "startedAt": "2026-10-30T20:38:23.005Z",
+  "finishedAt": "2026-10-30T20:38:23.664Z",
+  "source": {
+    "id": "thorit",
+    "name": "Thorit",
+    "baseUrl": "https://jobs.ashbyhq.com/thorit",
+    "adapterId": "ashby",
+    "configJson": {
+      "token": "thorit",
+      "maxPages": 500,
+      "expectedHost": "api.ashbyhq.com"
+    },
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false
+  },
+  "codeHashes": {
+    "worker.mjs": "08bdd3c1183ba454de7a0188631bcdc87a04d58c775155d7b71aae2e57088eb1",
+    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
+    "company-adapters.mjs": "ca588d36dfbf6fcf34431ce9a53a399d8a06c002f4a255f09a318d796b2a0865",
+    "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
+    "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
+  },
+  "listing": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "thorit",
+      "payload": {
+        "command": "scrape_source",
+        "complete": true,
+        "discovered": 12,
+        "persisted": 12,
+        "skipped": 0,
+        "filtered": 0,
+        "requests": 1,
+        "boardTotal": 12,
+        "boardTotalExact": true,
+        "mode": "direct-platform",
+        "warnings": [],
+        "timingMs": 118,
+        "pages": 1,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 118,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 89,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 9,
+              "emit": 2
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 89,
+                "bodyMs": 10
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    },
+    "jobs": 12,
+    "uniqueIdentities": 12,
+    "uniqueHashes": 12,
+    "samples": [
+      {
+        "externalId": "7823f6ee-4383-4880-8318-bce04ae32681",
+        "title": "Senior Business Consultant (all genders)",
+        "company": "Thorit",
+        "location": "Böblingen Headquater",
+        "postedAt": "2026-04-25",
+        "canonicalUrl": "https://jobs.ashbyhq.com/thorit/7823f6ee-4383-4880-8318-bce04ae32681",
+        "applyUrl": "https://jobs.ashbyhq.com/thorit/7823f6ee-4383-4880-8318-bce04ae32681",
+        "descriptionStatus": "complete",
+        "descriptionChars": 6070
+      },
+      {
+        "externalId": "e68fdae2-e826-4484-9d61-0f54453423fc",
+        "title": "Unsolicited Application (all genders)",
+        "company": "Thorit",
+        "location": "Böblingen Headquater, Lisbon Office",
+        "postedAt": "2026-08-18",
+        "canonicalUrl": "https://jobs.ashbyhq.com/thorit/e68fdae2-e826-4484-9d61-0f54453423fc",
+        "applyUrl": "https://jobs.ashbyhq.com/thorit/e68fdae2-e826-4484-9d61-0f54453423fc",
+        "descriptionStatus": "complete",
+        "descriptionChars": 2965
+      },
+      {
+        "externalId": "c525ea45-418e-4771-ba06-e16ed257e284",
+        "title": "Working Student AI Software Engineer, LangChain (all genders)",
+        "company": "Thorit",
+        "location": "Böblingen Headquater",
+        "postedAt": "2026-10-26",
+        "canonicalUrl": "https://jobs.ashbyhq.com/thorit/c525ea45-418e-4771-ba06-e16ed257e284",
+        "applyUrl": "https://jobs.ashbyhq.com/thorit/c525ea45-418e-4771-ba06-e16ed257e284",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3708
+      }
+    ],
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
+  },
+  "details": null,
+  "warm": {
+    "terminal": {
+      "protocolVersion": 1,
+      "event": "completed",
+      "runId": "thorit",
+      "payload": {
+        "complete": true,
+        "mode": "check",
+        "boardTotal": 12,
+        "boardTotalExact": true,
+        "fresh": 0,
+        "discovered": 12,
+        "requests": 1,
+        "skipped": 12,
+        "filtered": 0,
+        "warnings": [],
+        "timingMs": 118,
+        "performance": {
+          "version": 1,
+          "worker": {
+            "totalMs": 118,
+            "bucketsMs": {
+              "setup": 1,
+              "urlGuard": 7,
+              "pacing": 0,
+              "backoff": 0,
+              "response": 94,
+              "body": 10,
+              "browser": 0,
+              "adapterOther": 5,
+              "emit": 0
+            },
+            "requestsByKind": {
+              "robots": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "listing": {
+                "count": 1,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 94,
+                "bodyMs": 10
+              },
+              "detail": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "token": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "probe": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              },
+              "other": {
+                "count": 0,
+                "pacingMs": 0,
+                "backoffMs": 0,
+                "responseMs": 0,
+                "bodyMs": 0
+              }
+            },
+            "retries": 0,
+            "redirects": 0
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

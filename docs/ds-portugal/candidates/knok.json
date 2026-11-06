@@ -1,0 +1,22 @@
+{
+ "id": "knok",
+ "name": "knok",
+ "baseUrl": "https://apply.workable.com/api/v1/widget/accounts/knok?details=true",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "jobs",
+  "maxPages": 1,
+  "expectedHost": "apply.workable.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "url",
+   "externalId": "shortcode",
+   "postedAt": "published_on",
+   "description": "description",
+   "location": "locations"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}

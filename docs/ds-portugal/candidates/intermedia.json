@@ -1,0 +1,21 @@
+{
+ "id": "intermedia",
+ "name": "Intermedia",
+ "baseUrl": "https://intermedia.pinpointhq.com/postings.json",
+ "adapterId": "json",
+ "configJson": {
+  "itemsPath": "data",
+  "maxPages": 1,
+  "expectedHost": "intermedia.pinpointhq.com",
+  "fieldMap": {
+   "title": "title",
+   "url": "url",
+   "externalId": "id",
+   "description": "description",
+   "location": "location"
+  }
+ },
+ "kind": "active",
+ "robotsOverride": true,
+ "allowPrivateNetwork": false
+}
