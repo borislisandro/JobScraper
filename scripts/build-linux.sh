@@ -26,9 +26,10 @@ case "$mode" in
     echo "Running release gates..."
     pnpm check
     pnpm test
+    # Builds src-tauri/sidecar, which the Tauri build script requires to exist even for `cargo test`.
+    scripts/prepare-release.sh
     cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
     cargo test --manifest-path src-tauri/Cargo.toml
-    scripts/prepare-release.sh
     pnpm tauri build --bundles deb,rpm --ci
     out="artifacts/$version"
     mkdir -p "$out"
