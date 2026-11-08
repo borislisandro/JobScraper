@@ -113,16 +113,16 @@ export function describeOutcome(events: WorkerEvent[], sourceName: string) {
   return `${sourceName}: ${describeFailure(payload.code as string | undefined)}`;
 }
 
-// What choosing a profile did, in the words the Sources tab shows. `reading` is how many of the new
+// What switching profile did, in the words the window shows. `reading` is how many of the profile's
 // companies are about to be read, because the first read is what turns a list of names into jobs.
 export function describeProfileApplied(name: string | undefined, applied: ProfileApplied) {
-  if (!applied.profile) return "No profile selected. Your sources stay exactly as they are.";
-  const label = name || applied.profile, on = applied.added + applied.switchedOn;
-  const parts = [on ? `${on} ${on === 1 ? "company" : "companies"} switched on` : "nothing new to switch on"];
-  if (applied.switchedOff) parts.push(`${applied.switchedOff} from the previous profile switched off, their jobs kept`);
-  if (applied.alreadyFollowing) parts.push(`${applied.alreadyFollowing} already followed`);
+  if (!applied.profile) return "All profiles: showing every source, job and application. Updates read every profile's sources.";
+  const label = name || applied.profile, added = applied.added + applied.switchedOn;
+  const parts = [`${label}: showing only its sources, jobs and applications.`];
+  if (added) parts.push(`${added} ${added === 1 ? "company" : "companies"} added.`);
   const reading = applied.readNow.length;
-  return `${label}: ${parts.join(", ")}.${reading ? ` Reading ${reading} ${reading === 1 ? "company" : "companies"} now.` : ""}`;
+  if (reading) parts.push(`Reading ${reading} ${reading === 1 ? "company" : "companies"} now.`);
+  return parts.join(" ");
 }
 export function describeUpdateSummary(result: ScrapeAllResult) {
   if (!(result.completedSources || result.unchangedSources || result.failedSources || result.cancelledSources)) {

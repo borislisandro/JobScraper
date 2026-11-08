@@ -1,5 +1,5 @@
 {
- "version": "2026-11-07.1",
+ "version": "2026-11-07.3",
  "profiles": [
   {
    "id": "semiconductor",
@@ -209,6 +209,7 @@
    "config": {
     "domain": "qualcomm.com",
     "eightfoldApi": "pcsx",
+    "sortBy": "timestamp",
     "maxPages": 500,
     "requestDelayMs": 400,
     "retryForbidden": true,
@@ -5645,13 +5646,14 @@
     "urlSelector": "a.title",
     "companySelector": ".list-name a",
     "locationSelector": ".list-details",
-    "maxPages": 1,
+    "nextSelector": "ul.pagination li.last a",
+    "maxPages": 50,
     "expectedHost": "www.itjobs.pt",
     "detailSelector": ".content-block"
    },
    "verified": {
-    "at": "2026-10-30",
-    "jobs": 16,
+    "at": "2026-11-07",
+    "jobs": 69,
     "level": "full",
     "evidence": "docs/company-proofs/ds-pt-itjobs-ai.json"
    },

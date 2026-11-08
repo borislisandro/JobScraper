@@ -147,9 +147,19 @@ const requestSlots=new Map;
 export const requestSlotDelay=(origin,delay,now=Date.now(),slots=requestSlots)=>{const due=Math.max(now,slots.get(origin)??now);slots.set(origin,due+delay);return due-now};
 const cancelled=new Set;
 const cancelledError=runId=>{if(cancelled.has(runId))throw Error("cancelled")};
-async function wait(ms,s){cancelledError(s.__runId);await sleep(ms);cancelledError(s.__runId)}
+// Waits in short slices so a cancel lands within half a second even during a long rate-limit backoff.
+async function wait(ms,s){const end=Date.now()+ms;do{cancelledError(s.__runId);await sleep(Math.min(500,Math.max(0,end-Date.now())))}while(Date.now()<end);cancelledError(s.__runId)}
 async function measuredWait(ms,s,key,kind){if(ms<=0)return;const started=clock.now();try{await wait(ms,s)}finally{const elapsed=add(key,started);metrics.requestsByKind[kind][key==="pacingMs"?"pacingMs":"backoffMs"]+=elapsed}}
-async function waitForRequest(url,s,kind){if(s.configJson?.testNoDelay)return;const origin=new URL(url).origin,delay=s.configJson?.requestDelayMs??pace(s,kind);await measuredWait(requestSlotDelay(origin,delay),s,"pacingMs",kind)}
+// A site that answered 429 is read more slowly for the rest of the run: backing off and then
+// returning at the pace that tripped the limit only earns the next 429 a few pages later.
+const throttledOrigins=new Map;
+export const slowedPace=(origin,delay,throttled=throttledOrigins)=>Math.max(delay,throttled.get(origin)||0);
+export const throttleOrigin=(origin,delay,throttled=throttledOrigins)=>{const next=Math.min(5000,Math.max(1500,2*slowedPace(origin,delay,throttled)));throttled.set(origin,next);return next};
+// Without Retry-After, wait long enough for a per-minute window to roll over: Eightfold (Qualcomm)
+// lifts its limit within a minute, and the old 0.5s/1s retries failed the read every time.
+export const rateLimitWaitMs=(header,attempt,now=Date.now())=>retryAfterMs(header,now,60_000)||Math.min(60_000,15_000*2**attempt);
+const RATE_RETRIES=4;
+async function waitForRequest(url,s,kind){if(s.configJson?.testNoDelay)return;const origin=new URL(url).origin,delay=slowedPace(origin,s.configJson?.requestDelayMs??pace(s,kind));await measuredWait(requestSlotDelay(origin,delay),s,"pacingMs",kind)}
 async function guarded(url,s){const started=clock.now();try{return await allowed(url,s)}finally{add("urlGuardMs",started)}}
 async function retryWait(ms,s,kind){metrics.retries++;await measuredWait(ms,s,"backoffMs",kind)}
 // RFC 9309 robots.txt. Group selection by user-agent, then longest-matching rule wins
@@ -179,11 +189,11 @@ async function robotsPolicy(s,origin){const key=`${s.__runId}|${origin}`;if(robo
   else if(/HTTP 5\d\d/.test(m))throw Error("robots_denied: robots.txt unreachable (server error); refusing to crawl",{cause:e});
   else throw e}
  robotsCache.set(key,rules);return rules}
-async function get(url,s,redirects=0,request={},skipRobots=false){let last;const kind=kindFor(s,request),kindMetrics=metrics.requestsByKind[kind];for(let i=0;i<=R;i++)try{cancelledError(s.__runId);const safe=await guarded(url,s);if(!skipRobots&&!s.robotsOverride){const rules=await robotsPolicy(s,`${safe.protocol}//${safe.host}`);if(!robotsAllows(rules,`${safe.pathname}${safe.search}`))throw Error("robots_denied")}await waitForRequest(safe,s,kind);counters.requests++;kindMetrics.count++;const headers={"user-agent":"JobScraper/1.0 local personal use",...scopedHeaders(await requestHeaders(s),safe,s.baseUrl),...scopedHeaders(request.headers,safe,request.headerOrigin||safe)};const cookies=cookieHeader(s.__sessionCookies||[],safe,s.baseUrl);if(cookies&&!headers.cookie)headers.cookie=cookies;const fetchStarted=clock.now();let r;try{r=await fetch(safe,{redirect:"manual",method:request.method||"GET",headers,body:request.rawBody!==undefined?request.rawBody:request.body===undefined?undefined:JSON.stringify(request.body),signal:AbortSignal.timeout(30000)})}finally{const elapsed=add("responseMs",fetchStarted);kindMetrics.responseMs+=elapsed}if([301,302,303,307,308].includes(r.status)){metrics.redirects++;if(redirects>=10)throw Error("network_error: too many redirects");const next=r.headers.get("location");if(!next)throw Error("network_error: redirect missing location");await r.body?.cancel();return get(new URL(next,safe).toString(),s,redirects+1,{...([307,308].includes(r.status)?request:{headers:request.headers,metricKind:kind}),headerOrigin:request.headerOrigin||safe.origin},skipRobots)}
+async function get(url,s,redirects=0,request={},skipRobots=false){let last,limited=0;const kind=kindFor(s,request),kindMetrics=metrics.requestsByKind[kind];for(let i=0;i<=R;i++)try{cancelledError(s.__runId);const safe=await guarded(url,s);if(!skipRobots&&!s.robotsOverride){const rules=await robotsPolicy(s,`${safe.protocol}//${safe.host}`);if(!robotsAllows(rules,`${safe.pathname}${safe.search}`))throw Error("robots_denied")}await waitForRequest(safe,s,kind);counters.requests++;kindMetrics.count++;const headers={"user-agent":"JobScraper/1.0 local personal use",...scopedHeaders(await requestHeaders(s),safe,s.baseUrl),...scopedHeaders(request.headers,safe,request.headerOrigin||safe)};const cookies=cookieHeader(s.__sessionCookies||[],safe,s.baseUrl);if(cookies&&!headers.cookie)headers.cookie=cookies;const fetchStarted=clock.now();let r;try{r=await fetch(safe,{redirect:"manual",method:request.method||"GET",headers,body:request.rawBody!==undefined?request.rawBody:request.body===undefined?undefined:JSON.stringify(request.body),signal:AbortSignal.timeout(30000)})}finally{const elapsed=add("responseMs",fetchStarted);kindMetrics.responseMs+=elapsed}if([301,302,303,307,308].includes(r.status)){metrics.redirects++;if(redirects>=10)throw Error("network_error: too many redirects");const next=r.headers.get("location");if(!next)throw Error("network_error: redirect missing location");await r.body?.cancel();return get(new URL(next,safe).toString(),s,redirects+1,{...([307,308].includes(r.status)?request:{headers:request.headers,metricKind:kind}),headerOrigin:request.headerOrigin||safe.origin},skipRobots)}
  // Eightfold answers a burst with 403 rather than 429, so for sources that declare it a throttle
  // signal a 403 is retried with backoff before it is reported as an authentication wall.
  if(r.status===403&&s.configJson?.retryForbidden&&i<R){await retryWait(2000*(i+1),s,kind);continue}
- if([401,403].includes(r.status))throw Error("auth_required");if(r.status===429){if(i===R)throw Error(`rate_limited retry-after=${r.headers.get("retry-after")||"unknown"}`);await retryWait(retryAfterMs(r.headers.get("retry-after"),Date.now(),30_000)||500*(i+1),s,kind);continue}if(!r.ok){if(r.status>=500&&i<R){await retryWait(500*(i+1),s,kind);continue}throw Object.assign(Error(`network_error HTTP ${r.status}`),{noRetry:r.status>=400&&r.status<500&&r.status!==408})}checkHostDrift(safe,s);const bodyStarted=clock.now();let text;try{text=await r.text()}finally{const elapsed=add("bodyMs",bodyStarted);kindMetrics.bodyMs+=elapsed}return{text,type:r.headers.get("content-type")||"",url:safe.toString(),headers:r.headers}}catch(e){last=e;if(e.noRetry||/^(auth_required|rate_limited|robots_denied|cancelled)/.test(String(e.message||e))||i===R)throw e;await retryWait(500*(i+1),s,kind)}throw last}
+ if([401,403].includes(r.status))throw Error("auth_required");if(r.status===429){const after=r.headers.get("retry-after");await r.body?.cancel();if(limited>=RATE_RETRIES)throw Error(`rate_limited retry-after=${after||"unknown"}`);const slower=throttleOrigin(safe.origin,s.configJson?.requestDelayMs??pace(s,kind));emit("warning",s.__runId,{code:"rate_limited_backoff",message:`${safe.host} asked us to slow down; waiting before retrying, then reading one page every ${(slower/1000).toFixed(1)}s.`});await retryWait(s.configJson?.testNoDelay?Math.min(50,rateLimitWaitMs(after,limited)):rateLimitWaitMs(after,limited),s,kind);limited++;i--;continue}if(!r.ok){if(r.status>=500&&i<R){await retryWait(500*(i+1),s,kind);continue}throw Object.assign(Error(`network_error HTTP ${r.status}`),{noRetry:r.status>=400&&r.status<500&&r.status!==408})}checkHostDrift(safe,s);const bodyStarted=clock.now();let text;try{text=await r.text()}finally{const elapsed=add("bodyMs",bodyStarted);kindMetrics.bodyMs+=elapsed}return{text,type:r.headers.get("content-type")||"",url:safe.toString(),headers:r.headers}}catch(e){last=e;if(e.noRetry||/^(auth_required|rate_limited|robots_denied|cancelled)/.test(String(e.message||e))||i===R)throw e;await retryWait(500*(i+1),s,kind)}throw last}
 // Every fetched URL is now checked inside get(), including pagination and detail pages,
 // which the base-URL-only check used to miss entirely. This stays as an up-front gate so
 // a denied source fails before any listing request is issued.
@@ -474,12 +484,20 @@ const capped=max=>[`Stopped at the configured ${max}-page limit before the end o
 async function platformDirect(s){
   await robots(s)
   const cfg=s.configJson||{},max=cfg.maxPages||500
-  let state={},out=[],pages=0,complete=true,total=null,discovered=0,unstable=false;const identities=new Set()
+  let state={},out=[],pages=0,complete=true,total=null,discovered=0,unstable=false,emptyRetries=0;const identities=new Set()
   s.__requestHeaders=await requestHeaders(s)
   while(pages<max){
     const request=requestFor(s.adapterId,s.baseUrl,{...cfg,...state})
     const response=await get(request.url,s,0,{...request,metricKind:"listing"})
     const data=s.adapterId==="personio"?await parsePersonioXml(response.text):JSON.parse(response.text),items=collection(data,s)
+    // Eightfold also throttles with a 200 and an empty page. Taken at its word, that ended Qualcomm's
+    // read at 520 of 2,074 vacancies as if the board were done. Short of the published total, an
+    // empty page is the same "slow down" as a 429: wait, slow down, and ask for that page again.
+    if(s.adapterId==="eightfold"&&!(Array.isArray(items)&&items.length)&&total!==null&&discovered<total&&emptyRetries<RATE_RETRIES){
+      const origin=new URL(request.url).origin,slower=throttleOrigin(origin,cfg.requestDelayMs??pace(s,"listing"))
+      emit("warning",s.__runId,{code:"rate_limited_backoff",message:`${new URL(request.url).host} returned an empty page before its last vacancy; waiting, then reading one page every ${(slower/1000).toFixed(1)}s.`})
+      await retryWait(cfg.testNoDelay?50:rateLimitWaitMs(null,emptyRetries),s,"listing");emptyRetries++;continue}
+    emptyRetries=0
     // Ashby publishes the entire board without a count. Only this family can use its array
     // length as an exact total; a page from another family must never stand in for its board.
     const reported=s.adapterId==="workday"?workdayTotal(data,cfg):boardTotal(data),before=identities.size

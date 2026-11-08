@@ -9,7 +9,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "microchiphr"
     },
     "name": "Microchip"
@@ -24,7 +24,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "analogdevices"
     },
     "name": "Analog Devices"
@@ -39,7 +39,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External_Career",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "broadcom"
     },
     "name": "Broadcom"
@@ -54,7 +54,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "intel"
     },
     "name": "Intel"
@@ -69,7 +69,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "MarvellCareers",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "marvell"
     },
     "name": "Marvell"
@@ -87,7 +87,7 @@
       "requestDelayMs": 400,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "STMicroelectronics"
   },
@@ -103,7 +103,7 @@
       "site": "NVIDIAExternalCareerSite",
       "splitFacet": "jobFamilyGroup",
       "splitThreshold": 2000,
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "nvidia"
     },
     "name": "NVIDIA"
@@ -121,7 +121,7 @@
       "requestDelayMs": 400,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "GlobalFoundries"
   },
@@ -135,7 +135,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "micron"
     },
     "name": "Micron"
@@ -153,7 +153,8 @@
       "requestDelayMs": 400,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "sortBy": "timestamp",
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Qualcomm"
   },
@@ -166,7 +167,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Arm"
   },
@@ -179,7 +180,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "AMD"
   },
@@ -192,7 +193,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Cisco"
   },
@@ -207,7 +208,7 @@
       "mode": "direct",
       "requestDelayMs": 250,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Apple"
   },
@@ -220,7 +221,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "MediaTek"
   },
@@ -232,7 +233,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "u-blox"
   },
@@ -245,7 +246,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Google"
   },
@@ -257,7 +258,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "SK hynix"
   },
@@ -271,7 +272,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "careers",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "nxp"
     },
     "name": "NXP"
@@ -289,7 +290,7 @@
       "requestDelayMs": 400,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Ericsson"
   },
@@ -303,7 +304,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "MPS_Careers",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "monolithicpower"
     },
     "name": "Monolithic Power Systems"
@@ -321,7 +322,7 @@
       "requestDelayMs": 400,
       "retryForbidden": true,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Infineon"
   },
@@ -334,7 +335,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "tenstorrent"
     },
     "name": "Tenstorrent"
@@ -348,7 +349,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "graphcore"
     },
     "name": "Graphcore"
@@ -363,7 +364,7 @@
       "mode": "direct",
       "schemaVersion": "1.1.0",
       "site": "External_Careers",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "cadence"
     },
     "name": "Cadence"
@@ -377,7 +378,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Synopsys"
   },
@@ -401,7 +402,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "TEKEVER"
   },
@@ -423,7 +424,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "urlTemplate": "https://careers.pageuppeople.com/774/cw/en/jobs.json"
     },
     "name": "Imagination Technologies"
@@ -448,7 +449,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "SiPearl"
   },
@@ -472,7 +473,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Nordic Semiconductor"
   },
@@ -486,7 +487,7 @@
       "mode": "direct",
       "requestDelayMs": 1000,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "cirrus"
     },
     "name": "Cirrus Logic"
@@ -500,7 +501,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Renesas"
   },
@@ -513,7 +514,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Siemens"
   },
@@ -526,7 +527,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Rambus"
   },
@@ -550,7 +551,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Semidynamics"
   },
@@ -563,7 +564,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "fractile"
     },
     "name": "Fractile"
@@ -577,7 +578,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "arago"
     },
     "name": "Arago"
@@ -591,7 +592,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "riverlane"
     },
     "name": "Riverlane"
@@ -605,7 +606,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "bayasystems"
     },
     "name": "Baya Systems"
@@ -619,7 +620,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "olix"
     },
     "name": "Olix"
@@ -644,7 +645,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Dolphin Semiconductor"
   },
@@ -668,7 +669,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Prophesee"
   },
@@ -692,7 +693,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Pragmatic Semiconductor"
   },
@@ -705,7 +706,7 @@
       "maxPages": 5,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "axiomise"
     },
     "name": "Axiomise"
@@ -719,7 +720,7 @@
       "maxPages": 5,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "raspberrypi"
     },
     "name": "Raspberry Pi"
@@ -733,7 +734,7 @@
       "maxPages": 5,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "codasip"
     },
     "name": "Codasip"
@@ -747,7 +748,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Openchip"
   },
@@ -760,7 +761,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Racyics"
   },
@@ -773,7 +774,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Arteris"
   },
@@ -788,7 +789,7 @@
       "query": "Portugal",
       "schemaVersion": "1.1.0",
       "site": "AccentureCareers",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "accenture"
     },
     "name": "Accenture (Portugal)"
@@ -802,7 +803,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "act digital"
   },
@@ -815,7 +816,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "airapps"
     },
     "name": "Air Apps"
@@ -831,7 +832,7 @@
       "query": "Portugal",
       "schemaVersion": "1.1.0",
       "site": "Airbus",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "ag"
     },
     "name": "Airbus (Portugal)"
@@ -847,7 +848,7 @@
       "query": "Portugal",
       "schemaVersion": "1.1.0",
       "site": "bitsight",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "bitsight"
     },
     "name": "Bitsight (Portugal)"
@@ -861,7 +862,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Bosch (Portugal)"
   },
@@ -885,7 +886,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Celfocus"
   },
@@ -898,7 +899,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "datacamp"
     },
     "name": "DataCamp"
@@ -912,7 +913,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "DBServices Portugal"
   },
@@ -925,7 +926,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Devoteam"
   },
@@ -938,7 +939,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "emma-sleep"
     },
     "name": "Emma Sleep"
@@ -952,7 +953,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "farfetch"
     },
     "name": "Farfetch (Ashby)"
@@ -966,7 +967,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "farfetch"
     },
     "name": "Farfetch (Lever)"
@@ -980,7 +981,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "feedzai"
     },
     "name": "Feedzai"
@@ -994,7 +995,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "pnlfin"
     },
     "name": "Finom"
@@ -1008,7 +1009,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "flix"
     },
     "name": "Flix"
@@ -1033,7 +1034,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Hiire"
   },
@@ -1046,7 +1047,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "iLoF"
   },
@@ -1059,7 +1060,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Inetum"
   },
@@ -1074,7 +1075,7 @@
       "query": "Portugal",
       "schemaVersion": "1.1.0",
       "site": "IQVIA",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "iqvia"
     },
     "name": "IQVIA (Portugal)"
@@ -1097,7 +1098,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Mercedes-Benz.io"
   },
@@ -1119,7 +1120,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Metyis"
   },
@@ -1132,7 +1133,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Natixis in Portugal"
   },
@@ -1145,7 +1146,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "olx"
     },
     "name": "OLX"
@@ -1159,7 +1160,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "pagerduty"
     },
     "name": "PagerDuty"
@@ -1175,7 +1176,7 @@
       "query": "Portugal",
       "schemaVersion": "1.1.0",
       "site": "SantanderCareers",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "tenant": "santander"
     },
     "name": "Santander (Portugal)"
@@ -1189,7 +1190,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "superhuman platform inc"
     },
     "name": "Superhuman"
@@ -1203,7 +1204,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "swordhealth"
     },
     "name": "Sword Health"
@@ -1217,7 +1218,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "talkdesk2"
     },
     "name": "Talkdesk"
@@ -1231,7 +1232,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "thorit"
     },
     "name": "Thorit"
@@ -1254,7 +1255,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "TransPerfect (Unbabel)"
   },
@@ -1267,7 +1268,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Ubiwhere"
   },
@@ -1280,7 +1281,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "veeva"
     },
     "name": "Veeva Systems"
@@ -1294,7 +1295,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "vwgds"
     },
     "name": "Volkswagen Digital Solutions"
@@ -1319,7 +1320,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Axians Portugal"
   },
@@ -1343,7 +1344,7 @@
       "pageParam": "page",
       "pageStart": 1,
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "BearingPoint Portugal"
   },
@@ -1356,7 +1357,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "gocardless"
     },
     "name": "GoCardless"
@@ -1370,7 +1371,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "indiciumai"
     },
     "name": "Indicium AI"
@@ -1392,7 +1393,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Critical Software"
   },
@@ -1405,7 +1406,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "SIXT (Portugal)"
   },
@@ -1418,7 +1419,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "zego"
     },
     "name": "Zego"
@@ -1432,7 +1433,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "token": "lokainc"
     },
     "name": "Loka"
@@ -1454,7 +1455,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "Intermedia"
   },
@@ -1476,7 +1477,7 @@
       "maxPages": 500,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1"
+      "starterPackVersion": "2026-11-07.3"
     },
     "name": "IG&H Portugal"
   },
@@ -1492,7 +1493,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "titleXPath": "./name",
       "urlXPath": "concat('https://mobilab-solutions-gmbh.jobs.personio.com/job/', ./id, '?language=en')"
     },
@@ -1510,7 +1511,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "titleSelector": "h3",
       "urlSelector": "a[href^=\"/jobs/\"]"
     },
@@ -1526,10 +1527,11 @@
       "expectedHost": "www.itjobs.pt",
       "itemSelector": "ul.listing > li",
       "locationSelector": ".list-details",
-      "maxPages": 1,
+      "maxPages": 50,
       "mode": "direct",
+      "nextSelector": "ul.pagination li.last a",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "titleSelector": "a.title",
       "urlSelector": "a.title"
     },
@@ -1548,7 +1550,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "titleSelector": ".lj-jobcard-static__link",
       "urlSelector": ".lj-jobcard-static__link"
     },
@@ -1567,7 +1569,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "titleSelector": ".lj-jobcard-static__link",
       "urlSelector": ".lj-jobcard-static__link"
     },
@@ -1586,7 +1588,7 @@
       "maxPages": 1,
       "mode": "direct",
       "schemaVersion": "1.1.0",
-      "starterPackVersion": "2026-11-07.1",
+      "starterPackVersion": "2026-11-07.3",
       "titleSelector": ".lj-jobcard-static__link",
       "urlSelector": ".lj-jobcard-static__link"
     },

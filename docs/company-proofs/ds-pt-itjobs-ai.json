@@ -3,31 +3,32 @@
   "name": "ITJobs.pt - AI",
   "level": "full",
   "ok": true,
-  "startedAt": "2026-10-30T21:53:36.987Z",
-  "finishedAt": "2026-10-30T21:53:48.338Z",
+  "startedAt": "2026-11-07T22:30:26.226Z",
+  "finishedAt": "2026-11-07T22:30:39.986Z",
   "source": {
-    "id": "itjobs-ai",
+    "id": "00000000-0000-4000-8000-00000000019c",
     "name": "ITJobs.pt - AI",
     "baseUrl": "https://www.itjobs.pt/emprego/ai",
     "adapterId": "static-css",
+    "kind": "active",
+    "robotsOverride": true,
+    "allowPrivateNetwork": false,
     "configJson": {
       "itemSelector": "ul.listing > li",
       "titleSelector": "a.title",
       "urlSelector": "a.title",
       "companySelector": ".list-name a",
       "locationSelector": ".list-details",
-      "maxPages": 1,
+      "nextSelector": "ul.pagination li.last a",
+      "maxPages": 50,
       "expectedHost": "www.itjobs.pt",
       "detailSelector": ".content-block"
-    },
-    "kind": "active",
-    "robotsOverride": false,
-    "allowPrivateNetwork": false
+    }
   },
   "codeHashes": {
-    "worker.mjs": "51bf60178fa12cdd3a7177cda53152b1f870aac7da119f333b5dc8a6cf15d9fb",
-    "adapters.mjs": "043038f995d00f152c0b9b5019bc476b37ac69d6c0fabfcda982419ebe89870f",
-    "company-adapters.mjs": "fd17dc6b69336d89379bb5c650d6457bfa6c1e4e9794d6157492f05fa60acc33",
+    "worker.mjs": "bd466999ba18fd599ce7762398cfc76560ea8c23c02223ca249c65748057e8cf",
+    "adapters.mjs": "d4917dde288c2934b4072e28b219a911659d79ef5f6d5c95343dbc2eb3e08375",
+    "company-adapters.mjs": "e3a825478d014e16e024b3412fc493f97fef8612072577a825099d9ba3cb30bc",
     "request-policy.mjs": "10f89849bf692c6b6c8c9cf67369d37888d4e8a9725f0cf3cd7fdf8e6f7ee697",
     "browser-proxy.mjs": "ecd0ad4957f58e7bf42840c3a35c1725f4f9d8fa28b96a710d815521b6d8d13f"
   },
@@ -35,50 +36,50 @@
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "itjobs-ai",
+      "runId": "00000000-0000-4000-8000-00000000019c",
       "payload": {
         "command": "scrape_source",
         "complete": true,
-        "discovered": 16,
-        "persisted": 16,
+        "discovered": 69,
+        "persisted": 69,
         "skipped": 0,
         "filtered": 0,
-        "requests": 2,
-        "boardTotal": 16,
+        "requests": 5,
+        "boardTotal": 69,
         "boardTotalExact": true,
         "mode": "direct",
         "warnings": [],
-        "timingMs": 3422,
-        "pages": 1,
+        "timingMs": 10845,
+        "pages": 5,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 3422,
+            "totalMs": 10845,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 11,
-              "pacing": 2708,
+              "urlGuard": 12,
+              "pacing": 8857,
               "backoff": 0,
-              "response": 462,
-              "body": 12,
+              "response": 1669,
+              "body": 17,
               "browser": 0,
-              "adapterOther": 228,
-              "emit": 0
+              "adapterOther": 287,
+              "emit": 1
             },
             "requestsByKind": {
               "robots": {
-                "count": 1,
+                "count": 0,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 161,
-                "bodyMs": 7
+                "responseMs": 0,
+                "bodyMs": 0
               },
               "listing": {
-                "count": 1,
-                "pacingMs": 2708,
+                "count": 5,
+                "pacingMs": 8857,
                 "backoffMs": 0,
-                "responseMs": 301,
-                "bodyMs": 5
+                "responseMs": 1669,
+                "bodyMs": 17
               },
               "detail": {
                 "count": 0,
@@ -115,80 +116,85 @@
         }
       }
     },
-    "jobs": 16,
-    "uniqueIdentities": 16,
-    "uniqueHashes": 16,
+    "jobs": 69,
+    "uniqueIdentities": 69,
+    "uniqueHashes": 69,
     "samples": [
       {
-        "externalId": "0625c7bcbc06b6f23b66c261793eed3b0fe43c0ea0a66ac463578eb5f0254521",
-        "title": "AI Engineer (Generative AI Specialist)",
+        "externalId": "e429b4974f3112ae61d7acd4caa47f4233f4c440d6cf88022bab36da6d2e26c9",
+        "title": "Generative AI Engineer",
+        "company": "Frimarc - Indústria e Comércio",
+        "location": "Faro Presencial",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518729/generative-ai-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518729/generative-ai-engineer",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "a935f28ee865e0d053571cfc9773928b7d55f0fe6827b1f35bf48e5f2b72779b",
+        "title": "Data & AI Engineer",
+        "company": "IT House - Global Business Solutions",
+        "location": "Lisboa Híbrido",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518737/data-ai-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518737/data-ai-engineer",
+        "descriptionStatus": "pending",
+        "descriptionChars": 0
+      },
+      {
+        "externalId": "912d832619b5eac3c3e96bf2392cd889e7b86ea9ca61953b46a3c8a598899d02",
+        "title": "RPA Developer",
         "company": "Integer Consulting",
-        "location": "Híbrido",
+        "location": "Remoto",
         "postedAt": null,
-        "canonicalUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
-        "applyUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
-        "descriptionStatus": "pending",
-        "descriptionChars": 0
-      },
-      {
-        "externalId": "5de350fe8e41d9bdad267b8b68c9f8600a420adb0f092d5676ddb77463a743b2",
-        "title": "Machine Learning Engineer",
-        "company": "Neotalent Conclusion",
-        "location": "Lisboa, Porto Híbrido",
-        "postedAt": null,
-        "canonicalUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
-        "applyUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
-        "descriptionStatus": "pending",
-        "descriptionChars": 0
-      },
-      {
-        "externalId": "401cbff36ef2687267f2d90993f368e41719746a6474146e4ebe95dc016957e1",
-        "title": "Senior AI Solution Engineer",
-        "company": "team.it",
-        "location": "Porto Presencial",
-        "postedAt": null,
-        "canonicalUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
-        "applyUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518193/rpa-developer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518193/rpa-developer",
         "descriptionStatus": "pending",
         "descriptionChars": 0
       }
     ],
-    "warnings": []
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
   },
   "details": {
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "itjobs-ai",
+      "runId": "00000000-0000-4000-8000-00000000019c",
       "payload": {
         "completed": 3,
         "failed": 0,
         "complete": true,
         "mode": "enrichment",
-        "requests": 4,
-        "timingMs": 4354,
+        "requests": 3,
+        "timingMs": 1705,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 4354,
+            "totalMs": 1705,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 12,
-              "pacing": 3462,
+              "urlGuard": 10,
+              "pacing": 884,
               "backoff": 0,
-              "response": 617,
-              "body": 14,
+              "response": 593,
+              "body": 13,
               "browser": 0,
-              "adapterOther": 247,
+              "adapterOther": 205,
               "emit": 0
             },
             "requestsByKind": {
               "robots": {
-                "count": 1,
+                "count": 0,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 147,
-                "bodyMs": 6
+                "responseMs": 0,
+                "bodyMs": 0
               },
               "listing": {
                 "count": 0,
@@ -199,10 +205,10 @@
               },
               "detail": {
                 "count": 3,
-                "pacingMs": 3462,
+                "pacingMs": 884,
                 "backoffMs": 0,
-                "responseMs": 470,
-                "bodyMs": 8
+                "responseMs": 593,
+                "bodyMs": 13
               },
               "token": {
                 "count": 0,
@@ -234,87 +240,92 @@
     },
     "samples": [
       {
-        "externalId": "0625c7bcbc06b6f23b66c261793eed3b0fe43c0ea0a66ac463578eb5f0254521",
-        "title": "AI Engineer (Generative AI Specialist)",
+        "externalId": "e429b4974f3112ae61d7acd4caa47f4233f4c440d6cf88022bab36da6d2e26c9",
+        "title": "Generative AI Engineer",
+        "company": "Frimarc - Indústria e Comércio",
+        "location": "Faro Presencial",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518729/generative-ai-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518729/generative-ai-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 3834
+      },
+      {
+        "externalId": "a935f28ee865e0d053571cfc9773928b7d55f0fe6827b1f35bf48e5f2b72779b",
+        "title": "Data & AI Engineer",
+        "company": "IT House - Global Business Solutions",
+        "location": "Lisboa Híbrido",
+        "postedAt": null,
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518737/data-ai-engineer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518737/data-ai-engineer",
+        "descriptionStatus": "complete",
+        "descriptionChars": 1199
+      },
+      {
+        "externalId": "912d832619b5eac3c3e96bf2392cd889e7b86ea9ca61953b46a3c8a598899d02",
+        "title": "RPA Developer",
         "company": "Integer Consulting",
-        "location": "Híbrido",
+        "location": "Remoto",
         "postedAt": null,
-        "canonicalUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
-        "applyUrl": "https://www.itjobs.pt/oferta/517258/ai-engineer-generative-ai-specialist",
+        "canonicalUrl": "https://www.itjobs.pt/oferta/518193/rpa-developer",
+        "applyUrl": "https://www.itjobs.pt/oferta/518193/rpa-developer",
         "descriptionStatus": "complete",
-        "descriptionChars": 1626
-      },
-      {
-        "externalId": "5de350fe8e41d9bdad267b8b68c9f8600a420adb0f092d5676ddb77463a743b2",
-        "title": "Machine Learning Engineer",
-        "company": "Neotalent Conclusion",
-        "location": "Lisboa, Porto Híbrido",
-        "postedAt": null,
-        "canonicalUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
-        "applyUrl": "https://www.itjobs.pt/oferta/516925/machine-learning-engineer",
-        "descriptionStatus": "complete",
-        "descriptionChars": 3518
-      },
-      {
-        "externalId": "401cbff36ef2687267f2d90993f368e41719746a6474146e4ebe95dc016957e1",
-        "title": "Senior AI Solution Engineer",
-        "company": "team.it",
-        "location": "Porto Presencial",
-        "postedAt": null,
-        "canonicalUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
-        "applyUrl": "https://www.itjobs.pt/oferta/518039/senior-ai-solution-engineer",
-        "descriptionStatus": "complete",
-        "descriptionChars": 4288
+        "descriptionChars": 1578
       }
     ],
-    "warnings": []
+    "warnings": [
+      {
+        "code": "robots_override",
+        "message": "Saved per-source robots override is active."
+      }
+    ]
   },
   "warm": {
     "terminal": {
       "protocolVersion": 1,
       "event": "completed",
-      "runId": "itjobs-ai",
+      "runId": "00000000-0000-4000-8000-00000000019c",
       "payload": {
         "complete": true,
         "mode": "check",
-        "boardTotal": 16,
-        "boardTotalExact": true,
+        "boardTotal": null,
+        "boardTotalExact": false,
         "fresh": 0,
         "discovered": 16,
-        "requests": 2,
+        "requests": 1,
         "skipped": 16,
         "filtered": 0,
         "warnings": [],
-        "timingMs": 2931,
+        "timingMs": 611,
         "performance": {
           "version": 1,
           "worker": {
-            "totalMs": 2931,
+            "totalMs": 611,
             "bucketsMs": {
               "setup": 1,
-              "urlGuard": 11,
-              "pacing": 2194,
+              "urlGuard": 7,
+              "pacing": 0,
               "backoff": 0,
-              "response": 480,
-              "body": 11,
+              "response": 398,
+              "body": 9,
               "browser": 0,
-              "adapterOther": 234,
+              "adapterOther": 196,
               "emit": 0
             },
             "requestsByKind": {
               "robots": {
-                "count": 1,
+                "count": 0,
                 "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 152,
-                "bodyMs": 7
+                "responseMs": 0,
+                "bodyMs": 0
               },
               "listing": {
                 "count": 1,
-                "pacingMs": 2194,
+                "pacingMs": 0,
                 "backoffMs": 0,
-                "responseMs": 328,
-                "bodyMs": 4
+                "responseMs": 398,
+                "bodyMs": 9
               },
               "detail": {
                 "count": 0,

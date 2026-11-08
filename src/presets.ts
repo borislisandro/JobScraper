@@ -9,6 +9,16 @@ import { DEFAULT_POSTED_WINDOW, type JobFilter } from "./api";
 export const PRESETS_KEY = "jobs.savedViews";
 /// The filter as it was when the page was last used, kept so it is still there on the next launch.
 export const ACTIVE_FILTER_KEY = "jobs.activeFilter";
+/// Each profile is its own job search, so the filter the Jobs page was left on, the saved views and what
+/// counts as new are kept per profile: switching profile opens the other search exactly as it was left.
+/// "All profiles" (an empty profile) keeps the original keys.
+export const profileKey = (key: string, profile: string) => (profile ? `${key}.${profile}` : key);
+/// A profile that has never stored a value of its own starts from the one every profile shared before they
+/// were kept apart, so nothing set up earlier is lost. Its first save makes it independent.
+export async function readProfileSetting(read: (key: string) => Promise<string | null>, key: string, profile: string) {
+  const own = await read(profileKey(key, profile));
+  return own ?? (profile ? read(key) : null);
+}
 /// Neither the source ticks nor the triage toggles belong to a view. Source ids go stale as boards
 /// come and go, and whether dismissed rows show — or what counts as new — is where you are in
 /// today's reading, not what you were looking for.

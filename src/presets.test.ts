@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describePreset, parseActiveFilter, parsePresets, presetFrom, serializeActiveFilter, withoutPreset, withPreset } from "./presets";
+import { describePreset, parseActiveFilter, parsePresets, presetFrom, profileKey, readProfileSetting, serializeActiveFilter, withoutPreset, withPreset } from "./presets";
 import type { JobFilter } from "./api";
 
 const filter: JobFilter = {
@@ -71,5 +71,21 @@ describe("the last-used filter", () => {
     expect(view).toMatchObject({ title: "", countries: ["PT"], sort: "recent", savedOnly: false });
     // No window stored is not "any time": it is the default year.
     expect(view?.postedWithinDays).toBe(365);
+  });
+});
+
+describe("per-profile settings", () => {
+  it("keeps each profile under its own key and 'All profiles' under the original one", () => {
+    expect(profileKey("jobs.activeFilter", "semiconductor")).toBe("jobs.activeFilter.semiconductor");
+    expect(profileKey("jobs.activeFilter", "data-science")).toBe("jobs.activeFilter.data-science");
+    expect(profileKey("jobs.activeFilter", "")).toBe("jobs.activeFilter");
+  });
+  it("reads a profile's own value, and starts a profile with none from the shared one", async () => {
+    const stored: Record<string, string> = { "jobs.activeFilter": "shared", "jobs.activeFilter.semiconductor": "chips" };
+    const read = async (key: string) => stored[key] ?? null;
+    expect(await readProfileSetting(read, "jobs.activeFilter", "semiconductor")).toBe("chips");
+    expect(await readProfileSetting(read, "jobs.activeFilter", "data-science")).toBe("shared");
+    expect(await readProfileSetting(read, "jobs.activeFilter", "")).toBe("shared");
+    expect(await readProfileSetting(read, "jobs.savedViews", "data-science")).toBeNull();
   });
 });

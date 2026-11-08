@@ -12,10 +12,7 @@ mod startup;
 use db::Database;
 use notifications::{current_scheduler, run_scheduler_blocking, Scheduler};
 use startup::Startup;
-use std::{
-    path::PathBuf,
-    sync::{Arc, Mutex},
-};
+use std::{path::PathBuf, sync::Arc};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -27,7 +24,6 @@ use uuid::Uuid;
 pub struct AppState {
     pub db: Database,
     pub sidecars: sidecar::SidecarManager,
-    pub shown_apply_attempt: Mutex<Option<String>>,
     pub automatic_sync_started: std::sync::atomic::AtomicBool,
     pub headless: bool,
 }
@@ -240,7 +236,6 @@ pub fn run() {
             let state = Arc::new(AppState {
                 db,
                 sidecars: sidecar::SidecarManager::default(),
-                shown_apply_attempt: Mutex::new(None),
                 automatic_sync_started: std::sync::atomic::AtomicBool::new(false),
                 headless,
             });
@@ -289,6 +284,7 @@ pub fn run() {
             db::merge_duplicate_jobs,
             db::unmerge_duplicate_jobs,
             db::list_jobs,
+            db::count_jobs,
             db::job_countries,
             db::set_job_dismissed,
             db::new_since,
@@ -306,8 +302,6 @@ pub fn run() {
             db::transition_application,
             db::record_apply_decision,
             db::open_apply,
-            db::pending_apply_confirmation,
-            db::confirm_application,
             db::delete_application,
             db::reconcile_reminders,
             db::list_interviews,
@@ -364,20 +358,6 @@ pub fn run() {
                 if let Some(state) = app.try_state::<Arc<AppState>>() {
                     state.sidecars.cancel_all();
                 }
-            }
-            tauri::RunEvent::WindowEvent {
-                label,
-                event: tauri::WindowEvent::Focused(true),
-                ..
-            } if label == "main" => {
-                let app = app.clone();
-                let Some(state) = app.try_state::<Arc<AppState>>() else {
-                    return;
-                };
-                let state = state.inner().clone();
-                tauri::async_runtime::spawn(async move {
-                    let _ = db::emit_apply_confirmation_on_focus(&app, &state).await;
-                });
             }
             _ => {}
         });

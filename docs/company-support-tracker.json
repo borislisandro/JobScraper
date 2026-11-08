@@ -5971,7 +5971,7 @@
       "evidence": [
         "company-proofs/ds-pt-itjobs-ai.json"
       ],
-      "notes": "Portugal data/AI employer; 16 rows on the board at proof time.",
+      "notes": "Portugal data/AI employer. The board is paged 16 to a page; the first admission read only page 1 (16 of 69). Since 2026-11-07 the source follows the pager's next link (69 rows, 5 pages).",
       "nextAction": "Complete; revalidate if this employer changes its board.",
       "batch": "ds-portugal",
       "inScope": true

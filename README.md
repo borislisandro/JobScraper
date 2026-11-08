@@ -8,11 +8,11 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 
 **Collect** — Scrapes every enabled source on launch, or hidden at sign-in and every 4 hours via Task Scheduler (Windows) or a systemd user timer (Linux), with one desktop notification per run that finds something new. Incremental checks keep updates light; descriptions are fetched only when a job is opened. Results stream into the local database as they arrive, so cancelled or partially failed runs still keep what they found. A vacancy is marked possibly closed after one full run misses it, closed after two.
 
-**Search** — Filter by source, title, listing text, posting age, country, application status, and closed status. Sort by discovery or publish date, page through results, and open a reader view with description, work mode, seniority, salary, and status. Saved and applied jobs survive their source being disabled or deleted.
+**Search** — Filter by source, title, keywords, posting age, country, application status, and closed status, and keep the filters you use as named views. Sort by discovery or publish date, page through results, and open a reader view with description, work mode, seniority, salary, and status that moves with ← → (or j/k). Save, Apply and Not for me each offer Undo. A "new since you last looked" count follows the filters on screen. Saved and applied jobs survive their source being disabled or deleted.
 
-**Sources** — Add any of 164 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge, Google Chrome or Chromium, whichever is installed. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login, and filter titles during scraping so unwanted roles are never stored.
+**Sources** — Add any of 240 prepared companies in one click, or paste a careers URL and let the detector find the ATS, JSON endpoint, feed, or repeating HTML. JavaScript-only pages render through Microsoft Edge, Google Chrome or Chromium, whichever is installed. Test a source before trusting it, configure CSS/XPath/JSON/feed/ATS/Playwright adapters by hand, capture a browser session for sites needing login (Edit on the source's row), and filter titles during scraping — separately for each profile — so unwanted roles are never stored.
 
-**Applications** — Board with Saved, Applied, Screening, Interviewing, Offer, Accepted, Rejected, and Withdrawn stages. Stores recruiter details, notes with timestamps, an event timeline, and immutable document snapshots up to 20 MB. Schedules interview reminders (24 h and 1 h before) and ghosting reminders.
+**Applications** — A board with Saved, Applied and Rejected columns: mark a job applied once you have, rejected when it is over, or drag the card across, and search by title or company. Every stage change is kept as an event in the application's timeline.
 
 **Diagnostics** — Local health view for database, sources, listings, and sidecar; last 200 activity entries; scrape medians, p95, slowest phases, retries, and failures, exportable as JSON.
 
@@ -22,12 +22,13 @@ Not an auto-apply bot: it opens the original vacancy in your browser, records on
 
 ### Profiles
 
-A profile is a named set of catalog companies. Choosing one from the drop-down at the top of the Sources tab:
+A profile is a separate job search over a named set of catalog companies. Choosing one from the drop-down in the title bar (or from the buttons a new install opens on):
 
-- adds the profile's companies, switches them on, and reads the ones that have never been read;
-- when you switch from one profile to another, switches off the companies the first one turned on (their stored jobs stay) and leaves alone anything you switched on or added yourself, including companies added through Browse companies;
-- is remembered, and choosing the same profile again only adds what is new;
-- "No profile" forgets the choice and changes no source.
+- adds the profile's companies the first time, and reads the ones that have never been read;
+- shows only that profile's sources, jobs and applications on every tab, and updates read only its sources — switching switches nothing off and deletes nothing, so the other profile comes back exactly as it was;
+- keeps its own Jobs filters, saved views, "new since" mark, and collect and notification title filters;
+- is remembered across restarts;
+- "All profiles" shows every profile at once. A company added while all profiles are shown belongs to none of them.
 
 Browse companies keeps working under any profile, so a data-science profile can still follow Arm or Apple.
 
@@ -67,7 +68,7 @@ Rust owns persistence and rules; the Node worker owns untrusted web parsing and 
 
 ## Privacy
 
-No account, no cloud, no telemetry. Data lives in `%LOCALAPPDATA%\JobScraper` on Windows and `~/.local/share/JobScraper` on Linux (dev builds use `JobScraper-dev`). The UI's CSP blocks arbitrary requests; all network access is isolated in the sidecar, which blocks private/loopback/reserved targets, paces requests per origin, honors `Retry-After` and `robots.txt` (overridable per source), and encrypts captured browser sessions with AES-256-GCM keyed through the system credential store (Windows Credential Manager, or the Secret Service — GNOME Keyring or KWallet — on Linux).
+No account, no cloud, no telemetry. Data lives in `%LOCALAPPDATA%\JobScraper` on Windows and `~/.local/share/JobScraper` on Linux (dev builds use `JobScraper-dev`). The UI's CSP blocks arbitrary requests; all network access is isolated in the sidecar, which blocks private/loopback/reserved targets, paces requests per origin, honors `Retry-After` and `robots.txt` (overridable per source: catalog companies are added with the override on, and a manually added site that asks not to be read prompts once before the override applies), and encrypts captured browser sessions with AES-256-GCM keyed through the system credential store (Windows Credential Manager, or the Secret Service — GNOME Keyring or KWallet — on Linux).
 
 ## Install and build
 

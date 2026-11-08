@@ -334,3 +334,26 @@ test("Personio positions without an inline description defer to the vacancy page
  assert.equal(job.descriptionStatus,"complete");assert.match(job.descriptionText,/Architect the accelerator datapath/);assert.doesNotMatch(job.descriptionText,/Apply for this job/);
  const broken=await hostedRun("personio",{},{[url]:feed,[page]:"<html><body><main><div><div><h1>NPU</h1></div></div></main></body></html>"});assert.equal(broken.at(-1).event,"failed");
 });
+
+// Qualcomm's Eightfold board throttles with a 200 and an empty page as well as with 429. Reading that
+// as the end of the board stopped every read at about 520 of 2,074 vacancies.
+test("an Eightfold page that comes back empty before the published total is retried, not taken as the end",async()=>{
+ let emptied=0;
+ const fixture=createServer((req,res)=>{
+  const url=new URL(req.url,"http://fixture"),start=Number(url.searchParams.get("start"));
+  res.setHeader("content-type","application/json");
+  if(start===10&&emptied<2){emptied++;return res.end(JSON.stringify({data:{positions:[]}}))}
+  const positions=start>=25?[]:Array.from({length:Math.min(10,25-start)},(_,n)=>({id:1000+start+n,name:`Engineer ${start+n}`,positionUrl:`/careers/job/${1000+start+n}`,locations:["San Diego"]}));
+  res.end(JSON.stringify({data:{count:25,positions}}));
+ });
+ await new Promise(resolve=>fixture.listen(0,"127.0.0.1",resolve));
+ try{
+  const source={name:"Fixture",baseUrl:`http://127.0.0.1:${fixture.address().port}`,adapterId:"eightfold",kind:"active",allowPrivateNetwork:true,robotsOverride:true,configJson:{domain:"fixture.com",eightfoldApi:"pcsx",testNoDelay:true,maxPages:10}};
+  const events=await execute({protocolVersion:1,command:"scrape_source",runId:"empty-page",source,deferDetails:true});
+  const final=events.at(-1).payload;
+  assert.equal(emptied,2,"the empty page was asked for again");
+  assert.equal(events.filter(event=>event.event==="job").length,25);
+  assert.equal(final.complete,true,JSON.stringify(final.warnings));
+  assert.equal(events.filter(event=>event.payload?.code==="rate_limited_backoff").length,2);
+ }finally{await new Promise(resolve=>fixture.close(resolve))}
+});

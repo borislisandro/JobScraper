@@ -19,7 +19,7 @@ use std::{
     path::{Path, PathBuf},
     sync::{Arc, Mutex, OnceLock},
 };
-use tauri::{ipc::InvokeBody, Emitter, State};
+use tauri::{ipc::InvokeBody, State};
 use tauri_plugin_opener::OpenerExt;
 use url::Url;
 use uuid::Uuid;
@@ -442,6 +442,38 @@ pub const SCRAPE_TITLE_FILTER: &str = "scrape.titleAny";
 /// The setting holding the notification title filter. It narrows what the finished batch announces,
 /// never what it stores: everything the scrape filter let through is still on the Jobs page.
 pub const NOTIFY_TITLE_FILTER: &str = "notify.titleAny";
+/// Both title filters are kept per profile, as `<key>.<profile>`: a profile is a separate job search,
+/// and "verification" for a semiconductor search must not empty a data-science one. A profile that has
+/// never saved a value of its own uses the shared one, which is also the value "All profiles" edits —
+/// the same fallback the Jobs page's per-profile settings use.
+pub async fn source_filter_setting(
+    pool: &SqlitePool,
+    key: &str,
+    source_id: &str,
+) -> ApiResult<String> {
+    sqlx::query_scalar::<_, Option<String>>(
+        "SELECT coalesce((SELECT value FROM settings WHERE key=?||'.'||(SELECT profile_id FROM sources WHERE id=?)),(SELECT value FROM settings WHERE key=?))",
+    )
+    .bind(key)
+    .bind(source_id)
+    .bind(key)
+    .fetch_one(pool)
+    .await
+    .map(Option::unwrap_or_default)
+    .map_err(|e| e.to_string())
+}
+/// The same per-profile filter, for the profile that is active now: what a finished batch announces.
+pub async fn active_filter_setting(pool: &SqlitePool, key: &str) -> ApiResult<String> {
+    sqlx::query_scalar::<_, Option<String>>(
+        "SELECT coalesce((SELECT value FROM settings WHERE key=?||'.'||(SELECT value FROM settings WHERE key='profile.active')),(SELECT value FROM settings WHERE key=?))",
+    )
+    .bind(key)
+    .bind(key)
+    .fetch_one(pool)
+    .await
+    .map(Option::unwrap_or_default)
+    .map_err(|e| e.to_string())
+}
 /// Terms are separated by commas or newlines so a phrase ("design verification") stays one term.
 pub fn scrape_filter_terms(raw: &str) -> Vec<String> {
     raw.split(['\n', ','])
@@ -499,7 +531,10 @@ pub async fn purge_jobs(pool: &SqlitePool, confirmation: &str) -> ApiResult<Purg
     if confirmation.trim() != "Confirm" {
         return Err("Type Confirm to delete every stored job".into());
     }
-    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let deleted = sqlx::query(
         "DELETE FROM jobs WHERE NOT EXISTS(SELECT 1 FROM applications a WHERE a.job_id=jobs.id) AND NOT EXISTS(SELECT 1 FROM review_decisions r WHERE r.job_id=jobs.id)",
     )
@@ -814,6 +849,31 @@ where
     }
     operation().await
 }
+/// Keeps the query planner's picture of each table in step with its size. Statistics taken while
+/// the jobs table was empty (after a purge, or on a fresh install) said it held one row, and the
+/// planner answered every "is this job already stored?" lookup with a full scan from then on: 15ms
+/// a job at 30,000 rows, which held the write lock for seconds per batch. 0x10002 checks every
+/// table and re-analyzes only those that grew or shrank tenfold since they were last analyzed, so
+/// it is close to free when nothing changed, and as a table fills it is re-analyzed at roughly
+/// 10, 100, 1,000 and 10,000 rows. Best effort: a busy database just tries again next batch. The
+/// new numbers reach the rest of the pool as its connections are replaced (POOL_CONNECTION_LIFETIME).
+pub async fn refresh_planner_statistics(pool: &SqlitePool) {
+    let _ = sqlx::query("PRAGMA optimize=0x10002").execute(pool).await;
+}
+/// How every write transaction starts. A plain (deferred) BEGIN reads first and only asks for the
+/// write lock at its first write, and SQLite never waits for a lock it would have to upgrade to: it
+/// fails at once with "database is locked", whatever the busy timeout says. With several boards
+/// saving their jobs at the same time, that threw away every large read. IMMEDIATE takes the write
+/// lock up front, where the busy timeout applies, so concurrent writers queue instead of failing.
+pub const WRITE_TRANSACTION: &str = "BEGIN IMMEDIATE";
+/// How long a writer waits for another writer's transaction before giving up. Batches commit in
+/// well under a second; this only has to outlast a queue of them.
+const BUSY_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
+/// SQLite loads a table's statistics when a connection opens, and never again on that connection:
+/// an ANALYZE on one pooled connection left the other four planning with the old numbers. Opening
+/// a connection costs about a millisecond, so they are replaced every minute and fresh statistics
+/// reach every query within that time.
+const POOL_CONNECTION_LIFETIME: std::time::Duration = std::time::Duration::from_secs(60);
 impl Database {
     /// Builds the pool without touching the disk, so application startup can manage its state
     /// and paint a window before any I/O happens. Connecting and migrating is `prepare()`.
@@ -821,10 +881,12 @@ impl Database {
         let opts = SqliteConnectOptions::new()
             .filename(&path)
             .create_if_missing(true)
-            .foreign_keys(true);
+            .foreign_keys(true)
+            .busy_timeout(BUSY_TIMEOUT);
         Self {
             pool: SqlitePoolOptions::new()
                 .max_connections(5)
+                .max_lifetime(POOL_CONNECTION_LIFETIME)
                 .connect_lazy_with(opts),
             root: path.parent().unwrap_or(Path::new(".")).to_path_buf(),
         }
@@ -838,7 +900,7 @@ impl Database {
         retry_transient(|| self.prepare_once()).await
     }
     async fn prepare_once(&self) -> ApiResult<()> {
-        sqlx::query("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;")
+        sqlx::query("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;")
             .execute(&self.pool)
             .await
             .map_err(|e| e.to_string())?;
@@ -848,7 +910,7 @@ impl Database {
             .map_err(migration_error)?;
         // Fast, bounded planner maintenance after schema/index changes. It never rewrites user
         // rows or blocks startup with a whole-database VACUUM.
-        sqlx::query("PRAGMA optimize")
+        sqlx::query("PRAGMA optimize=0x10002")
             .execute(&self.pool)
             .await
             .map(|_| ())
@@ -862,7 +924,11 @@ impl Database {
         if sync_in_progress(&self.pool).await {
             return Ok(0);
         }
-        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
         sqlx::query(
             "DELETE FROM job_occurrences WHERE run_id IN (SELECT id FROM scrape_runs WHERE status='running')",
         )
@@ -1157,7 +1223,11 @@ impl Database {
         source_id: &str,
         payloads: &[serde_json::Value],
     ) -> ApiResult<PersistBatchResult> {
-        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
         let mut result = PersistBatchResult::default();
         for payload in payloads {
             if Self::persist_worker_job_in(&mut tx, run_id, source_id, payload).await? {
@@ -1167,6 +1237,7 @@ impl Database {
             }
         }
         tx.commit().await.map_err(|e| e.to_string())?;
+        refresh_planner_statistics(&self.pool).await;
         Ok(result)
     }
 
@@ -1315,7 +1386,11 @@ impl Database {
         source_id: &str,
         listing_hashes: &[String],
     ) -> ApiResult<u32> {
-        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
         let seen_at = now();
         let mut recorded = 0;
         let mut unique = std::collections::HashSet::new();
@@ -1377,7 +1452,11 @@ impl Database {
         source_id: &str,
         payloads: &[serde_json::Value],
     ) -> ApiResult<u64> {
-        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
         let checked_at = now();
         let mut written = 0;
         for payload in payloads {
@@ -1423,7 +1502,11 @@ impl Database {
         source_id: &str,
         payloads: &[serde_json::Value],
     ) -> ApiResult<u64> {
-        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
         let checked_at = now();
         let mut written = 0;
         for payload in payloads {
@@ -1477,7 +1560,11 @@ impl Database {
         if !complete {
             return Ok(());
         };
-        let mut tx = self.pool.begin().await.map_err(|e| e.to_string())?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
         sqlx::query("UPDATE jobs SET missing_full_runs=0,availability='active',updated_at=? WHERE source_id=? AND availability!='archived' AND id IN (SELECT job_id FROM job_occurrences WHERE run_id=?)").bind(now()).bind(source_id).bind(run_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
         sqlx::query("UPDATE jobs SET missing_full_runs=missing_full_runs+1,availability=CASE WHEN missing_full_runs+1>=2 THEN 'closed' ELSE 'possibly_closed' END,updated_at=? WHERE source_id=? AND availability NOT IN ('archived','closed') AND id NOT IN (SELECT job_id FROM job_occurrences WHERE run_id=?)").bind(now()).bind(source_id).bind(run_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
         // One occurrence row per job per run, never pruned, meant a full update added tens of
@@ -1514,7 +1601,7 @@ pub async fn list_company_catalog() -> ApiResult<Vec<CatalogCompany>> {
 }
 #[tauri::command]
 pub async fn list_sources(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Source>> {
-    sqlx::query_as::<_,Source>("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.deleted_at IS NULL ORDER BY s.name") .fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as::<_,Source>(&format!("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.deleted_at IS NULL AND {SOURCE_IN_PROFILE} ORDER BY s.name")).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn get_source_config(
@@ -1603,7 +1690,12 @@ pub async fn resolve_duplicate_conflict(
     if !["keep_canonical", "keep_alias", "retain_both_history"].contains(&resolution) {
         return Err("Resolution must keep_canonical, keep_alias, or retain_both_history".into());
     }
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let row=sqlx::query("SELECT a.canonical_job_id,a.merged_job_id,c.conflict_type,c.persona_id,c.canonical_snapshot_json,c.merged_snapshot_json,c.resolution,c.resolved_at FROM duplicate_merge_conflicts c JOIN duplicate_merge_audits a ON a.id=c.audit_id WHERE c.id=?").bind(&conflict_id).fetch_one(&mut *tx).await.map_err(|_|"Duplicate conflict was not found".to_string())?;
     if row.get::<Option<String>, _>(7).is_some() {
         if row.get::<String, _>(6) == resolution {
@@ -1702,7 +1794,12 @@ pub async fn merge_duplicate_jobs(
     canonical_job_id: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let pair=sqlx::query("SELECT left_job_id,right_job_id FROM duplicate_candidates WHERE id=? AND status='suggested'").bind(&candidate_id).fetch_one(&mut *tx).await.map_err(|_|"Duplicate candidate is not pending".to_string())?;
     let left: String = pair.get(0);
     let right: String = pair.get(1);
@@ -1767,7 +1864,12 @@ pub async fn unmerge_duplicate_jobs(
     merged_job_id: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let row=sqlx::query("SELECT id,snapshot_json FROM duplicate_merge_audits WHERE canonical_job_id=? AND merged_job_id=? AND undone_at IS NULL ORDER BY created_at DESC LIMIT 1").bind(&canonical_job_id).bind(&merged_job_id).fetch_one(&mut *tx).await.map_err(|_|"No active merge audit was found".to_string())?;
     let audit: String = row.get(0);
     let snapshot: serde_json::Value = serde_json::from_str(&row.get::<String, _>(1))
@@ -1909,24 +2011,47 @@ pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) ->
         return Err("Reference sources cannot be enabled for scraping".into());
     }
     let source_id = input.id.unwrap_or_else(id);
-    let followed: Vec<(String, String, String)> =
-        sqlx::query_as("SELECT id,name,base_url FROM sources WHERE deleted_at IS NULL AND id<>?")
-            .bind(&source_id)
-            .fetch_all(&state.db.pool)
-            .await
-            .map_err(|e| e.to_string())?;
-    if let Some((_, name, _)) = followed
+    let active = active_profile(&state.db.pool).await?;
+    let followed: Vec<(String, String, String, Option<String>)> = sqlx::query_as(
+        "SELECT id,name,base_url,profile_id FROM sources WHERE deleted_at IS NULL AND id<>?",
+    )
+    .bind(&source_id)
+    .fetch_all(&state.db.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    if let Some((_, name, _, owner)) = followed
         .iter()
-        .find(|(_, _, url)| same_board(url, &input.base_url))
+        .find(|(_, _, url, _)| same_board(url, &input.base_url))
     {
+        // The other copy may belong to a profile that is not showing, where the user cannot see it.
+        let elsewhere = owner
+            .as_deref()
+            .filter(|owner| active.as_deref().is_some_and(|active| active != *owner))
+            .map(|owner| {
+                let label = company_catalog()
+                    .profiles
+                    .iter()
+                    .find(|profile| profile.id == owner)
+                    .map_or(owner, |profile| profile.name.as_str());
+                format!(" in the {label} profile")
+            })
+            .unwrap_or_default();
         return Err(format!(
-            "That board is already followed as \"{name}\". Two sources on one address cannot both hold its jobs; edit or delete \"{name}\" instead."
+            "That board is already followed as \"{name}\"{elsewhere}. Two sources on one address cannot both hold its jobs; edit or delete \"{name}\" instead."
         ));
     }
+    // A new source joins the profile it is added in. With all profiles showing, a board the catalog places in a
+    // profile goes there; anything else belongs to none. Editing a source never moves it.
+    let owner = active.or_else(|| catalog_profile(&source_id, &input.base_url, &input.adapter_id));
     let t = now();
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
-    sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,robots_acknowledged_at,allow_private_network,created_at,updated_at) VALUES(?,?,?,?,?, ?,?,?, ?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,base_url=excluded.base_url,adapter_id=excluded.adapter_id,enabled=excluded.enabled,kind=excluded.kind,disabled_reason=excluded.disabled_reason,robots_override=excluded.robots_override,robots_acknowledged_at=excluded.robots_acknowledged_at,allow_private_network=excluded.allow_private_network,updated_at=excluded.updated_at")
-  .bind(&source_id).bind(&input.name).bind(&input.base_url).bind(&input.adapter_id).bind("1.0.0").bind(input.enabled).bind(&input.kind).bind(&input.disabled_reason).bind(input.robots_override).bind(if input.robots_override {Some(t.clone())} else {None}).bind(input.allow_private_network).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,robots_acknowledged_at,allow_private_network,created_at,updated_at,profile_id) VALUES(?,?,?,?,?, ?,?,?, ?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,base_url=excluded.base_url,adapter_id=excluded.adapter_id,enabled=excluded.enabled,kind=excluded.kind,disabled_reason=excluded.disabled_reason,robots_override=excluded.robots_override,robots_acknowledged_at=excluded.robots_acknowledged_at,allow_private_network=excluded.allow_private_network,updated_at=excluded.updated_at")
+  .bind(&source_id).bind(&input.name).bind(&input.base_url).bind(&input.adapter_id).bind("1.0.0").bind(input.enabled).bind(&input.kind).bind(&input.disabled_reason).bind(input.robots_override).bind(if input.robots_override {Some(t.clone())} else {None}).bind(input.allow_private_network).bind(&t).bind(&t).bind(&owner).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(source_id) DO UPDATE SET config_json=excluded.config_json,updated_at=excluded.updated_at").bind(id()).bind(&source_id).bind(input.config_json.to_string()).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
     sqlx::query_as("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.id=?").bind(source_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
@@ -2072,7 +2197,10 @@ pub async fn backfill_location_countries(pool: &SqlitePool) -> ApiResult<u64> {
         .await?;
         return Ok(0);
     }
-    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     for (id, location, url) in &rows {
         let codes = crate::locations::resolve(location.as_deref(), url.as_deref());
         sqlx::query("UPDATE jobs SET location_countries=? WHERE id=?")
@@ -2093,12 +2221,19 @@ pub async fn backfill_location_countries(pool: &SqlitePool) -> ApiResult<u64> {
     .await?;
     Ok(rows.len() as u64)
 }
-/// The profile the user last chose on the Sources tab. Absent means "no profile": the sources are whatever
-/// the user has added or switched on by hand.
+/// The profile the user is working in. Absent means "All profiles": every source, job and application at once.
 const PROFILE_ACTIVE: &str = "profile.active";
-/// Source IDs a profile switched on. Only these are switched off again when the user changes profile, so a
-/// company the user turned on or added themselves is never taken away by a profile change.
-const PROFILE_MANAGED: &str = "profile.managed";
+/// Present once every source and application an earlier version stored has been given its profile.
+const PROFILE_SCOPED: &str = "profile.scoped";
+/// The sources an earlier version switched on for a profile, so it could switch them off again when another one
+/// was chosen. Profiles no longer switch anything off, so this is only ever deleted.
+const LEGACY_PROFILE_MANAGED: &str = "profile.managed";
+/// SQL condition on a source aliased `s`: it belongs to the active profile, or no profile is active. Inlined
+/// rather than bound so every query that lists sources, jobs or reads boards can share it without re-plumbing
+/// its binds; it carries no user text.
+pub(crate) const SOURCE_IN_PROFILE: &str = "(NOT EXISTS (SELECT 1 FROM settings WHERE key='profile.active') OR s.profile_id=(SELECT value FROM settings WHERE key='profile.active'))";
+/// The same condition on an application aliased `a`.
+const APPLICATION_IN_PROFILE: &str = "(NOT EXISTS (SELECT 1 FROM settings WHERE key='profile.active') OR a.profile_id=(SELECT value FROM settings WHERE key='profile.active'))";
 async fn read_setting(pool: &SqlitePool, key: &str) -> ApiResult<Option<String>> {
     sqlx::query_scalar("SELECT value FROM settings WHERE key=?")
         .bind(key)
@@ -2106,48 +2241,40 @@ async fn read_setting(pool: &SqlitePool, key: &str) -> ApiResult<Option<String>>
         .await
         .map_err(|e| e.to_string())
 }
-async fn read_managed(pool: &SqlitePool) -> ApiResult<std::collections::BTreeSet<String>> {
-    Ok(read_setting(pool, PROFILE_MANAGED)
-        .await?
-        .and_then(|text| serde_json::from_str::<Vec<String>>(&text).ok())
-        .unwrap_or_default()
-        .into_iter()
-        .collect())
+/// The profile the user is working in, if it is one this version knows.
+async fn active_profile(pool: &SqlitePool) -> ApiResult<Option<String>> {
+    Ok(read_setting(pool, PROFILE_ACTIVE).await?.filter(|id| {
+        company_catalog()
+            .profiles
+            .iter()
+            .any(|profile| &profile.id == id)
+    }))
 }
-async fn write_managed(
-    pool: &SqlitePool,
-    managed: &std::collections::BTreeSet<String>,
-) -> ApiResult<()> {
-    let ids: Vec<&String> = managed.iter().collect();
-    write_setting(
-        pool,
-        PROFILE_MANAGED,
-        &serde_json::to_string(&ids).map_err(|e| e.to_string())?,
-    )
-    .await
+/// The catalog's profile for a board: by catalog ID, or by address and adapter for a copy added from the picker.
+fn catalog_profile(source_id: &str, base_url: &str, adapter_id: &str) -> Option<String> {
+    let companies = &company_catalog().companies;
+    companies
+        .iter()
+        .find(|company| company.id == source_id)
+        .or_else(|| {
+            companies
+                .iter()
+                .find(|company| company.base_url == base_url && company.adapter_id == adapter_id)
+        })
+        .and_then(|company| company.profiles.first().cloned())
 }
-/// The user took this source over (switched it by hand): profile changes leave it alone from now on.
-async fn forget_managed(pool: &SqlitePool, source_id: &str) -> ApiResult<()> {
-    let mut managed = read_managed(pool).await?;
-    if managed.remove(source_id) {
-        write_managed(pool, &managed).await?;
-    }
-    Ok(())
-}
-/// What choosing a profile did, so the Sources tab can say it and read what is new.
+/// What switching to a profile did, so the window can say it and read what is new.
 #[derive(Debug, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ProfileApplied {
     pub profile: Option<String>,
-    /// Companies that were not on the Sources tab and now are.
+    /// Companies that were not on the Sources tab and now are (or that had been removed and are back).
     pub added: u64,
-    /// Companies that were there but off (or removed earlier) and are now on.
+    /// Companies that were there but off and are now on: only the first time a profile is chosen.
     pub switched_on: u64,
-    /// Companies the previous profile had switched on that this one does not include.
-    pub switched_off: u64,
-    /// Companies of the profile that were already on, or that the user already follows from their own copy.
+    /// Companies of the profile that were already there, as they are.
     pub already_following: u64,
-    /// The profile's companies that have never been read: the app reads these now.
+    /// The profile's switched-on sources that have never been read: the app reads these now.
     pub read_now: Vec<String>,
 }
 #[derive(Debug, Serialize)]
@@ -2156,8 +2283,9 @@ pub struct ProfileSummary {
     pub id: String,
     pub name: String,
     pub description: String,
+    /// The profile's sources, or the catalog companies it will add while it has never been chosen.
     pub companies: i64,
-    /// How many of its companies are switched on right now.
+    /// How many of its sources are switched on right now.
     pub on: i64,
 }
 #[derive(Debug, Serialize)]
@@ -2176,93 +2304,109 @@ fn profile_companies(profile_id: &str) -> Vec<&'static CatalogCompany> {
         .collect()
 }
 impl Database {
-    /// Makes the Sources tab follow a profile: its companies are added (or switched back on) and read, and the
-    /// companies the previous profile switched on, which this one does not include, are switched off. Their
-    /// stored jobs stay. `None` clears the profile and changes no source.
+    /// Makes `profile_id` the job search the window is about: from now on the Sources tab lists its sources, an
+    /// update reads only them, the Jobs tab shows their jobs and the Applications tab its applications. `None` is
+    /// "All profiles". Switching never switches a source off and deletes nothing, so going back to a profile
+    /// finds it exactly as it was left.
     ///
-    /// Never touched: a source the user added or switched on themselves, however it got there. A board the user
-    /// already has under their own copy is not added a second time.
+    /// The first time a profile is chosen its catalog companies are added and switched on (a board that was
+    /// switched off or removed before profiles existed comes back: choosing the profile is the newer decision).
+    /// After that only catalog companies that have no row at all are added, which is how a company a later
+    /// version adds to the profile arrives; what the user switched off or deleted inside the profile stays so.
     pub async fn apply_profile(&self, profile_id: Option<&str>) -> ApiResult<ProfileApplied> {
-        let catalog = company_catalog();
-        let companies = match profile_id {
-            Some(id) => {
-                if !catalog.profiles.iter().any(|profile| profile.id == id) {
-                    return Err(format!("Unknown profile: {id}"));
-                }
-                profile_companies(id)
-            }
-            None => Vec::new(),
+        let Some(profile) = profile_id else {
+            sqlx::query("DELETE FROM settings WHERE key=?")
+                .bind(PROFILE_ACTIVE)
+                .execute(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+            log(
+                &self.pool,
+                "info",
+                None,
+                None,
+                "profile",
+                None,
+                "Showing all profiles.",
+                serde_json::json!({"profile": null}),
+            )
+            .await;
+            return Ok(ProfileApplied::default());
         };
-        let wanted: std::collections::BTreeSet<&str> = companies
+        if !company_catalog()
+            .profiles
             .iter()
-            .map(|company| company.id.as_str())
-            .collect();
-        let mut managed = read_managed(&self.pool).await?;
+            .any(|known| known.id == profile)
+        {
+            return Err(format!("Unknown profile: {profile}"));
+        }
         let mut applied = ProfileApplied {
-            profile: profile_id.map(str::to_string),
+            profile: Some(profile.to_string()),
             ..ProfileApplied::default()
         };
-        if profile_id.is_some() {
-            // Off first, so a company both profiles share is never switched off and back on.
-            let leaving: Vec<String> = managed
-                .iter()
-                .filter(|id| !wanted.contains(id.as_str()))
-                .cloned()
-                .collect();
-            for id in leaving {
-                applied.switched_off += sqlx::query("UPDATE sources SET enabled=0,updated_at=? WHERE id=? AND enabled=1 AND deleted_at IS NULL")
-                    .bind(now()).bind(&id).execute(&self.pool).await.map_err(|e| e.to_string())?.rows_affected();
-                managed.remove(&id);
-            }
-        }
-        for company in companies {
+        let chosen_before: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM sources WHERE profile_id=?")
+                .bind(profile)
+                .fetch_one(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+        for company in profile_companies(profile) {
             // A board the user already added from the picker has a generated ID, not this catalog ID, so seeding
-            // it again would put a second copy on the Sources tab and read it twice. Their copy is left as it is.
-            let user_copy: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources s WHERE s.id<>? AND s.deleted_at IS NULL AND s.base_url=? AND s.adapter_id=? AND NOT EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=s.id AND c.config_json LIKE '%starterPackVersion%') LIMIT 1")
-                .bind(company.id.as_str()).bind(company.base_url.as_str()).bind(company.adapter_id.as_str())
+            // it again would put a second copy on the Sources tab and read it twice. Their copy is used instead;
+            // one that belongs to no profile yet joins this one.
+            let user_copy: Option<(String, Option<String>)> = sqlx::query_as("SELECT s.id,s.profile_id FROM sources s WHERE s.id<>? AND s.deleted_at IS NULL AND s.base_url=? AND s.adapter_id=? AND (s.profile_id IS NULL OR s.profile_id=?) AND NOT EXISTS (SELECT 1 FROM source_configs c WHERE c.source_id=s.id AND c.config_json LIKE '%starterPackVersion%') LIMIT 1")
+                .bind(company.id.as_str()).bind(company.base_url.as_str()).bind(company.adapter_id.as_str()).bind(profile)
                 .fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
-            if user_copy.is_some() {
+            if let Some((copy, owner)) = user_copy {
+                if owner.is_none() {
+                    sqlx::query("UPDATE sources SET profile_id=?,updated_at=? WHERE id=?")
+                        .bind(profile)
+                        .bind(now())
+                        .bind(&copy)
+                        .execute(&self.pool)
+                        .await
+                        .map_err(|e| e.to_string())?;
+                }
                 applied.already_following += 1;
                 continue;
             }
-            let was_live: Option<i64> =
-                sqlx::query_scalar("SELECT 1 FROM sources WHERE id=? AND deleted_at IS NULL")
+            let existing: Option<(Option<String>, Option<String>)> =
+                sqlx::query_as("SELECT profile_id,deleted_at FROM sources WHERE id=?")
                     .bind(company.id.as_str())
                     .fetch_optional(&self.pool)
                     .await
                     .map_err(|e| e.to_string())?;
+            if existing
+                .as_ref()
+                .is_some_and(|(owner, _)| owner.as_deref().is_some_and(|owner| owner != profile))
+            {
+                // The catalog moved this company to another profile after it was added; it stays where it is.
+                continue;
+            }
             self.sync_catalog_company(company, true).await?;
-            // Choosing a profile is a decision made now, so it outranks a board that was switched off or removed
-            // earlier: that board comes back.
+            sqlx::query("UPDATE sources SET profile_id=? WHERE id=? AND profile_id IS NULL")
+                .bind(profile)
+                .bind(company.id.as_str())
+                .execute(&self.pool)
+                .await
+                .map_err(|e| e.to_string())?;
+            if existing.is_some() && chosen_before > 0 {
+                applied.already_following += 1;
+                continue;
+            }
             let changed = sqlx::query("UPDATE sources SET enabled=1,deleted_at=NULL,disabled_reason=NULL,updated_at=? WHERE id=? AND kind='active' AND (enabled=0 OR deleted_at IS NOT NULL)")
                 .bind(now()).bind(company.id.as_str()).execute(&self.pool).await.map_err(|e| e.to_string())?.rows_affected();
-            if changed > 0 {
-                managed.insert(company.id.clone());
-                if was_live.is_some() {
-                    applied.switched_on += 1;
-                } else {
-                    applied.added += 1;
-                }
-            } else {
-                applied.already_following += 1;
-            }
-            let never_read: Option<i64> = sqlx::query_scalar("SELECT 1 FROM sources WHERE id=? AND enabled=1 AND deleted_at IS NULL AND last_success_at IS NULL")
-                .bind(company.id.as_str()).fetch_optional(&self.pool).await.map_err(|e| e.to_string())?;
-            if never_read.is_some() {
-                applied.read_now.push(company.id.clone());
+            match existing {
+                _ if changed == 0 => applied.already_following += 1,
+                Some((_, None)) => applied.switched_on += 1,
+                _ => applied.added += 1,
             }
         }
-        write_managed(&self.pool, &managed).await?;
-        match profile_id {
-            Some(id) => write_setting(&self.pool, PROFILE_ACTIVE, id).await?,
-            None => {
-                sqlx::query("DELETE FROM settings WHERE key=?")
-                    .bind(PROFILE_ACTIVE)
-                    .execute(&self.pool)
-                    .await
-                    .map_err(|e| e.to_string())?;
-            }
-        }
+        write_setting(&self.pool, PROFILE_ACTIVE, profile).await?;
+        // Never read and never tried: a source that was tried and failed says so on the Sources tab, and the
+        // next update tries it again; switching profile is not a reason to hammer it.
+        applied.read_now = sqlx::query_scalar("SELECT s.id FROM sources s WHERE s.profile_id=? AND s.enabled=1 AND s.kind='active' AND s.deleted_at IS NULL AND s.last_success_at IS NULL AND NOT EXISTS (SELECT 1 FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape') ORDER BY s.name,s.id")
+            .bind(profile).fetch_all(&self.pool).await.map_err(|e| e.to_string())?;
         log(
             &self.pool,
             "info",
@@ -2270,41 +2414,108 @@ impl Database {
             None,
             "profile",
             None,
-            &match profile_id {
-                Some(id) => format!(
-                    "Profile {id} applied: {} added, {} switched on, {} switched off.",
-                    applied.added, applied.switched_on, applied.switched_off
-                ),
-                None => "Profile cleared; no source was changed.".to_string(),
-            },
-            serde_json::json!({"profile": profile_id, "added": applied.added, "switchedOn": applied.switched_on, "switchedOff": applied.switched_off}),
+            &format!(
+                "Profile {profile} active: {} added, {} switched on, {} to read.",
+                applied.added,
+                applied.switched_on,
+                applied.read_now.len()
+            ),
+            serde_json::json!({"profile": profile, "added": applied.added, "switchedOn": applied.switched_on, "readNow": applied.read_now.len()}),
         )
         .await;
         Ok(applied)
     }
     pub async fn profiles_state(&self) -> ApiResult<ProfilesState> {
-        let catalog = company_catalog();
-        let active = read_setting(&self.pool, PROFILE_ACTIVE)
-            .await?
-            .filter(|id| catalog.profiles.iter().any(|profile| &profile.id == id));
+        let active = active_profile(&self.pool).await?;
         let mut profiles = Vec::new();
-        for profile in &catalog.profiles {
-            let ids: Vec<&str> = profile_companies(&profile.id)
-                .iter()
-                .map(|company| company.id.as_str())
-                .collect();
-            let on: i64 = sqlx::query_scalar("SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL AND id IN (SELECT value FROM json_each(?))")
-                .bind(serde_json::to_string(&ids).map_err(|e| e.to_string())?)
+        for profile in &company_catalog().profiles {
+            let (sources, on): (i64, i64) = sqlx::query_as("SELECT count(*),coalesce(sum(enabled),0) FROM sources WHERE profile_id=? AND kind='active' AND deleted_at IS NULL")
+                .bind(&profile.id)
                 .fetch_one(&self.pool).await.map_err(|e| e.to_string())?;
             profiles.push(ProfileSummary {
                 id: profile.id.clone(),
                 name: profile.name.clone(),
                 description: profile.description.clone(),
-                companies: ids.len() as i64,
+                companies: if sources > 0 {
+                    sources
+                } else {
+                    profile_companies(&profile.id).len() as i64
+                },
                 on,
             });
         }
         Ok(ProfilesState { active, profiles })
+    }
+    /// Gives every source and application an earlier version stored the profile it belongs to, once. A board
+    /// takes its profile from the company catalog; anything the catalog does not place goes to the profile that
+    /// was active, as it was added while that one was. An application belongs to its job's source's profile.
+    ///
+    /// Earlier versions also switched the previous profile's sources off when another profile was chosen. A
+    /// profile's sources are now read only while it is active, so those are switched back on: they belong to the
+    /// profile that is not showing, and are there, as they were, when it is chosen again.
+    pub async fn scope_to_profiles(&self) -> ApiResult<()> {
+        if read_setting(&self.pool, PROFILE_SCOPED).await?.is_some() {
+            return Ok(());
+        }
+        let active = active_profile(&self.pool).await?;
+        let mut tx = self
+            .pool
+            .begin_with(WRITE_TRANSACTION)
+            .await
+            .map_err(|e| e.to_string())?;
+        let rows: Vec<(String, String, String)> =
+            sqlx::query_as("SELECT id,base_url,adapter_id FROM sources WHERE profile_id IS NULL")
+                .fetch_all(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+        let mut placed = 0u64;
+        for (source_id, base_url, adapter_id) in rows {
+            let Some(owner) =
+                catalog_profile(&source_id, &base_url, &adapter_id).or_else(|| active.clone())
+            else {
+                continue;
+            };
+            sqlx::query("UPDATE sources SET profile_id=? WHERE id=?")
+                .bind(&owner)
+                .bind(&source_id)
+                .execute(&mut *tx)
+                .await
+                .map_err(|e| e.to_string())?;
+            placed += 1;
+        }
+        let mut revived = 0;
+        if let Some(active) = &active {
+            revived = sqlx::query("UPDATE sources SET enabled=1,updated_at=? WHERE enabled=0 AND disabled_reason IS NULL AND kind='active' AND deleted_at IS NULL AND profile_id IS NOT NULL AND profile_id<>?")
+                .bind(now()).bind(active)
+                .execute(&mut *tx).await.map_err(|e| e.to_string())?.rows_affected();
+        }
+        sqlx::query("UPDATE applications SET profile_id=(SELECT s.profile_id FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.id=applications.job_id) WHERE profile_id IS NULL")
+            .execute(&mut *tx).await.map_err(|e| e.to_string())?;
+        sqlx::query("DELETE FROM settings WHERE key=?")
+            .bind(LEGACY_PROFILE_MANAGED)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+        sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES(?,'1',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at")
+            .bind(PROFILE_SCOPED).bind(now())
+            .execute(&mut *tx).await.map_err(|e| e.to_string())?;
+        tx.commit().await.map_err(|e| e.to_string())?;
+        if placed > 0 || revived > 0 {
+            log(
+                &self.pool,
+                "info",
+                None,
+                None,
+                "profile",
+                None,
+                &format!(
+                    "Sources sorted into profiles: {placed} placed, {revived} switched back on."
+                ),
+                serde_json::json!({"placed": placed, "switchedOn": revived}),
+            )
+            .await;
+        }
+        Ok(())
     }
 }
 #[tauri::command]
@@ -2354,7 +2565,7 @@ async fn job_countries_query(
     };
     // Codes are packed per job (",PT,ES,"), and the distinct packings number in the hundreds at
     // most, so they are counted here rather than in a table the schema would have to maintain.
-    let sql = format!("SELECT coalesce(j.location_countries,'') AS codes,count(*) AS jobs FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.enabled=1 AND s.deleted_at IS NULL AND j.availability NOT IN ('archived','closed'){scope} GROUP BY codes");
+    let sql = format!("SELECT coalesce(j.location_countries,'') AS codes,count(*) AS jobs FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.enabled=1 AND s.deleted_at IS NULL AND {SOURCE_IN_PROFILE} AND j.availability NOT IN ('archived','closed'){scope} GROUP BY codes");
     let mut query = sqlx::query_as::<_, (String, i64)>(&sql);
     for id in source_ids {
         query = query.bind(id);
@@ -2382,16 +2593,35 @@ async fn job_countries_query(
 /// the filters, the country resolver, applications — treats a captured job like any other, but it
 /// is never scraped: nothing about a pasted link describes a board to read.
 pub const CAPTURED_SOURCE_ID: &str = "00000000-0000-4000-8000-00000000c0de";
-async fn captured_source(pool: &SqlitePool) -> ApiResult<()> {
+/// Each profile keeps its own, so a job pasted in while helping a friend lands in their search, not yours; with
+/// all profiles showing it is the original one, which belongs to none.
+async fn captured_source(pool: &SqlitePool) -> ApiResult<String> {
     let t = now();
-    sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at) VALUES(?,'Added by hand','about:blank','reference','1.1.0',1,'reference','Jobs you pasted a link to; there is no board here to read.',0,0,?,?)")
-        .bind(CAPTURED_SOURCE_ID)
+    let profile = active_profile(pool).await?;
+    if let Some(profile) = &profile {
+        let existing: Option<String> = sqlx::query_scalar("SELECT id FROM sources WHERE kind='reference' AND adapter_id='reference' AND base_url='about:blank' AND profile_id=? AND deleted_at IS NULL ORDER BY created_at,id LIMIT 1")
+            .bind(profile)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| e.to_string())?;
+        if let Some(existing) = existing {
+            return Ok(existing);
+        }
+    }
+    let source_id = if profile.is_some() {
+        id()
+    } else {
+        CAPTURED_SOURCE_ID.to_string()
+    };
+    sqlx::query("INSERT OR IGNORE INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,disabled_reason,robots_override,allow_private_network,created_at,updated_at,profile_id) VALUES(?,'Added by hand','about:blank','reference','1.1.0',1,'reference','Jobs you pasted a link to; there is no board here to read.',0,0,?,?,?)")
+        .bind(&source_id)
         .bind(&t)
         .bind(&t)
+        .bind(&profile)
         .execute(pool)
         .await
         .map_err(|e| e.to_string())?;
-    Ok(())
+    Ok(source_id)
 }
 /// Stores a captured vacancy, after the person pasting the link has had a chance to correct it.
 /// Everything it stores came from that page or from them, so it goes through the same persistence
@@ -2412,7 +2642,7 @@ pub async fn save_captured_job(
         .and_then(|value| value.as_str())
         .unwrap_or_default();
     valid_url(url, false)?;
-    captured_source(&state.db.pool).await?;
+    let captured = captured_source(&state.db.pool).await?;
     let payload = serde_json::json!({
         "title": title,
         "company": job.get("company").and_then(|v| v.as_str()).unwrap_or("").trim(),
@@ -2432,10 +2662,10 @@ pub async fn save_captured_job(
     });
     state
         .db
-        .persist_worker_job(&id(), CAPTURED_SOURCE_ID, &payload)
+        .persist_worker_job(&id(), &captured, &payload)
         .await?;
     let stored: String = sqlx::query_scalar("SELECT id FROM jobs WHERE source_id=? AND canonical_url=? ORDER BY updated_at DESC LIMIT 1")
-        .bind(CAPTURED_SOURCE_ID)
+        .bind(&captured)
         .bind(url)
         .fetch_one(&state.db.pool)
         .await
@@ -2443,7 +2673,7 @@ pub async fn save_captured_job(
     log(
         &state.db.pool,
         "info",
-        Some(CAPTURED_SOURCE_ID),
+        Some(captured.as_str()),
         Some("Added by hand"),
         "capture_job",
         None,
@@ -2478,7 +2708,7 @@ pub async fn new_since(since: Option<String>, state: State<'_, Arc<AppState>>) -
     let Some(since) = since.filter(|value| !value.is_empty()) else {
         return Ok(0);
     };
-    sqlx::query_scalar("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.enabled=1 AND s.deleted_at IS NULL AND j.availability NOT IN ('archived','closed') AND j.dismissed_at IS NULL AND coalesce(j.first_seen_at,j.created_at)>?")
+    sqlx::query_scalar(&format!("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id WHERE s.enabled=1 AND s.deleted_at IS NULL AND {SOURCE_IN_PROFILE} AND j.availability NOT IN ('archived','closed') AND j.dismissed_at IS NULL AND coalesce(j.first_seen_at,j.created_at)>?"))
         .bind(since)
         .fetch_one(&state.db.pool)
         .await
@@ -2494,8 +2724,22 @@ pub async fn list_jobs(
         filter.unwrap_or_default(),
         offset.unwrap_or_default(),
         &state.db.pool,
+        true,
     )
     .await
+}
+/// How many jobs a filter matches, without reading any of them: the "new since you last looked" count
+/// has to agree with the list it opens, so it is the list's own WHERE, counted.
+#[tauri::command]
+pub async fn count_jobs(
+    filter: Option<JobFilter>,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<i64> {
+    Ok(
+        jobs_page_query(filter.unwrap_or_default(), 0, &state.db.pool, false)
+            .await?
+            .total,
+    )
 }
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -2507,9 +2751,14 @@ pub struct JobPage {
 }
 #[cfg(test)]
 async fn jobs_query(filter: JobFilter, pool: &SqlitePool) -> ApiResult<Vec<crate::domain::Job>> {
-    Ok(jobs_page_query(filter, 0, pool).await?.items)
+    Ok(jobs_page_query(filter, 0, pool, true).await?.items)
 }
-async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> ApiResult<JobPage> {
+async fn jobs_page_query(
+    filter: JobFilter,
+    offset: i64,
+    pool: &SqlitePool,
+    with_items: bool,
+) -> ApiResult<JobPage> {
     let (title_sql, title_terms) = term_clauses("j.title", &filter.title);
     let (keyword_sql, keyword_terms) = term_clauses(
         "j.title||' '||j.company||' '||coalesce(j.location,'')||' '||j.description_text",
@@ -2581,7 +2830,7 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
     };
     // One WHERE, shared by the count and the rows. They used to be spelled out separately, so a
     // filter added to one silently missed the other and the count disagreed with the list.
-    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}{dismissed}{fresh_sql}");
+    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL AND {SOURCE_IN_PROFILE}{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}{dismissed}{fresh_sql}");
     let count_sql =
         format!("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id{where_sql}");
     let mut count_query = sqlx::query_scalar::<_, i64>(&count_sql);
@@ -2599,6 +2848,14 @@ async fn jobs_page_query(filter: JobFilter, offset: i64, pool: &SqlitePool) -> A
         .fetch_one(pool)
         .await
         .map_err(|e| e.to_string())?;
+    if !with_items {
+        return Ok(JobPage {
+            items: Vec::new(),
+            total,
+            offset,
+            has_more: false,
+        });
+    }
     let sql = format!("{JOB_SELECT}{where_sql} {order} LIMIT {JOB_PAGE_SIZE} OFFSET ?");
     let mut query = sqlx::query_as::<_, crate::domain::Job>(&sql);
     for bound in filter
@@ -2645,16 +2902,16 @@ pub async fn set_source_enabled(
     // fact that it is currently unticked, which the enabled flag already says. Selecting a source
     // clears the recorded reason because the user is overriding that finding on purpose.
     sqlx::query("UPDATE sources SET enabled=?,disabled_reason=CASE WHEN ? THEN NULL ELSE disabled_reason END,updated_at=? WHERE id=?").bind(enabled).bind(enabled).bind(now()).bind(&source_id).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
-    // Switching a source by hand makes it the user's: a later profile change leaves it as they set it.
-    forget_managed(&state.db.pool, &source_id).await?;
     Ok(())
 }
 #[tauri::command]
 pub async fn list_applications(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Application>> {
-    sqlx::query_as(&format!("{APPLICATION_SELECT} ORDER BY a.updated_at DESC"))
-        .fetch_all(&state.db.pool)
-        .await
-        .map_err(|e| e.to_string())
+    sqlx::query_as(&format!(
+        "{APPLICATION_SELECT} WHERE {APPLICATION_IN_PROFILE} ORDER BY a.updated_at DESC"
+    ))
+    .fetch_all(&state.db.pool)
+    .await
+    .map_err(|e| e.to_string())
 }
 #[derive(Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -2751,7 +3008,12 @@ pub async fn save_application_details(
     input: ApplicationDetailsInput,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let t = now();
     let changed=sqlx::query("UPDATE applications SET recruiter_name=?,recruiter_email=?,recruiter_phone=?,source_attribution=?,rejection_reason=?,rejection_category=?,withdrawn_reason=?,updated_at=? WHERE id=?").bind(&input.recruiter_name).bind(&input.recruiter_email).bind(&input.recruiter_phone).bind(&input.source_attribution).bind(&input.rejection_reason).bind(&input.rejection_category).bind(&input.withdrawn_reason).bind(&t).bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     if changed.rows_affected() == 0 {
@@ -2777,7 +3039,12 @@ pub async fn save_application_note(
     };
     let t = now();
     let note_id = input.id.unwrap_or_else(id);
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     sqlx::query("INSERT INTO notes(id,application_id,body,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET body=excluded.body,updated_at=excluded.updated_at WHERE notes.application_id=excluded.application_id AND notes.deleted_at IS NULL").bind(&note_id).bind(&input.application_id).bind(&input.body).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'note_saved',?,?)").bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"noteId":note_id}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
@@ -2794,7 +3061,12 @@ pub async fn delete_application_note(
     note_id: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let app: Option<String> =
         sqlx::query_scalar("SELECT application_id FROM notes WHERE id=? AND deleted_at IS NULL")
             .bind(&note_id)
@@ -2881,7 +3153,10 @@ async fn attach_application_document_pool(
     let sha256 = format!("{:x}", Sha256::digest(&content));
     let size = content.len() as i64;
     let t = now();
-    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     sqlx::query("INSERT INTO application_documents(id,application_id,kind,document_type,filename,content,mime_type,sha256,size,event_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)").bind(&document_id).bind(&input.application_id).bind(&input.document_type).bind(&input.document_type).bind(&filename).bind(content).bind(&mime).bind(&sha256).bind(size).bind(&input.event_id).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'document_attached',?,?)").bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"documentId":document_id,"sha256":sha256,"filename":filename}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
@@ -2964,8 +3239,15 @@ pub async fn create_application(
     }
     let application_id = id();
     let t = now();
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
-    sqlx::query("INSERT INTO applications(id,job_id,persona_id,current_stage,created_at,updated_at) VALUES(?,?,?,'planned',?,?)").bind(&application_id).bind(&job_id).bind(persona_id).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
+    // An application belongs to the profile of the board its job came from, so it shows on the Applications tab
+    // exactly when that board's jobs show on the Jobs tab; failing that, to the profile it was saved in.
+    sqlx::query("INSERT INTO applications(id,job_id,persona_id,current_stage,created_at,updated_at,profile_id) VALUES(?,?,?,'planned',?,?,coalesce((SELECT s.profile_id FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.id=?),(SELECT value FROM settings WHERE key='profile.active')))").bind(&application_id).bind(&job_id).bind(persona_id).bind(&t).bind(&t).bind(&job_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,to_stage,occurred_at) VALUES(?,?, 'created','planned',?)").bind(id()).bind(&application_id).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
     sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
@@ -3015,7 +3297,12 @@ pub async fn transition_application(
     if !valid.contains(&input.stage.as_str()) {
         return Err("Invalid application stage".into());
     };
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let current: String = sqlx::query_scalar("SELECT current_stage FROM applications WHERE id=?")
         .bind(&input.application_id)
         .fetch_one(&mut *tx)
@@ -3107,7 +3394,12 @@ pub async fn record_apply_decision(
     if !["yes", "no", "not_yet"].contains(&decision.as_str()) {
         return Err("Decision must be yes, no, or not_yet".into());
     };
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let attempt: Option<String> = sqlx::query_scalar("SELECT id FROM application_attempts WHERE application_id=? AND resolved_at IS NULL ORDER BY opened_at DESC LIMIT 1").bind(&application_id).fetch_optional(&mut *tx).await.map_err(|e|e.to_string())?;
     if attempt.is_none() {
         tx.rollback().await.map_err(|e| e.to_string())?;
@@ -3126,10 +3418,9 @@ pub async fn record_apply_decision(
         let due = ghost_due_from(&t, 14)?;
         sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)").bind(id()).bind(&application_id).bind(due).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
-    // "not_yet" leaves the attempt open (resolved_at stays NULL) so it can still be answered
-    // later from the Applications card, but records the resolution so the focus-edge auto-popup
-    // never re-asks it: without this, closing and reopening the app reset the in-memory dedupe
-    // and asked the same question on every single launch until the user picked yes or no.
+    // Apply no longer opens attempts (see mark_applied_on_open); this only settles ones left open
+    // by the old "Did you submit?" flow, answered from the Applications board. "not_yet" keeps
+    // the attempt open (resolved_at stays NULL) so it can still be answered there later.
     if decision == "not_yet" {
         sqlx::query(
             "UPDATE application_attempts SET resolution=? WHERE id=? AND resolved_at IS NULL",
@@ -3143,21 +3434,7 @@ pub async fn record_apply_decision(
         sqlx::query("UPDATE application_attempts SET resolved_at=?,resolution=? WHERE id=? AND resolved_at IS NULL").bind(&t).bind(&decision).bind(&attempt).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
-    *state
-        .shown_apply_attempt
-        .lock()
-        .map_err(|_| "Apply prompt lock failed")? = None;
     Ok(())
-}
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-#[derive(Clone)]
-pub struct ApplyConfirmation {
-    pub attempt_id: String,
-    pub application_id: String,
-    pub job_id: String,
-    pub opened_at: String,
-    pub original_stage: String,
 }
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -3224,7 +3501,12 @@ pub async fn save_interview(
     }
     let interview_id = input.id.clone().unwrap_or_else(id);
     let t = now();
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     if input.id.is_some() {
         let owner: String = sqlx::query_scalar("SELECT application_id FROM interviews WHERE id=?")
             .bind(&interview_id)
@@ -3271,7 +3553,12 @@ pub async fn delete_interview(
     interview_id: String,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let application_id: String =
         sqlx::query_scalar("SELECT application_id FROM interviews WHERE id=?")
             .bind(&interview_id)
@@ -3297,7 +3584,12 @@ pub async fn update_ghost_threshold(
     if !(1..=365).contains(&days) {
         return Err("Ghost reminder threshold must be 1 to 365 days".into());
     }
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     let applied: Option<String> =
         sqlx::query_scalar("SELECT applied_at FROM applications WHERE id=?")
             .bind(&application_id)
@@ -3321,104 +3613,49 @@ pub async fn open_apply(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
-    let row=sqlx::query("SELECT a.job_id,a.current_stage,j.apply_url FROM applications a JOIN jobs j ON j.id=a.job_id WHERE a.id=?").bind(&application_id).fetch_one(&state.db.pool).await.map_err(|_|"Application was not found".to_string())?;
-    let job_id: String = row.get(0);
-    let stage: String = row.get(1);
-    let url: Option<String> = row.get(2);
+    let url: Option<String> = sqlx::query_scalar(
+        "SELECT j.apply_url FROM applications a JOIN jobs j ON j.id=a.job_id WHERE a.id=?",
+    )
+    .bind(&application_id)
+    .fetch_one(&state.db.pool)
+    .await
+    .map_err(|_| "Application was not found".to_string())?;
     let url = url.ok_or("Job has no apply URL")?;
     valid_url(&url, false)?;
-    let open: Option<String> = sqlx::query_scalar("SELECT id FROM application_attempts WHERE application_id=? AND resolved_at IS NULL ORDER BY opened_at DESC LIMIT 1")
-        .bind(&application_id).fetch_optional(&state.db.pool).await.map_err(|e|e.to_string())?;
-    if open.is_none() {
-        let attempt = id();
-        let t = now();
-        sqlx::query("INSERT INTO application_attempts(id,application_id,job_id,opened_at,original_stage) VALUES(?,?,?,?,?)").bind(&attempt).bind(&application_id).bind(&job_id).bind(&t).bind(&stage).execute(&state.db.pool).await.map_err(|e|e.to_string())?;
-    }
+    // Open first, so a posting that failed to open is never recorded as applied to.
     app.opener()
         .open_url(url, None::<&str>)
         .map_err(|e| e.to_string())?;
-    Ok(())
+    mark_applied_on_open(&state.db.pool, &application_id).await
 }
-/// The Applications card's own "Confirm application" button, for an attempt a "not_yet" answer
-/// already silenced from the automatic focus-edge prompt. Looked up by application, not by the
-/// global "next" attempt, and ignores the resolution filter that keeps it out of that prompt.
-#[tauri::command]
-pub async fn confirm_application(
-    application_id: String,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<Option<ApplyConfirmation>> {
-    attempt_for_application(&state.db.pool, &application_id).await
-}
-async fn attempt_for_application(
-    pool: &SqlitePool,
-    application_id: &str,
-) -> ApiResult<Option<ApplyConfirmation>> {
-    let row = sqlx::query("SELECT id,application_id,job_id,opened_at,original_stage FROM application_attempts WHERE application_id=? AND resolved_at IS NULL ORDER BY opened_at DESC LIMIT 1")
-        .bind(application_id)
-        .fetch_optional(pool)
+/// Pressing Apply is taken as having applied. This used to open an "attempt" and ask "Did you
+/// submit?" on the next window focus — one prompt per Apply, so applying to a batch of jobs meant
+/// answering the same dialog again on every click back into the app. Any attempt still open from
+/// that flow is closed here too, so nothing is left counting as unconfirmed.
+async fn mark_applied_on_open(pool: &SqlitePool, application_id: &str) -> ApiResult<()> {
+    let mut tx = pool
+        .begin_with(WRITE_TRANSACTION)
         .await
         .map_err(|e| e.to_string())?;
-    Ok(row.map(|r| ApplyConfirmation {
-        attempt_id: r.get(0),
-        application_id: r.get(1),
-        job_id: r.get(2),
-        opened_at: r.get(3),
-        original_stage: r.get(4),
-    }))
-}
-#[tauri::command]
-pub async fn pending_apply_confirmation(
-    app: tauri::AppHandle,
-    state: State<'_, Arc<AppState>>,
-) -> ApiResult<Option<ApplyConfirmation>> {
-    let value = next_apply_confirmation(&state.db.pool).await?;
-    if let Some(ref value) = value {
-        let _ = app.emit("apply-confirmation-required", value);
+    let current: String = sqlx::query_scalar("SELECT current_stage FROM applications WHERE id=?")
+        .bind(application_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|_| "Application was not found".to_string())?;
+    let t = now();
+    sqlx::query("UPDATE application_attempts SET resolved_at=?,resolution='yes' WHERE application_id=? AND resolved_at IS NULL")
+        .bind(&t).bind(application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+    // Only a saved job moves. One already applied to (or further along) keeps its stage and date.
+    if current == "planned" {
+        sqlx::query("UPDATE applications SET current_stage='applied',applied_at=COALESCE(applied_at,?),updated_at=? WHERE id=?")
+            .bind(&t).bind(&t).bind(application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        sqlx::query("INSERT INTO application_events(id,application_id,event_type,from_stage,to_stage,reason,occurred_at,payload_json) VALUES(?,?, 'stage_changed','planned','applied','Opened the posting with Apply',?,'{}')")
+            .bind(id()).bind(application_id).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
+        let due = ghost_due_from(&t, 14)?;
+        sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)")
+            .bind(id()).bind(application_id).bind(due).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
-    Ok(value)
-}
-
-async fn next_apply_confirmation(pool: &SqlitePool) -> ApiResult<Option<ApplyConfirmation>> {
-    // resolution IS NULL means this attempt has never been shown a decision at all. Once "not_yet"
-    // sets resolution without resolving it (see record_apply_decision), it drops out of the
-    // automatic focus-edge prompt for good; the user answers it later from the Applications card
-    // via confirm_application, which looks the attempt up directly and ignores this filter.
-    let row=sqlx::query("SELECT id,application_id,job_id,opened_at,original_stage FROM application_attempts WHERE resolved_at IS NULL AND resolution IS NULL ORDER BY opened_at DESC LIMIT 1").fetch_optional(pool).await.map_err(|e|e.to_string())?;
-    let value = row.map(|r| ApplyConfirmation {
-        attempt_id: r.get(0),
-        application_id: r.get(1),
-        job_id: r.get(2),
-        opened_at: r.get(3),
-        original_stage: r.get(4),
-    });
-    Ok(value)
-}
-
-/// Focus edge handler. One unresolved attempt is emitted once per focus edge;
-/// decision handling clears its marker so `not_yet` can be asked next focus.
-pub async fn emit_apply_confirmation_on_focus(
-    app: &tauri::AppHandle,
-    state: &AppState,
-) -> ApiResult<()> {
-    let value = next_apply_confirmation(&state.db.pool).await?;
-    let Some(value) = value else { return Ok(()) };
-    let mut shown = state
-        .shown_apply_attempt
-        .lock()
-        .map_err(|_| "Apply prompt lock failed")?;
-    if !mark_focus_prompt(&mut *shown, &value.attempt_id) {
-        return Ok(());
-    }
-    app.emit("apply-confirmation-required", value)
-        .map_err(|e| e.to_string())
-}
-fn mark_focus_prompt(shown: &mut Option<String>, attempt_id: &str) -> bool {
-    if shown.as_deref() == Some(attempt_id) {
-        false
-    } else {
-        *shown = Some(attempt_id.to_owned());
-        true
-    }
+    tx.commit().await.map_err(|e| e.to_string())
 }
 
 #[cfg(test)]
@@ -3447,64 +3684,65 @@ mod apply_confirmation_tests {
             .bind(application_id).fetch_one(pool).await.unwrap()
     }
 
-    // "Not yet" is a snooze, not a dismissal: it must not vanish from the automatic focus-edge
-    // prompt only to also vanish for the user. Before this test existed, `not_yet` never touched
-    // `application_attempts` at all, so the attempt stayed indistinguishable from a brand new one
-    // and the launch prompt asked about it again on every single app open.
-    #[tokio::test]
-    async fn not_yet_silences_the_automatic_prompt_but_stays_answerable() {
-        let pool = migrated_pool().await;
-        seed_application(&pool).await;
-        assert!(
-            next_apply_confirmation(&pool).await.unwrap().is_some(),
-            "a fresh attempt is asked about automatically"
-        );
-
-        sqlx::query("UPDATE application_attempts SET resolution='not_yet' WHERE id='att' AND resolved_at IS NULL").execute(&pool).await.unwrap();
-
-        assert!(
-            next_apply_confirmation(&pool).await.unwrap().is_none(),
-            "a snoozed attempt must not trigger the launch/focus prompt again"
-        );
-        assert!(
-            pending_confirmation(&pool, "a").await,
-            "the application still shows as needing a decision"
-        );
-        let revisited = attempt_for_application(&pool, "a").await.unwrap();
-        assert_eq!(
-            revisited.map(|value| value.attempt_id),
-            Some("att".to_string()),
-            "the Applications card can still bring the same attempt back up"
-        );
-    }
-
-    #[tokio::test]
-    async fn a_resolved_attempt_leaves_nothing_pending() {
-        let pool = migrated_pool().await;
-        seed_application(&pool).await;
-        sqlx::query(
-            "UPDATE application_attempts SET resolved_at='t',resolution='no' WHERE id='att'",
-        )
-        .execute(&pool)
-        .await
-        .unwrap();
-
-        assert!(next_apply_confirmation(&pool).await.unwrap().is_none());
-        assert!(!pending_confirmation(&pool, "a").await);
-        assert!(
-            attempt_for_application(&pool, "a").await.unwrap().is_none(),
-            "there is nothing left for the card to reopen"
-        );
-    }
-
-    #[tokio::test]
-    async fn confirm_application_ignores_other_applications_open_attempts() {
-        let pool = migrated_pool().await;
-        seed_application(&pool).await;
-        assert!(attempt_for_application(&pool, "other-application")
+    async fn stage_of(pool: &SqlitePool, application_id: &str) -> String {
+        sqlx::query_scalar("SELECT current_stage FROM applications WHERE id=?")
+            .bind(application_id)
+            .fetch_one(pool)
             .await
             .unwrap()
-            .is_none());
+    }
+
+    // Pressing Apply is the answer. There is no "Did you submit?" question left to ask, so the
+    // application is applied straight away and nothing stays pending that could prompt later.
+    #[tokio::test]
+    async fn apply_marks_a_saved_job_applied_and_leaves_nothing_pending() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+
+        mark_applied_on_open(&pool, "a").await.unwrap();
+
+        assert_eq!(stage_of(&pool, "a").await, "applied");
+        assert!(
+            !pending_confirmation(&pool, "a").await,
+            "an attempt left open by the old prompt flow is closed too"
+        );
+        let applied_at: Option<String> =
+            sqlx::query_scalar("SELECT applied_at FROM applications WHERE id='a'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert!(applied_at.is_some());
+        let ghost: i64 = sqlx::query_scalar("SELECT count(*) FROM reminders WHERE application_id='a' AND reminder_type='ghosted' AND status='pending'")
+            .fetch_one(&pool).await.unwrap();
+        assert_eq!(ghost, 1, "applying schedules the usual follow-up reminder");
+    }
+
+    // Opening the posting again for something already applied to (or further along) must not
+    // move it back, reset its date, or stack another reminder.
+    #[tokio::test]
+    async fn apply_again_leaves_a_later_stage_alone() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        sqlx::query("UPDATE applications SET current_stage='interviewing',applied_at='earlier' WHERE id='a'")
+            .execute(&pool)
+            .await
+            .unwrap();
+
+        mark_applied_on_open(&pool, "a").await.unwrap();
+
+        assert_eq!(stage_of(&pool, "a").await, "interviewing");
+        let applied_at: String =
+            sqlx::query_scalar("SELECT applied_at FROM applications WHERE id='a'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert_eq!(applied_at, "earlier");
+        let reminders: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM reminders WHERE application_id='a'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert_eq!(reminders, 0);
     }
 
     // "Remove from Applications" needs to take everything hanging off the application with it —
@@ -4719,7 +4957,12 @@ pub async fn apply_purge(
     if stored.expires_at < Utc::now() || stored.preview.preview_hash != input.preview_hash {
         return Err("Purge preview is stale or was tampered with".into());
     };
-    let mut tx = state.db.pool.begin().await.map_err(|e| e.to_string())?;
+    let mut tx = state
+        .db
+        .pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
     for job in &stored.job_ids {
         let changed=sqlx::query("DELETE FROM jobs WHERE id=? AND availability='closed' AND NOT EXISTS(SELECT 1 FROM applications WHERE job_id=?) AND NOT EXISTS(SELECT 1 FROM review_decisions WHERE job_id=?)").bind(job).bind(job).bind(job).execute(&mut *tx).await.map_err(|e|e.to_string())?;
         if changed.rows_affected() != 1 {
@@ -4766,7 +5009,7 @@ pub async fn apply_purge(
         .await
         .map_err(|e| e.to_string())?;
     if stored.preview.category == "closed_jobs" || stored.preview.category == "scrape_logs" {
-        let _ = sqlx::query("PRAGMA optimize").execute(&state.db.pool).await;
+        refresh_planner_statistics(&state.db.pool).await;
     }
     Ok(
         serde_json::json!({"auditId":audit,"deleted":stored.preview.row_counts,"fileCleanupFailures":failures}),
@@ -4792,6 +5035,84 @@ mod matching_persistence_tests {
         sqlx::query("INSERT INTO personas(id,name,target_titles_json,include_keywords_json,include_keyword_mode,exclude_keywords_json,threshold,unknown_policy,resume_document_id,created_at,updated_at) VALUES('p','p','[]','[]','any','[]',60,'pass','r','t','persona-v1')").execute(pool).await.unwrap();
         sqlx::query("INSERT INTO resume_documents(id,persona_id,filename,path,extracted_text,mime_type,content_hash,created_at,updated_at) VALUES('r','p','r.txt','r.txt','resume','text/plain','resume-v1','t','t')").execute(pool).await.unwrap();
         sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,extraction_at,adapter_version,created_at,updated_at) VALUES('j','s','Engineer','Company','description','[]','job-v1','t','1','t','t')").execute(pool).await.unwrap();
+    }
+    #[tokio::test]
+    async fn title_filters_are_read_per_profile_with_the_shared_value_as_fallback() {
+        let pool = migrated_pool().await;
+        for (id, profile) in [
+            ("chip", Some("semiconductor")),
+            ("data", Some("data-science")),
+            ("loose", None),
+        ] {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at,profile_id) VALUES(?,?,?,'json','1',1,'active',0,0,'t','t',?)")
+                .bind(id).bind(id).bind(format!("https://{id}.test")).bind(profile)
+                .execute(&pool).await.unwrap();
+        }
+        let set = |key: &'static str, value: &'static str| {
+            let pool = pool.clone();
+            async move {
+                sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES(?,?,'t') ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+                    .bind(key).bind(value).execute(&pool).await.unwrap();
+            }
+        };
+        // Nothing saved anywhere: every source stores everything.
+        assert_eq!(
+            source_filter_setting(&pool, SCRAPE_TITLE_FILTER, "chip")
+                .await
+                .unwrap(),
+            ""
+        );
+        set("scrape.titleAny", "shared").await;
+        set("scrape.titleAny.semiconductor", "verification").await;
+        // A profile with its own filter uses it; one without, and a source in no profile, use the shared one.
+        assert_eq!(
+            source_filter_setting(&pool, SCRAPE_TITLE_FILTER, "chip")
+                .await
+                .unwrap(),
+            "verification"
+        );
+        assert_eq!(
+            source_filter_setting(&pool, SCRAPE_TITLE_FILTER, "data")
+                .await
+                .unwrap(),
+            "shared"
+        );
+        assert_eq!(
+            source_filter_setting(&pool, SCRAPE_TITLE_FILTER, "loose")
+                .await
+                .unwrap(),
+            "shared"
+        );
+        assert_eq!(
+            source_filter_setting(&pool, SCRAPE_TITLE_FILTER, "missing")
+                .await
+                .unwrap(),
+            "shared"
+        );
+        // Emptied on purpose for one profile means "everything" there, not "fall back".
+        set("scrape.titleAny.data-science", "").await;
+        assert_eq!(
+            source_filter_setting(&pool, SCRAPE_TITLE_FILTER, "data")
+                .await
+                .unwrap(),
+            ""
+        );
+        // The notification filter follows the profile that is active now.
+        set("notify.titleAny", "anything").await;
+        set("notify.titleAny.data-science", "machine learning").await;
+        assert_eq!(
+            active_filter_setting(&pool, NOTIFY_TITLE_FILTER)
+                .await
+                .unwrap(),
+            "anything"
+        );
+        set("profile.active", "data-science").await;
+        assert_eq!(
+            active_filter_setting(&pool, NOTIFY_TITLE_FILTER)
+                .await
+                .unwrap(),
+            "machine learning"
+        );
     }
     #[tokio::test]
     async fn new_jobs_since_ignores_rescraped_and_closed_rows() {
@@ -5000,7 +5321,7 @@ mod matching_persistence_tests {
         let ids = |page: &JobPage| page.items.iter().map(|j| j.id.clone()).collect::<Vec<_>>();
 
         // No narrowing is the default and means everything followed, not nothing.
-        let all = jobs_page_query(JobFilter::default(), 0, &pool)
+        let all = jobs_page_query(JobFilter::default(), 0, &pool, true)
             .await
             .unwrap();
         assert_eq!(all.total, 2);
@@ -5012,6 +5333,7 @@ mod matching_persistence_tests {
             },
             0,
             &pool,
+            true,
         )
         .await
         .unwrap();
@@ -5029,6 +5351,7 @@ mod matching_persistence_tests {
             },
             0,
             &pool,
+            true,
         )
         .await
         .unwrap();
@@ -5569,10 +5892,10 @@ mod matching_persistence_tests {
                 .await
                 .unwrap();
         }
-        let first = jobs_page_query(JobFilter::default(), 0, &pool)
+        let first = jobs_page_query(JobFilter::default(), 0, &pool, true)
             .await
             .unwrap();
-        let second = jobs_page_query(JobFilter::default(), 200, &pool)
+        let second = jobs_page_query(JobFilter::default(), 200, &pool, true)
             .await
             .unwrap();
         assert_eq!(
@@ -5586,7 +5909,7 @@ mod matching_persistence_tests {
         assert_ne!(first.items.last().unwrap().id, second.items[0].id);
     }
     #[test]
-    fn reminder_utc_math_and_focus_dedupe_are_deterministic() {
+    fn reminder_utc_math_is_deterministic() {
         let applied = "2026-03-29T00:30:00Z";
         assert_eq!(
             ghost_due_from(applied, 14).unwrap(),
@@ -5596,10 +5919,6 @@ mod matching_persistence_tests {
             interview_reminder_due("2026-10-25T12:00:00Z", 24).unwrap(),
             "2026-10-24T12:00:00+00:00"
         );
-        let mut shown = None;
-        assert!(mark_focus_prompt(&mut shown, "first"));
-        assert!(!mark_focus_prompt(&mut shown, "first"));
-        assert!(mark_focus_prompt(&mut shown, "second"));
     }
 
     #[tokio::test]
@@ -5881,14 +6200,7 @@ mod matching_persistence_tests {
         let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
         assert_eq!(applied.profile.as_deref(), Some("semiconductor"));
         assert_eq!(applied.added as usize, wanted.len());
-        assert_eq!(
-            (
-                applied.switched_on,
-                applied.switched_off,
-                applied.already_following
-            ),
-            (0, 0, 0)
-        );
+        assert_eq!((applied.switched_on, applied.already_following), (0, 0));
         let mut read_now = applied.read_now.clone();
         read_now.sort();
         let mut expected = wanted.clone();
@@ -5936,51 +6248,121 @@ mod matching_persistence_tests {
         );
         db.pool.close().await;
     }
+    async fn enabled(db: &Database, id: &str) -> i64 {
+        sqlx::query_scalar("SELECT enabled FROM sources WHERE id=?")
+            .bind(id)
+            .fetch_one(&db.pool)
+            .await
+            .unwrap()
+    }
+    // A profile is a whole job search, not a set of switches: choosing another one hides the first, it does not
+    // dismantle it, so going back finds every source exactly as it was left, including what was switched off.
     #[tokio::test]
-    async fn changing_profile_switches_off_only_what_the_previous_profile_turned_on() {
+    async fn switching_profile_switches_nothing_off_and_going_back_finds_it_as_it_was() {
         let db = fresh_database("switch").await;
         let semiconductor = profile_ids("semiconductor");
         let data_science = profile_ids("data-science");
         db.apply_profile(Some("semiconductor")).await.unwrap();
-        // The user keeps one chip company for themselves by switching it on by hand (the picker does exactly this).
-        let kept = semiconductor[0].clone();
-        forget_managed(&db.pool, &kept).await.unwrap();
-        // ...and follows a company of their own that no profile includes.
-        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('mine','Mine','https://jobs.example.test/mine','static-css','1.1.0',1,'active',1,0,'t','t')")
-            .execute(&db.pool).await.unwrap();
+        sqlx::query("UPDATE sources SET enabled=0 WHERE id=?")
+            .bind(&semiconductor[0])
+            .execute(&db.pool)
+            .await
+            .unwrap();
         let applied = db.apply_profile(Some("data-science")).await.unwrap();
         assert_eq!(applied.added as usize, data_science.len());
-        assert_eq!(applied.switched_off as usize, semiconductor.len() - 1);
-        for id in &semiconductor {
-            let enabled: i64 = sqlx::query_scalar("SELECT enabled FROM sources WHERE id=?")
-                .bind(id)
-                .fetch_one(&db.pool)
-                .await
-                .unwrap();
-            assert_eq!(enabled, i64::from(*id == kept), "{id}");
+        for id in &semiconductor[1..] {
+            assert_eq!(enabled(&db, id).await, 1, "{id} stays on while hidden");
         }
-        assert_eq!(
-            count(&db, "SELECT enabled FROM sources WHERE id='mine'").await,
-            1
-        );
-        // Switched off is not removed: the sources and their stored jobs are all still there.
-        assert_eq!(
-            count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize,
-            semiconductor.len() + data_science.len() + 1
-        );
-        // Going back brings the first set back without adding anything twice.
         let back = db.apply_profile(Some("semiconductor")).await.unwrap();
         assert_eq!(
             (
                 back.added,
-                back.switched_on as usize,
-                back.switched_off as usize
+                back.switched_on,
+                back.already_following as usize
             ),
-            (0, semiconductor.len() - 1, data_science.len())
+            (0, 0, semiconductor.len())
+        );
+        assert_eq!(
+            enabled(&db, &semiconductor[0]).await,
+            0,
+            "what the user switched off in a profile stays off there"
         );
         assert_eq!(
             count(&db, "SELECT count(*) FROM sources WHERE deleted_at IS NULL").await as usize,
-            semiconductor.len() + data_science.len() + 1
+            semiconductor.len() + data_science.len()
+        );
+        db.pool.close().await;
+    }
+    // The point of profiles: one person's search and another's never mix. Everything a tab lists, and what an
+    // update reads, goes through the active profile; "All profiles" shows both.
+    #[tokio::test]
+    async fn the_active_profile_decides_which_sources_jobs_and_applications_show() {
+        let db = fresh_database("scope").await;
+        db.apply_profile(Some("semiconductor")).await.unwrap();
+        db.apply_profile(Some("data-science")).await.unwrap();
+        let (chip, data) = (
+            profile_ids("semiconductor")[0].clone(),
+            profile_ids("data-science")[0].clone(),
+        );
+        for (job, source) in [("chip-job", &chip), ("data-job", &data)] {
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,'Engineer','Co','text','[]',?,'active','t','1','t','t')")
+                .bind(job).bind(source).bind(job).execute(&db.pool).await.unwrap();
+            // Exactly what create_application stores.
+            sqlx::query("INSERT INTO applications(id,job_id,current_stage,created_at,updated_at,profile_id) VALUES(?,?,'planned','t','t',coalesce((SELECT s.profile_id FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.id=?),(SELECT value FROM settings WHERE key='profile.active')))")
+                .bind(format!("app-{job}")).bind(job).bind(job).execute(&db.pool).await.unwrap();
+        }
+        let shown = |db: &Database| {
+            let pool = db.pool.clone();
+            async move {
+                let jobs: Vec<String> = jobs_query(JobFilter::default(), &pool)
+                    .await
+                    .unwrap()
+                    .into_iter()
+                    .map(|job| job.id)
+                    .collect();
+                let apps: Vec<String> = sqlx::query_scalar(&format!(
+                    "SELECT a.id FROM applications a WHERE {APPLICATION_IN_PROFILE} ORDER BY a.id"
+                ))
+                .fetch_all(&pool)
+                .await
+                .unwrap();
+                let sources: Vec<String> = sqlx::query_scalar(&format!(
+                    "SELECT s.id FROM sources s WHERE {SOURCE_IN_PROFILE}"
+                ))
+                .fetch_all(&pool)
+                .await
+                .unwrap();
+                (jobs, apps, sources)
+            }
+        };
+        let (jobs, apps, sources) = shown(&db).await;
+        assert_eq!(
+            (jobs, apps),
+            (
+                vec!["data-job".to_string()],
+                vec!["app-data-job".to_string()]
+            )
+        );
+        assert!(sources.contains(&data) && !sources.contains(&chip));
+        db.apply_profile(Some("semiconductor")).await.unwrap();
+        let (jobs, apps, sources) = shown(&db).await;
+        assert_eq!(
+            (jobs, apps),
+            (
+                vec!["chip-job".to_string()],
+                vec!["app-chip-job".to_string()]
+            )
+        );
+        assert!(sources.contains(&chip) && !sources.contains(&data));
+        let all = db.apply_profile(None).await.unwrap();
+        assert_eq!(all, ProfileApplied::default());
+        assert_eq!(db.profiles_state().await.unwrap().active, None);
+        let (mut jobs, apps, _) = shown(&db).await;
+        jobs.sort();
+        assert_eq!((jobs.len(), apps.len()), (2, 2), "all profiles shows both");
+        assert!(
+            db.apply_profile(Some("astronaut")).await.is_err(),
+            "a profile that does not exist is refused"
         );
         db.pool.close().await;
     }
@@ -5995,23 +6377,37 @@ mod matching_persistence_tests {
             .await
             .unwrap();
         let again = db.apply_profile(Some("data-science")).await.unwrap();
-        assert_eq!(
-            (again.added, again.switched_on, again.switched_off),
-            (0, 0, 0)
-        );
+        assert_eq!((again.added, again.switched_on), (0, 0));
         assert_eq!(again.already_following as usize, wanted.len());
         assert_eq!(
             again.read_now,
             vec![wanted[0].clone()],
             "only the board that was never read is read again"
         );
+        // A board that was tried and failed is not hammered on every switch; the next update retries it.
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('failed',?,'scrape','failed','t')")
+            .bind(&wanted[0]).execute(&db.pool).await.unwrap();
+        assert!(db
+            .apply_profile(Some("data-science"))
+            .await
+            .unwrap()
+            .read_now
+            .is_empty());
         db.pool.close().await;
     }
+    // Only the first choice of a profile brings back what was switched off or removed before profiles kept
+    // their own sources. After that the profile is the user's: a removed board stays removed, but a company
+    // the catalog newly adds to the profile still arrives.
     #[tokio::test]
-    async fn a_profile_brings_back_boards_that_were_switched_off_or_removed() {
+    async fn only_the_first_choice_revives_boards_and_later_ones_add_only_new_companies() {
         let db = fresh_database("revive").await;
         let wanted = profile_ids("semiconductor");
         db.apply_profile(Some("semiconductor")).await.unwrap();
+        // As an install from before profiles scoped the window left them.
+        sqlx::query("UPDATE sources SET profile_id=NULL")
+            .execute(&db.pool)
+            .await
+            .unwrap();
         sqlx::query("UPDATE sources SET enabled=0 WHERE id=?")
             .bind(&wanted[0])
             .execute(&db.pool)
@@ -6022,38 +6418,150 @@ mod matching_persistence_tests {
             .execute(&db.pool)
             .await
             .unwrap();
-        let applied = db.apply_profile(Some("semiconductor")).await.unwrap();
-        assert_eq!(applied.switched_on, 1);
-        assert_eq!(applied.added, 1, "a removed board counts as added back");
+        let first = db.apply_profile(Some("semiconductor")).await.unwrap();
+        assert_eq!((first.switched_on, first.added), (1, 1));
+        assert_eq!(
+            count(&db, "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL AND profile_id='semiconductor'").await as usize,
+            wanted.len()
+        );
+        // Now removed inside the profile, and one company the catalog has added since.
+        sqlx::query("UPDATE sources SET deleted_at='2026-11-02T00:00:00Z',enabled=0 WHERE id=?")
+            .bind(&wanted[1])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM source_configs WHERE source_id=?")
+            .bind(&wanted[2])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM sources WHERE id=?")
+            .bind(&wanted[2])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        let later = db.apply_profile(Some("semiconductor")).await.unwrap();
+        assert_eq!((later.added, later.switched_on), (1, 0));
+        assert_eq!(enabled(&db, &wanted[2]).await, 1);
         assert_eq!(
             count(
                 &db,
-                "SELECT count(*) FROM sources WHERE enabled=1 AND deleted_at IS NULL"
+                &format!(
+                    "SELECT count(*) FROM sources WHERE id='{}' AND deleted_at IS NOT NULL",
+                    wanted[1]
+                )
             )
-            .await as usize,
-            wanted.len()
+            .await,
+            1,
+            "a board removed inside the profile stays removed"
         );
         db.pool.close().await;
     }
+    // An install from before profiles scoped the window: the data-science switch had turned the chip boards
+    // off, nothing had a profile, and the applications had none either.
     #[tokio::test]
-    async fn clearing_the_profile_forgets_it_and_changes_no_source() {
-        let db = fresh_database("clear").await;
+    async fn existing_sources_and_applications_are_sorted_into_profiles_once() {
+        let db = fresh_database("legacy").await;
         db.apply_profile(Some("semiconductor")).await.unwrap();
-        let before = count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await;
-        let cleared = db.apply_profile(None).await.unwrap();
+        db.apply_profile(Some("data-science")).await.unwrap();
+        let (chip, data) = (profile_ids("semiconductor"), profile_ids("data-science"));
+        sqlx::query("UPDATE sources SET profile_id=NULL")
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("DELETE FROM settings WHERE key=?")
+            .bind(PROFILE_SCOPED)
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("UPDATE sources SET enabled=0 WHERE id IN (?,?)")
+            .bind(&chip[0])
+            .bind(&chip[1])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("UPDATE sources SET disabled_reason='Board is gone' WHERE id=?")
+            .bind(&chip[1])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("UPDATE sources SET enabled=0 WHERE id=?")
+            .bind(&data[0])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('mine','Mine','https://jobs.example.test/mine','static-css','1.1.0',1,'active',1,0,'t','t')")
+            .execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,created_at,updated_at) VALUES('j',?,'Engineer','Co','text','[]','j','active','t','1','t','t')")
+            .bind(&chip[2]).execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO applications(id,job_id,current_stage,created_at,updated_at) VALUES('a','j','applied','t','t')")
+            .execute(&db.pool).await.unwrap();
+        write_setting(&db.pool, LEGACY_PROFILE_MANAGED, "[]")
+            .await
+            .unwrap();
+
+        db.scope_to_profiles().await.unwrap();
+
+        let owner = |id: String| {
+            let pool = db.pool.clone();
+            async move {
+                sqlx::query_scalar::<_, Option<String>>("SELECT profile_id FROM sources WHERE id=?")
+                    .bind(id)
+                    .fetch_one(&pool)
+                    .await
+                    .unwrap()
+            }
+        };
         assert_eq!(
-            (cleared.profile, cleared.added, cleared.switched_off),
-            (None, 0, 0)
+            owner(chip[0].clone()).await.as_deref(),
+            Some("semiconductor")
         );
-        assert_eq!(db.profiles_state().await.unwrap().active, None);
         assert_eq!(
-            count(&db, "SELECT count(*) FROM sources WHERE enabled=1").await,
-            before
+            owner(data[0].clone()).await.as_deref(),
+            Some("data-science")
         );
-        assert!(
-            db.apply_profile(Some("astronaut")).await.is_err(),
-            "a profile that does not exist is refused"
+        assert_eq!(
+            owner("mine".into()).await.as_deref(),
+            Some("data-science"),
+            "the catalog does not place it, so it joins the active profile"
         );
+        assert_eq!(
+            enabled(&db, &chip[0]).await,
+            1,
+            "switched off by the old profile switch, so back on"
+        );
+        assert_eq!(
+            enabled(&db, &chip[1]).await,
+            0,
+            "off for a reason of its own"
+        );
+        assert_eq!(
+            enabled(&db, &data[0]).await,
+            0,
+            "the active profile's choices are the user's"
+        );
+        assert_eq!(
+            count(
+                &db,
+                "SELECT count(*) FROM applications WHERE profile_id='semiconductor'"
+            )
+            .await,
+            1
+        );
+        assert_eq!(
+            read_setting(&db.pool, LEGACY_PROFILE_MANAGED)
+                .await
+                .unwrap(),
+            None
+        );
+        // Once only: what the user does afterwards is never undone by the next launch.
+        sqlx::query("UPDATE sources SET enabled=0 WHERE id=?")
+            .bind(&chip[0])
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        db.scope_to_profiles().await.unwrap();
+        assert_eq!(enabled(&db, &chip[0]).await, 0);
         db.pool.close().await;
     }
     // Reconciliation keeps rows an earlier version created in step with the catalog, and clears the
@@ -6229,6 +6737,91 @@ mod matching_persistence_tests {
                 .unwrap();
         assert_eq!(state[1], ("kept".into(), "active".into(), 0));
         assert_eq!(state[0], ("gone".into(), "possibly_closed".into(), 1));
+        db.pool.close().await;
+    }
+
+    // An update reads several boards at once, and each one writes its jobs in batches whose
+    // transactions read before they write. A deferred BEGIN cannot wait for a lock it tries to
+    // upgrade to, so the large boards (AMD, Apple, Micron, ...) failed with "database is locked"
+    // the moment two of them wrote together. Concurrent batches must queue, not fail.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn boards_written_at_the_same_time_wait_for_each_other_instead_of_failing() {
+        let root = std::env::temp_dir().join(format!("jobscraper-concurrent-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = std::sync::Arc::new(Database::open(root.join("jobscraper.db")).await.unwrap());
+        let boards = 6;
+        for board in 0..boards {
+            sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES(?,?,?,'workday','1.1.0',1,'active',0,0,'t','t')")
+                .bind(format!("s{board}")).bind(format!("Board {board}")).bind(format!("https://board{board}.example.test/"))
+                .execute(&db.pool).await.unwrap();
+            sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES(?,?,'scrape','running','t')")
+                .bind(format!("r{board}")).bind(format!("s{board}"))
+                .execute(&db.pool).await.unwrap();
+        }
+        let tasks = (0..boards).map(|board| {
+            let db = db.clone();
+            tokio::spawn(async move {
+                for batch in 0..4 {
+                    let jobs = (0..200).map(|n| {
+                        let id = format!("{board}-{batch}-{n}");
+                        serde_json::json!({"externalId":id,"title":format!("Engineer {id}"),"company":format!("Board {board}"),
+                            "canonicalUrl":format!("https://board{board}.example.test/job/{id}"),"descriptionText":"x".repeat(2000),
+                            "contentHash":format!("h{id}"),"listingHash":format!("l{id}"),"location":"Lisbon"})
+                    }).collect::<Vec<_>>();
+                    db.persist_worker_jobs(&format!("r{board}"), &format!("s{board}"), &jobs).await?;
+                }
+                Ok::<_, String>(())
+            })
+        });
+        for result in futures::future::join_all(tasks).await {
+            result.unwrap().unwrap();
+        }
+        let stored: i64 = sqlx::query_scalar("SELECT count(*) FROM jobs")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(stored, boards * 4 * 200);
+        db.pool.close().await;
+    }
+
+    // The planner's statistics were taken when the jobs table had been emptied (a purge, then a
+    // launch), so it believed the table held one row and answered every "is this job already
+    // stored?" lookup with a full scan: 15ms a job at 30,000 rows, which held the write lock for
+    // seconds per batch and starved every other board into "database is locked". Saving jobs must
+    // keep the statistics in step with the table.
+    #[tokio::test]
+    async fn statistics_taken_on_an_empty_table_do_not_outlive_the_jobs_saved_into_it() {
+        let root = std::env::temp_dir().join(format!("jobscraper-stats-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+        let job = |n: usize| {
+            serde_json::json!({"externalId":format!("E{n}"),"title":format!("Engineer {n}"),"company":"S",
+            "canonicalUrl":format!("https://example.test/job/{n}"),"descriptionText":"x","contentHash":format!("h{n}"),"listingHash":format!("l{n}")})
+        };
+        // The one row present when the statistics were taken carried no board ID, link or
+        // requisition, so those three indexes were recorded as empty: exactly the stored state.
+        db.persist_worker_jobs("r", "s", &[serde_json::json!({"title":"Seed","company":"S","descriptionText":"x","contentHash":"h","listingHash":"l"})]).await.unwrap();
+        sqlx::query("ANALYZE").execute(&db.pool).await.unwrap();
+        // Statistics are refreshed each time the table grows tenfold, so a small table may briefly be
+        // planned as a scan (cheap at that size); past a few thousand rows it must use its indexes.
+        for batch in 0..20 {
+            let jobs = (1..=200).map(|n| job(batch * 200 + n)).collect::<Vec<_>>();
+            db.persist_worker_jobs("r", "s", &jobs).await.unwrap();
+        }
+        // SQLite reads statistics when a connection opens, so the pool's connections are recycled
+        // (see POOL_CONNECTION_LIFETIME); a connection opened now is what the next minute plans with.
+        db.pool.close().await;
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        let plan: Vec<(i64, i64, i64, String)> = sqlx::query_as("EXPLAIN QUERY PLAN SELECT id FROM jobs WHERE (source_id=? AND external_id=?) OR (? IS NOT NULL AND canonical_url=?) OR (? IS NOT NULL AND requisition_id=? AND lower(trim(company))=lower(?)) OR (?=0 AND source_id=? AND dedupe_fingerprint=?) ORDER BY created_at LIMIT 1")
+            .bind("s").bind("E1").bind("u").bind("u").bind("r").bind("r").bind("S").bind(0).bind("s").bind("f")
+            .fetch_all(&db.pool).await.unwrap();
+        let plan = plan.into_iter().map(|row| row.3).collect::<Vec<_>>();
+        assert!(
+            !plan.iter().any(|step| step == "SCAN jobs"),
+            "the stored-job lookup scans the table: {plan:?}"
+        );
         db.pool.close().await;
     }
 
@@ -6645,6 +7238,7 @@ mod matching_persistence_tests {
                     },
                     0,
                     &pool,
+                    true,
                 )
                 .await
                 .unwrap();

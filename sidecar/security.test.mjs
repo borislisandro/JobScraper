@@ -163,3 +163,17 @@ test("a response with headers larger than Node's default limit is still readable
   assert.match(String(withoutFlag.at(-1).payload.message),/fetch failed|network_error/);
  }finally{await new Promise(resolve=>server.close(resolve))}
 });
+
+test("a 429 without Retry-After backs off for a rate-limit window, and the site is then read more slowly", async () => {
+  const { rateLimitWaitMs, throttleOrigin, slowedPace } = await import("./worker.mjs");
+  assert.equal(rateLimitWaitMs(null, 0), 15_000);
+  assert.equal(rateLimitWaitMs(null, 1), 30_000);
+  assert.equal(rateLimitWaitMs(null, 3), 60_000, "never more than a minute");
+  assert.equal(rateLimitWaitMs("5", 3, 0), 5_000, "the site's own Retry-After wins");
+  const throttled = new Map();
+  assert.equal(slowedPace("https://q.test", 400, throttled), 400);
+  assert.equal(throttleOrigin("https://q.test", 400, throttled), 1_500);
+  assert.equal(throttleOrigin("https://q.test", 400, throttled), 3_000);
+  assert.equal(throttleOrigin("https://q.test", 400, throttled), 5_000, "capped");
+  assert.equal(slowedPace("https://other.test", 400, throttled), 400, "only the site that complained slows down");
+});

@@ -62,7 +62,7 @@ impl Drop for RunFinalizer {
         }
         let (pool, run_id) = (self.pool.clone(), self.run_id.clone());
         tauri::async_runtime::spawn(async move {
-            if let Ok(mut tx) = pool.begin().await {
+            if let Ok(mut tx) = pool.begin_with(crate::db::WRITE_TRANSACTION).await {
                 let _ = sqlx::query("DELETE FROM job_occurrences WHERE run_id=?")
                     .bind(&run_id)
                     .execute(&mut *tx)
@@ -454,13 +454,14 @@ async fn run(
     // before anything is.
     let filter_terms = if matches!(command, "scrape_source" | "check_source") {
         let started = Instant::now();
+        // Kept per profile: the filter that applies is the one of the profile this source belongs to.
         let terms = crate::db::scrape_filter_terms(
-            &sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key=?")
-                .bind(crate::db::SCRAPE_TITLE_FILTER)
-                .fetch_optional(&state.db.pool)
-                .await
-                .map_err(|e| e.to_string())?
-                .unwrap_or_default(),
+            &crate::db::source_filter_setting(
+                &state.db.pool,
+                crate::db::SCRAPE_TITLE_FILTER,
+                &source_id,
+            )
+            .await?,
         );
         filter_load_ms = millis(started.elapsed());
         terms
@@ -756,8 +757,23 @@ async fn run(
             && !(command == "scrape_source" && event.event == "job")
             && !matches!(event.event.as_str(), "enriched_job" | "enrichment_failed")
         {
-            app.emit("scrape-event", &event)
-                .map_err(|e| e.to_string())?;
+            // Lanes run sources in parallel, so a bare worker event cannot be told apart from its
+            // neighbours. The source and command travel with it, which is what lets the Sources
+            // tab draw one progress bar per row instead of one interleaved log.
+            app.emit(
+                "scrape-event",
+                serde_json::json!({
+                    "protocolVersion": event.protocol_version,
+                    "event": &event.event,
+                    "runId": &event.run_id,
+                    "payload": &event.payload,
+                    "sourceId": &source_id,
+                    "sourceName": &source_name,
+                    "command": command,
+                    "batchId": batch_id,
+                }),
+            )
+            .map_err(|e| e.to_string())?;
         }
         if event.event != "seen_batch"
             && !(command == "scrape_source" && event.event == "job")
@@ -1372,15 +1388,17 @@ fn may_skip(decision: CheckDecision, unchanged_checks: i64, limit: i64) -> bool 
 /// sources are followed at all stays `sources.enabled`, owned by the Sources page; this is the
 /// separate, throwaway question of what is being looked at right now.
 async fn saved_sources(state: &AppState, only: &[String]) -> ApiResult<Vec<SavedSource>> {
-    let rows = sqlx::query(
+    // Only the active profile's boards: switching profile is how the user says whose job search to update.
+    let rows = sqlx::query(&format!(
         "SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.robots_override,s.unchanged_checks,\
          (SELECT count(*) FROM jobs j WHERE j.source_id=s.id AND j.availability<>'archived') AS stored,\
          (SELECT r.discovered_count FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape' AND r.status='completed' AND r.complete=1 ORDER BY r.started_at DESC LIMIT 1) AS baseline,\
          (SELECT r.started_at FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape' AND r.status='completed' AND r.complete=1 ORDER BY r.started_at DESC LIMIT 1) AS last_full_at,\
-         (SELECT MAX(changed_at) FROM (SELECT c.updated_at AS changed_at FROM source_configs c WHERE c.source_id=s.id UNION ALL SELECT updated_at FROM settings WHERE key='scrape.titleAny')) AS config_changed_at,\
+         (SELECT MAX(changed_at) FROM (SELECT c.updated_at AS changed_at FROM source_configs c WHERE c.source_id=s.id UNION ALL SELECT updated_at FROM settings WHERE key='scrape.titleAny' OR key='scrape.titleAny.'||s.profile_id)) AS config_changed_at,\
          EXISTS(SELECT 1 FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape') AS attempted \
-         FROM sources s WHERE s.enabled=1 AND s.kind='active' AND s.deleted_at IS NULL ORDER BY s.name,s.id",
-    )
+         FROM sources s WHERE s.enabled=1 AND s.kind='active' AND s.deleted_at IS NULL AND {} ORDER BY s.name,s.id",
+        crate::db::SOURCE_IN_PROFILE
+    ))
     .fetch_all(&state.db.pool)
     .await
     .map_err(|e| e.to_string())?;
@@ -1624,6 +1642,10 @@ async fn scrape_all_inner(
     let batch_id = run_id.unwrap_or_else(|| Uuid::new_v4().to_string());
     let sources = saved_sources(&state, &source_ids).await?;
     let total = sources.len();
+    let queued: Vec<String> = sources
+        .iter()
+        .map(|source| source.source_id.clone())
+        .collect();
     let groups = domain_groups(sources);
     // Sources used to run in fixed pairs, and each pair had to finish before the next began, so a
     // two-second board sat waiting on a two-hour one and eighteen sources meant nine such waits.
@@ -1633,6 +1655,12 @@ async fn scrape_all_inner(
     if !state.sidecars.start_batch(&batch_id) {
         return Err("Another source update is already running".into());
     }
+    // Every source in the batch is waiting from this moment; saying which ones up front is what
+    // lets each row show "Queued" before its lane reaches it.
+    let _ = app.emit(
+        "scrape-all-progress",
+        serde_json::json!({"runId":batch_id,"phase":"queued","sourceIds":queued,"completed":0,"total":total}),
+    );
     let active_started = Instant::now();
     let queue = Arc::new(Mutex::new(VecDeque::from(groups)));
     let done = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -1784,27 +1812,31 @@ async fn scrape_all_inner(
                             }
                         }
                     };
-                    if state.sidecars.batch_cancelled(&batch_id) {
+                    let finished = if state.sidecars.batch_cancelled(&batch_id) {
                         cancelled.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        "cancelled"
                     } else {
                         match outcome {
                             CheckDecision::Unchanged => {
                                 unchanged.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                                "unchanged"
                             }
                             CheckDecision::Changed => {
                                 done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                                "read"
                             }
                             CheckDecision::Failed | CheckDecision::Indeterminate => {
                                 failed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                                "failed"
                             }
                         }
-                    }
+                    };
                     let read = |c: &std::sync::atomic::AtomicUsize| {
                         c.load(std::sync::atomic::Ordering::Relaxed)
                     };
                     // Progress is now reported the moment a source finishes rather than when its
                     // pair does, so the count moves steadily instead of in jumps.
-                    let _=app.emit("scrape-all-progress",serde_json::json!({"runId":batch_id,"completed":read(&done)+read(&unchanged)+read(&failed)+read(&cancelled),"total":total,"unchanged":read(&unchanged),"failed":read(&failed),"cancelled":read(&cancelled)}));
+                    let _=app.emit("scrape-all-progress",serde_json::json!({"runId":batch_id,"sourceId":&source.source_id,"outcome":finished,"completed":read(&done)+read(&unchanged)+read(&failed)+read(&cancelled),"total":total,"unchanged":read(&unchanged),"failed":read(&failed),"cancelled":read(&cancelled)}));
                 }
                 active_domains.fetch_sub(1, std::sync::atomic::Ordering::Relaxed);
             }
@@ -1889,12 +1921,7 @@ pub async fn notify_new_jobs(
     // Announcing is the last thing a batch does, so the terms are read here rather than kept from
     // the start of the run: changing them mid-update takes effect on that update's notification.
     let terms = crate::db::scrape_filter_terms(
-        &sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key=?")
-            .bind(crate::db::NOTIFY_TITLE_FILTER)
-            .fetch_optional(pool)
-            .await
-            .map_err(|e| e.to_string())?
-            .unwrap_or_default(),
+        &crate::db::active_filter_setting(pool, crate::db::NOTIFY_TITLE_FILTER).await?,
     );
     let (count, jobs) = crate::db::new_jobs_since(pool, since, 3, &terms).await?;
     let Some((title, body)) = new_jobs_summary(count, &jobs) else {
@@ -2178,7 +2205,6 @@ mod tests {
         let state = AppState {
             db,
             sidecars: SidecarManager::default(),
-            shown_apply_attempt: Mutex::new(None),
             automatic_sync_started: false.into(),
             headless: true,
         };

@@ -74,6 +74,8 @@ async fn start(
     // A new install holds no sources; the user picks a profile on the Sources tab. This only keeps the
     // sources an earlier version created in step with the catalog.
     db::retry_transient(|| state.db.reconcile_catalog_sources()).await?;
+    // Sources and applications stored before profiles scoped the window are sorted into them, once.
+    db::retry_transient(|| state.db.scope_to_profiles()).await?;
     if !state.headless {
         startup.set(app, "scheduling", "Setting up reminders");
         // Scheduler failure is recorded on reminder rows and never blocks local application use.
