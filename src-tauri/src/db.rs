@@ -462,7 +462,9 @@ pub async fn source_filter_setting(
     .map(Option::unwrap_or_default)
     .map_err(|e| e.to_string())
 }
-/// The same per-profile filter, for the profile that is active now: what a finished batch announces.
+/// The same per-profile filter, for the profile that is active now. Notifications now go through
+/// `scoped_setting` per profile; this stays for the tests that pin the fallback rule.
+#[cfg(test)]
 pub async fn active_filter_setting(pool: &SqlitePool, key: &str) -> ApiResult<String> {
     sqlx::query_scalar::<_, Option<String>>(
         "SELECT coalesce((SELECT value FROM settings WHERE key=?||'.'||(SELECT value FROM settings WHERE key='profile.active')),(SELECT value FROM settings WHERE key=?))",
@@ -473,6 +475,195 @@ pub async fn active_filter_setting(pool: &SqlitePool, key: &str) -> ApiResult<St
     .await
     .map(Option::unwrap_or_default)
     .map_err(|e| e.to_string())
+}
+/// Which jobs the notification after an update announces: "" (or nothing stored) follows the filter
+/// the Jobs page was last left on, "view:<name>" a saved view, and "title" only the title box above.
+/// Kept per profile like the filters it points at.
+pub const NOTIFY_VIEW: &str = "notify.view";
+/// Written by the Jobs page (src/presets.ts): the filter it was last left on, and its saved views.
+const JOBS_ACTIVE_FILTER: &str = "jobs.activeFilter";
+const JOBS_SAVED_VIEWS: &str = "jobs.savedViews";
+/// A per-profile setting for one scope: the profile's own value, else the shared one.
+async fn scoped_setting(
+    pool: &SqlitePool,
+    key: &str,
+    scope: &ProfileScope,
+) -> ApiResult<Option<String>> {
+    let own = match scope {
+        ProfileScope::Active => match read_setting(pool, PROFILE_ACTIVE).await? {
+            Some(profile) => read_setting(pool, &format!("{key}.{profile}")).await?,
+            None => None,
+        },
+        ProfileScope::Profile(profile) => read_setting(pool, &format!("{key}.{profile}")).await?,
+        ProfileScope::Unassigned => None,
+    };
+    match own {
+        Some(value) => Ok(Some(value)),
+        None => read_setting(pool, key).await,
+    }
+}
+/// What a notification counts, for one profile.
+#[derive(Debug)]
+pub enum NotifyRule {
+    /// A Jobs page filter: the one it was last left on (no name), or a saved view.
+    View {
+        name: Option<String>,
+        filter: JobFilter,
+    },
+    /// The older title box: any of these terms in the title.
+    Title(Vec<String>),
+}
+/// A stored Jobs filter, read the way the page reads it (presets.ts): a missing window is the
+/// page's default year, and anything that is not what it should be counts as unset.
+fn stored_view_filter(value: &serde_json::Value) -> JobFilter {
+    let text = |key: &str| {
+        value
+            .get(key)
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_owned()
+    };
+    let flag = |key: &str| value.get(key).and_then(|v| v.as_bool()).unwrap_or(false);
+    JobFilter {
+        title: text("title"),
+        keyword: text("keyword"),
+        sort: "recent".into(),
+        saved_only: flag("savedOnly"),
+        include_closed: flag("includeClosed"),
+        posted_within_days: match value.get("postedWithinDays") {
+            None => Some(365),
+            Some(days) => days.as_i64().filter(|days| *days > 0),
+        },
+        countries: value
+            .get("countries")
+            .and_then(|v| v.as_array())
+            .map(|codes| {
+                codes
+                    .iter()
+                    .filter_map(|c| c.as_str().map(str::to_owned))
+                    .collect()
+            })
+            .unwrap_or_default(),
+        include_unknown_locations: flag("includeUnknownLocations"),
+        ..JobFilter::default()
+    }
+}
+pub async fn notification_rule(pool: &SqlitePool, scope: &ProfileScope) -> ApiResult<NotifyRule> {
+    let choice = scoped_setting(pool, NOTIFY_VIEW, scope)
+        .await?
+        .unwrap_or_default();
+    if choice == "title" {
+        return Ok(NotifyRule::Title(scrape_filter_terms(
+            &scoped_setting(pool, NOTIFY_TITLE_FILTER, scope)
+                .await?
+                .unwrap_or_default(),
+        )));
+    }
+    if let Some(name) = choice.strip_prefix("view:") {
+        let views: serde_json::Value = serde_json::from_str(
+            &scoped_setting(pool, JOBS_SAVED_VIEWS, scope)
+                .await?
+                .unwrap_or_default(),
+        )
+        .unwrap_or_default();
+        let found = views.as_array().and_then(|views| {
+            views.iter().find(|view| {
+                view.get("name")
+                    .and_then(|v| v.as_str())
+                    .is_some_and(|stored| stored.trim().eq_ignore_ascii_case(name.trim()))
+            })
+        });
+        // A view deleted after it was chosen falls through to the last-used filter rather than
+        // announcing everything.
+        if let Some(view) = found {
+            return Ok(NotifyRule::View {
+                name: Some(name.trim().to_owned()),
+                filter: stored_view_filter(view),
+            });
+        }
+    }
+    let last: serde_json::Value = serde_json::from_str(
+        &scoped_setting(pool, JOBS_ACTIVE_FILTER, scope)
+            .await?
+            .unwrap_or_default(),
+    )
+    .unwrap_or(serde_json::Value::Null);
+    Ok(NotifyRule::View {
+        name: None,
+        filter: if last.is_object() {
+            stored_view_filter(&last)
+        } else {
+            JobFilter {
+                posted_within_days: Some(365),
+                ..JobFilter::default()
+            }
+        },
+    })
+}
+/// New jobs in one profile that its notification rule lets through, counted with the Jobs page's
+/// own query so the number announced is the number the list shows for that filter.
+pub async fn new_jobs_matching(
+    pool: &SqlitePool,
+    scope: &ProfileScope,
+    since: &str,
+    limit: usize,
+) -> ApiResult<(i64, Vec<NewJob>, NotifyRule)> {
+    let rule = notification_rule(pool, scope).await?;
+    let (count, jobs) = match &rule {
+        NotifyRule::Title(terms) => new_jobs_since(pool, scope, since, limit as i64, terms).await?,
+        NotifyRule::View { filter, .. } => {
+            let page = jobs_page_query(
+                JobFilter {
+                    first_seen_after: Some(since.to_owned()),
+                    include_dismissed: false,
+                    source_ids: Vec::new(),
+                    sort: "recent".into(),
+                    scope: scope.clone(),
+                    ..filter.clone()
+                },
+                0,
+                pool,
+                true,
+            )
+            .await?;
+            let samples = page
+                .items
+                .into_iter()
+                .take(limit)
+                .map(|job| NewJob {
+                    title: job.title,
+                    company: job.company,
+                })
+                .collect();
+            (page.total, samples)
+        }
+    };
+    Ok((count, jobs, rule))
+}
+/// The profiles an update can have brought news for: every one with a switched-on source.
+pub async fn notification_scopes(
+    pool: &SqlitePool,
+) -> ApiResult<Vec<(ProfileScope, Option<String>)>> {
+    let ids: Vec<Option<String>> = sqlx::query_scalar(
+        "SELECT DISTINCT profile_id FROM sources WHERE enabled=1 AND deleted_at IS NULL AND kind='active' ORDER BY profile_id",
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(ids
+        .into_iter()
+        .map(|id| match id {
+            Some(id) => {
+                let name = company_catalog()
+                    .profiles
+                    .iter()
+                    .find(|profile| profile.id == id)
+                    .map(|profile| profile.name.clone());
+                (ProfileScope::Profile(id), name)
+            }
+            None => (ProfileScope::Unassigned, None),
+        })
+        .collect())
 }
 /// Terms are separated by commas or newlines so a phrase ("design verification") stays one term.
 pub fn scrape_filter_terms(raw: &str) -> Vec<String> {
@@ -604,6 +795,14 @@ pub async fn sync_in_progress(pool: &SqlitePool) -> bool {
                 < HEARTBEAT_FRESH_SECS
         })
 }
+/// Whether the scheduled background check is switched on, as the user last asked.
+pub async fn background_sync_requested(pool: &SqlitePool) -> bool {
+    read_setting(pool, SYNC_BACKGROUND)
+        .await
+        .ok()
+        .flatten()
+        .is_some_and(|value| value == "true")
+}
 pub async fn write_sync_heartbeat(pool: &SqlitePool) {
     let _ = write_setting(pool, SYNC_HEARTBEAT, &now()).await;
 }
@@ -622,6 +821,7 @@ pub struct NewJob {
 /// `created_at` is insert-only, so re-scraping an existing listing cannot resurface it here.
 pub async fn new_jobs_since(
     pool: &SqlitePool,
+    scope: &ProfileScope,
     since: &str,
     limit: i64,
     terms: &[String],
@@ -629,13 +829,13 @@ pub async fn new_jobs_since(
     // ponytail: every new row is read so the terms can be applied in Rust rather than in two
     // dialects of LIKE. One batch's new listings are a small set; push the match into SQL if a
     // first full read ever makes this slow.
-    let jobs: Vec<NewJob> = sqlx::query_as(
-        "SELECT title,company FROM jobs WHERE created_at >= ? AND availability != 'closed' ORDER BY created_at DESC",
-    )
-    .bind(since)
-    .fetch_all(pool)
-    .await
-    .map_err(|e| e.to_string())?;
+    let (scope_sql, scope_bind) = scope.clause();
+    let sql = format!("SELECT j.title,j.company FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.created_at >= ? AND j.availability NOT IN ('closed','archived') AND j.dismissed_at IS NULL AND s.enabled=1 AND s.deleted_at IS NULL AND {scope_sql} ORDER BY j.created_at DESC");
+    let mut query = sqlx::query_as::<_, NewJob>(&sql).bind(since);
+    if let Some(bound) = scope_bind {
+        query = query.bind(bound);
+    }
+    let jobs: Vec<NewJob> = query.fetch_all(pool).await.map_err(|e| e.to_string())?;
     let mut matched = jobs
         .into_iter()
         .filter(|job| title_passes_scrape_filter(&job.title, terms));
@@ -772,8 +972,20 @@ fn worker_content_hash(title: &str, company: &str, description: &str) -> String 
 pub struct PersistBatchResult {
     pub written: u32,
     pub unchanged: u32,
+    /// Rows left out because they carried no title or no company. One broken row on a board used
+    /// to abort the whole chunk of up to 200 with it.
+    pub invalid: u32,
 }
-const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company,EXISTS(SELECT 1 FROM application_attempts att WHERE att.application_id=a.id AND att.resolved_at IS NULL) AS pending_confirmation,j.canonical_url,j.apply_url FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
+const MISSING_TITLE_OR_COMPANY: &str = "Worker result is missing required title or company";
+fn has_title_and_company(payload: &serde_json::Value) -> bool {
+    ["title", "company"].iter().all(|key| {
+        payload
+            .get(*key)
+            .and_then(|v| v.as_str())
+            .is_some_and(|value| !value.trim().is_empty())
+    })
+}
+const APPLICATION_SELECT: &str = "SELECT a.id,a.job_id,a.persona_id,a.current_stage,a.recruiter,a.recruiter_name,a.recruiter_email,a.recruiter_phone,a.source_attribution,a.rejection_reason,a.rejection_category,a.withdrawn_reason,a.accepted_at,a.applied_at,a.created_at,a.updated_at,j.title,j.company,EXISTS(SELECT 1 FROM application_attempts att WHERE att.application_id=a.id AND att.resolved_at IS NULL) AS pending_confirmation,j.canonical_url,j.apply_url,(SELECT r.due_at FROM reminders r WHERE r.application_id=a.id AND r.reminder_type='ghosted' AND r.status<>'cancelled' ORDER BY r.created_at DESC,r.rowid DESC LIMIT 1) AS follow_up_at,j.availability AS job_availability,j.posted_at AS job_posted_at,j.closing_at AS job_closing_at FROM applications a LEFT JOIN jobs j ON j.id=a.job_id";
 fn valid_url(value: &str, allow_private: bool) -> ApiResult<()> {
     let url = Url::parse(value).map_err(|_| "A valid HTTP(S) URL is required".to_string())?;
     if !matches!(url.scheme(), "http" | "https") {
@@ -1209,6 +1421,10 @@ impl Database {
         source_id: &str,
         payload: &serde_json::Value,
     ) -> ApiResult<()> {
+        // One job saved on its own (a captured link) has nothing else to fall back on: say why.
+        if !has_title_and_company(payload) {
+            return Err(MISSING_TITLE_OR_COMPANY.into());
+        }
         self.persist_worker_jobs(run_id, source_id, std::slice::from_ref(payload))
             .await
             .map(|_| ())
@@ -1230,6 +1446,10 @@ impl Database {
             .map_err(|e| e.to_string())?;
         let mut result = PersistBatchResult::default();
         for payload in payloads {
+            if !has_title_and_company(payload) {
+                result.invalid += 1;
+                continue;
+            }
             if Self::persist_worker_job_in(&mut tx, run_id, source_id, payload).await? {
                 result.written += 1;
             } else {
@@ -1258,7 +1478,7 @@ impl Database {
             .unwrap_or("")
             .trim();
         if title.is_empty() || company.is_empty() {
-            return Err("Worker result is missing required title or company".into());
+            return Err(MISSING_TITLE_OR_COMPANY.into());
         }
         let external = payload.get("externalId").and_then(|v| v.as_str());
         let canonical = payload
@@ -1350,8 +1570,8 @@ impl Database {
             stored_checked
         };
         let description_error = payload.get("descriptionError").and_then(|v| v.as_str());
-        sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,requisition_id,dedupe_fingerprint,first_seen_at,title,company,location,location_countries,work_mode,description_text,description_html,detail_url,description_status,description_error,description_checked_at,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,listing_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET external_id=COALESCE(excluded.external_id,jobs.external_id),canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,requisition_id=COALESCE(excluded.requisition_id,jobs.requisition_id),dedupe_fingerprint=excluded.dedupe_fingerprint,title=excluded.title,company=excluded.company,location=excluded.location,location_countries=excluded.location_countries,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,detail_url=COALESCE(excluded.detail_url,jobs.detail_url),description_status=excluded.description_status,description_error=excluded.description_error,description_checked_at=excluded.description_checked_at,posted_at=excluded.posted_at,closing_at=excluded.closing_at,salary_min=excluded.salary_min,salary_max=excluded.salary_max,salary_currency=excluded.salary_currency,salary_period=excluded.salary_period,salary_confidence=excluded.salary_confidence,seniority=excluded.seniority,skills_json=excluded.skills_json,content_hash=excluded.content_hash,listing_hash=COALESCE(excluded.listing_hash,jobs.listing_hash),provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,adapter_version=excluded.adapter_version,updated_at=excluded.updated_at")
-            .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(requisition).bind(&fingerprint).bind(&t).bind(title).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(crate::locations::stored(&crate::locations::resolve(payload.get("location").and_then(|v|v.as_str()),canonical.as_deref()))).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(description_html).bind(payload.get("detailUrl").and_then(|v|v.as_str())).bind(incoming_status).bind(description_error).bind(checked_at).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(listing_hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut **tx).await.map_err(|e|e.to_string())?;
+        sqlx::query("INSERT INTO jobs(id,source_id,external_id,canonical_url,apply_url,requisition_id,dedupe_fingerprint,first_seen_at,title,title_folded,company,location,location_countries,work_mode,description_text,description_html,detail_url,description_status,description_error,description_checked_at,posted_at,closing_at,salary_min,salary_max,salary_currency,salary_period,salary_confidence,seniority,skills_json,content_hash,listing_hash,provenance_json,extraction_at,adapter_version,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET external_id=COALESCE(excluded.external_id,jobs.external_id),canonical_url=excluded.canonical_url,apply_url=excluded.apply_url,requisition_id=COALESCE(excluded.requisition_id,jobs.requisition_id),dedupe_fingerprint=excluded.dedupe_fingerprint,title=excluded.title,title_folded=excluded.title_folded,company=excluded.company,location=excluded.location,location_countries=excluded.location_countries,work_mode=excluded.work_mode,description_text=excluded.description_text,description_html=excluded.description_html,detail_url=COALESCE(excluded.detail_url,jobs.detail_url),description_status=excluded.description_status,description_error=excluded.description_error,description_checked_at=excluded.description_checked_at,posted_at=excluded.posted_at,closing_at=excluded.closing_at,salary_min=excluded.salary_min,salary_max=excluded.salary_max,salary_currency=excluded.salary_currency,salary_period=excluded.salary_period,salary_confidence=excluded.salary_confidence,seniority=excluded.seniority,skills_json=excluded.skills_json,content_hash=excluded.content_hash,listing_hash=COALESCE(excluded.listing_hash,jobs.listing_hash),provenance_json=excluded.provenance_json,extraction_at=excluded.extraction_at,adapter_version=excluded.adapter_version,updated_at=excluded.updated_at")
+            .bind(&actual).bind(source_id).bind(external).bind(canonical.as_deref()).bind(payload.get("applyUrl").and_then(|v|v.as_str())).bind(requisition).bind(&fingerprint).bind(&t).bind(title).bind(crate::locations::fold_text(title)).bind(company).bind(payload.get("location").and_then(|v|v.as_str())).bind(crate::locations::stored(&crate::locations::resolve(payload.get("location").and_then(|v|v.as_str()),canonical.as_deref()))).bind(payload.get("workMode").and_then(|v|v.as_str())).bind(description).bind(description_html).bind(payload.get("detailUrl").and_then(|v|v.as_str())).bind(incoming_status).bind(description_error).bind(checked_at).bind(payload.get("postedAt").and_then(|v|v.as_str())).bind(payload.get("closingAt").and_then(|v|v.as_str())).bind(payload.get("salaryMin").and_then(|v|v.as_f64())).bind(payload.get("salaryMax").and_then(|v|v.as_f64())).bind(payload.get("salaryCurrency").and_then(|v|v.as_str())).bind(payload.get("salaryPeriod").and_then(|v|v.as_str())).bind(payload.get("salaryConfidence").and_then(|v|v.as_str())).bind(payload.get("seniority").and_then(|v|v.as_str())).bind(payload.get("skills").cloned().unwrap_or_else(||serde_json::json!([])).to_string()).bind(hash).bind(listing_hash).bind(payload.get("provenance").cloned().unwrap_or_else(||serde_json::json!({})).to_string()).bind(&t).bind(payload.get("adapterVersion").and_then(|v|v.as_str()).unwrap_or("1.0.0")).bind(&t).bind(&t).execute(&mut **tx).await.map_err(|e|e.to_string())?;
         sqlx::query(
             "INSERT OR IGNORE INTO job_occurrences(id,job_id,run_id,seen_at) VALUES(?,?,?,?)",
         )
@@ -1445,6 +1665,33 @@ impl Database {
                 }),
             )
         }))
+    }
+
+    /// The jobs in a view that still need their description, newest first, as the worker reads
+    /// them: what `pending_enrichment_job` builds for one job, for up to `limit`.
+    pub async fn view_enrichment_jobs(
+        &self,
+        filter: JobFilter,
+        limit: usize,
+    ) -> ApiResult<Vec<(String, serde_json::Value)>> {
+        let page = jobs_page_query(
+            JobFilter {
+                missing_description: true,
+                sort: "recent".into(),
+                ..filter
+            },
+            0,
+            &self.pool,
+            true,
+        )
+        .await?;
+        let mut jobs = Vec::new();
+        for job in page.items.into_iter().take(limit) {
+            if let Some(found) = self.pending_enrichment_job(&job.id, false).await? {
+                jobs.push(found);
+            }
+        }
+        Ok(jobs)
     }
 
     pub async fn persist_enriched_jobs(
@@ -1599,9 +1846,17 @@ pub async fn list_company_catalog() -> ApiResult<Vec<CatalogCompany>> {
         .cloned()
         .collect())
 }
+/// The outcome of each source's latest finished full read, and how many failed in a row since the
+/// last one that worked. `lr` is joined by SOURCE_RUN_JOIN.
+const SOURCE_RUN_COLUMNS: &str = "lr.status AS last_run_status,lr.complete AS last_run_complete,lr.started_at AS last_run_at,lr.failure_code AS last_failure_code,lr.diagnostics AS last_failure_message,\
+ (SELECT count(*) FROM scrape_runs f WHERE f.source_id=s.id AND f.mode='scrape' AND f.status='failed' AND f.started_at>COALESCE((SELECT max(ok.started_at) FROM scrape_runs ok WHERE ok.source_id=s.id AND ok.mode='scrape' AND ok.status='completed'),'')) AS consecutive_failures";
+const SOURCE_RUN_JOIN: &str = "LEFT JOIN scrape_runs lr ON lr.id=(SELECT r.id FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape' AND r.status IN ('completed','failed') ORDER BY r.started_at DESC LIMIT 1)";
 #[tauri::command]
 pub async fn list_sources(state: State<'_, Arc<AppState>>) -> ApiResult<Vec<Source>> {
-    sqlx::query_as::<_,Source>(&format!("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.deleted_at IS NULL AND {SOURCE_IN_PROFILE} ORDER BY s.name")).fetch_all(&state.db.pool).await.map_err(|e|e.to_string())
+    list_sources_pool(&state.db.pool).await
+}
+pub(crate) async fn list_sources_pool(pool: &SqlitePool) -> ApiResult<Vec<Source>> {
+    sqlx::query_as::<_,Source>(&format!("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at,{SOURCE_RUN_COLUMNS} FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id {SOURCE_RUN_JOIN} WHERE s.deleted_at IS NULL AND {SOURCE_IN_PROFILE} ORDER BY s.name")).fetch_all(pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn get_source_config(
@@ -2054,7 +2309,7 @@ pub async fn save_source(input: SourceInput, state: State<'_, Arc<AppState>>) ->
   .bind(&source_id).bind(&input.name).bind(&input.base_url).bind(&input.adapter_id).bind("1.0.0").bind(input.enabled).bind(&input.kind).bind(&input.disabled_reason).bind(input.robots_override).bind(if input.robots_override {Some(t.clone())} else {None}).bind(input.allow_private_network).bind(&t).bind(&t).bind(&owner).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO source_configs(id,source_id,config_json,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(source_id) DO UPDATE SET config_json=excluded.config_json,updated_at=excluded.updated_at").bind(id()).bind(&source_id).bind(input.config_json.to_string()).bind(&t).bind(&t).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
-    sqlx::query_as("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id WHERE s.id=?").bind(source_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
+    sqlx::query_as(&format!("SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.enabled,s.kind,s.disabled_reason,s.robots_override,s.last_success_at,COALESCE(c.live,0) AS job_count,COALESCE(c.gone,0) AS closed_count,s.created_at,s.updated_at,{SOURCE_RUN_COLUMNS} FROM sources s LEFT JOIN (SELECT source_id,sum(CASE WHEN availability='closed' THEN 0 ELSE 1 END) AS live,sum(CASE WHEN availability='closed' THEN 1 ELSE 0 END) AS gone FROM jobs GROUP BY source_id) c ON c.source_id=s.id {SOURCE_RUN_JOIN} WHERE s.id=?")).bind(source_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn delete_source(
@@ -2073,6 +2328,26 @@ pub async fn delete_source(
         .await
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+/// Which profile's sources a query covers. The window always works in the active profile; the
+/// notification after a background update is worked out once for each profile it read.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub enum ProfileScope {
+    #[default]
+    Active,
+    Profile(String),
+    /// Sources added while "All profiles" was chosen, which belong to none.
+    Unassigned,
+}
+impl ProfileScope {
+    /// A condition on a source aliased `s`, and what it binds.
+    fn clause(&self) -> (&'static str, Option<&str>) {
+        match self {
+            Self::Active => (SOURCE_IN_PROFILE, None),
+            Self::Profile(id) => ("s.profile_id=?", Some(id)),
+            Self::Unassigned => ("s.profile_id IS NULL", None),
+        }
+    }
 }
 /// Filters the Jobs page sends. Everything is optional; the source scope is not a filter but
 /// the enabled set on the Sources page, so "no sources selected" always means "no jobs".
@@ -2113,6 +2388,12 @@ pub struct JobFilter {
     /// This is the view, not the collection: whether a source is followed at all is
     /// `sources.enabled`, and narrowing the list must never quietly retire a board.
     pub source_ids: Vec<String>,
+    /// Never sent by the window, which always looks at the active profile.
+    #[serde(skip)]
+    pub scope: ProfileScope,
+    /// Only listings whose description has not been downloaded yet and can be: what the background
+    /// description fetch works through after an update.
+    pub missing_description: bool,
 }
 // The list never renders a description — it is read only when a card is opened, through
 // load_job_description(). Keyword search still matches against the real column in the WHERE clause;
@@ -2120,19 +2401,140 @@ pub struct JobFilter {
 const JOB_SELECT: &str = "SELECT j.id,j.source_id,j.title,j.company,j.location,j.work_mode,j.canonical_url,j.apply_url,'' AS description_text,j.description_status,j.dismissed_at,j.posted_at,j.salary_min,j.salary_max,j.salary_currency,j.seniority,j.availability,j.created_at,j.updated_at,NULL AS score,NULL AS eligible,NULL AS reasons,(SELECT a.current_stage FROM applications a WHERE a.job_id=j.id ORDER BY a.created_at DESC LIMIT 1) AS application_stage FROM jobs j JOIN sources s ON s.id=j.source_id";
 // Substring matching, not FTS. FTS5 tokenizes on word boundaries and treats punctuation as
 // syntax, so "verification" missed "Verification/Validation" while "C++" raised a syntax error.
-// instr() over lower() is what a user typing into a search box actually expects, and every
-// word they type has to appear — order and case never matter.
-fn term_clauses(field: &str, text: &str) -> (String, Vec<String>) {
-    let terms: Vec<String> = text
-        .split_whitespace()
-        .take(8)
-        .map(|word| word.to_lowercase())
-        .collect();
-    let sql = terms
-        .iter()
-        .map(|_| format!(" AND instr(lower({field}),?)>0"))
-        .collect::<String>();
-    (sql, terms)
+// instr() is what a user typing into a search box actually expects: every word they type has to
+// appear, and order, case and (in titles) accents never matter. On top of that, a small syntax:
+// -word leaves out what contains it, "a phrase" is matched whole, and a | b takes either.
+#[derive(Debug, PartialEq, Eq)]
+enum SearchClause {
+    /// At least one of these appears.
+    Any(Vec<String>),
+    /// This does not appear.
+    Not(String),
+}
+fn parse_search(text: &str) -> Vec<SearchClause> {
+    enum Token {
+        Word(String, bool),
+        Or,
+    }
+    let chars: Vec<char> = text.chars().collect();
+    let mut tokens = Vec::new();
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if c.is_whitespace() {
+            i += 1;
+            continue;
+        }
+        if c == '|' {
+            tokens.push(Token::Or);
+            i += 1;
+            continue;
+        }
+        let negated = c == '-'
+            && chars
+                .get(i + 1)
+                .is_some_and(|next| !next.is_whitespace() && *next != '|');
+        if negated {
+            i += 1;
+        }
+        let word = if chars[i] == '"' {
+            let end = chars[i + 1..]
+                .iter()
+                .position(|c| *c == '"')
+                .map_or(chars.len(), |at| i + 1 + at);
+            let phrase = chars[i + 1..end].iter().collect::<String>();
+            i = (end + 1).min(chars.len());
+            phrase.split_whitespace().collect::<Vec<_>>().join(" ")
+        } else {
+            let start = i;
+            while i < chars.len() && !chars[i].is_whitespace() && chars[i] != '|' {
+                i += 1;
+            }
+            chars[start..i].iter().collect()
+        };
+        if !word.is_empty() {
+            tokens.push(Token::Word(word, negated));
+        }
+    }
+    let mut clauses = Vec::new();
+    let mut join = false;
+    for token in tokens {
+        match token {
+            Token::Or => join = true,
+            Token::Word(word, true) => {
+                clauses.push(SearchClause::Not(word));
+                join = false;
+            }
+            Token::Word(word, false) => {
+                if let (true, Some(SearchClause::Any(words))) = (join, clauses.last_mut()) {
+                    if words.len() < 8 {
+                        words.push(word);
+                    }
+                } else {
+                    clauses.push(SearchClause::Any(vec![word]));
+                }
+                join = false;
+            }
+        }
+    }
+    clauses.truncate(8);
+    clauses
+}
+/// Where a search looks, and whether that text is stored folded (accents off) or only lower-cased.
+struct SearchField {
+    sql: &'static str,
+    folded: bool,
+}
+// Rows written before the folded column existed are backfilled at startup; the coalesce covers the
+// moment between.
+const TITLE_SEARCH: &[SearchField] = &[SearchField {
+    sql: "coalesce(j.title_folded,lower(j.title))",
+    folded: true,
+}];
+const KEYWORD_SEARCH: &[SearchField] = &[
+    SearchField {
+        sql: "coalesce(j.title_folded,lower(j.title))",
+        folded: true,
+    },
+    SearchField {
+        sql: "lower(j.company||' '||coalesce(j.location,'')||' '||j.description_text)",
+        folded: false,
+    },
+];
+fn term_clauses(fields: &[SearchField], text: &str) -> (String, Vec<String>) {
+    let mut sql = String::new();
+    let mut binds = Vec::new();
+    let term = |word: &str, binds: &mut Vec<String>| {
+        let lower = word.to_lowercase();
+        let parts = fields
+            .iter()
+            .map(|field| {
+                binds.push(if field.folded {
+                    crate::locations::fold_text(word)
+                } else {
+                    lower.clone()
+                });
+                format!("instr({},?)>0", field.sql)
+            })
+            .collect::<Vec<_>>();
+        format!("({})", parts.join(" OR "))
+    };
+    for clause in parse_search(text) {
+        match clause {
+            SearchClause::Any(words) => {
+                let any = words
+                    .iter()
+                    .map(|word| term(word, &mut binds))
+                    .collect::<Vec<_>>();
+                sql.push_str(&format!(" AND ({})", any.join(" OR ")));
+            }
+            SearchClause::Not(word) => {
+                let not = term(&word, &mut binds);
+                sql.push_str(&format!(" AND NOT {not}"));
+            }
+        }
+    }
+    (sql, binds)
 }
 // Codes are stored as ",PT,ES," precisely so one of them is a substring test, which an index on the
 // column serves without a join table or a LIKE pattern that starts with a wildcard.
@@ -2219,6 +2621,32 @@ pub async fn backfill_location_countries(pool: &SqlitePool) -> ApiResult<u64> {
         crate::locations::RESOLVER_VERSION,
     )
     .await?;
+    Ok(rows.len() as u64)
+}
+/// Fills the folded title of every row stored before the column existed (or written by anything that
+/// does not set it), once; new rows get theirs when they are persisted.
+pub async fn backfill_folded_titles(pool: &SqlitePool) -> ApiResult<u64> {
+    let rows: Vec<(String, String)> =
+        sqlx::query_as("SELECT id,title FROM jobs WHERE title_folded IS NULL")
+            .fetch_all(pool)
+            .await
+            .map_err(|e| e.to_string())?;
+    if rows.is_empty() {
+        return Ok(0);
+    }
+    let mut tx = pool
+        .begin_with(WRITE_TRANSACTION)
+        .await
+        .map_err(|e| e.to_string())?;
+    for (id, title) in &rows {
+        sqlx::query("UPDATE jobs SET title_folded=? WHERE id=?")
+            .bind(crate::locations::fold_text(title))
+            .bind(id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(rows.len() as u64)
 }
 /// The profile the user is working in. Absent means "All profiles": every source, job and application at once.
@@ -2759,11 +3187,8 @@ async fn jobs_page_query(
     pool: &SqlitePool,
     with_items: bool,
 ) -> ApiResult<JobPage> {
-    let (title_sql, title_terms) = term_clauses("j.title", &filter.title);
-    let (keyword_sql, keyword_terms) = term_clauses(
-        "j.title||' '||j.company||' '||coalesce(j.location,'')||' '||j.description_text",
-        &filter.keyword,
-    );
+    let (title_sql, title_terms) = term_clauses(TITLE_SEARCH, &filter.title);
+    let (keyword_sql, keyword_terms) = term_clauses(KEYWORD_SEARCH, &filter.keyword);
     let (location_sql, location_terms) =
         location_clauses(&filter.countries, filter.include_unknown_locations);
     let dismissed = if filter.include_dismissed {
@@ -2830,13 +3255,20 @@ async fn jobs_page_query(
     };
     // One WHERE, shared by the count and the rows. They used to be spelled out separately, so a
     // filter added to one silently missed the other and the count disagreed with the list.
-    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL AND {SOURCE_IN_PROFILE}{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}{dismissed}{fresh_sql}");
+    let (scope_sql, scope_bind) = filter.scope.clause();
+    let scope_bind: Vec<String> = scope_bind.map(str::to_owned).into_iter().collect();
+    let missing = if filter.missing_description {
+        " AND j.description_status='pending' AND j.detail_url IS NOT NULL AND j.listing_hash IS NOT NULL"
+    } else {
+        ""
+    };
+    let where_sql = format!(" WHERE s.enabled=1 AND s.deleted_at IS NULL AND {scope_sql}{saved}{availability}{posted}{sources_sql}{title_sql}{keyword_sql}{location_sql}{dismissed}{fresh_sql}{missing}");
     let count_sql =
         format!("SELECT count(*) FROM jobs j JOIN sources s ON s.id=j.source_id{where_sql}");
     let mut count_query = sqlx::query_scalar::<_, i64>(&count_sql);
-    for bound in filter
-        .source_ids
+    for bound in scope_bind
         .iter()
+        .chain(filter.source_ids.iter())
         .chain(title_terms.iter())
         .chain(keyword_terms.iter())
         .chain(location_terms.iter())
@@ -2858,9 +3290,9 @@ async fn jobs_page_query(
     }
     let sql = format!("{JOB_SELECT}{where_sql} {order} LIMIT {JOB_PAGE_SIZE} OFFSET ?");
     let mut query = sqlx::query_as::<_, crate::domain::Job>(&sql);
-    for bound in filter
-        .source_ids
+    for bound in scope_bind
         .iter()
+        .chain(filter.source_ids.iter())
         .chain(title_terms.iter())
         .chain(keyword_terms.iter())
         .chain(location_terms.iter())
@@ -3282,6 +3714,7 @@ async fn delete_application_pool(pool: &SqlitePool, application_id: &str) -> Api
 #[tauri::command]
 pub async fn transition_application(
     input: StageInput,
+    app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Application> {
     let valid = [
@@ -3341,6 +3774,7 @@ pub async fn transition_application(
         sqlx::query("UPDATE reminders SET status='cancelled' WHERE application_id=? AND status='pending' AND reminder_type='ghosted'").bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
+    schedule_reminders(&app, &state.db.pool);
     sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
         .bind(input.application_id)
         .fetch_one(&state.db.pool)
@@ -3389,6 +3823,7 @@ fn validate_stage_transition(
 pub async fn record_apply_decision(
     application_id: String,
     decision: String,
+    app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
     if !["yes", "no", "not_yet"].contains(&decision.as_str()) {
@@ -3434,6 +3869,7 @@ pub async fn record_apply_decision(
         sqlx::query("UPDATE application_attempts SET resolved_at=?,resolution=? WHERE id=? AND resolved_at IS NULL").bind(&t).bind(&decision).bind(&attempt).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
     tx.commit().await.map_err(|e| e.to_string())?;
+    schedule_reminders(&app, &state.db.pool);
     Ok(())
 }
 #[derive(Debug, Deserialize)]
@@ -3492,6 +3928,7 @@ pub async fn list_interviews(
 #[tauri::command]
 pub async fn save_interview(
     input: InterviewInput,
+    app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<Interview> {
     chrono::DateTime::parse_from_rfc3339(&input.scheduled_at)
@@ -3545,12 +3982,14 @@ pub async fn save_interview(
         .bind(id()).bind(&input.application_id).bind(&t).bind(serde_json::json!({"interviewId":interview_id,"stage":input.stage,"scheduledAt":input.scheduled_at}).to_string())
         .execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
+    schedule_reminders(&app, &state.db.pool);
     sqlx::query_as("SELECT id,application_id,stage,scheduled_at,completed_at,notes,outcome,created_at,updated_at FROM interviews WHERE id=?")
         .bind(interview_id).fetch_one(&state.db.pool).await.map_err(|e|e.to_string())
 }
 #[tauri::command]
 pub async fn delete_interview(
     interview_id: String,
+    app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
     let mut tx = state
@@ -3573,12 +4012,14 @@ pub async fn delete_interview(
         .map_err(|e| e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'interview_deleted',?,?)").bind(id()).bind(application_id).bind(now()).bind(serde_json::json!({"interviewId":interview_id}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
+    schedule_reminders(&app, &state.db.pool);
     Ok(())
 }
 #[tauri::command]
 pub async fn update_ghost_threshold(
     application_id: String,
     days: i64,
+    app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<()> {
     if !(1..=365).contains(&days) {
@@ -3605,6 +4046,7 @@ pub async fn update_ghost_threshold(
     sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)").bind(id()).bind(&application_id).bind(due).bind(now()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     sqlx::query("INSERT INTO application_events(id,application_id,event_type,occurred_at,payload_json) VALUES(?,?, 'ghost_threshold_changed',?,?)").bind(id()).bind(&application_id).bind(now()).bind(serde_json::json!({"days":days}).to_string()).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     tx.commit().await.map_err(|e| e.to_string())?;
+    schedule_reminders(&app, &state.db.pool);
     Ok(())
 }
 #[tauri::command]
@@ -3626,7 +4068,9 @@ pub async fn open_apply(
     app.opener()
         .open_url(url, None::<&str>)
         .map_err(|e| e.to_string())?;
-    mark_applied_on_open(&state.db.pool, &application_id).await
+    mark_applied_on_open(&state.db.pool, &application_id).await?;
+    schedule_reminders(&app, &state.db.pool);
+    Ok(())
 }
 /// Pressing Apply is taken as having applied. This used to open an "attempt" and ask "Did you
 /// submit?" on the next window focus — one prompt per Apply, so applying to a batch of jobs meant
@@ -3749,6 +4193,65 @@ mod apply_confirmation_tests {
     // notes, timeline events, documents, reminders and the open attempt — not leave orphaned rows
     // an unrelated application could later collide with. The job itself must survive: dismissing
     // an application is not the same act as dismissing a listing.
+    // A reminder's own timer and the app starting at the same sign-in can both reach it. Only one
+    // may show it; a notification that fails to show leaves it to be delivered again.
+    #[tokio::test]
+    async fn a_due_reminder_is_delivered_once_and_a_failed_delivery_is_retried() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        let due = Uuid::new_v4().to_string();
+        let later = Uuid::new_v4().to_string();
+        sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,'a','ghosted','2026-01-01T00:00:00Z','pending','t'),(?,'a','ghosted','2999-01-01T00:00:00Z','pending','t')")
+            .bind(&due).bind(&later).execute(&pool).await.unwrap();
+        assert!(
+            claim_reminder_delivery(&pool, &later)
+                .await
+                .unwrap()
+                .is_none(),
+            "not due yet"
+        );
+        let first = claim_reminder_delivery(&pool, &due).await.unwrap();
+        assert!(first.is_some());
+        assert!(
+            claim_reminder_delivery(&pool, &due)
+                .await
+                .unwrap()
+                .is_none(),
+            "the second caller loses"
+        );
+        finish_reminder_delivery(&pool, &due, Err("no notification daemon".into()))
+            .await
+            .unwrap();
+        let status: String = sqlx::query_scalar("SELECT status FROM reminders WHERE id=?")
+            .bind(&due)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(status, "pending");
+        assert!(
+            claim_reminder_delivery(&pool, &due)
+                .await
+                .unwrap()
+                .is_some(),
+            "and is tried again"
+        );
+        finish_reminder_delivery(&pool, &due, Ok(())).await.unwrap();
+        let status: String = sqlx::query_scalar("SELECT status FROM reminders WHERE id=?")
+            .bind(&due)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(status, "delivered");
+        // The card shows the latest follow-up, delivered or not, until the threshold moves it.
+        let follow_up: Option<String> = sqlx::query_scalar(&format!(
+            "SELECT follow_up_at FROM ({APPLICATION_SELECT} WHERE a.id='a')"
+        ))
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert!(follow_up.is_some());
+    }
+
     #[tokio::test]
     async fn deleting_an_application_cascades_its_own_records_and_spares_the_job() {
         let pool = migrated_pool().await;
@@ -3841,22 +4344,109 @@ pub async fn pending_reminder_delivery(
         body: format!("{title} at {company}"),
     }))
 }
+/// Takes a due reminder for delivery. Two processes can reach the same reminder at once — its own
+/// timer firing at sign-in while the app, starting at the same sign-in, delivers what came due while
+/// the machine was off — so it is marked delivered before it is shown, and only the caller whose
+/// update landed shows it. A notification that then fails to show puts it back.
+pub async fn claim_reminder_delivery(
+    pool: &SqlitePool,
+    reminder_id: &str,
+) -> ApiResult<Option<ReminderDelivery>> {
+    let Some(delivery) = pending_reminder_delivery(pool, reminder_id).await? else {
+        return Ok(None);
+    };
+    let claimed = sqlx::query("UPDATE reminders SET status='delivered',last_error=NULL,last_reconciled_at=? WHERE id=? AND status='pending'")
+        .bind(now())
+        .bind(reminder_id)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .rows_affected();
+    Ok((claimed == 1).then_some(delivery))
+}
 pub async fn finish_reminder_delivery(
     pool: &SqlitePool,
     reminder_id: &str,
     result: Result<(), String>,
 ) -> ApiResult<()> {
-    let (status, error) = match result {
-        Ok(()) => ("delivered", None),
-        Err(error) => ("pending", Some(error)),
-    };
-    sqlx::query("UPDATE reminders SET status=?,last_error=?,last_reconciled_at=? WHERE id=? AND status='pending'")
-        .bind(status).bind(error).bind(now()).bind(reminder_id).execute(pool).await.map_err(|e|e.to_string())?;
+    if let Err(error) = result {
+        sqlx::query("UPDATE reminders SET status='pending',last_error=?,last_reconciled_at=? WHERE id=? AND status='delivered'")
+            .bind(error).bind(now()).bind(reminder_id).execute(pool).await.map_err(|e|e.to_string())?;
+    }
     Ok(())
 }
+/// Reconciliation shells out to the system scheduler once per reminder; two at once (applying to a
+/// few jobs in quick succession) would race each other creating the same timers.
+static RECONCILING: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+/// Brings the system timers in line with the reminders table and shows whatever came due while
+/// nothing was running to show it. Called at startup, from Settings, and straight after anything
+/// that creates or moves a reminder, so a new reminder has its timer at once rather than at the
+/// next launch.
+pub async fn reconcile_and_deliver(
+    app: &tauri::AppHandle,
+    pool: &SqlitePool,
+) -> ApiResult<serde_json::Value> {
+    use tauri_plugin_notification::NotificationExt;
+    let _turn = RECONCILING.lock().await;
+    let mut outcome = reconcile_reminders_pool(pool).await?;
+    let due: Vec<String> = outcome
+        .get("due")
+        .and_then(|v| v.as_array())
+        .map(|ids| {
+            ids.iter()
+                .filter_map(|id| id.as_str().map(str::to_owned))
+                .collect()
+        })
+        .unwrap_or_default();
+    let mut delivered = 0;
+    for reminder_id in due {
+        let Some(reminder) = claim_reminder_delivery(pool, &reminder_id).await? else {
+            continue;
+        };
+        let shown = app
+            .notification()
+            .builder()
+            .title(&reminder.title)
+            .body(&reminder.body)
+            .show()
+            .map_err(|e| e.to_string());
+        if shown.is_ok() {
+            delivered += 1;
+        }
+        finish_reminder_delivery(pool, &reminder_id, shown).await?;
+    }
+    if let Some(object) = outcome.as_object_mut() {
+        object.remove("due");
+        object.insert("delivered".into(), serde_json::json!(delivered));
+    }
+    Ok(outcome)
+}
+/// Runs reconcile_and_deliver off the command that changed a reminder: the change is committed and
+/// answered at once, and a scheduler that is slow or failing never holds up the window.
+pub fn schedule_reminders(app: &tauri::AppHandle, pool: &SqlitePool) {
+    let (app, pool) = (app.clone(), pool.clone());
+    tauri::async_runtime::spawn(async move {
+        if let Err(error) = reconcile_and_deliver(&app, &pool).await {
+            log(
+                &pool,
+                "warning",
+                None,
+                None,
+                "reminders",
+                None,
+                &error,
+                serde_json::json!({}),
+            )
+            .await;
+        }
+    });
+}
 #[tauri::command]
-pub async fn reconcile_reminders(state: State<'_, Arc<AppState>>) -> ApiResult<serde_json::Value> {
-    reconcile_reminders_pool(&state.db.pool).await
+pub async fn reconcile_reminders(
+    app: tauri::AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<serde_json::Value> {
+    reconcile_and_deliver(&app, &state.db.pool).await
 }
 
 /// Called during startup before first window interaction and by Diagnostics.
@@ -3867,8 +4457,8 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
         .map_err(|e| e.to_string())?;
     let scheduler = current_scheduler()?;
     let mut scheduled = 0;
-    let mut missed = 0;
     let mut errors = 0;
+    let mut due_now = Vec::new();
     let snapshot = run_scheduler_blocking({
         let scheduler = scheduler.clone();
         move || scheduler.list_managed()
@@ -3930,9 +4520,14 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
             status: "pending".into(),
             kind: row.get(3),
         };
+        // Overdue: it came due while nothing was running to show it (the machine was off, or the
+        // timer was never made). It is handed back to be delivered now, rather than marked missed
+        // with nobody told. Its timer, if it has one, is left to fire into an already-delivered row.
         if due <= Utc::now() {
-            sqlx::query("UPDATE reminders SET status='missed',last_reconciled_at=?,last_error=NULL WHERE id=? AND status='pending'").bind(now()).bind(&id).execute(pool).await.map_err(|e|e.to_string())?;
-            missed += 1;
+            if let Some(task) = existing {
+                expected_tasks.insert(task);
+            }
+            due_now.push(id);
             continue;
         }
         let task = match existing.as_deref() {
@@ -4002,7 +4597,7 @@ pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json
             .await;
         }
     }
-    Ok(serde_json::json!({"scheduled":scheduled,"missed":missed,"errors":errors}))
+    Ok(serde_json::json!({"scheduled":scheduled,"due":due_now,"errors":errors}))
 }
 #[derive(Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -4268,7 +4863,7 @@ pub async fn backup_database(state: State<'_, Arc<AppState>>) -> ApiResult<Strin
 pub async fn export_csv(kind: String, state: State<'_, Arc<AppState>>) -> ApiResult<String> {
     let out = state.db.root.join("exports");
     std::fs::create_dir_all(&out).map_err(|e| e.to_string())?;
-    let (sql,headers)=match kind.as_str(){"applications"=>("SELECT a.current_stage,j.title,j.company,a.applied_at FROM applications a LEFT JOIN jobs j ON j.id=a.job_id","stage,title,company,applied_at"),"events"=>("SELECT application_id,event_type,from_stage,to_stage,occurred_at FROM application_events","application_id,event_type,from_stage,to_stage,occurred_at"),_ => ("SELECT title,company,location,canonical_url,availability FROM jobs","title,company,location,canonical_url,availability")};
+    let (sql,headers)=match kind.as_str(){"applications"=>("SELECT a.current_stage,j.title,j.company,j.location,a.created_at,a.applied_at,coalesce(j.canonical_url,j.apply_url),a.recruiter_name,a.recruiter_email,a.recruiter_phone,(SELECT group_concat(n.body,' | ') FROM notes n WHERE n.application_id=a.id AND n.deleted_at IS NULL) FROM applications a LEFT JOIN jobs j ON j.id=a.job_id ORDER BY a.created_at","stage,title,company,location,saved_at,applied_at,url,recruiter_name,recruiter_email,recruiter_phone,notes"),"events"=>("SELECT application_id,event_type,from_stage,to_stage,occurred_at FROM application_events","application_id,event_type,from_stage,to_stage,occurred_at"),_ => ("SELECT title,company,location,canonical_url,availability FROM jobs","title,company,location,canonical_url,availability")};
     let rows = sqlx::query(sql)
         .fetch_all(&state.db.pool)
         .await
@@ -5114,6 +5709,71 @@ mod matching_persistence_tests {
             "machine learning"
         );
     }
+    // The notification announced 313 and 114 new jobs while the search was "verification" in eight
+    // countries. It now counts what that profile's chosen view would list.
+    #[tokio::test]
+    async fn the_notification_counts_what_the_chosen_view_would_list() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,profile_id,created_at,updated_at) VALUES('semi','Semi','https://semi.example.test','json','1',1,'active',0,0,'semiconductor','t','t'),('data','Data','https://data.example.test','json','1',1,'active',0,0,'data-science','t','t')").execute(&pool).await.unwrap();
+        let since = "2026-11-09T10:00:00+00:00";
+        let after = "2026-11-09T10:05:00+00:00";
+        for n in 0..300 {
+            let (title, countries) = if n < 4 {
+                (format!("Design Verification Engineer {n}"), ",PT,")
+            } else if n < 8 {
+                (format!("Verification Engineer {n}"), ",US,")
+            } else {
+                (format!("Layout Engineer {n}"), ",PT,")
+            };
+            sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,location_countries,first_seen_at,created_at,updated_at) VALUES(?,'semi',?,'Chip Co','','[]',?,'active','t','1',?,?,?,?)")
+                .bind(format!("j{n}")).bind(&title).bind(format!("h{n}")).bind(countries).bind(after).bind(after).bind(after)
+                .execute(&pool).await.unwrap();
+        }
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,location_countries,first_seen_at,created_at,updated_at) VALUES('d1','data','Verification Analyst','Data Co','','[]','hd','active','t','1',',PT,',?,?,?)")
+            .bind(after).bind(after).bind(after).execute(&pool).await.unwrap();
+        let set = |key: &'static str, value: &'static str| {
+            let pool = pool.clone();
+            async move {
+                write_setting(&pool, key, value).await.unwrap();
+            }
+        };
+        let semi = ProfileScope::Profile("semiconductor".into());
+        // Nothing chosen: the filter the Jobs page was last left on.
+        set("jobs.activeFilter.semiconductor", r#"{"title":"verification","keyword":"","sort":"recent","postedWithinDays":null,"countries":[]}"#).await;
+        let (count, _, rule) = new_jobs_matching(&pool, &semi, since, 5).await.unwrap();
+        assert_eq!(count, 8);
+        assert!(matches!(rule, NotifyRule::View { name: None, .. }));
+        // A saved view chosen in Settings.
+        set("jobs.savedViews.semiconductor", r#"[{"name":"Verification PT","title":"verification","countries":["PT"],"postedWithinDays":null}]"#).await;
+        set("notify.view.semiconductor", "view:Verification PT").await;
+        let (count, jobs, _) = new_jobs_matching(&pool, &semi, since, 5).await.unwrap();
+        assert_eq!(count, 4, "300 stored, four match the view");
+        assert_eq!(jobs.len(), 4, "and all four are named");
+        assert!(jobs
+            .iter()
+            .all(|job| job.title.starts_with("Design Verification")));
+        // Each profile is counted on its own.
+        let (count, _, _) = new_jobs_matching(
+            &pool,
+            &ProfileScope::Profile("data-science".into()),
+            since,
+            5,
+        )
+        .await
+        .unwrap();
+        assert_eq!(
+            count, 1,
+            "the other profile's rule is the shared default: everything new"
+        );
+        // The title box remains as a choice.
+        set("notify.view.semiconductor", "title").await;
+        set("notify.titleAny.semiconductor", "layout").await;
+        let (count, _, rule) = new_jobs_matching(&pool, &semi, since, 5).await.unwrap();
+        assert_eq!(count, 292);
+        assert!(matches!(rule, NotifyRule::Title(_)));
+        let scopes = notification_scopes(&pool).await.unwrap();
+        assert_eq!(scopes.len(), 2);
+    }
     #[tokio::test]
     async fn new_jobs_since_ignores_rescraped_and_closed_rows() {
         let pool = migrated_pool().await;
@@ -5142,15 +5802,22 @@ mod matching_persistence_tests {
             .execute(&pool)
             .await
             .unwrap();
-        let (count, jobs) = new_jobs_since(&pool, "2026-08-31T10:00:00+00:00", 3, &[])
-            .await
-            .unwrap();
+        let (count, jobs) = new_jobs_since(
+            &pool,
+            &ProfileScope::Active,
+            "2026-08-31T10:00:00+00:00",
+            3,
+            &[],
+        )
+        .await
+        .unwrap();
         assert_eq!(count, 2);
         assert_eq!(jobs.len(), 2);
         assert_eq!(jobs[1].title, "New role");
         // The notification filter narrows what is announced, never what was stored.
         let (count, jobs) = new_jobs_since(
             &pool,
+            &ProfileScope::Active,
             "2026-08-31T10:00:00+00:00",
             3,
             &["new role".to_string()],
@@ -5163,6 +5830,7 @@ mod matching_persistence_tests {
         // A term that matches nothing must announce nothing, not everything.
         let (count, _) = new_jobs_since(
             &pool,
+            &ProfileScope::Active,
             "2026-08-31T10:00:00+00:00",
             3,
             &["nothing here".to_string()],
@@ -6821,6 +7489,177 @@ mod matching_persistence_tests {
         assert!(
             !plan.iter().any(|step| step == "SCAN jobs"),
             "the stored-job lookup scans the table: {plan:?}"
+        );
+        db.pool.close().await;
+    }
+
+    #[test]
+    fn search_syntax_excludes_matches_phrases_and_alternatives() {
+        use SearchClause::*;
+        assert_eq!(
+            parse_search(r#"verification | validation -manager "design verification""#),
+            vec![
+                Any(vec!["verification".into(), "validation".into()]),
+                Not("manager".into()),
+                Any(vec!["design verification".into()])
+            ]
+        );
+        assert_eq!(
+            parse_search("a|b c"),
+            vec![Any(vec!["a".into(), "b".into()]), Any(vec!["c".into()])]
+        );
+        assert_eq!(
+            parse_search("front-end - c++"),
+            vec![
+                Any(vec!["front-end".into()]),
+                Any(vec!["-".into()]),
+                Any(vec!["c++".into()])
+            ],
+            "only a leading dash excludes"
+        );
+        assert_eq!(
+            parse_search(r#"-"senior manager" "unterminated"#),
+            vec![
+                Not("senior manager".into()),
+                Any(vec!["unterminated".into()])
+            ]
+        );
+        assert!(parse_search("  ").is_empty());
+    }
+
+    #[tokio::test]
+    async fn titles_are_searched_with_syntax_and_without_accents() {
+        let root = std::env::temp_dir().join(format!("jobscraper-search-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+        let titles = [
+            "ENGENHEIRO DE AUTOMAÇÃO",
+            "Design Verification Engineer",
+            "Verification Manager",
+            "Validation Engineer",
+            "Layout Engineer",
+        ];
+        let batch: Vec<serde_json::Value> = titles
+            .iter()
+            .enumerate()
+            .map(|(n, title)| serde_json::json!({"externalId":format!("E{n}"),"title":title,"company":"S","descriptionText":"","listingHash":format!("l{n}")}))
+            .collect();
+        db.persist_worker_jobs("r", "s", &batch).await.unwrap();
+        // One row as an older version stored it, with no folded copy yet.
+        sqlx::query("UPDATE jobs SET title_folded=NULL WHERE external_id='E0'")
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        let search = |title: &'static str| {
+            let pool = db.pool.clone();
+            async move {
+                let mut found: Vec<String> = jobs_query(
+                    JobFilter {
+                        title: title.into(),
+                        ..JobFilter::default()
+                    },
+                    &pool,
+                )
+                .await
+                .unwrap()
+                .into_iter()
+                .map(|job| job.title)
+                .collect();
+                found.sort();
+                found
+            }
+        };
+        assert_eq!(backfill_folded_titles(&db.pool).await.unwrap(), 1);
+        assert_eq!(search("automacao").await, vec!["ENGENHEIRO DE AUTOMAÇÃO"]);
+        assert_eq!(search("automação").await, vec!["ENGENHEIRO DE AUTOMAÇÃO"]);
+        assert_eq!(
+            search("verification -manager").await,
+            vec!["Design Verification Engineer"]
+        );
+        assert_eq!(
+            search("verification | validation -manager").await,
+            vec!["Design Verification Engineer", "Validation Engineer"]
+        );
+        assert_eq!(
+            search("\"verification engineer\"").await,
+            vec!["Design Verification Engineer"]
+        );
+        assert_eq!(
+            search("engineer verification").await,
+            vec!["Design Verification Engineer"],
+            "plain words still all have to appear"
+        );
+        db.pool.close().await;
+    }
+
+    // NXP failed with HTTP 422 on every update for a week and nothing outside the activity log said
+    // so. The list now carries each source's latest outcome and its run of failures.
+    #[tokio::test]
+    async fn sources_carry_their_latest_outcome_and_failure_streak() {
+        let root = std::env::temp_dir().join(format!("jobscraper-outcome-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('nxp','NXP','https://nxp.example.test/','workday','1.1.0',1,'active',0,0,'t','t'),('ok','OK','https://ok.example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,complete,failure_code,diagnostics,started_at) VALUES\
+            ('1','nxp','scrape','completed',1,NULL,NULL,'2026-11-01T00:00:00Z'),\
+            ('2','nxp','scrape','failed',0,'network_error','network_error HTTP 422','2026-11-02T00:00:00Z'),\
+            ('3','nxp','scrape','failed',0,'network_error','network_error HTTP 422','2026-11-03T00:00:00Z'),\
+            ('4','nxp','scrape','cancelled',0,'interrupted',NULL,'2026-11-04T00:00:00Z'),\
+            ('5','nxp','test','failed',0,'network_error',NULL,'2026-11-05T00:00:00Z'),\
+            ('6','ok','scrape','failed',0,'network_error',NULL,'2026-11-01T00:00:00Z'),\
+            ('7','ok','scrape','completed',0,NULL,NULL,'2026-11-02T00:00:00Z')").execute(&db.pool).await.unwrap();
+        let sources = list_sources_pool(&db.pool).await.unwrap();
+        let nxp = sources.iter().find(|s| s.id == "nxp").unwrap();
+        assert_eq!(nxp.last_run_status.as_deref(), Some("failed"));
+        assert_eq!(
+            nxp.consecutive_failures, 2,
+            "cancelled and test runs say nothing"
+        );
+        assert_eq!(
+            nxp.last_failure_message.as_deref(),
+            Some("network_error HTTP 422")
+        );
+        let ok = sources.iter().find(|s| s.id == "ok").unwrap();
+        assert_eq!(ok.consecutive_failures, 0);
+        assert_eq!(
+            ok.last_run_complete,
+            Some(false),
+            "a partial read is told apart"
+        );
+        db.pool.close().await;
+    }
+
+    // One listing without a title used to abort the whole chunk of up to 200 it arrived in.
+    #[tokio::test]
+    async fn one_invalid_listing_is_skipped_and_the_rest_of_the_batch_is_stored() {
+        let root = std::env::temp_dir().join(format!("jobscraper-invalid-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let db = Database::open(root.join("jobscraper.db")).await.unwrap();
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test/','workday','1.1.0',1,'active',0,0,'t','t')").execute(&db.pool).await.unwrap();
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,started_at) VALUES('r','s','scrape','running','t')").execute(&db.pool).await.unwrap();
+        let mut batch: Vec<serde_json::Value> = (0..199)
+            .map(|n| {
+                serde_json::json!({"externalId":format!("E{n}"),"title":format!("Engineer {n}"),"company":"S",
+                    "canonicalUrl":format!("https://example.test/job/{n}"),"descriptionText":"","listingHash":format!("l{n}")})
+            })
+            .collect();
+        batch.insert(
+            50,
+            serde_json::json!({"externalId":"broken","title":"  ","company":"S","listingHash":"lb"}),
+        );
+        let result = db.persist_worker_jobs("r", "s", &batch).await.unwrap();
+        assert_eq!(result.written, 199);
+        assert_eq!(result.invalid, 1);
+        let stored: i64 = sqlx::query_scalar("SELECT count(*) FROM jobs")
+            .fetch_one(&db.pool)
+            .await
+            .unwrap();
+        assert_eq!(stored, 199);
+        assert!(
+            db.persist_worker_job("r", "s", &batch[50]).await.is_err(),
+            "a single job saved on its own still says why it was refused"
         );
         db.pool.close().await;
     }

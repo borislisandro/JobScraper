@@ -212,6 +212,24 @@ pub fn fold(value: &str) -> String {
     }
     out.split_whitespace().collect::<Vec<_>>().join(" ")
 }
+/// Case and accents off, everything else kept: the form job titles are searched in. Unlike `fold`,
+/// punctuation stays, because "C++" and "Verification/Validation" are searched as typed.
+pub fn fold_text(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for character in value.chars() {
+        if character.is_ascii() {
+            out.push(character.to_ascii_lowercase());
+            continue;
+        }
+        for lower in character.to_lowercase() {
+            match folds().get(&lower) {
+                Some(plain) => out.push_str(plain),
+                None => out.push(lower),
+            }
+        }
+    }
+    out
+}
 /// The office in a Workday job path: "/job/Taichung---Fab-16-Taiwan/Staff-Engineer_JR1". Mirrors
 /// pathCity() in sidecar/worker.mjs, and exists because the listings that say only "4 Locations"
 /// still carry their primary office right there in the URL.
@@ -558,5 +576,25 @@ mod tests {
         assert_eq!(stored(&["PT".into(), "ES".into()]), ",PT,ES,");
         assert_eq!(stored(&[]), "");
         assert!(stored(&["PT".into()]).contains(",PT,"));
+    }
+}
+
+#[cfg(test)]
+mod fold_text_tests {
+    #[test]
+    fn titles_fold_case_and_accents_and_keep_punctuation() {
+        assert_eq!(super::fold_text("AUTOMAÇÃO"), "automacao");
+        assert_eq!(
+            super::fold_text("Engenheiro de Automação"),
+            "engenheiro de automacao"
+        );
+        assert_eq!(
+            super::fold_text("C++ Verification/Validation"),
+            "c++ verification/validation"
+        );
+        assert_eq!(
+            super::fold_text("Ingénieur Vérification"),
+            "ingenieur verification"
+        );
     }
 }

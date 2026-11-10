@@ -180,3 +180,29 @@ export function probeVerdict(payload: { recommendedAdapter?: unknown; unsupporte
   }
   return { ok: true as const, adapterId, found: Array.isArray(payload.sampleJobs) ? payload.sampleJobs.length : 0 };
 }
+
+// What a source's latest full read says about it, in the few words a Sources row has room for.
+// Two failures in a row is the line between "a site had a bad minute" and "this needs looking at".
+export const FAILURE_STREAK_ATTENTION = 2;
+const shortCause = (source: Source) => {
+  const http = /HTTP (\d{3})/.exec(source.lastFailureMessage ?? "")?.[1];
+  if (http) return `HTTP ${http}`;
+  const code = source.lastFailureCode ?? "";
+  return code === "rate_limited" ? "rate limited" : code === "network_error" ? "unreachable" : code === "auth_required" ? "login required"
+    : code === "robots_denied" ? "robots.txt" : code === "internal_error" ? "stopped unexpectedly" : code ? code.replaceAll("_", " ") : "";
+};
+export function sourceRunHealth(source: Source): { text: string; attention: boolean } | null {
+  if (source.kind === "reference" || !source.enabled) return null;
+  const failures = source.consecutiveFailures ?? 0;
+  if (source.lastRunStatus === "failed") {
+    const cause = shortCause(source);
+    const text = failures > 1 ? `Failed ${failures} times${cause ? ` · ${cause}` : ""}` : `Last read failed${cause ? ` · ${cause}` : ""}`;
+    return { text, attention: failures >= FAILURE_STREAK_ATTENTION };
+  }
+  if (source.lastRunStatus === "completed" && source.lastRunComplete === false) return { text: "Partly read", attention: false };
+  return null;
+}
+// Everything the attention badge and the Diagnostics list count: a source switched off for a
+// reason, and one that keeps failing while switched on.
+export const needsAttention = (source: Source) =>
+  source.kind !== "reference" && ((!source.enabled && !!source.disabledReason) || !!sourceRunHealth(source)?.attention);

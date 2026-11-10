@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { describeCheckSummary, describeFailure, describeLogEvent, describeOutcome, describeUpdateSummary, previewFromEvents, probeVerdict, supportsSessionCapture } from "./source-ui";
+import type { Source } from "./api";
+import { describeCheckSummary, describeFailure, describeLogEvent, describeOutcome, describeUpdateSummary, needsAttention, previewFromEvents, probeVerdict, sourceRunHealth, supportsSessionCapture } from "./source-ui";
 
 describe("source preview and session controls", () => {
   it("only offers headed capture to browser-capable adapters", () => {
@@ -103,5 +104,25 @@ describe("run log wording", () => {
     expect(line("test_source", 0)).not.toContain("0 saved");
     // A real scrape still reports what it stored.
     expect(line("scrape_source", 20)).toContain("20 saved");
+  });
+});
+
+describe("source run health", () => {
+  const base = { id: "nxp", name: "NXP", baseUrl: "https://nxp.example.test", adapterId: "workday", adapterVersion: "1.1.0", enabled: true, kind: "active", robotsOverride: false, jobCount: 0, closedCount: 0 } as Source;
+  it("names a failure streak and its cause, and counts it for attention", () => {
+    const failing = { ...base, lastRunStatus: "failed" as const, consecutiveFailures: 12, lastFailureCode: "network_error", lastFailureMessage: "network_error HTTP 422" };
+    expect(sourceRunHealth(failing)).toEqual({ text: "Failed 12 times · HTTP 422", attention: true });
+    expect(needsAttention(failing)).toBe(true);
+  });
+  it("lets one failure pass without raising the badge", () => {
+    const once = { ...base, lastRunStatus: "failed" as const, consecutiveFailures: 1, lastFailureCode: "rate_limited" };
+    expect(sourceRunHealth(once)).toEqual({ text: "Last read failed · rate limited", attention: false });
+    expect(needsAttention(once)).toBe(false);
+  });
+  it("tells a partial read apart and stays quiet for a switched-off source", () => {
+    expect(sourceRunHealth({ ...base, lastRunStatus: "completed", lastRunComplete: false })?.text).toBe("Partly read");
+    expect(sourceRunHealth({ ...base, lastRunStatus: "completed", lastRunComplete: true })).toBeNull();
+    expect(sourceRunHealth({ ...base, enabled: false, lastRunStatus: "failed", consecutiveFailures: 5 })).toBeNull();
+    expect(needsAttention({ ...base, enabled: false, disabledReason: "No listings" })).toBe(true);
   });
 });

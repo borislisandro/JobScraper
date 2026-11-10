@@ -530,3 +530,14 @@ main.splash p{margin:0;font-size:13px;color:var(--n500)}
 .status .undo{margin-left:6px;font-size:12.5px;color:var(--fg);border-bottom:1px solid var(--accent)}
 .filters .search{flex:0 1 360px}
 .filters .search input{width:100%}
+
+/* Applications: the follow-up marker, the detail panel's timeline and notes. */
+.card .when .pill{margin-left:6px}
+.pill.follow{border-color:#c9a46a;color:#e0bd84}
+.card{cursor:pointer}
+.application-panel textarea{width:100%;resize:vertical;font:inherit}
+.application-panel .note{border-top:1px solid var(--rule);padding:8px 0;display:grid;gap:4px}
+.application-panel .note p{margin:0;white-space:pre-wrap}
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:220px;overflow:auto}
+.timeline li{display:grid;grid-template-columns:150px 1fr;gap:10px;font-size:12px}
+.timeline time{color:var(--n500)}

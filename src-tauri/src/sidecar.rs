@@ -22,7 +22,13 @@ use uuid::Uuid;
 pub struct SidecarManager {
     workers: Mutex<HashMap<String, RunningWorker>>,
     batches: Mutex<HashMap<String, ScrapeBatch>>,
-    domains: Mutex<HashSet<String>>,
+    /// One queue per host. Every worker holds its host's lock for the length of its run, so a
+    /// host is only ever read by one worker at a time; a second operation waits its turn instead
+    /// of failing, which is what lets a job open while an update reads the same site.
+    domains: Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>,
+    /// Sources a full scrape is reading right now. Waiting for a second full read of the same
+    /// board makes no sense, so that one case still refuses at once.
+    scraping: Mutex<HashSet<String>>,
     /// Runs this process killed on purpose. A cancelled worker is killed where it stands, so it
     /// never gets to say it was cancelled, and its non-zero exit is indistinguishable from a crash
     /// unless we remember that we were the ones who ended it.
@@ -37,6 +43,9 @@ struct RunningWorker {
 struct ScrapeBatch {
     cancelled: bool,
     workers: HashSet<String>,
+    /// A background description download. It runs beside source updates rather than instead of
+    /// them: each host is still read by one worker at a time through its lock.
+    descriptions: bool,
 }
 struct RunFinalizer {
     pool: sqlx::SqlitePool,
@@ -102,26 +111,102 @@ impl Drop for WorkerFinalizer {
         }
     }
 }
-struct DomainFinalizer {
+/// Releases a source's "being scraped" mark on every exit path.
+struct SourceClaim {
     state: Arc<AppState>,
-    domain: String,
+    source_id: String,
 }
-impl Drop for DomainFinalizer {
+impl Drop for SourceClaim {
     fn drop(&mut self) {
-        self.state.sidecars.release_domain(&self.domain);
+        self.state
+            .sidecars
+            .scraping
+            .lock()
+            .unwrap()
+            .remove(&self.source_id);
     }
 }
+/// A batch is released however its run ends — a lane that panics, an error from the database, a
+/// cancelled future. An early return used to skip the release, and every later update then
+/// answered "Another source update is already running" until the app was restarted.
+struct BatchGuard<'a> {
+    manager: &'a SidecarManager,
+    id: String,
+}
+impl<'a> BatchGuard<'a> {
+    fn start(manager: &'a SidecarManager, id: &str) -> Option<Self> {
+        Self::start_of(manager, id, false)
+    }
+    fn start_of(manager: &'a SidecarManager, id: &str, descriptions: bool) -> Option<Self> {
+        manager.start_batch_of(id, descriptions).then(|| Self {
+            manager,
+            id: id.to_owned(),
+        })
+    }
+}
+impl Drop for BatchGuard<'_> {
+    fn drop(&mut self) {
+        self.manager.finish_batch(&self.id);
+    }
+}
+/// The decrypted copy of a saved browser session exists only for the length of one run. It is
+/// removed when this is dropped, so a run that fails after writing it leaves no plaintext behind.
+struct TempSessionFile(PathBuf);
+impl Drop for TempSessionFile {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_file(&self.0);
+    }
+}
+/// Plaintext session copies only outlive their run when the process itself died mid-run. They are
+/// cleared at startup, leaving any written in the last few minutes: the background check and the
+/// window can start together, and one must not delete the file the other has just handed a browser.
+pub fn remove_stale_session_files(sessions: &std::path::Path) -> usize {
+    let Ok(entries) = std::fs::read_dir(sessions) else {
+        return 0;
+    };
+    let cutoff = std::time::SystemTime::now() - Duration::from_secs(10 * 60);
+    entries
+        .flatten()
+        .filter(|entry| {
+            entry
+                .file_name()
+                .to_string_lossy()
+                .ends_with(".playwright.json")
+        })
+        .filter(|entry| {
+            entry
+                .metadata()
+                .and_then(|meta| meta.modified())
+                .map_or(true, |modified| modified < cutoff)
+        })
+        .filter(|entry| std::fs::remove_file(entry.path()).is_ok())
+        .count()
+}
+/// How long an operation started by hand (opening a job, a test, a probe) waits for an update that
+/// is reading the same host before it gives up and says so.
+const INTERACTIVE_DOMAIN_WAIT: Duration = Duration::from_secs(180);
 impl SidecarManager {
     pub fn active(&self) -> bool {
         !self.workers.lock().unwrap().is_empty()
     }
-    fn claim_domain(&self, domain: &str) -> bool {
-        domain.is_empty() || self.domains.lock().unwrap().insert(domain.to_owned())
+    fn domain_lock(&self, domain: &str) -> Arc<tokio::sync::Mutex<()>> {
+        self.domains
+            .lock()
+            .unwrap()
+            .entry(domain.to_owned())
+            .or_default()
+            .clone()
     }
-    fn release_domain(&self, domain: &str) {
-        if !domain.is_empty() {
-            self.domains.lock().unwrap().remove(domain);
-        }
+    fn claim_source(&self, source_id: &str) -> bool {
+        self.scraping.lock().unwrap().insert(source_id.to_owned())
+    }
+    /// Whether any batch is running in this process, whichever button or timer started it.
+    pub fn batch_running(&self) -> bool {
+        self.batches
+            .lock()
+            .unwrap()
+            .values()
+            .any(|batch| !batch.descriptions)
     }
     fn add(
         &self,
@@ -157,12 +242,27 @@ impl SidecarManager {
             }
         }
     }
+    #[cfg(test)]
     fn start_batch(&self, id: &str) -> bool {
+        self.start_batch_of(id, false)
+    }
+    /// One source update at a time, and one description download at a time; either may run while
+    /// the other does.
+    fn start_batch_of(&self, id: &str, descriptions: bool) -> bool {
         let mut batches = self.batches.lock().unwrap();
-        if !batches.is_empty() {
+        if batches
+            .values()
+            .any(|batch| batch.descriptions == descriptions)
+        {
             return false;
         }
-        batches.insert(id.to_owned(), ScrapeBatch::default());
+        batches.insert(
+            id.to_owned(),
+            ScrapeBatch {
+                descriptions,
+                ..ScrapeBatch::default()
+            },
+        );
         true
     }
     fn finish_batch(&self, id: &str) {
@@ -420,14 +520,42 @@ async fn run(
         .and_then(|value| url::Url::parse(value).ok())
         .and_then(|url| url.host_str().map(str::to_owned))
         .unwrap_or_default();
-    if !state.sidecars.claim_domain(&domain) {
-        return Err(format!(
-            "Another operation is already reading {domain}; wait for it to finish."
-        ));
-    }
-    let _domain_finalizer = DomainFinalizer {
-        state: state.clone(),
-        domain,
+    let _source_claim = if command == "scrape_source" && !source_id.is_empty() {
+        if !state.sidecars.claim_source(&source_id) {
+            return Err(format!("{source_name} is already being updated."));
+        }
+        Some(SourceClaim {
+            state: state.clone(),
+            source_id: source_id.clone(),
+        })
+    } else {
+        None
+    };
+    let _domain_guard = if domain.is_empty() {
+        None
+    } else {
+        let lock = state.sidecars.domain_lock(&domain);
+        let guard = match lock.clone().try_lock_owned() {
+            Ok(guard) => guard,
+            Err(_) => {
+                // Said out loud so the reader can show why a description is taking its time.
+                let _ = app.emit(
+                    "domain-wait",
+                    serde_json::json!({"domain": &domain, "sourceId": &source_id, "command": command}),
+                );
+                let wait = lock.lock_owned();
+                if batch_id.is_none() && command != "scrape_source" {
+                    tokio::time::timeout(INTERACTIVE_DOMAIN_WAIT, wait)
+                        .await
+                        .map_err(|_| {
+                            format!("An update is still reading {domain}; try again once it has finished.")
+                        })?
+                } else {
+                    wait.await
+                }
+            }
+        };
+        Some(guard)
     };
     if !source_id.is_empty() {
         let started = Instant::now();
@@ -468,7 +596,7 @@ async fn run(
     } else {
         Vec::new()
     };
-    let temp_session = if !source_id.is_empty() && command != "capture_session" {
+    let _temp_session = if !source_id.is_empty() && command != "capture_session" {
         let started = Instant::now();
         if let Some(plain) = crate::sessions::load_browser_session(&state.db.root, &source_id)? {
             let path = state
@@ -476,10 +604,12 @@ async fn run(
                 .root
                 .join("sessions")
                 .join(format!("{run_id}.playwright.json"));
-            std::fs::write(&path, plain).map_err(|e| e.to_string())?;
-            source["sessionStatePath"] = serde_json::json!(path.to_string_lossy());
+            // Guarded before it is written: a half-written file is removed just the same.
+            let file = TempSessionFile(path);
+            std::fs::write(&file.0, plain).map_err(|e| e.to_string())?;
+            source["sessionStatePath"] = serde_json::json!(file.0.to_string_lossy());
             session_load_ms = millis(started.elapsed());
-            Some(path)
+            Some(file)
         } else {
             session_load_ms = millis(started.elapsed());
             None
@@ -584,6 +714,7 @@ async fn run(
     let mut events = Vec::new();
     let mut filtered_out: i64 = 0;
     let mut skipped: i64 = 0;
+    let mut invalid: i64 = 0;
     let mut pending_jobs = Vec::with_capacity(200);
     let mut persisted_written: i64 = 0;
     let mut persistence_ms: u128 = 0;
@@ -617,6 +748,7 @@ async fn run(
                     persistence_ms += started.elapsed().as_millis();
                     persisted_written += i64::from(result.written);
                     skipped += i64::from(result.unchanged);
+                    invalid += i64::from(result.invalid);
                     pending_jobs.clear();
                 }
             } else {
@@ -661,11 +793,13 @@ async fn run(
             persistence_ms += started.elapsed().as_millis();
             persisted_written += i64::from(result.written);
             skipped += i64::from(result.unchanged);
+            invalid += i64::from(result.invalid);
             pending_jobs.clear();
         }
         if finished && command == "scrape_source" {
             if let Some(payload) = event.payload.as_object_mut() {
                 payload.insert("persisted".into(), serde_json::json!(persisted_written));
+                payload.insert("invalid".into(), serde_json::json!(invalid));
                 payload.insert("persistenceMs".into(), serde_json::json!(persistence_ms));
                 payload.insert("skipped".into(), serde_json::json!(skipped));
             }
@@ -801,9 +935,6 @@ async fn run(
     let child_exited_at = Instant::now();
     state.sidecars.remove(&run_id);
     worker_finalizer.disarm();
-    if let Some(path) = temp_session {
-        let _ = std::fs::remove_file(path);
-    }
     let mut run_record_ms = 0u64;
     let mut availability_ms = 0u64;
     if track_run {
@@ -832,10 +963,25 @@ async fn run(
         };
         let discovered = count("discovered");
         let persisted = count("persisted").max(0);
+        // Why a run failed is kept on the run, so the Sources row can say it ("HTTP 422") without
+        // anyone opening the activity log.
+        let (failure_code, diagnostics) = match events.last() {
+            Some(event) if state_name == "failed" => (
+                event
+                    .payload
+                    .get("code")
+                    .and_then(|v| v.as_str())
+                    .map(str::to_owned),
+                Some(text(&event.payload, "message").to_owned()).filter(|m| !m.is_empty()),
+            ),
+            _ => (None, None),
+        };
         let record_started = Instant::now();
-        sqlx::query("UPDATE scrape_runs SET status=?,complete=?,discovered_count=?,persisted_count=?,skipped_count=?,requests_count=?,finished_at=? WHERE id=?")
+        sqlx::query("UPDATE scrape_runs SET status=?,complete=?,failure_code=COALESCE(?,failure_code),diagnostics=COALESCE(?,diagnostics),discovered_count=?,persisted_count=?,skipped_count=?,requests_count=?,finished_at=? WHERE id=?")
             .bind(state_name)
             .bind(complete)
+            .bind(failure_code)
+            .bind(diagnostics)
             .bind(discovered)
             .bind(persisted)
             .bind(skipped)
@@ -1116,8 +1262,21 @@ fn outcome_message(event: &WorkerEvent, command: &str, filtered_out: i64) -> Str
             if filtered > 0 {
                 parts.push(format!("{filtered} skipped by the title filter"));
             }
+            let invalid = event
+                .payload
+                .get("invalid")
+                .and_then(|v| v.as_i64())
+                .unwrap_or(0);
+            let invalid = if invalid > 0 {
+                format!(
+                    " {invalid} listing{} skipped: missing title or company.",
+                    if invalid == 1 { "" } else { "s" }
+                )
+            } else {
+                String::new()
+            };
             format!(
-                "Finished: {} · {requests} requests{}.",
+                "Finished: {} · {requests} requests{}.{invalid}",
                 parts.join(", "),
                 performance_suffix(&event.payload)
             )
@@ -1259,7 +1418,8 @@ pub async fn job_description(
     else {
         return Ok(current);
     };
-    let mut source = saved_sources(&state, &[source_id])
+    // Addressed by id, so the profile it belongs to does not matter.
+    let mut source = saved_sources(&state, &[source_id], true)
         .await?
         .into_iter()
         .next()
@@ -1286,6 +1446,151 @@ pub async fn job_description(
         });
     }
     crate::db::load_job_description(&state.db.pool, &job_id).await
+}
+
+/// How many descriptions one background pass downloads at most. The jobs in view are taken newest
+/// first, so the ones most likely to be read are the ones that get theirs.
+const VIEW_DESCRIPTION_CAP: usize = 200;
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DescriptionPass {
+    pub run_id: String,
+    pub requested: usize,
+    pub saved: u64,
+    pub failed: u64,
+    pub cancelled: bool,
+}
+/// Downloads the descriptions of the jobs the Jobs page is showing that have none yet, so a keyword
+/// search covers them without each one being opened first. Run after an update, in the background:
+/// at each host's usual pace, one worker per host, and cancellable with cancel_scrape_all(run_id).
+#[tauri::command]
+pub async fn fetch_view_descriptions(
+    filter: crate::db::JobFilter,
+    run_id: String,
+    app: tauri::AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> ApiResult<DescriptionPass> {
+    let state = state.inner().clone();
+    let Some(_batch) = BatchGuard::start_of(&state.sidecars, &run_id, true) else {
+        return Err("Descriptions are already being downloaded".into());
+    };
+    let jobs = state
+        .db
+        .view_enrichment_jobs(filter, VIEW_DESCRIPTION_CAP)
+        .await?;
+    let requested = jobs.len();
+    let mut by_source: BTreeMap<String, Vec<serde_json::Value>> = BTreeMap::new();
+    for (source_id, job) in jobs {
+        by_source.entry(source_id).or_default().push(job);
+    }
+    let ids: Vec<String> = by_source.keys().cloned().collect();
+    let sources = if ids.is_empty() {
+        Vec::new()
+    } else {
+        saved_sources(&state, &ids, true).await?
+    };
+    let progress = |done: u64, failed: u64| {
+        let _ = app.emit(
+            "descriptions-progress",
+            serde_json::json!({"runId": &run_id, "completed": done + failed, "saved": done, "failed": failed, "total": requested}),
+        );
+    };
+    progress(0, 0);
+    let groups = domain_groups(sources);
+    let lanes = lane_count(&state, groups.len()).await?;
+    let queue = Arc::new(Mutex::new(VecDeque::from(groups)));
+    let by_source = Arc::new(by_source);
+    let saved = Arc::new(std::sync::atomic::AtomicU64::new(0));
+    let failed = Arc::new(std::sync::atomic::AtomicU64::new(0));
+    let mut tasks = Vec::new();
+    for _ in 0..lanes {
+        let (app, state, queue, by_source, saved, failed, run_id) = (
+            app.clone(),
+            state.clone(),
+            queue.clone(),
+            by_source.clone(),
+            saved.clone(),
+            failed.clone(),
+            run_id.clone(),
+        );
+        tasks.push(tokio::spawn(async move {
+            while let Some(group) = {
+                let next = queue.lock().unwrap().pop_front();
+                next
+            } {
+                for source in group {
+                    if state.sidecars.batch_cancelled(&run_id) {
+                        return;
+                    }
+                    let jobs = by_source.get(&source.source_id).cloned().unwrap_or_default();
+                    let count = jobs.len() as u64;
+                    let mut request = source.source.clone();
+                    request["enrichmentJobs"] = serde_json::json!(jobs);
+                    let result = run(
+                        app.clone(),
+                        state.clone(),
+                        "enrich_source",
+                        request,
+                        Some(&run_id),
+                        false,
+                    )
+                    .await;
+                    let (ok, bad) = match result.as_ref().ok().and_then(|events| events.last()) {
+                        Some(event) if event.event == "completed" => {
+                            let read = |key: &str| event.payload.get(key).and_then(|v| v.as_u64()).unwrap_or(0);
+                            (read("persisted"), read("failed"))
+                        }
+                        _ => (0, count),
+                    };
+                    let ordering = std::sync::atomic::Ordering::Relaxed;
+                    let done = saved.fetch_add(ok, ordering) + ok;
+                    let missed = failed.fetch_add(bad, ordering) + bad;
+                    let _ = app.emit(
+                        "descriptions-progress",
+                        serde_json::json!({"runId": &run_id, "completed": done + missed, "saved": done, "failed": missed, "total": by_source.values().map(Vec::len).sum::<usize>()}),
+                    );
+                }
+            }
+        }));
+    }
+    for task in futures::future::join_all(tasks).await {
+        task.map_err(|e| e.to_string())?;
+    }
+    let ordering = std::sync::atomic::Ordering::Relaxed;
+    let pass = DescriptionPass {
+        run_id: run_id.clone(),
+        requested,
+        saved: saved.load(ordering),
+        failed: failed.load(ordering),
+        cancelled: state.sidecars.batch_cancelled(&run_id),
+    };
+    let _ = app.emit(
+        "descriptions-progress",
+        serde_json::json!({"runId": &run_id, "done": true, "completed": pass.saved + pass.failed, "saved": pass.saved, "failed": pass.failed, "total": requested, "cancelled": pass.cancelled}),
+    );
+    if requested > 0 {
+        crate::db::log(
+            &state.db.pool,
+            if pass.failed > 0 { "warning" } else { "info" },
+            None,
+            None,
+            "view_descriptions",
+            None,
+            &format!(
+                "Downloaded {} of {requested} descriptions for the jobs in view{}{}.",
+                pass.saved,
+                if pass.failed > 0 {
+                    format!(" · {} failed", pass.failed)
+                } else {
+                    String::new()
+                },
+                if pass.cancelled { " · cancelled" } else { "" }
+            ),
+            serde_json::json!({"requested": requested, "saved": pass.saved, "failed": pass.failed}),
+        )
+        .await;
+    }
+    Ok(pass)
 }
 
 #[derive(Clone)]
@@ -1387,8 +1692,14 @@ fn may_skip(decision: CheckDecision, unchanged_checks: i64, limit: i64) -> bool 
 /// narrowing to nothing — it is the default, meaning every source the user still follows. Which
 /// sources are followed at all stays `sources.enabled`, owned by the Sources page; this is the
 /// separate, throwaway question of what is being looked at right now.
-async fn saved_sources(state: &AppState, only: &[String]) -> ApiResult<Vec<SavedSource>> {
-    // Only the active profile's boards: switching profile is how the user says whose job search to update.
+async fn saved_sources(
+    state: &AppState,
+    only: &[String],
+    all_profiles: bool,
+) -> ApiResult<Vec<SavedSource>> {
+    // Only the active profile's boards when the window asks: switching profile is how the user says
+    // whose job search to update. The automatic update reads every profile, or the one not shown
+    // goes stale until it is switched to.
     let rows = sqlx::query(&format!(
         "SELECT s.id,s.name,s.base_url,s.adapter_id,s.adapter_version,s.robots_override,s.unchanged_checks,\
          (SELECT count(*) FROM jobs j WHERE j.source_id=s.id AND j.availability<>'archived') AS stored,\
@@ -1397,7 +1708,11 @@ async fn saved_sources(state: &AppState, only: &[String]) -> ApiResult<Vec<Saved
          (SELECT MAX(changed_at) FROM (SELECT c.updated_at AS changed_at FROM source_configs c WHERE c.source_id=s.id UNION ALL SELECT updated_at FROM settings WHERE key='scrape.titleAny' OR key='scrape.titleAny.'||s.profile_id)) AS config_changed_at,\
          EXISTS(SELECT 1 FROM scrape_runs r WHERE r.source_id=s.id AND r.mode='scrape') AS attempted \
          FROM sources s WHERE s.enabled=1 AND s.kind='active' AND s.deleted_at IS NULL AND {} ORDER BY s.name,s.id",
-        crate::db::SOURCE_IN_PROFILE
+        if all_profiles {
+            "1=1"
+        } else {
+            crate::db::SOURCE_IN_PROFILE
+        }
     ))
     .fetch_all(&state.db.pool)
     .await
@@ -1546,7 +1861,7 @@ pub async fn check_sources(
     source_ids: Option<Vec<String>>,
 ) -> ApiResult<Vec<SourceCheck>> {
     let started = Instant::now();
-    let sources = saved_sources(&state, &source_ids.unwrap_or_default()).await?;
+    let sources = saved_sources(&state, &source_ids.unwrap_or_default(), false).await?;
     let source_count = sources.len();
     let groups = domain_groups(sources);
     let lanes = lane_count(&state, groups.len()).await?;
@@ -1625,6 +1940,7 @@ pub async fn scrape_all(
         run_id,
         source_ids.unwrap_or_default(),
         force_refresh.unwrap_or(false),
+        false,
     )
     .await
 }
@@ -1637,10 +1953,11 @@ async fn scrape_all_inner(
     run_id: Option<String>,
     source_ids: Vec<String>,
     force_refresh: bool,
+    all_profiles: bool,
 ) -> ApiResult<ScrapeAllResult> {
     let started = Instant::now();
     let batch_id = run_id.unwrap_or_else(|| Uuid::new_v4().to_string());
-    let sources = saved_sources(&state, &source_ids).await?;
+    let sources = saved_sources(&state, &source_ids, all_profiles).await?;
     let total = sources.len();
     let queued: Vec<String> = sources
         .iter()
@@ -1652,9 +1969,15 @@ async fn scrape_all_inner(
     // Lanes now pull from a shared queue: a lane that finishes a host immediately takes the next.
     // One host is still read strictly serially, by itself, which is what politeness requires.
     let lanes = lane_count(&state, groups.len()).await?;
-    if !state.sidecars.start_batch(&batch_id) {
+    let Some(_batch) = BatchGuard::start(&state.sidecars, &batch_id) else {
         return Err("Another source update is already running".into());
+    };
+    // The window and the scheduled background check are separate processes on one database. The
+    // heartbeat is how each sees the other, and every batch now writes it, whoever started it.
+    if crate::db::sync_in_progress(&state.db.pool).await {
+        return Err("A background update is already running".into());
     }
+    let heartbeat = Heartbeat::start(state.db.pool.clone()).await;
     // Every source in the batch is waiting from this moment; saying which ones up front is what
     // lets each row show "Queued" before its lane reaches it.
     let _ = app.emit(
@@ -1882,7 +2205,7 @@ async fn scrape_all_inner(
             }}
         }),
     ).await;
-    state.sidecars.finish_batch(&batch_id);
+    heartbeat.stop().await;
     Ok(ScrapeAllResult {
         run_id: batch_id,
         completed_sources: done,
@@ -1892,6 +2215,46 @@ async fn scrape_all_inner(
     })
 }
 
+/// Keeps the cross-process heartbeat fresh while a batch runs. `stop` clears it; dropping it
+/// without stopping (an error, a panic) clears it from a spawned task instead.
+struct Heartbeat {
+    pool: sqlx::SqlitePool,
+    task: Option<tokio::task::JoinHandle<()>>,
+}
+impl Heartbeat {
+    async fn start(pool: sqlx::SqlitePool) -> Self {
+        crate::db::write_sync_heartbeat(&pool).await;
+        let beat = pool.clone();
+        let task = tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(Duration::from_secs(60)).await;
+                crate::db::write_sync_heartbeat(&beat).await;
+            }
+        });
+        Self {
+            pool,
+            task: Some(task),
+        }
+    }
+    async fn stop(mut self) {
+        if let Some(task) = self.task.take() {
+            task.abort();
+            let _ = task.await;
+        }
+        crate::db::clear_sync_heartbeat(&self.pool).await;
+    }
+}
+impl Drop for Heartbeat {
+    fn drop(&mut self) {
+        if let Some(task) = self.task.take() {
+            task.abort();
+            let pool = self.pool.clone();
+            tauri::async_runtime::spawn(async move {
+                crate::db::clear_sync_heartbeat(&pool).await;
+            });
+        }
+    }
+}
 /// Builds one compact toast, or stays silent when the batch stored nothing new.
 pub fn new_jobs_summary(count: i64, samples: &[crate::db::NewJob]) -> Option<(String, String)> {
     if count <= 0 {
@@ -1902,9 +2265,15 @@ pub fn new_jobs_summary(count: i64, samples: &[crate::db::NewJob]) -> Option<(St
     } else {
         format!("{count} new jobs")
     };
+    // A handful is named in full; past that, three and a count.
+    let shown = if count as usize <= NAMED_IN_FULL {
+        NAMED_IN_FULL
+    } else {
+        3
+    };
     let mut lines: Vec<String> = samples
         .iter()
-        .take(3)
+        .take(shown)
         .map(|job| format!("{} — {}", job.title, job.company))
         .collect();
     let remaining = count - lines.len() as i64;
@@ -1913,43 +2282,38 @@ pub fn new_jobs_summary(count: i64, samples: &[crate::db::NewJob]) -> Option<(St
     }
     Some((title, lines.join("\n")))
 }
+const NAMED_IN_FULL: usize = 5;
+fn describe_rule(rule: &crate::db::NotifyRule) -> String {
+    match rule {
+        crate::db::NotifyRule::View {
+            name: Some(name), ..
+        } => format!("the view \"{name}\""),
+        crate::db::NotifyRule::View { name: None, .. } => "the Jobs filter".into(),
+        crate::db::NotifyRule::Title(terms) if terms.is_empty() => "every new listing".into(),
+        crate::db::NotifyRule::Title(_) => "the notification title filter".into(),
+    }
+}
+/// One notification per profile with news, counted the way that profile's Jobs list would count it:
+/// a batch that stores 300 new jobs, four of them in "verification, eight countries", announces four.
 pub async fn notify_new_jobs(
     app: &tauri::AppHandle,
     pool: &sqlx::SqlitePool,
     since: &str,
 ) -> ApiResult<()> {
-    // Announcing is the last thing a batch does, so the terms are read here rather than kept from
-    // the start of the run: changing them mid-update takes effect on that update's notification.
-    let terms = crate::db::scrape_filter_terms(
-        &crate::db::active_filter_setting(pool, crate::db::NOTIFY_TITLE_FILTER).await?,
-    );
-    let (count, jobs) = crate::db::new_jobs_since(pool, since, 3, &terms).await?;
-    let Some((title, body)) = new_jobs_summary(count, &jobs) else {
-        crate::db::log(
-            pool,
-            "info",
-            None,
-            None,
-            "new_jobs_alert",
-            None,
-            if terms.is_empty() {
-                "No new jobs found; no notification shown."
-            } else {
-                "No new job matched the notification filter; no notification shown."
-            },
-            serde_json::json!({"count": 0, "notifyTerms": terms}),
-        )
-        .await;
-        return Ok(());
-    };
-    match app
-        .notification()
-        .builder()
-        .title(&title)
-        .body(&body)
-        .show()
-    {
-        Ok(()) => {
+    // Announcing is the last thing a batch does, so the rule is read here rather than kept from
+    // the start of the run: changing it mid-update takes effect on that update's notification.
+    let scopes = crate::db::notification_scopes(pool).await?;
+    let named = scopes.len() > 1;
+    let mut failure = None;
+    for (scope, profile_name) in scopes {
+        let (count, jobs, rule) =
+            crate::db::new_jobs_matching(pool, &scope, since, NAMED_IN_FULL).await?;
+        let rule_text = describe_rule(&rule);
+        let scope_text = profile_name
+            .as_deref()
+            .map(|name| format!(" ({name})"))
+            .unwrap_or_default();
+        let Some((mut title, body)) = new_jobs_summary(count, &jobs) else {
             crate::db::log(
                 pool,
                 "info",
@@ -1957,62 +2321,82 @@ pub async fn notify_new_jobs(
                 None,
                 "new_jobs_alert",
                 None,
-                &format!(
-                    "Announced {count} new job{}.",
-                    if count == 1 { "" } else { "s" }
-                ),
-                serde_json::json!({"count": count, "samples": jobs}),
+                &format!("No new job matched {rule_text}{scope_text}; no notification shown."),
+                serde_json::json!({"count": 0, "profile": profile_name}),
             )
             .await;
-            Ok(())
+            continue;
+        };
+        if named {
+            if let Some(name) = &profile_name {
+                title = format!("{title} · {name}");
+            }
         }
-        Err(error) => {
-            let error = error.to_string();
-            crate::db::log(
-                pool,
-                "error",
-                None,
-                None,
-                "new_jobs_alert",
-                None,
-                &error,
-                serde_json::json!({"count": count}),
-            )
-            .await;
-            Err(error)
+        match app
+            .notification()
+            .builder()
+            .title(&title)
+            .body(&body)
+            .show()
+        {
+            Ok(()) => {
+                crate::db::log(
+                    pool,
+                    "info",
+                    None,
+                    None,
+                    "new_jobs_alert",
+                    None,
+                    &format!(
+                        "Announced {count} new job{} matching {rule_text}{scope_text}.",
+                        if count == 1 { "" } else { "s" }
+                    ),
+                    serde_json::json!({"count": count, "samples": jobs, "profile": profile_name}),
+                )
+                .await;
+            }
+            Err(error) => {
+                let error = error.to_string();
+                crate::db::log(
+                    pool,
+                    "error",
+                    None,
+                    None,
+                    "new_jobs_alert",
+                    None,
+                    &error,
+                    serde_json::json!({"count": count, "profile": profile_name}),
+                )
+                .await;
+                failure = Some(error);
+            }
         }
     }
+    failure.map_or(Ok(()), Err)
 }
+/// The automatic update: every profile's switched-on sources, then the notification. Skipped, not
+/// failed, when another update — in this process or the other one — is already running.
 pub async fn run_automatic_sync(app: tauri::AppHandle, state: Arc<AppState>) -> ApiResult<bool> {
-    if crate::db::sync_in_progress(&state.db.pool).await {
+    if state.sidecars.batch_running() || crate::db::sync_in_progress(&state.db.pool).await {
         return Ok(false);
     }
     let since = chrono::Utc::now().to_rfc3339();
-    crate::db::write_sync_heartbeat(&state.db.pool).await;
-    let heartbeat_pool = state.db.pool.clone();
-    let heartbeat = tokio::spawn(async move {
-        loop {
-            tokio::time::sleep(Duration::from_secs(60)).await;
-            crate::db::write_sync_heartbeat(&heartbeat_pool).await;
-        }
-    });
     let result = scrape_all_inner(
         app.clone(),
         state.clone(),
-        Some("automatic-startup".into()),
+        Some(format!("automatic-{}", Uuid::new_v4())),
         Vec::new(),
         false,
+        true,
     )
     .await;
-    heartbeat.abort();
-    let _ = heartbeat.await;
-    crate::db::clear_sync_heartbeat(&state.db.pool).await;
     let alert = notify_new_jobs(&app, &state.db.pool, &since).await;
     result?;
     alert?;
     Ok(true)
 }
 
+const IN_APP_SYNC_INTERVAL: Duration = Duration::from_secs(4 * 60 * 60);
 #[tauri::command]
 pub async fn start_automatic_sync(
     app: tauri::AppHandle,
@@ -2028,19 +2412,33 @@ pub async fn start_automatic_sync(
         return Ok(false);
     }
     let state = state.inner().clone();
+    // Once at launch, then every four hours for as long as the app runs — it mostly sits in the tray,
+    // and a launch-only update left it a day stale. When the scheduled background check is on, that
+    // timer already runs every four hours, so this loop leaves the work to it.
     tauri::async_runtime::spawn(async move {
-        if let Err(error) = run_automatic_sync(app, state.clone()).await {
-            crate::db::log(
-                &state.db.pool,
-                "error",
-                None,
-                None,
-                "automatic_sync",
-                None,
-                &error,
-                serde_json::json!({}),
-            )
-            .await;
+        let mut first = true;
+        loop {
+            if !first {
+                tokio::time::sleep(IN_APP_SYNC_INTERVAL).await;
+            }
+            let timer_on = !first && crate::db::background_sync_requested(&state.db.pool).await;
+            first = false;
+            if timer_on {
+                continue;
+            }
+            if let Err(error) = run_automatic_sync(app.clone(), state.clone()).await {
+                crate::db::log(
+                    &state.db.pool,
+                    "error",
+                    None,
+                    None,
+                    "automatic_sync",
+                    None,
+                    &error,
+                    serde_json::json!({}),
+                )
+                .await;
+            }
         }
     });
     Ok(true)
@@ -2106,6 +2504,11 @@ mod tests {
         let seven = new_jobs_summary(7, &samples).unwrap();
         assert_eq!(seven.0, "7 new jobs");
         assert!(seven.1.ends_with("and 4 more"));
+        // A handful is named in full rather than three and "and 1 more".
+        let four: Vec<_> = samples.iter().cycle().take(4).cloned().collect();
+        let named = new_jobs_summary(4, &four).unwrap();
+        assert_eq!(named.1.lines().count(), 4);
+        assert!(!named.1.contains("more"));
     }
 
     #[test]
@@ -2209,7 +2612,7 @@ mod tests {
             headless: true,
         };
         let only = ["fixture".into()];
-        let source = saved_sources(&state, &only).await.unwrap().remove(0);
+        let source = saved_sources(&state, &only, false).await.unwrap().remove(0);
         assert_eq!(
             source.baseline,
             Some(0),
@@ -2222,7 +2625,7 @@ mod tests {
             .await
             .unwrap();
         assert!(full_read_due(
-            &saved_sources(&state, &only).await.unwrap()[0],
+            &saved_sources(&state, &only, false).await.unwrap()[0],
             now
         ));
         sqlx::query("UPDATE source_configs SET updated_at=? WHERE source_id='fixture'")
@@ -2232,7 +2635,7 @@ mod tests {
             .unwrap();
         sqlx::query("INSERT INTO settings(key,value,updated_at) VALUES('scrape.titleAny','[]',?) ON CONFLICT(key) DO UPDATE SET updated_at=excluded.updated_at").bind(now.to_rfc3339()).execute(&state.db.pool).await.unwrap();
         assert!(full_read_due(
-            &saved_sources(&state, &only).await.unwrap()[0],
+            &saved_sources(&state, &only, false).await.unwrap()[0],
             now
         ));
         state.db.pool.close().await;
@@ -2349,14 +2752,122 @@ mod tests {
         assert!(!manager.resume("missing"));
     }
 
-    #[test]
-    fn domain_claims_prevent_manual_and_batch_workers_from_overlapping() {
+    #[tokio::test]
+    async fn a_second_operation_on_a_busy_host_waits_for_it_instead_of_failing() {
         let manager = SidecarManager::default();
-        assert!(manager.claim_domain("jobs.example.test"));
-        assert!(!manager.claim_domain("jobs.example.test"));
-        assert!(manager.claim_domain("other.example.test"));
-        manager.release_domain("jobs.example.test");
-        assert!(manager.claim_domain("jobs.example.test"));
+        let held = manager
+            .domain_lock("jobs.example.test")
+            .try_lock_owned()
+            .unwrap();
+        assert!(
+            manager
+                .domain_lock("jobs.example.test")
+                .try_lock_owned()
+                .is_err(),
+            "one worker per host at a time"
+        );
+        assert!(manager
+            .domain_lock("other.example.test")
+            .try_lock_owned()
+            .is_ok());
+        let waiter = tokio::spawn({
+            let lock = manager.domain_lock("jobs.example.test");
+            async move {
+                let _turn = lock.lock_owned().await;
+            }
+        });
+        tokio::time::sleep(Duration::from_millis(20)).await;
+        assert!(!waiter.is_finished(), "the second operation queues");
+        drop(held);
+        tokio::time::timeout(Duration::from_secs(1), waiter)
+            .await
+            .expect("and runs once the first is done")
+            .unwrap();
+    }
+
+    #[test]
+    fn a_description_download_runs_beside_an_update_but_not_beside_another() {
+        let manager = SidecarManager::default();
+        assert!(manager.start_batch("update"));
+        assert!(manager.start_batch_of("descriptions", true));
+        assert!(!manager.start_batch_of("more", true));
+        assert!(!manager.start_batch("another update"));
+        manager.finish_batch("update");
+        assert!(
+            !manager.batch_running(),
+            "a description download is not an update"
+        );
+        assert!(manager.start_batch("next update"));
+    }
+
+    #[test]
+    fn a_second_full_read_of_the_same_source_is_refused() {
+        let manager = SidecarManager::default();
+        assert!(manager.claim_source("s"));
+        assert!(!manager.claim_source("s"));
+        assert!(manager.claim_source("t"));
+    }
+
+    #[tokio::test]
+    async fn a_lane_that_panics_does_not_block_the_next_batch() {
+        let manager = SidecarManager::default();
+        let first = async {
+            let Some(_batch) = BatchGuard::start(&manager, "first") else {
+                return Err("busy".to_string());
+            };
+            assert!(manager.batch_running());
+            let lane = tokio::spawn(async { panic!("lane crashed") });
+            lane.await.map_err(|error| error.to_string())?;
+            Ok(())
+        }
+        .await;
+        assert!(first.is_err(), "the crashed lane is reported");
+        assert!(!manager.batch_running());
+        assert!(
+            BatchGuard::start(&manager, "second").is_some(),
+            "a second batch can start afterwards"
+        );
+    }
+
+    #[test]
+    fn a_session_copy_is_removed_however_the_run_ends() {
+        let root = std::env::temp_dir().join(format!("jobscraper-session-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let path = root.join("run.playwright.json");
+        let failed_run = || -> Result<(), String> {
+            let file = TempSessionFile(path.clone());
+            std::fs::write(&file.0, "{}").map_err(|e| e.to_string())?;
+            Err("the worker could not start".into())
+        };
+        assert!(failed_run().is_err());
+        assert!(!path.exists(), "nothing is left behind");
+        // Startup sweeps old copies only: a fresh one may belong to a run in another process.
+        std::fs::write(&path, "{}").unwrap();
+        std::fs::write(root.join("keep.json"), "{}").unwrap();
+        assert_eq!(remove_stale_session_files(&root), 0);
+        let old = std::time::SystemTime::now() - Duration::from_secs(3600);
+        std::fs::File::options()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_modified(old)
+            .unwrap();
+        assert_eq!(remove_stale_session_files(&root), 1);
+        assert!(!path.exists());
+        assert!(root.join("keep.json").exists());
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn a_skipped_invalid_listing_is_named_in_the_outcome() {
+        let event = WorkerEvent {
+            protocol_version: 1,
+            event: "completed".into(),
+            run_id: "r".into(),
+            payload: serde_json::json!({"discovered":200,"persisted":199,"invalid":1,"requests":1}),
+        };
+        assert!(outcome_message(&event, "scrape_source", 0)
+            .ends_with("1 listing skipped: missing title or company."));
     }
 }
 

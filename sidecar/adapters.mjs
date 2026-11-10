@@ -41,10 +41,12 @@ export const platformRequests={
   // by the employer's own board token. That is why they take a token rather than a listingPath —
   // the base URL is the human-readable board an applicant sees, and the request goes to the API.
   //
-  // Greenhouse hands back the entire board in one response, so there is no page to ask for. The
-  // listing carries no description; the per-job endpoint does, and it is what fetchDetail reads.
+  // Greenhouse hands back the entire board in one response, so there is no page to ask for.
+  // content=true puts every description in that same response (about ten times the bytes: 10 MB
+  // for Databricks' 914 openings, against 914 detail requests), so keyword search sees them from
+  // the first read. The per-job endpoint stays as the detail link for a refresh.
   greenhouse:(base,{token}={})=>{if(!token)throw Error("incomplete: Greenhouse source requires token");
-   return{url:`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs`,method:"GET",headers:{accept:"application/json"},next:()=>null}},
+   return{url:`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs?content=true`,method:"GET",headers:{accept:"application/json"},next:()=>null}},
   // Ashby also answers whole-board, and unlike Greenhouse its listing already carries the
   // description, so a scrape of an Ashby board is exactly one request.
   ashby:(base,{token}={})=>{if(!token)throw Error("incomplete: Ashby source requires token");
@@ -85,6 +87,9 @@ export const platformRequests={
 // more shapes, each family maps one raw record onto the generic keys that loop already reads.
 // Applied to the listing row AND to the row merged with its detail payload, so a field that only
 // the detail page carries (Greenhouse's description) is mapped just the same.
+// Greenhouse entity-escapes its HTML once more than the shared normalizer decodes ("&lt;p&gt;"),
+// so that one extra level is taken off here; otherwise the stored text keeps the markup as words.
+const ghUnescape=v=>v==null?v:String(v).replace(/&(lt|gt|quot|#39|#x27|amp);/g,(_,e)=>({lt:"<",gt:">",quot:'"',"#39":"'","#x27":"'",amp:"&"})[e]);
 const ghDetail=(token,id)=>token&&id!=null?`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs/${encodeURIComponent(id)}`:null;
 const personioDescription=x=>[].concat(x.jobDescriptions?.jobDescription??[]).filter(part=>String(part?.value??"").trim()).map(part=>`${part.name?`<h3>${String(part.name).trim()}</h3>`:""}${part.value}`).join("\n");
 export const platformItems={
@@ -97,7 +102,7 @@ export const platformItems={
   location:x.location?.name??x.location,company:x.company_name,
   // first_published is when the opening appeared; updated_at moves whenever anything is edited,
   // so using it would make an untouched year-old posting look new.
-  postedAt:x.first_published||x.updated_at,description:x.content,detailUrl:ghDetail(cfg.token,x.id)}),
+  postedAt:x.first_published||x.updated_at,description:ghUnescape(x.content),detailUrl:ghDetail(cfg.token,x.id)}),
  ashby:x=>({...x,externalId:String(x.id??""),url:x.jobUrl,
   // applyUrl on Ashby is the application form, not the posting; the posting is what gets stored.
   applyUrl:x.jobUrl,location:[x.location,...(x.secondaryLocations||[]).map(l=>l?.location)].filter(Boolean),

@@ -527,7 +527,10 @@ async function platformDirect(s){
       if(!titlePasses(s,title)){counters.filtered++;if(known)markSeen(lhash);continue}
       if(known){markSeen(lhash);continue}
       const detailUrl=detail?new URL(detail,response.url).toString():null
-      if(detailUrl&&cfg.fetchDetail!==false){
+      // A Greenhouse listing read with content=true already carries the description, so the row is
+      // complete as it stands and its detail link is kept only for a later refresh.
+      const inline=s.adapterId==="greenhouse"&&!!String(item.description||"").trim()
+      if(detailUrl&&cfg.fetchDetail!==false&&!inline){
         if(s.adapterId==="personio")full={...item,...await personioDetail(detailUrl,s)}
         else{const detailResponse=await get(detailUrl,s,0,{metricKind:"detail"})
         full=normalizeItem(s.adapterId,{...raw,...unwrap(JSON.parse(detailResponse.text),s.adapterId)},cfg,s.baseUrl)}
@@ -541,7 +544,7 @@ async function platformDirect(s){
         description:full.description||full.jobDescription||full.job_description,
         postedAt:full.postedDate||full.postedAt||full.startDate||full.postedTs||full.creationTs||full.t_create,
         listingHash:lhash,detailUrl,
-        descriptionStatus:detailUrl&&cfg.fetchDetail===false?"pending":"complete"
+        descriptionStatus:detailUrl&&cfg.fetchDetail===false&&!inline?"pending":"complete"
       },s)
       if(keep(s,normalized))out.push(normalized)
     }

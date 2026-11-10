@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [codex/jobscraper-v1]
   pull_request:
 
 jobs:

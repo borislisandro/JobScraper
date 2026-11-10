@@ -84,3 +84,16 @@ it("Remove asks first on a job you applied to and does nothing if declined",asyn
  await click("Remove");
  expect(del).toHaveBeenCalledWith("app-1");
 });
+it("marks an applied job whose follow-up has come due, and a saved job whose listing closed",async()=>{
+ await render({...applied,followUpAt:"2026-01-01T00:00:00Z"});
+ expect(container.textContent).toContain("Follow up");
+ await render({...saved,jobAvailability:"closed"});
+ expect(container.textContent).toContain("Closed");expect(container.textContent).not.toContain("Follow up");
+});
+it("a click on the card opens it, and a click on one of its buttons does not",async()=>{
+ const onOpen=vi.fn();vi.spyOn(api,"stage").mockResolvedValue(applied);
+ await act(async()=>root.render(<QueryClientProvider client={client}><DndContext><AppCard app={saved} onStatus={()=>{}} refresh={()=>{}} onOpen={onOpen}/></DndContext></QueryClientProvider>));
+ await click("Mark applied");expect(onOpen).not.toHaveBeenCalled();
+ await act(async()=>{(container.querySelector("article strong") as HTMLElement).click()});
+ expect(onOpen).toHaveBeenCalledWith(saved);
+});

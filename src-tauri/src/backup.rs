@@ -19,8 +19,18 @@ use std::{
 use tauri::State;
 
 pub const BACKUP_VERSION: u32 = 1;
-/// Bump when a backup can no longer be restored by this build.
+/// The oldest database schema a backup can carry and still be restored: startup migrates a restored
+/// database forward, so anything from the first migration up to this build's newest is accepted.
 pub const CURRENT_SCHEMA_VERSION: i64 = 1;
+/// The newest migration this build knows. A backup from a newer build cannot be restored by it, since
+/// this build cannot read what the newer migrations made.
+fn newest_schema() -> i64 {
+    sqlx::migrate!("./migrations")
+        .iter()
+        .map(|migration| migration.version)
+        .max()
+        .unwrap_or(CURRENT_SCHEMA_VERSION)
+}
 const INTENT_FILE: &str = "restore-intent.json";
 const STATUS_FILE: &str = "restore-last.json";
 
@@ -157,7 +167,9 @@ pub fn validate(manifest: &Manifest, db: &[u8]) -> Result<(), String> {
     if manifest.version != BACKUP_VERSION {
         return Err(format!("Unsupported backup version {}", manifest.version));
     }
-    if manifest.schema_version != CURRENT_SCHEMA_VERSION {
+    // Backups record the migration they were taken at (create_backup_archive), so a fixed "1" here
+    // refused every backup this app has ever written.
+    if !(CURRENT_SCHEMA_VERSION..=newest_schema()).contains(&manifest.schema_version) {
         return Err(format!(
             "Unsupported backup schema {}",
             manifest.schema_version
@@ -802,7 +814,12 @@ mod tests {
             read_archive(&bytes).unwrap().0.schema_version,
             CURRENT_SCHEMA_VERSION
         );
-        assert!(validate(&manifest(b"sqlite", CURRENT_SCHEMA_VERSION + 1), b"sqlite").is_err());
+        assert!(validate(&manifest(b"sqlite", newest_schema() + 1), b"sqlite").is_err());
+        assert!(validate(&manifest(b"sqlite", 0), b"sqlite").is_err());
+        assert!(
+            validate(&manifest(b"sqlite", newest_schema()), b"sqlite").is_ok(),
+            "a backup taken by this build restores"
+        );
         let _ = fs::remove_dir_all(root);
     }
     #[test]

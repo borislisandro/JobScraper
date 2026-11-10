@@ -55,6 +55,8 @@ async fn start(
     for folder in ["documents", "sessions", "logs"] {
         std::fs::create_dir_all(local.join(folder)).map_err(|e| e.to_string())?;
     }
+    // A decrypted session copy left by a run that died with its process is not left lying around.
+    crate::sidecar::remove_stale_session_files(&local.join("sessions"));
     // Restore can replace the database and controlled documents only while no SQLite pool has
     // connected. The lazy pool has not, so this still runs before the first query.
     backup::apply_pending_restore(local)?;
@@ -67,6 +69,8 @@ async fn start(
     // Listings collected before the country resolver existed carry no codes, so the Jobs page
     // location filter would miss every one of them until they were next scraped.
     let placed = db::retry_transient(|| db::backfill_location_countries(&state.db.pool)).await?;
+    // Titles stored before accent-free search existed get their folded copy once.
+    db::retry_transient(|| db::backfill_folded_titles(&state.db.pool)).await?;
     if placed > 0 {
         startup.set(app, "migrating", "Working out where existing jobs are");
     }
@@ -79,7 +83,8 @@ async fn start(
     if !state.headless {
         startup.set(app, "scheduling", "Setting up reminders");
         // Scheduler failure is recorded on reminder rows and never blocks local application use.
-        let _ = db::reconcile_reminders_pool(&state.db.pool).await;
+        // What came due while the machine was off is shown now rather than marked missed.
+        let _ = db::reconcile_and_deliver(app, &state.db.pool).await;
         // Reconciliation failure must be visible without blocking local application use.
         let refresh = notifications::refresh_login_tasks().await;
         if !matches!(refresh, Ok(false)) {

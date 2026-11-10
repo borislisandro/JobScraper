@@ -34,6 +34,22 @@ pub struct Source {
     pub closed_count: i64,
     pub created_at: String,
     pub updated_at: String,
+    /// The latest full read that finished, failed or succeeded (a cancelled one says nothing about
+    /// the board). Read with the list so a source failing on every update is visible on its row
+    /// without anyone opening the activity log.
+    #[sqlx(default)]
+    pub last_run_status: Option<String>,
+    #[sqlx(default)]
+    pub last_run_complete: Option<bool>,
+    #[sqlx(default)]
+    pub last_run_at: Option<String>,
+    #[sqlx(default)]
+    pub last_failure_code: Option<String>,
+    #[sqlx(default)]
+    pub last_failure_message: Option<String>,
+    /// Failed full reads since the last one that finished.
+    #[sqlx(default)]
+    pub consecutive_failures: i64,
 }
 #[derive(Debug, Clone, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -91,6 +107,17 @@ pub struct Application {
     /// The job's own page and its apply link, so the Applications card can open the website.
     pub canonical_url: Option<String>,
     pub apply_url: Option<String>,
+    /// When the follow-up reminder of an application in Applied comes (or came) due. Past means
+    /// it is time to follow up; it moves when the threshold does.
+    #[sqlx(default)]
+    pub follow_up_at: Option<String>,
+    /// The listing's own state, so a saved job whose posting closed says so on its card.
+    #[sqlx(default)]
+    pub job_availability: Option<String>,
+    #[sqlx(default)]
+    pub job_posted_at: Option<String>,
+    #[sqlx(default)]
+    pub job_closing_at: Option<String>,
 }
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]

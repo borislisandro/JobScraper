@@ -116,7 +116,7 @@ test("Lever pages without inventing an exact total from one page",async()=>{
  const partial=await hostedRun("lever",{pageSize:1,maxPages:1},routes);assert.equal(partial.at(-1).payload.complete,false);assert.equal(partial.at(-1).payload.boardTotalExact,false);
 });
 test("Greenhouse and Oracle keep IDs and normalize inline and deferred descriptions",async()=>{
- const cases=[{adapter:"greenhouse",config:{},listing:"https://boards-api.greenhouse.io/v1/boards/fixture/jobs",detail:"https://boards-api.greenhouse.io/v1/boards/fixture/jobs/7",
+ const cases=[{adapter:"greenhouse",config:{},listing:"https://boards-api.greenhouse.io/v1/boards/fixture/jobs?content=true",detail:"https://boards-api.greenhouse.io/v1/boards/fixture/jobs/7",
   rows:{meta:{total:1},jobs:[{id:7,title:"Engineer",absolute_url:"https://jobs.example.test/7",location:{name:"Berlin"}}]},body:{id:7,title:"Engineer",absolute_url:"https://jobs.example.test/7",content:"<p>Design chips.</p>"}},
  {adapter:"oracle",config:{apiHost:"pod.example.test",siteNumber:"CX",pageSize:200},listing:"https://pod.example.test/hcmRestApi/resources/latest/recruitingCEJobRequisitions?onlyData=true&expand=requisitionList.secondaryLocations&finder=findReqs;siteNumber=CX,limit=200,offset=0,sortBy=POSTING_DATES_DESC",
   detail:"https://pod.example.test/hcmRestApi/resources/latest/recruitingCEJobRequisitionDetails?onlyData=true&expand=all&finder=ById;Id=%227%22,siteNumber=CX",
@@ -129,6 +129,27 @@ test("Greenhouse and Oracle keep IDs and normalize inline and deferred descripti
   assert.equal(enriched?.jobId,"stored",JSON.stringify(detail));assert.equal(enriched.descriptionText,"Design chips.",fixture.adapter);
   const inline=await hostedRun(fixture.adapter,fixture.config,routes);assert.equal(inline.find(event=>event.event==="job")?.payload.descriptionText,"Design chips.",fixture.adapter);
  }
+});
+
+// Greenhouse answers the whole board with every description when asked for content=true, so a
+// fresh read stores complete descriptions in one request, with no detail request behind it.
+test("a Greenhouse listing read with content stores complete descriptions in one request",async()=>{
+ const listing="https://boards-api.greenhouse.io/v1/boards/fixture/jobs?content=true";
+ const rows={meta:{total:2},jobs:[
+  {id:7,title:"Verification Engineer",absolute_url:"https://jobs.example.test/7",location:{name:"Berlin"},content:"&lt;p&gt;UVM &amp;amp; SystemVerilog.&lt;/p&gt;"},
+  {id:8,title:"Design Engineer",absolute_url:"https://jobs.example.test/8",location:{name:"Lisbon"},content:"&lt;p&gt;RTL.&lt;/p&gt;"}]};
+ const events=await hostedRun("greenhouse",{},{[listing]:rows},{deferDetails:true}),jobs=events.filter(event=>event.event==="job").map(event=>event.payload);
+ assert.equal(events.at(-1).event,"completed",JSON.stringify(events.at(-1)));
+ assert.equal(events.at(-1).payload.performance.worker.requestsByKind.listing.count,1,"one listing request");
+ assert.equal(events.at(-1).payload.performance.worker.requestsByKind.detail?.count??0,0,"and no detail request");
+ assert.equal(jobs.length,2);
+ for(const job of jobs)assert.equal(job.descriptionStatus,"complete");
+ assert.equal(jobs[0].descriptionText,"UVM & SystemVerilog.");
+ assert.equal(jobs[0].detailUrl,"https://boards-api.greenhouse.io/v1/boards/fixture/jobs/7","the detail link is kept for a refresh");
+ // A test read fetches details inline; with the description already there it asks for none (the
+ // fixture has no detail route, so a detail request would fail the run).
+ const inline=await hostedRun("greenhouse",{},{[listing]:rows});
+ assert.equal(inline.at(-1).event,"completed",JSON.stringify(inline.at(-1)));
 });
 
 // Workday publishes the posting date as prose that changes every day ("Posted 5 Days Ago" becomes

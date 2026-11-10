@@ -192,9 +192,10 @@ pub fn run() {
                 std::fs::create_dir_all(&local)?;
                 let db =
                     tauri::async_runtime::block_on(Database::open(local.join("jobscraper.db")))?;
-                if let Some(reminder) = tauri::async_runtime::block_on(
-                    db::pending_reminder_delivery(&db.pool, &reminder_id),
-                )
+                if let Some(reminder) = tauri::async_runtime::block_on(db::claim_reminder_delivery(
+                    &db.pool,
+                    &reminder_id,
+                ))
                 .map_err(std::io::Error::other)?
                 {
                     let shown = app
@@ -266,6 +267,7 @@ pub fn run() {
             db::list_app_logs,
             db::scrape_performance,
             sidecar::job_description,
+            sidecar::fetch_view_descriptions,
             db::purge_all_jobs,
             db::get_setting,
             db::set_setting,
