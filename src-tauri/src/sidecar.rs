@@ -2380,7 +2380,9 @@ pub async fn run_automatic_sync(app: tauri::AppHandle, state: Arc<AppState>) -> 
     if state.sidecars.batch_running() || crate::db::sync_in_progress(&state.db.pool).await {
         return Ok(false);
     }
-    let since = chrono::Utc::now().to_rfc3339();
+    // Counted from the start of this run, or from the start of an earlier one that ended before it
+    // could announce what it had stored.
+    let since = crate::db::open_notification_window(&state.db.pool).await;
     let result = scrape_all_inner(
         app.clone(),
         state.clone(),
@@ -2391,18 +2393,23 @@ pub async fn run_automatic_sync(app: tauri::AppHandle, state: Arc<AppState>) -> 
     )
     .await;
     let alert = notify_new_jobs(&app, &state.db.pool, &since).await;
+    // A notification that could not be shown stays owed, and the next run tries again.
+    if alert.is_ok() {
+        crate::db::close_notification_window(&state.db.pool).await;
+    }
     result?;
     alert?;
     Ok(true)
 }
 
 const IN_APP_SYNC_INTERVAL: Duration = Duration::from_secs(4 * 60 * 60);
+const SKIPPED_SYNC_RETRY: Duration = Duration::from_secs(10 * 60);
 #[tauri::command]
 pub async fn start_automatic_sync(
     app: tauri::AppHandle,
     state: State<'_, Arc<AppState>>,
 ) -> ApiResult<bool> {
-    if state.headless || crate::db::sync_in_progress(&state.db.pool).await {
+    if state.headless {
         return Ok(false);
     }
     if state
@@ -2417,16 +2424,23 @@ pub async fn start_automatic_sync(
     // timer already runs every four hours, so this loop leaves the work to it.
     tauri::async_runtime::spawn(async move {
         let mut first = true;
+        let mut wait = Duration::ZERO;
         loop {
-            if !first {
-                tokio::time::sleep(IN_APP_SYNC_INTERVAL).await;
-            }
+            tokio::time::sleep(wait).await;
+            wait = IN_APP_SYNC_INTERVAL;
             let timer_on = !first && crate::db::background_sync_requested(&state.db.pool).await;
             first = false;
             if timer_on {
                 continue;
             }
-            if let Err(error) = run_automatic_sync(app.clone(), state.clone()).await {
+            let outcome = run_automatic_sync(app.clone(), state.clone()).await;
+            // Skipped because another update was running — the background check at sign-in, or one
+            // the app was closed in the middle of. Returning before the loop started used to leave
+            // this session with no automatic updates at all; now it looks again shortly.
+            if matches!(outcome, Ok(false)) {
+                wait = SKIPPED_SYNC_RETRY;
+            }
+            if let Err(error) = outcome {
                 crate::db::log(
                     &state.db.pool,
                     "error",

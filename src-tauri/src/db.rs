@@ -615,6 +615,7 @@ pub async fn new_jobs_matching(
             let page = jobs_page_query(
                 JobFilter {
                     first_seen_after: Some(since.to_owned()),
+                    source_read_before: Some(since.to_owned()),
                     include_dismissed: false,
                     source_ids: Vec::new(),
                     sort: "recent".into(),
@@ -664,6 +665,42 @@ pub async fn notification_scopes(
             None => (ProfileScope::Unassigned, None),
         })
         .collect())
+}
+/// Where the announcement a run still owes starts counting from. Written when an automatic update
+/// begins and removed once its notification has gone out, so it is only ever present when a run
+/// ended without announcing: the machine shut down mid-update, systemd's time limit, Exit from the
+/// tray. The next run then counts from here instead of from its own start, and the jobs the dead
+/// run stored are announced after all rather than by nobody.
+const NOTIFY_PENDING_SINCE: &str = "notify.pendingSince";
+/// A window older than this is dropped: a notification that kept failing must not grow into a
+/// month's backlog announced in one go.
+const NOTIFY_WINDOW_DAYS: i64 = 7;
+pub async fn open_notification_window(pool: &SqlitePool) -> String {
+    let now = Utc::now();
+    let owed = read_setting(pool, NOTIFY_PENDING_SINCE)
+        .await
+        .ok()
+        .flatten()
+        .and_then(|value| chrono::DateTime::parse_from_rfc3339(&value).ok())
+        .map(|at| at.with_timezone(&Utc))
+        .filter(|at| {
+            *at <= now
+                && now.signed_duration_since(*at) <= chrono::Duration::days(NOTIFY_WINDOW_DAYS)
+        });
+    match owed {
+        Some(at) => at.to_rfc3339(),
+        None => {
+            let since = now.to_rfc3339();
+            let _ = write_setting(pool, NOTIFY_PENDING_SINCE, &since).await;
+            since
+        }
+    }
+}
+pub async fn close_notification_window(pool: &SqlitePool) {
+    let _ = sqlx::query("DELETE FROM settings WHERE key=?")
+        .bind(NOTIFY_PENDING_SINCE)
+        .execute(pool)
+        .await;
 }
 /// Terms are separated by commas or newlines so a phrase ("design verification") stays one term.
 pub fn scrape_filter_terms(raw: &str) -> Vec<String> {
@@ -830,8 +867,8 @@ pub async fn new_jobs_since(
     // dialects of LIKE. One batch's new listings are a small set; push the match into SQL if a
     // first full read ever makes this slow.
     let (scope_sql, scope_bind) = scope.clause();
-    let sql = format!("SELECT j.title,j.company FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.created_at >= ? AND j.availability NOT IN ('closed','archived') AND j.dismissed_at IS NULL AND s.enabled=1 AND s.deleted_at IS NULL AND {scope_sql} ORDER BY j.created_at DESC");
-    let mut query = sqlx::query_as::<_, NewJob>(&sql).bind(since);
+    let sql = format!("SELECT j.title,j.company FROM jobs j JOIN sources s ON s.id=j.source_id WHERE j.created_at >= ? AND j.availability NOT IN ('closed','archived') AND j.dismissed_at IS NULL AND s.enabled=1 AND s.deleted_at IS NULL{SOURCE_READ_BEFORE} AND {scope_sql} ORDER BY j.created_at DESC");
+    let mut query = sqlx::query_as::<_, NewJob>(&sql).bind(since).bind(since);
     if let Some(bound) = scope_bind {
         query = query.bind(bound);
     }
@@ -2394,7 +2431,16 @@ pub struct JobFilter {
     /// Only listings whose description has not been downloaded yet and can be: what the background
     /// description fetch works through after an update.
     pub missing_description: bool,
+    /// Only listings from sources that had already been read before this instant. Set by the
+    /// notification, never by the window: see `SOURCE_READ_BEFORE`.
+    #[serde(skip)]
+    pub source_read_before: Option<String>,
 }
+/// A job is news when it turns up on a board that had been read before. The first read of a source
+/// — a new profile, a company just added, a board that worked for the first time — stores its whole
+/// backlog at once, and announcing that produced "9806 new jobs". That read is the baseline; what
+/// arrives after it is what the notification is for. Binds one value: the start of the window.
+const SOURCE_READ_BEFORE: &str = " AND EXISTS(SELECT 1 FROM scrape_runs r WHERE r.source_id=j.source_id AND r.mode='scrape' AND r.status='completed' AND r.started_at<?)";
 // The list never renders a description — it is read only when a card is opened, through
 // load_job_description(). Keyword search still matches against the real column in the WHERE clause;
 // only the projection is trimmed, because that is what crosses into the window.
@@ -3206,6 +3252,13 @@ async fn jobs_page_query(
         ),
         None => (String::new(), Vec::new()),
     };
+    let (fresh_sql, fresh_bind) = match filter.source_read_before.as_deref() {
+        Some(before) => (
+            format!("{fresh_sql}{SOURCE_READ_BEFORE}"),
+            fresh_bind.into_iter().chain([before.to_string()]).collect(),
+        ),
+        None => (fresh_sql, fresh_bind),
+    };
     // Posting dates are stored as ISO strings, so text order is date order; the NULL test keeps
     // undated listings at the bottom instead of letting them win the descending sort.
     const JOB_PAGE_SIZE: i64 = 200;
@@ -3759,26 +3812,34 @@ pub async fn transition_application(
         let due = ghost_due_from(&occurred, 14)?;
         sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,?, 'ghosted',?,'pending',?)").bind(id()).bind(&input.application_id).bind(due).bind(&occurred).execute(&mut *tx).await.map_err(|e|e.to_string())?;
     }
-    // Moving back to Saved ("unapply") also stops the ghosting reminder the apply had scheduled.
-    if [
-        "planned",
-        "screening",
-        "interviewing",
-        "offer",
-        "accepted",
-        "rejected",
-        "withdrawn",
-    ]
-    .contains(&input.stage.as_str())
-    {
-        sqlx::query("UPDATE reminders SET status='cancelled' WHERE application_id=? AND status='pending' AND reminder_type='ghosted'").bind(&input.application_id).execute(&mut *tx).await.map_err(|e|e.to_string())?;
-    }
+    cancel_reminders_for_stage(&mut tx, &input.application_id, &input.stage).await?;
     tx.commit().await.map_err(|e| e.to_string())?;
     schedule_reminders(&app, &state.db.pool);
     sqlx::query_as(&format!("{APPLICATION_SELECT} WHERE a.id=?"))
         .bind(input.application_id)
         .fetch_one(&state.db.pool)
         .await
+        .map_err(|e| e.to_string())
+}
+/// The reminders a stage change makes pointless. Any move away from "applied" stops the follow-up
+/// reminder the apply had scheduled (moving back to Saved included). An application that has ended
+/// also stops its interview reminders: "Interview reminder" for a job you were turned down for, or
+/// withdrew from, is noise at best.
+async fn cancel_reminders_for_stage(
+    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+    application_id: &str,
+    stage: &str,
+) -> ApiResult<()> {
+    if stage == "applied" {
+        return Ok(());
+    }
+    let ended = matches!(stage, "rejected" | "withdrawn");
+    sqlx::query("UPDATE reminders SET status='cancelled' WHERE application_id=? AND status='pending' AND (reminder_type='ghosted' OR ?)")
+        .bind(application_id)
+        .bind(ended)
+        .execute(&mut **tx)
+        .await
+        .map(|_| ())
         .map_err(|e| e.to_string())
 }
 fn legal_stage_transition(from: &str, to: &str) -> bool {
@@ -3909,8 +3970,15 @@ async fn insert_interview_reminders(
     scheduled_at: &str,
     occurred_at: &str,
 ) -> ApiResult<()> {
+    let now = Utc::now();
     for hours in [24_i64, 1_i64] {
         let due = interview_reminder_due(scheduled_at, hours)?;
+        // A reminder whose moment has already passed is not a reminder: an interview added for
+        // this afternoon, or recorded after it happened, used to show "Interview reminder" the
+        // instant it was saved, and again on every edit.
+        if chrono::DateTime::parse_from_rfc3339(&due).is_ok_and(|due| due <= now) {
+            continue;
+        }
         sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,entity_id,due_at,status,created_at) VALUES(?,?, 'interview',?,?,'pending',?)")
             .bind(id()).bind(application_id).bind(interview_id).bind(due).bind(occurred_at)
             .execute(&mut **tx).await.map_err(|e|e.to_string())?;
@@ -4195,6 +4263,115 @@ mod apply_confirmation_tests {
     // an application is not the same act as dismissing a listing.
     // A reminder's own timer and the app starting at the same sign-in can both reach it. Only one
     // may show it; a notification that fails to show leaves it to be delivered again.
+    async fn reminder_rows(pool: &SqlitePool) -> Vec<(String, String)> {
+        sqlx::query_as("SELECT reminder_type,status FROM reminders ORDER BY due_at")
+            .fetch_all(pool)
+            .await
+            .unwrap()
+    }
+    #[tokio::test]
+    async fn an_interview_reminder_whose_time_has_passed_is_never_created() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        let at = |hours: i64| (Utc::now() + chrono::Duration::hours(hours)).to_rfc3339();
+        for (interview, scheduled, expected) in [
+            ("next-week", at(7 * 24), 2),
+            // Two hours away: the 24-hour reminder is already in the past, the 1-hour one is not.
+            ("this-afternoon", at(2), 1),
+            ("yesterday", at(-24), 0),
+        ] {
+            let mut tx = pool.begin().await.unwrap();
+            insert_interview_reminders(&mut tx, "a", interview, &scheduled, "t")
+                .await
+                .unwrap();
+            tx.commit().await.unwrap();
+            let pending: Vec<String> = sqlx::query_scalar(
+                "SELECT due_at FROM reminders WHERE entity_id=? AND status='pending'",
+            )
+            .bind(interview)
+            .fetch_all(&pool)
+            .await
+            .unwrap();
+            assert_eq!(pending.len(), expected, "{interview}");
+            for due in pending {
+                assert!(
+                    chrono::DateTime::parse_from_rfc3339(&due).unwrap() > Utc::now(),
+                    "{interview}: nothing overdue is left for reconciliation to show at once"
+                );
+            }
+        }
+    }
+    #[tokio::test]
+    async fn ending_an_application_cancels_its_interview_reminders_too() {
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        let seed = || async {
+            sqlx::query("DELETE FROM reminders")
+                .execute(&pool)
+                .await
+                .unwrap();
+            sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,entity_id,due_at,status,created_at) VALUES('g','a','ghosted',NULL,'2999-01-01T00:00:00Z','pending','t'),('i','a','interview','iv','2999-01-02T00:00:00Z','pending','t')")
+                .execute(&pool).await.unwrap();
+        };
+        let after = |stage: &'static str| {
+            let pool = pool.clone();
+            async move {
+                let mut tx = pool.begin().await.unwrap();
+                cancel_reminders_for_stage(&mut tx, "a", stage)
+                    .await
+                    .unwrap();
+                tx.commit().await.unwrap();
+                reminder_rows(&pool).await
+            }
+        };
+        let row = |kind: &str, status: &str| (kind.to_string(), status.to_string());
+        seed().await;
+        assert_eq!(
+            after("applied").await,
+            [row("ghosted", "pending"), row("interview", "pending")]
+        );
+        // Still in play: the follow-up is moot, the interview is not.
+        for stage in ["planned", "screening", "interviewing", "offer", "accepted"] {
+            seed().await;
+            assert_eq!(
+                after(stage).await,
+                [row("ghosted", "cancelled"), row("interview", "pending")],
+                "{stage}"
+            );
+        }
+        for stage in ["rejected", "withdrawn"] {
+            seed().await;
+            assert_eq!(
+                after(stage).await,
+                [row("ghosted", "cancelled"), row("interview", "cancelled")],
+                "{stage}"
+            );
+        }
+    }
+    /// Tests are debug builds, which is the case being pinned: the system's timers belong to the
+    /// installed app, and a development database that knows none of them must not sweep them away.
+    #[tokio::test]
+    async fn a_debug_build_reconciles_without_touching_system_timers() {
+        assert!(!reminders_use_system_scheduler());
+        let pool = migrated_pool().await;
+        seed_application(&pool).await;
+        let (due, later) = (Uuid::new_v4().to_string(), Uuid::new_v4().to_string());
+        sqlx::query("INSERT INTO reminders(id,application_id,reminder_type,due_at,status,created_at) VALUES(?,'a','ghosted','2026-01-01T00:00:00Z','pending','t'),(?,'a','ghosted','2999-01-01T00:00:00Z','pending','t'),('done','a','ghosted','2026-01-01T00:00:00Z','delivered','t')")
+            .bind(&due).bind(&later).execute(&pool).await.unwrap();
+        let outcome = reconcile_reminders_pool(&pool).await.unwrap();
+        assert_eq!(
+            outcome,
+            serde_json::json!({"scheduled":0,"due":[due],"errors":0}),
+            "what is overdue is still handed back to be shown"
+        );
+        let touched: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM reminders WHERE os_task_id IS NOT NULL OR last_error IS NOT NULL",
+        )
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert_eq!(touched, 0, "no timer was created, looked up or cancelled");
+    }
     #[tokio::test]
     async fn a_due_reminder_is_delivered_once_and_a_failed_delivery_is_retried() {
         let pool = migrated_pool().await;
@@ -4449,12 +4626,38 @@ pub async fn reconcile_reminders(
     reconcile_and_deliver(&app, &state.db.pool).await
 }
 
+fn reminders_use_system_scheduler() -> bool {
+    !cfg!(debug_assertions)
+}
+/// The pending reminders whose time has come, from rows of (id, due_at, status, ...).
+fn overdue_pending(rows: &[sqlx::sqlite::SqliteRow]) -> ApiResult<Vec<String>> {
+    let now = Utc::now();
+    let mut due = Vec::new();
+    for row in rows {
+        if row.get::<String, _>(2) != "pending" {
+            continue;
+        }
+        let at = chrono::DateTime::parse_from_rfc3339(&row.get::<String, _>(1))
+            .map_err(|_| "Reminder due_at must be UTC RFC3339")?;
+        if at <= now {
+            due.push(row.get::<String, _>(0));
+        }
+    }
+    Ok(due)
+}
 /// Called during startup before first window interaction and by Diagnostics.
 pub async fn reconcile_reminders_pool(pool: &SqlitePool) -> ApiResult<serde_json::Value> {
     let rows = sqlx::query("SELECT id,due_at,status,reminder_type,os_task_id FROM reminders")
         .fetch_all(pool)
         .await
         .map_err(|e| e.to_string())?;
+    // A development build keeps its own database but would share the system's timers with the
+    // installed app. Its reminders table knows none of the installed app's timers, so the orphan
+    // sweep below removed every one of them. Like refresh_login_tasks, a debug build therefore
+    // never touches the system scheduler; what is overdue is still shown while it runs.
+    if !reminders_use_system_scheduler() {
+        return Ok(serde_json::json!({"scheduled":0,"due":overdue_pending(&rows)?,"errors":0}));
+    }
     let scheduler = current_scheduler()?;
     let mut scheduled = 0;
     let mut errors = 0;
@@ -5717,6 +5920,9 @@ mod matching_persistence_tests {
         sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,profile_id,created_at,updated_at) VALUES('semi','Semi','https://semi.example.test','json','1',1,'active',0,0,'semiconductor','t','t'),('data','Data','https://data.example.test','json','1',1,'active',0,0,'data-science','t','t')").execute(&pool).await.unwrap();
         let since = "2026-11-09T10:00:00+00:00";
         let after = "2026-11-09T10:05:00+00:00";
+        // Both boards had been read before this update, so what it stores is news.
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,complete,started_at) VALUES('r-semi','semi','scrape','completed',1,'2026-11-09T06:00:00+00:00'),('r-data','data','scrape','completed',1,'2026-11-09T06:00:00+00:00')")
+            .execute(&pool).await.unwrap();
         for n in 0..300 {
             let (title, countries) = if n < 4 {
                 (format!("Design Verification Engineer {n}"), ",PT,")
@@ -5775,6 +5981,77 @@ mod matching_persistence_tests {
         assert_eq!(scopes.len(), 2);
     }
     #[tokio::test]
+    async fn the_first_read_of_a_source_is_a_baseline_and_not_news() {
+        let pool = migrated_pool().await;
+        sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,profile_id,created_at,updated_at) VALUES('known','Known','https://known.example.test','json','1',1,'active',0,0,'semiconductor','t','t'),('added','Added','https://added.example.test','json','1',1,'active',0,0,'semiconductor','t','t'),('broken','Broken','https://broken.example.test','json','1',1,'active',0,0,'semiconductor','t','t')").execute(&pool).await.unwrap();
+        let since = "2026-11-09T10:00:00+00:00";
+        // "known" was read yesterday. "added" is read for the first time in this update. "broken"
+        // has only ever failed, so the update in which it finally works is its first read too. A
+        // preview ("test") is not a read.
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,complete,started_at) VALUES('k0','known','scrape','completed',1,'2026-11-08T10:00:00+00:00'),('k1','known','scrape','completed',1,'2026-11-09T10:00:05+00:00'),('a1','added','scrape','completed',1,'2026-11-09T10:00:06+00:00'),('a0','added','test','completed',1,'2026-11-08T10:00:00+00:00'),('b0','broken','scrape','failed',0,'2026-11-08T10:00:00+00:00'),('b1','broken','scrape','completed',1,'2026-11-09T10:00:07+00:00')")
+            .execute(&pool).await.unwrap();
+        let after = "2026-11-09T10:05:00+00:00";
+        for (job, source, count) in [("k", "known", 2), ("a", "added", 500), ("b", "broken", 40)] {
+            for n in 0..count {
+                sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,first_seen_at,created_at,updated_at) VALUES(?,?,?,'Chip Co','','[]',?,'active','t','1',?,?,?)")
+                    .bind(format!("{job}{n}")).bind(source).bind(format!("Engineer {job}{n}")).bind(format!("h-{job}{n}")).bind(after).bind(after).bind(after)
+                    .execute(&pool).await.unwrap();
+            }
+        }
+        let semi = ProfileScope::Profile("semiconductor".into());
+        // The default rule (the Jobs filter) and the title box count the same way.
+        let (count, jobs, _) = new_jobs_matching(&pool, &semi, since, 5).await.unwrap();
+        assert_eq!(
+            count, 2,
+            "542 rows stored, two of them on a board read before"
+        );
+        assert!(jobs.iter().all(|job| job.title.starts_with("Engineer k")));
+        let (count, _) = new_jobs_since(&pool, &semi, since, 5, &[]).await.unwrap();
+        assert_eq!(count, 2);
+        // On the next update those boards have been read before, and their new jobs are news.
+        let next = "2026-11-09T14:00:00+00:00";
+        sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,first_seen_at,created_at,updated_at) VALUES('a-later','added','Engineer later','Chip Co','','[]','h-later','active','t','1','2026-11-09T14:05:00+00:00','2026-11-09T14:05:00+00:00','2026-11-09T14:05:00+00:00')")
+            .execute(&pool).await.unwrap();
+        let (count, _, _) = new_jobs_matching(&pool, &semi, next, 5).await.unwrap();
+        assert_eq!(count, 1);
+    }
+    #[tokio::test]
+    async fn a_run_that_died_before_announcing_leaves_its_window_for_the_next_one() {
+        let pool = migrated_pool().await;
+        let first = open_notification_window(&pool).await;
+        // The run is killed here: nothing closes the window.
+        tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+        let second = open_notification_window(&pool).await;
+        assert_eq!(
+            second, first,
+            "the next run counts from where the dead one started"
+        );
+        close_notification_window(&pool).await;
+        let third = open_notification_window(&pool).await;
+        assert!(
+            third > first,
+            "once announced, the next run starts its own window"
+        );
+        // Neither a week-old window nor an unreadable or future one is carried forward.
+        for stale in [
+            (Utc::now() - chrono::Duration::days(NOTIFY_WINDOW_DAYS + 1)).to_rfc3339(),
+            (Utc::now() + chrono::Duration::hours(1)).to_rfc3339(),
+            "not a date".to_string(),
+        ] {
+            write_setting(&pool, NOTIFY_PENDING_SINCE, &stale)
+                .await
+                .unwrap();
+            let opened = open_notification_window(&pool).await;
+            assert_ne!(opened, stale);
+            assert!(opened >= third);
+            assert_eq!(
+                read_setting(&pool, NOTIFY_PENDING_SINCE).await.unwrap(),
+                Some(opened),
+                "and the fresh start is what is stored"
+            );
+        }
+    }
+    #[tokio::test]
     async fn new_jobs_since_ignores_rescraped_and_closed_rows() {
         let pool = migrated_pool().await;
         sqlx::query("INSERT INTO sources(id,name,base_url,adapter_id,adapter_version,enabled,kind,robots_override,allow_private_network,created_at,updated_at) VALUES('s','S','https://example.test','json','1',1,'active',0,0,'t','t')").execute(&pool).await.unwrap();
@@ -5797,6 +6074,8 @@ mod matching_persistence_tests {
             sqlx::query("INSERT INTO jobs(id,source_id,title,company,description_text,skills_json,content_hash,availability,extraction_at,adapter_version,created_at,updated_at) VALUES(?,'s',?,'Chip Co','','[]',?,?, 't','1',?,?)")
                 .bind(job).bind(title).bind(job).bind(availability).bind(created_at).bind(created_at).execute(&pool).await.unwrap();
         }
+        sqlx::query("INSERT INTO scrape_runs(id,source_id,mode,status,complete,started_at) VALUES('r','s','scrape','completed',1,'2026-08-31T06:00:00+00:00')")
+            .execute(&pool).await.unwrap();
         // Simulate a re-scrape: updated_at changes, while insert-only created_at remains old.
         sqlx::query("UPDATE jobs SET updated_at='2026-08-31T10:00:03+00:00' WHERE id='old'")
             .execute(&pool)

@@ -535,7 +535,15 @@ main.splash p{margin:0;font-size:13px;color:var(--n500)}
 .card .when .pill{margin-left:6px}
 .pill.follow{border-color:#c9a46a;color:#e0bd84}
 .card{cursor:pointer}
-.application-panel textarea{width:100%;resize:vertical;font:inherit}
+/* Every grid in the panel sized its one column to its widest child — a date-and-time field, a file
+   picker — so the body was 516px wide inside a 440px panel: the right edge of every field was cut
+   off and the panel scrolled sideways. Columns may now shrink to the panel, and the fields with them. */
+.application-panel .panel-body,.application-panel section,.application-panel .setting{grid-template-columns:minmax(0,1fr)}
+.application-panel .field-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.application-panel .field-grid input,.application-panel .field-grid select,.application-panel .setting>input,.application-panel input[type=file]{width:100%;min-width:0;box-sizing:border-box}
+.application-panel textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit}
+.application-panel .note .row{display:flex;gap:12px}
+.application-panel .panel-body>.status{position:sticky;top:0;z-index:1;margin:0;padding:6px 0 6px 11px;background:var(--drawer)}
 .application-panel .note{border-top:1px solid var(--rule);padding:8px 0;display:grid;gap:4px}
 .application-panel .note p{margin:0;white-space:pre-wrap}
 .timeline{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:220px;overflow:auto}

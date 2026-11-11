@@ -239,6 +239,15 @@ export const JobCard=React.memo(function JobCard({job,sourceName,onStatus,onOpen
   </div>});
 // Reading is where most judging happens, so the reader can do everything a row can — including "Not
 // for me", which drops the job and shows the next one — and moves with the keyboard.
+// Which row the reader is on. It follows the job it was opened on: an update refetches the list every
+// time a source finishes, and rows that arrive ahead of the open job used to slide a different job
+// under the reader — and under its Apply button. Only when that job has left the list (Not for me,
+// a filter) does the reader fall back to the position, which is the job that took its place.
+export type ReaderAt={id:string;index:number};
+export function readerPosition(jobs:{id:string}[],at:ReaderAt|null):number|null{
+ if(!at||!jobs.length)return null;
+ const found=jobs.findIndex(job=>job.id===at.id);
+ return found>=0?found:Math.min(at.index,jobs.length-1)}
 const typing=(target:EventTarget|null)=>target instanceof Element&&!!target.closest("input,textarea,select,[contenteditable=true]");
 export function JobReader({jobs,index,sourceName,onMove,onClose,onStatus}:{jobs:Job[];index:number;sourceName:(job:Job)=>string|undefined;onMove:(index:number)=>void;onClose:()=>void;onStatus:Notify}){
  const job=jobs[index];const [description,setDescription]=useState<JobDescription>();const [descriptionLoading,setDescriptionLoading]=useState(false);const descriptionRequest=useRef(0);const {busy,act,dismiss}=useJobActions(job,onStatus);
@@ -381,7 +390,7 @@ function JobsView({profile,onCount,initial,onBrowse,onOpenSources,onStatus}:Jobs
    setStatus("Marked as seen. What arrives from now on is what counts as new.")})
   .catch(error=>setStatus(String(error)));
  const filter:JobFilter={title:useDebounced(title),keyword:useDebounced(keyword),sort,savedOnly,includeClosed,postedWithinDays:postedWithin,sourceIds:shownIds,countries,includeUnknownLocations,includeDismissed,firstSeenAfter:onlyNew?reviewedAt??null:null};
- const {data,isLoading,fetchNextPage,hasNextPage,isFetchingNextPage}=useInfiniteQuery({queryKey:["jobs",filter],queryFn:({pageParam})=>api.jobs(filter,pageParam),initialPageParam:0,getNextPageParam:last=>last.hasMore?last.offset+last.items.length:undefined,refetchOnWindowFocus:true});
+ const {data,isLoading,error:listError,refetch:reloadList,isFetching:listFetching,fetchNextPage,hasNextPage,isFetchingNextPage}=useInfiniteQuery({queryKey:["jobs",filter],queryFn:({pageParam})=>api.jobs(filter,pageParam),initialPageParam:0,getNextPageParam:last=>last.hasMore?last.offset+last.items.length:undefined,refetchOnWindowFocus:true});
  const jobs=data?.pages.flatMap(page=>page.items)??[],total=data?.pages[0]?.total??0;
  // Counted with the list's own filters, so "12 new" opens on exactly twelve rows. Under the "jobs" key,
  // so everything that refreshes the list refreshes this with it.
@@ -394,7 +403,12 @@ function JobsView({profile,onCount,initial,onBrowse,onOpenSources,onStatus}:Jobs
  const downloadDescriptions=useCallback(()=>{fetchViewDescriptions({...latestFilter.current,firstSeenAfter:null}).catch(()=>{/* one is already running, or the view has none to fetch */})},[]);
  const missingFilter={...filter,firstSeenAfter:null,missingDescription:true};
  const {data:missingDescriptions=0}=useQuery({queryKey:["jobs","missing-descriptions",missingFilter],queryFn:()=>countJobs(missingFilter),enabled:!!filter.keyword.trim()&&!!shownIds.length});
- const [toolbarOpen,setToolbarOpen]=useState(readFiltersOpen);const [readerIndex,setReaderIndex]=useState<number|null>(null);
+ const [toolbarOpen,setToolbarOpen]=useState(readFiltersOpen);const [reader,setReader]=useState<ReaderAt|null>(null);
+ const readerIndex=readerPosition(jobs,reader),readerJob=readerIndex===null?undefined:jobs[readerIndex];
+ const setReaderIndex=(index:number|null)=>{const job=index===null?undefined:jobs[index];setReader(job&&index!==null?{id:job.id,index}:null)};
+ // Keeps the remembered position in step with where the job is now, and adopts the job that replaced one
+ // that left, so the next refetch follows that one.
+ useEffect(()=>{if(readerJob&&readerIndex!==null)setReader(at=>at&&(at.id!==readerJob.id||at.index!==readerIndex)?{id:readerJob.id,index:readerIndex}:at)},[readerJob,readerIndex]);
  const toggleToolbar=()=>setToolbarOpen(open=>{try{localStorage.setItem(FILTERS_OPEN_KEY,String(!open))}catch{/* a convenience only */}return !open});
  const names=new Map(sourceList.map(s=>[s.id,s.name]));
  const selected=followed.filter(s=>shownIds.includes(s.id));
@@ -436,7 +450,7 @@ function JobsView({profile,onCount,initial,onBrowse,onOpenSources,onStatus}:Jobs
  const clearFilters=()=>{setTitle("");setKeyword("");setSavedOnly(false);setIncludeClosed(false);setCountries([]);setIncludeUnknownLocations(false);setPostedWithin(DEFAULT_POSTED_WINDOW)};
  // The nav badge counts what the page is showing, so narrowing the view moves it too.
  useEffect(()=>onCount(selected.length?total:0),[selected.length,total,onCount]);
- useEffect(()=>{const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!document.querySelector("dialog[open],.panel-sheet"))setReaderIndex(null)};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[]);
+ useEffect(()=>{const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!document.querySelector("dialog[open],.panel-sheet"))setReader(null)};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[]);
  // A new install has nothing to filter: one clear way in, and none of the controls that would only be empty.
  if(!anySources)return <div className="view"><div className="toolbar"><header><h2>Jobs</h2></header></div>
   <div className="scroll"><GetStarted onBrowse={()=>onBrowse?.()} onStatus={text=>onStatus?onStatus(text):setStatus(text)}/></div></div>;
@@ -510,6 +524,10 @@ function JobsView({profile,onCount,initial,onBrowse,onOpenSources,onStatus}:Jobs
      <button onClick={()=>setShown(followed.map(s=>s.id))}>Show all sources</button></div>
     :isLoading?<div className="skeletons" aria-hidden="true">{["58%","71%","46%","64%","52%"].map(width=>
       <div key={width}><span style={{width}}/><span/><span/><span/></div>)}</div>
+    // A list that could not be read is not an empty list: it used to say "No job matches these filters".
+    :listError&&!jobs.length?<div className="empty" role="alert"><strong>The job list could not be loaded</strong>
+     <span className="error">{String(listError)}</span>
+     <button disabled={listFetching} onClick={()=>reloadList()}>{listFetching?"Trying again…":"Try again"}</button></div>
     :!jobs.length?(filtered||onlyNew
      ?<div className="empty"><strong>No job matches these filters</strong>
        <span>Clear them to see everything from the selected sources.</span>
@@ -518,7 +536,8 @@ function JobsView({profile,onCount,initial,onBrowse,onOpenSources,onStatus}:Jobs
        <span>JobScraper is checking these sources automatically. New listings will appear here.</span></div>)
     // The header carries the same column widths as every row, so the list reads as one table
     // and nothing shifts when the next page arrives.
-    :<><div className="list-head" aria-hidden="true"><span>Role</span><span>Company</span><span className="hide-sm">Location</span><span className="hide-sm">Posted</span><span className="only-wide">Salary</span><span className="hide-md">Status</span><span>Actions</span></div>
+    :<>{listError&&<p className="error" role="alert">The list could not be refreshed, so it may be out of date: {String(listError)} <button className="link" disabled={listFetching} onClick={()=>reloadList()}>Try again</button></p>}
+     <div className="list-head" aria-hidden="true"><span>Role</span><span>Company</span><span className="hide-sm">Location</span><span className="hide-sm">Posted</span><span className="only-wide">Salary</span><span className="hide-md">Status</span><span>Actions</span></div>
      <div className="jobs">{jobs.map((job,index)=><JobCard job={job} sourceName={names.get(job.sourceId)} onStatus={setStatus} onOpen={()=>setReaderIndex(index)} key={job.id}/>)}</div>
      {hasNextPage&&<div className="load-more"><button disabled={isFetchingNextPage} onClick={()=>fetchNextPage()}>{isFetchingNextPage?"Loading…":`Load ${Math.min(200,total-jobs.length).toLocaleString()} more`}</button></div>}</>}
   </div>
@@ -1014,19 +1033,23 @@ export function ApplicationPanel({applicationId,onClose,onChanged}:{applicationI
  const [message,setMessage]=useState("");const [busy,setBusy]=useState(false);
  useEffect(()=>{const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!typing(event.target))onClose()};window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close)},[onClose]);
  const reload=()=>{qc.invalidateQueries({queryKey:["application-details",applicationId]});qc.invalidateQueries({queryKey:["interviews",applicationId]});onChanged()};
- const run:PanelRun=(work,done)=>{setBusy(true);setMessage("");return work().then(()=>{setMessage(done);reload()}).catch(problem=>setMessage(String(problem))).finally(()=>setBusy(false))};
+ // Resolves to whether the work succeeded. The forms below clear themselves only when it did: a note
+ // whose save failed used to vanish from the box along with the error that explained why.
+ const run:PanelRun=(work,done)=>{setBusy(true);setMessage("");return work().then(()=>{setMessage(done);reload();return true}).catch(problem=>{setMessage(String(problem));return false}).finally(()=>setBusy(false))};
  const app=details?.application;
  return <><div className="scrim" onClick={onClose}/><aside className="panel-sheet application-panel" role="dialog" aria-modal="true" aria-label="Application">
   <header><h2>{app?.title||"Application"}</h2><button className="link close" onClick={onClose}>Close</button></header>
   <div className="panel-body">
    {error&&<p className="error">{String(error)}</p>}
+   {/* Pinned to the top of the panel: the sections are taller than the window, and the outcome of a save
+       further down used to appear in the first section, out of sight. */}
+   {message&&<output className="status" role="status">{message}</output>}
    {!details||!app?<p className="muted">Loading…</p>:<>
     <section><p className="muted">{app.company}{details.sourceName&&details.sourceName!==app.company?` · ${details.sourceName}`:""}</p>
      <div className="setting"><label><span>Stage</span>
       <select value={app.currentStage} disabled={busy} onPointerDown={showSelect} onChange={event=>{const stage=event.target.value;run(()=>stage==="applied"&&app.pendingConfirmation?api.applyDecision(app.id,"yes"):api.stage(app.id,stage,"Set in the application panel",true),`Moved to ${stageLabel(stage)}.`)}}>
        {STAGES.map(stage=><option key={stage} value={stage}>{stageLabel(stage)}</option>)}</select></label>
-      {websiteUrl(app)&&<div className="row"><button className="small" onClick={()=>openUrl(websiteUrl(app)!).catch(problem=>setMessage(String(problem)))}>Open website</button></div>}</div>
-     {message&&<output className="status">{message}</output>}</section>
+      {websiteUrl(app)&&<div className="row"><button className="small" onClick={()=>openUrl(websiteUrl(app)!).catch(problem=>setMessage(String(problem)))}>Open website</button></div>}</div></section>
     <NotesSection details={details} busy={busy} run={run}/>
     <section><span className="caption">Timeline</span>
      <p className="muted">{app.appliedAt?`Applied ${new Date(app.appliedAt).toLocaleDateString([],{dateStyle:"medium"})}`:"Not applied yet"}{details.firstResponseAt?` · first response ${new Date(details.firstResponseAt).toLocaleDateString()}`:""}</p>
@@ -1037,16 +1060,16 @@ export function ApplicationPanel({applicationId,onClose,onChanged}:{applicationI
     <DocumentsSection details={details} busy={busy} run={run}/>
    </>}
   </div></aside></>}
-type PanelRun=(work:()=>Promise<unknown>,done:string)=>Promise<void>;
+type PanelRun=(work:()=>Promise<unknown>,done:string)=>Promise<boolean>;
 function NotesSection({details,busy,run}:{details:ApplicationDetails;busy:boolean;run:PanelRun}){
  const [draft,setDraft]=useState("");const [editing,setEditing]=useState<{id:string;body:string}>();
  const applicationId=details.application.id;
  return <section><span className="caption">Notes</span>
   <div className="setting"><textarea rows={3} value={draft} placeholder="What you sent, who you spoke to, what to ask next…" onChange={event=>setDraft(event.target.value)}/>
-   <div className="row"><button className="small primary" disabled={busy||!draft.trim()} onClick={()=>run(()=>api.saveNote({applicationId,body:draft.trim()}),"Note added.").then(()=>setDraft(""))}>Add note</button></div></div>
+   <div className="row"><button className="small primary" disabled={busy||!draft.trim()} onClick={()=>run(()=>api.saveNote({applicationId,body:draft.trim()}),"Note added.").then(saved=>{if(saved)setDraft("")})}>Add note</button></div></div>
   {details.notes.map(note=><div className="note" key={note.id}>{editing?.id===note.id
    ?<><textarea rows={3} value={editing.body} onChange={event=>setEditing({id:note.id,body:event.target.value})}/>
-     <div className="row"><button className="small primary" disabled={busy||!editing.body.trim()} onClick={()=>run(()=>api.saveNote({id:note.id,applicationId,body:editing.body.trim()}),"Note saved.").then(()=>setEditing(undefined))}>Save</button><button className="small" onClick={()=>setEditing(undefined)}>Cancel</button></div></>
+     <div className="row"><button className="small primary" disabled={busy||!editing.body.trim()} onClick={()=>run(()=>api.saveNote({id:note.id,applicationId,body:editing.body.trim()}),"Note saved.").then(saved=>{if(saved)setEditing(undefined)})}>Save</button><button className="small" onClick={()=>setEditing(undefined)}>Cancel</button></div></>
    :<><p>{note.body}</p><small className="muted">{new Date(note.updatedAt||note.createdAt).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})}</small>
      <div className="row"><button className="link" onClick={()=>setEditing({id:note.id,body:note.body})}>Edit</button><button className="link" disabled={busy} onClick={()=>run(()=>api.deleteNote(note.id),"Note deleted.")}>Delete</button></div></>}</div>)}
  </section>}
@@ -1070,7 +1093,7 @@ function InterviewsSection({applicationId,interviews,busy,run}:{applicationId:st
    <label><span>Kind</span><select value={kind} onPointerDown={showSelect} onChange={event=>setKind(event.target.value)}>{INTERVIEW_KINDS.map(entry=><option key={entry}>{entry}</option>)}</select></label>
    <label><span>When</span><input type="datetime-local" value={when} onChange={event=>setWhen(event.target.value)}/></label></div>
    <input value={notes} placeholder="Notes (who, where, the link)" onChange={event=>setNotes(event.target.value)}/>
-   <div className="row"><button className="small primary" disabled={busy||Number.isNaN(at.getTime())} onClick={()=>run(()=>api.saveInterview({applicationId,stage:kind,scheduledAt:at.toISOString(),notes:notes.trim()||undefined}),"Interview added.").then(()=>setNotes(""))}>Add interview</button></div>
+   <div className="row"><button className="small primary" disabled={busy||Number.isNaN(at.getTime())} onClick={()=>run(()=>api.saveInterview({applicationId,stage:kind,scheduledAt:at.toISOString(),notes:notes.trim()||undefined}),"Interview added.").then(saved=>{if(saved)setNotes("")})}>Add interview</button></div>
    <small>Reminders are set for 24 hours and 1 hour before.</small></div></section>}
 function RecruiterSection({details,busy,run}:{details:ApplicationDetails;busy:boolean;run:PanelRun}){
  const app=details.application;
